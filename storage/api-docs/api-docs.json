@@ -6,7 +6,7 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/transporte/public/api/access": {
+        "/transportev2/public/api/access": {
             "get": {
                 "tags": [
                     "Access"
@@ -32,7 +32,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/access?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/access?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -40,11 +40,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/access?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/access?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/access"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/access"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -88,7 +88,7 @@
                 ]
             }
         },
-        "/transporte/public/api/address": {
+        "/transportev2/public/api/address": {
             "get": {
                 "tags": [
                     "Address"
@@ -212,7 +212,7 @@
                 ]
             }
         },
-        "/transporte/public/api/addressForPerson/{idPersona}": {
+        "/transportev2/public/api/addressForPerson/{idPersona}": {
             "get": {
                 "tags": [
                     "Address"
@@ -259,7 +259,7 @@
                 ]
             }
         },
-        "/transporte/public/api/address/{id}": {
+        "/transportev2/public/api/address/{id}": {
             "get": {
                 "tags": [
                     "Address"
@@ -489,7 +489,7 @@
                 ]
             }
         },
-        "/transporte/public/api/bank": {
+        "/transportev2/public/api/bank": {
             "get": {
                 "tags": [
                     "Bank"
@@ -515,7 +515,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/bank?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/bank?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -523,11 +523,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/bank?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/bank?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/bank"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/bank"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -637,7 +637,7 @@
                 ]
             }
         },
-        "/transporte/public/api/bank/{id}": {
+        "/transportev2/public/api/bank/{id}": {
             "get": {
                 "tags": [
                     "Bank"
@@ -872,7 +872,7 @@
                 ]
             }
         },
-        "/transporte/public/api/box": {
+        "/transportev2/public/api/box": {
             "get": {
                 "tags": [
                     "Box"
@@ -898,7 +898,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -906,11 +906,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -1037,7 +1037,7 @@
                 ]
             }
         },
-        "/transporte/public/api/boxAll": {
+        "/transportev2/public/api/boxAll": {
             "get": {
                 "tags": [
                     "Box"
@@ -1063,7 +1063,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -1071,11 +1071,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/box"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/box"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -1119,7 +1119,7 @@
                 ]
             }
         },
-        "/transporte/public/api/boxByBranch/{id}": {
+        "/transportev2/public/api/boxByBranch/{id}": {
             "get": {
                 "tags": [
                     "Box"
@@ -1176,7 +1176,7 @@
                 ]
             }
         },
-        "/transporte/public/api/box/{id}": {
+        "/transportev2/public/api/box/{id}": {
             "get": {
                 "tags": [
                     "Box"
@@ -1401,7 +1401,7 @@
                 ]
             }
         },
-        "/transporte/public/api/branchOffice": {
+        "/transportev2/public/api/branchOffice": {
             "get": {
                 "tags": [
                     "BranchOffice"
@@ -1535,7 +1535,7 @@
                 ]
             }
         },
-        "/transporte/public/api/branchOffice/{id}": {
+        "/transportev2/public/api/branchOffice/{id}": {
             "get": {
                 "tags": [
                     "BranchOffice"
@@ -1765,7 +1765,7 @@
                 ]
             }
         },
-        "/transporte/public/api/carrierGuide": {
+        "/transportev2/public/api/carrierGuide": {
             "get": {
                 "tags": [
                     "CarrierGuide"
@@ -1954,7 +1954,7 @@
                 ]
             }
         },
-        "/transporte/public/api/carrierGuide/{id}": {
+        "/transportev2/public/api/carrierGuide/{id}": {
             "get": {
                 "tags": [
                     "CarrierGuide"
@@ -2229,7 +2229,7 @@
                 ]
             }
         },
-        "/transporte/public/api/carrierGuide/{id}/status": {
+        "/transportev2/public/api/carrierGuide/{id}/status": {
             "put": {
                 "tags": [
                     "CarrierGuide"
@@ -2305,7 +2305,7 @@
                 ]
             }
         },
-        "/transporte/public/api/comissionAgent": {
+        "/transportev2/public/api/comissionAgent": {
             "get": {
                 "tags": [
                     "ComissionAgent"
@@ -2434,7 +2434,7 @@
                 ]
             }
         },
-        "/transporte/public/api/comissionAgent/{id}": {
+        "/transportev2/public/api/comissionAgent/{id}": {
             "get": {
                 "tags": [
                     "ComissionAgent"
@@ -2659,7 +2659,7 @@
                 ]
             }
         },
-        "/transporte/public/api/contactInfo": {
+        "/transportev2/public/api/contactInfo": {
             "get": {
                 "tags": [
                     "ContactInfo"
@@ -2813,7 +2813,7 @@
                 ]
             }
         },
-        "/transporte/public/api/contactInfo/{id}": {
+        "/transportev2/public/api/contactInfo/{id}": {
             "get": {
                 "tags": [
                     "ContactInfo"
@@ -3073,7 +3073,7 @@
                 ]
             }
         },
-        "/transporte/public/api/contactsForPerson/{idPersona}": {
+        "/transportev2/public/api/contactsForPerson/{idPersona}": {
             "get": {
                 "tags": [
                     "ContactInfo"
@@ -3120,7 +3120,7 @@
                 ]
             }
         },
-        "/transporte/public/api/creditNote": {
+        "/transportev2/public/api/creditNote": {
             "get": {
                 "tags": [
                     "CreditNote"
@@ -3157,7 +3157,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/creditNote?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/creditNote?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -3165,11 +3165,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/creditNote?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/creditNote?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/creditNote"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/creditNote"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -3332,7 +3332,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailGrt": {
+        "/transportev2/public/api/detailGrt": {
             "get": {
                 "tags": [
                     "DetailGrt"
@@ -3452,7 +3452,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailGrt/{id}": {
+        "/transportev2/public/api/detailGrt/{id}": {
             "get": {
                 "tags": [
                     "DetailGrt"
@@ -3665,7 +3665,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailReception": {
+        "/transportev2/public/api/detailReception": {
             "get": {
                 "tags": [
                     "Detail Reception"
@@ -3804,7 +3804,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailReception/{id}": {
+        "/transportev2/public/api/detailReception/{id}": {
             "get": {
                 "tags": [
                     "Detail Reception"
@@ -4029,7 +4029,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailReceptionForReception/{id}": {
+        "/transportev2/public/api/detailReceptionForReception/{id}": {
             "get": {
                 "tags": [
                     "Detail Reception"
@@ -4092,7 +4092,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailReceptionWithoutProgramming": {
+        "/transportev2/public/api/detailReceptionWithoutProgramming": {
             "get": {
                 "tags": [
                     "Detail Reception"
@@ -4139,7 +4139,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailWorker": {
+        "/transportev2/public/api/detailWorker": {
             "get": {
                 "tags": [
                     "DetailWorker"
@@ -4273,7 +4273,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailWorker/{id}": {
+        "/transportev2/public/api/detailWorker/{id}": {
             "get": {
                 "tags": [
                     "DetailWorker"
@@ -4490,7 +4490,7 @@
                 ]
             }
         },
-        "/transporte/public/api/detailWorkerForProgramming/{id}": {
+        "/transportev2/public/api/detailWorkerForProgramming/{id}": {
             "get": {
                 "tags": [
                     "DetailWorker"
@@ -4560,7 +4560,7 @@
                 ]
             }
         },
-        "/transporte/public/api/document": {
+        "/transportev2/public/api/document": {
             "get": {
                 "tags": [
                     "Document"
@@ -4711,7 +4711,7 @@
                 ]
             }
         },
-        "/transporte/public/api/document/{id}": {
+        "/transportev2/public/api/document/{id}": {
             "get": {
                 "tags": [
                     "Document"
@@ -5104,7 +5104,7 @@
                 ]
             }
         },
-        "/transporte/public/api/driverExpense": {
+        "/transportev2/public/api/driverExpense": {
             "get": {
                 "tags": [
                     "DriverExpense"
@@ -5141,7 +5141,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/driverExpense?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/driverExpense?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -5149,11 +5149,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/driverExpense?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/driverExpense?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/driverExpense"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/driverExpense"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -5313,7 +5313,7 @@
                 ]
             }
         },
-        "/transporte/public/api/devolverMontoaCaja": {
+        "/transportev2/public/api/devolverMontoaCaja": {
             "post": {
                 "tags": [
                     "DriverExpense"
@@ -5484,7 +5484,7 @@
                 ]
             }
         },
-        "/transporte/public/api/driverExpense/{id}": {
+        "/transportev2/public/api/driverExpense/{id}": {
             "get": {
                 "tags": [
                     "DriverExpense"
@@ -5742,7 +5742,7 @@
                 ]
             }
         },
-        "/transporte/public/api/expensesConcept": {
+        "/transportev2/public/api/expensesConcept": {
             "get": {
                 "tags": [
                     "ExpensesConcept"
@@ -5768,7 +5768,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/expensesConcept?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/expensesConcept?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -5776,11 +5776,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/expensesConcept?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/expensesConcept?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/expensesConcept"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/expensesConcept"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -5912,7 +5912,7 @@
                 ]
             }
         },
-        "/transporte/public/api/expensesConcept/{id}": {
+        "/transportev2/public/api/expensesConcept/{id}": {
             "get": {
                 "tags": [
                     "ExpensesConcept"
@@ -6142,7 +6142,7 @@
                 ]
             }
         },
-        "/transporte/public/api/installment": {
+        "/transportev2/public/api/installment": {
             "get": {
                 "tags": [
                     "Installment"
@@ -6191,7 +6191,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/installment?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/installment?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -6199,11 +6199,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/installment?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/installment?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/installment"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/installment"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -6451,7 +6451,7 @@
                 ]
             }
         },
-        "/transporte/public/api/payMasivo/{id}": {
+        "/transportev2/public/api/payMasivo/{id}": {
             "post": {
                 "tags": [
                     "Installment"
@@ -6546,7 +6546,7 @@
                 ]
             }
         },
-        "/transporte/public/api/modelFunctional": {
+        "/transportev2/public/api/modelFunctional": {
             "get": {
                 "tags": [
                     "ModelFunctional"
@@ -6680,7 +6680,7 @@
                 ]
             }
         },
-        "/transporte/public/api/modelFunctional/{id}": {
+        "/transportev2/public/api/modelFunctional/{id}": {
             "get": {
                 "tags": [
                     "ModelFunctional"
@@ -6910,7 +6910,7 @@
                 ]
             }
         },
-        "/transporte/public/api/motive": {
+        "/transportev2/public/api/motive": {
             "get": {
                 "tags": [
                     "Motive"
@@ -6936,7 +6936,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/motive?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/motive?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -6944,11 +6944,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/motive?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/motive?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/motive"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/motive"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -6992,7 +6992,7 @@
                 ]
             }
         },
-        "/transporte/public/api/motive/{id}": {
+        "/transportev2/public/api/motive/{id}": {
             "get": {
                 "tags": [
                     "Motive"
@@ -7061,7 +7061,7 @@
                 ]
             }
         },
-        "/transporte/public/api/moviment": {
+        "/transportev2/public/api/moviment": {
             "get": {
                 "tags": [
                     "Moviment"
@@ -7108,7 +7108,7 @@
                                                         },
                                                         "first_page_url": {
                                                             "type": "string",
-                                                            "example": "http://localhost/transporte/public/api/moviment?page=1"
+                                                            "example": "http://localhost/transportev2/public/api/moviment?page=1"
                                                         },
                                                         "from": {
                                                             "type": "integer",
@@ -7120,7 +7120,7 @@
                                                         },
                                                         "path": {
                                                             "type": "string",
-                                                            "example": "http://localhost/transporte/public/api/moviment"
+                                                            "example": "http://localhost/transportev2/public/api/moviment"
                                                         },
                                                         "per_page": {
                                                             "type": "integer",
@@ -7412,7 +7412,7 @@
                 ]
             }
         },
-        "/transporte/public/api/moviment/{id}": {
+        "/transportev2/public/api/moviment/{id}": {
             "get": {
                 "tags": [
                     "Moviment"
@@ -7543,7 +7543,7 @@
                 ]
             }
         },
-        "/transporte/public/api/moviment/last/{idBox}": {
+        "/transportev2/public/api/moviment/last/{idBox}": {
             "get": {
                 "tags": [
                     "Moviment"
@@ -7613,7 +7613,7 @@
                 ]
             }
         },
-        "/transporte/public/api/movimentAperturaCierre": {
+        "/transportev2/public/api/movimentAperturaCierre": {
             "post": {
                 "tags": [
                     "Moviment"
@@ -7757,7 +7757,7 @@
                 ]
             }
         },
-        "/transporte/public/api/validateBox/{id}": {
+        "/transportev2/public/api/validateBox/{id}": {
             "get": {
                 "tags": [
                     "Moviment"
@@ -7849,7 +7849,7 @@
                 ]
             }
         },
-        "/transporte/public/api/showAperturaMovements": {
+        "/transportev2/public/api/showAperturaMovements": {
             "get": {
                 "tags": [
                     "Moviment"
@@ -7938,7 +7938,7 @@
                 ]
             }
         },
-        "/transporte/public/api/paymentConcept": {
+        "/transportev2/public/api/paymentConcept": {
             "get": {
                 "tags": [
                     "PaymentConcept"
@@ -7980,7 +7980,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/paymentConcept?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/paymentConcept?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -7988,11 +7988,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/paymentConcept?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/paymentConcept?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/paymentConcept"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/paymentConcept"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -8119,7 +8119,7 @@
                 ]
             }
         },
-        "/transporte/public/api/paymentConcept/{id}": {
+        "/transportev2/public/api/paymentConcept/{id}": {
             "get": {
                 "tags": [
                     "PaymentConcept"
@@ -8344,7 +8344,7 @@
                 ]
             }
         },
-        "/transporte/public/api/saveguia/{id}": {
+        "/transportev2/public/api/saveguia/{id}": {
             "get": {
                 "tags": [
                     "CarrierGuide"
@@ -8399,7 +8399,7 @@
                 ]
             }
         },
-        "/transporte/public/api/manifiesto/{id}": {
+        "/transportev2/public/api/manifiesto/{id}": {
             "get": {
                 "tags": [
                     "Report"
@@ -8454,7 +8454,7 @@
                 ]
             }
         },
-        "/transporte/public/api/reportCaja": {
+        "/transportev2/public/api/reportCaja": {
             "get": {
                 "tags": [
                     "Report"
@@ -8498,7 +8498,7 @@
                 ]
             }
         },
-        "/transporte/public/api/reportCajaExcel": {
+        "/transportev2/public/api/reportCajaExcel": {
             "get": {
                 "tags": [
                     "Report"
@@ -8558,7 +8558,7 @@
                 ]
             }
         },
-        "/transporte/public/api/clients": {
+        "/transportev2/public/api/clients": {
             "get": {
                 "tags": [
                     "Clients"
@@ -8754,7 +8754,7 @@
                 ]
             }
         },
-        "/transporte/public/api/naturalPerson": {
+        "/transportev2/public/api/naturalPerson": {
             "get": {
                 "tags": [
                     "Clients"
@@ -8800,7 +8800,7 @@
                 ]
             }
         },
-        "/transporte/public/api/legalEntity": {
+        "/transportev2/public/api/legalEntity": {
             "get": {
                 "tags": [
                     "Clients"
@@ -8846,7 +8846,7 @@
                 ]
             }
         },
-        "/transporte/public/api/clients/{id}": {
+        "/transportev2/public/api/clients/{id}": {
             "get": {
                 "tags": [
                     "Clients"
@@ -9138,7 +9138,7 @@
                 ]
             }
         },
-        "/transporte/public/api/clients/{id}/changeState": {
+        "/transportev2/public/api/clients/{id}/changeState": {
             "put": {
                 "tags": [
                     "Clients"
@@ -9210,7 +9210,7 @@
                 ]
             }
         },
-        "/transporte/public/api/personsWithDebt": {
+        "/transportev2/public/api/personsWithDebt": {
             "get": {
                 "tags": [
                     "Clients"
@@ -9300,7 +9300,7 @@
                 ]
             }
         },
-        "/transporte/public/api/place": {
+        "/transportev2/public/api/place": {
             "get": {
                 "tags": [
                     "Place"
@@ -9421,7 +9421,7 @@
                 ]
             }
         },
-        "/transporte/public/api/place/{id}": {
+        "/transportev2/public/api/place/{id}": {
             "get": {
                 "tags": [
                     "Place"
@@ -9664,7 +9664,7 @@
                 ]
             }
         },
-        "/transporte/public/api/programming": {
+        "/transportev2/public/api/programming": {
             "get": {
                 "tags": [
                     "Programming"
@@ -9859,7 +9859,7 @@
                 ]
             }
         },
-        "/transporte/public/api/programming/{id}": {
+        "/transportev2/public/api/programming/{id}": {
             "get": {
                 "tags": [
                     "Programming"
@@ -10140,7 +10140,7 @@
                 ]
             }
         },
-        "/transporte/public/api/reprogramming/{id}": {
+        "/transportev2/public/api/reprogramming/{id}": {
             "post": {
                 "tags": [
                     "Programming"
@@ -10232,7 +10232,7 @@
                 ]
             }
         },
-        "/transporte/public/api/finishProgramming/{id}": {
+        "/transportev2/public/api/finishProgramming/{id}": {
             "put": {
                 "tags": [
                     "Programming"
@@ -10311,7 +10311,7 @@
                 ]
             }
         },
-        "/transporte/public/api/reception": {
+        "/transportev2/public/api/reception": {
             "get": {
                 "tags": [
                     "Reception"
@@ -10603,7 +10603,7 @@
                 ]
             }
         },
-        "/transporte/public/api/reception/{id}": {
+        "/transportev2/public/api/reception/{id}": {
             "get": {
                 "tags": [
                     "Reception"
@@ -10953,7 +10953,7 @@
                 ]
             }
         },
-        "/transporte/public/api/routes": {
+        "/transportev2/public/api/routes": {
             "get": {
                 "tags": [
                     "Routes"
@@ -11091,7 +11091,7 @@
                 ]
             }
         },
-        "/transporte/public/api/routesFather": {
+        "/transportev2/public/api/routesFather": {
             "get": {
                 "tags": [
                     "Routes"
@@ -11137,7 +11137,7 @@
                 ]
             }
         },
-        "/transporte/public/api/routes/{id}": {
+        "/transportev2/public/api/routes/{id}": {
             "get": {
                 "tags": [
                     "Routes"
@@ -11403,7 +11403,7 @@
                 ]
             }
         },
-        "/transporte/public/api/routeStore": {
+        "/transportev2/public/api/routeStore": {
             "get": {
                 "tags": [
                     "Routes"
@@ -11528,7 +11528,7 @@
                 ]
             }
         },
-        "/transporte/public/api/searchRoute": {
+        "/transportev2/public/api/searchRoute": {
             "get": {
                 "tags": [
                     "Routes"
@@ -11643,7 +11643,7 @@
                 ]
             }
         },
-        "/transporte/public/api/addSubRoute": {
+        "/transportev2/public/api/addSubRoute": {
             "post": {
                 "tags": [
                     "Routes"
@@ -11744,7 +11744,7 @@
                 ]
             }
         },
-        "/transporte/public/api/routes/assign-parent": {
+        "/transportev2/public/api/routes/assign-parent": {
             "post": {
                 "tags": [
                     "Routes"
@@ -11864,7 +11864,7 @@
                 ]
             }
         },
-        "/transporte/public/api/subcontract": {
+        "/transportev2/public/api/subcontract": {
             "get": {
                 "tags": [
                     "Subcontract"
@@ -11992,7 +11992,7 @@
                 ]
             }
         },
-        "/transporte/public/api/subcontract/{id}": {
+        "/transportev2/public/api/subcontract/{id}": {
             "get": {
                 "tags": [
                     "Subcontract"
@@ -12216,7 +12216,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typecarroceria": {
+        "/transportev2/public/api/typecarroceria": {
             "get": {
                 "tags": [
                     "Type Carroceria"
@@ -12347,7 +12347,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typecarroceria/{id}": {
+        "/transportev2/public/api/typecarroceria/{id}": {
             "get": {
                 "tags": [
                     "Type Carroceria"
@@ -12598,7 +12598,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typecompany": {
+        "/transportev2/public/api/typecompany": {
             "get": {
                 "tags": [
                     "Type Company"
@@ -12723,7 +12723,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typecompany/{id}": {
+        "/transportev2/public/api/typecompany/{id}": {
             "get": {
                 "tags": [
                     "Type Company"
@@ -12969,7 +12969,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typeofUser": {
+        "/transportev2/public/api/typeofUser": {
             "get": {
                 "tags": [
                     "TypeofUser"
@@ -13093,7 +13093,7 @@
                 ]
             }
         },
-        "/transporte/public/api/typeofUser/{id}": {
+        "/transportev2/public/api/typeofUser/{id}": {
             "get": {
                 "tags": [
                     "TypeofUser"
@@ -13313,7 +13313,7 @@
                 ]
             }
         },
-        "/transporte/public/api/setAccess/{typeUserId}": {
+        "/transportev2/public/api/setAccess/{typeUserId}": {
             "put": {
                 "tags": [
                     "TypeofUser"
@@ -13422,7 +13422,7 @@
                 ]
             }
         },
-        "/transporte/public/api/getAccess/{typeUserId}": {
+        "/transportev2/public/api/getAccess/{typeUserId}": {
             "get": {
                 "tags": [
                     "TypeofUser"
@@ -13501,7 +13501,7 @@
                 ]
             }
         },
-        "/transporte/public/api/departments": {
+        "/transportev2/public/api/departments": {
             "get": {
                 "tags": [
                     "Ubigeo"
@@ -13561,7 +13561,7 @@
                 ]
             }
         },
-        "/transporte/public/api/provinces/{departmentId}": {
+        "/transportev2/public/api/provinces/{departmentId}": {
             "get": {
                 "tags": [
                     "Ubigeo"
@@ -13636,7 +13636,7 @@
                 ]
             }
         },
-        "/transporte/public/api/districts/{provinceId}": {
+        "/transportev2/public/api/districts/{provinceId}": {
             "get": {
                 "tags": [
                     "Ubigeo"
@@ -13711,7 +13711,7 @@
                 ]
             }
         },
-        "/transporte/public/api/ubigeos": {
+        "/transportev2/public/api/ubigeos": {
             "get": {
                 "tags": [
                     "Ubigeo"
@@ -13772,7 +13772,7 @@
                 ]
             }
         },
-        "/transporte/public/api/user": {
+        "/transportev2/public/api/user": {
             "get": {
                 "tags": [
                     "User"
@@ -13798,7 +13798,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/user?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/user?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -13806,11 +13806,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/user?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/user?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/user"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/user"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -13971,7 +13971,7 @@
                 ]
             }
         },
-        "/transporte/public/api/login": {
+        "/transportev2/public/api/login": {
             "post": {
                 "tags": [
                     "Authentication"
@@ -14078,7 +14078,7 @@
                 ]
             }
         },
-        "/transporte/public/api/user/{id}": {
+        "/transportev2/public/api/user/{id}": {
             "get": {
                 "tags": [
                     "User"
@@ -14322,7 +14322,7 @@
                 ]
             }
         },
-        "/transporte/public/api/authenticate": {
+        "/transportev2/public/api/authenticate": {
             "get": {
                 "tags": [
                     "Authentication"
@@ -14393,7 +14393,7 @@
                 ]
             }
         },
-        "/transporte/public/api/logout": {
+        "/transportev2/public/api/logout": {
             "get": {
                 "tags": [
                     "Authentication"
@@ -14445,7 +14445,7 @@
                 ]
             }
         },
-        "/transporte/public/api/searchByDni/{dni}": {
+        "/transportev2/public/api/searchByDni/{dni}": {
             "get": {
                 "tags": [
                     "Search"
@@ -14551,7 +14551,7 @@
                 ]
             }
         },
-        "/transporte/public/api/searchByRuc/{ruc}": {
+        "/transportev2/public/api/searchByRuc/{ruc}": {
             "get": {
                 "tags": [
                     "Search"
@@ -14648,7 +14648,7 @@
                 ]
             }
         },
-        "/transporte/public/api/vehicleAll": {
+        "/transportev2/public/api/vehicleAll": {
             "get": {
                 "tags": [
                     "Vehicle"
@@ -14684,7 +14684,7 @@
                 ]
             }
         },
-        "/transporte/public/api/vehicle": {
+        "/transportev2/public/api/vehicle": {
             "get": {
                 "tags": [
                     "Vehicle"
@@ -14973,7 +14973,7 @@
                 ]
             }
         },
-        "/transporte/public/api/vehicle/{id}": {
+        "/transportev2/public/api/vehicle/{id}": {
             "get": {
                 "tags": [
                     "Vehicle"
@@ -15310,7 +15310,7 @@
                 ]
             }
         },
-        "/transporte/public/api/sale": {
+        "/transportev2/public/api/sale": {
             "get": {
                 "tags": [
                     "Sale"
@@ -15356,7 +15356,7 @@
                                         },
                                         "first_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/sale?page=1"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/sale?page=1"
                                         },
                                         "from": {
                                             "type": "integer",
@@ -15364,11 +15364,11 @@
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/sale?page=2"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/sale?page=2"
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "http://develop.garzasoft.com/transporte/public/api/sale"
+                                            "example": "http://develop.garzasoft.com/transportev2/public/api/sale"
                                         },
                                         "per_page": {
                                             "type": "integer",
@@ -15655,7 +15655,7 @@
                 ]
             }
         },
-        "/transporte/public/api/saleWithReceptions": {
+        "/transportev2/public/api/saleWithReceptions": {
             "post": {
                 "tags": [
                     "Sale1"
@@ -15882,7 +15882,7 @@
                 ]
             }
         },
-        "/transporte/public/api/saleWithoutCreditNote": {
+        "/transportev2/public/api/saleWithoutCreditNote": {
             "get": {
                 "tags": [
                     "Sale"
@@ -15989,7 +15989,7 @@
                 ]
             }
         },
-        "/transporte/public/api/saleIdNumber": {
+        "/transportev2/public/api/saleIdNumber": {
             "get": {
                 "tags": [
                     "Sale"
@@ -16080,7 +16080,7 @@
                 ]
             }
         },
-        "/transporte/public/api/receptionWithoutSale": {
+        "/transportev2/public/api/receptionWithoutSale": {
             "get": {
                 "tags": [
                     "Sale"
@@ -16142,7 +16142,7 @@
                 ]
             }
         },
-        "/transporte/public/api/worker": {
+        "/transportev2/public/api/worker": {
             "get": {
                 "tags": [
                     "Worker"
@@ -16351,7 +16351,7 @@
                 ]
             }
         },
-        "/transporte/public/api/worker/{id}": {
+        "/transportev2/public/api/worker/{id}": {
             "get": {
                 "tags": [
                     "Worker"
@@ -16741,7 +16741,7 @@
                 ]
             }
         },
-        "/transporte/public/api/worker/{id}/historyProgramming": {
+        "/transportev2/public/api/worker/{id}/historyProgramming": {
             "get": {
                 "tags": [
                     "Worker"
@@ -16830,7 +16830,7 @@
                 ]
             }
         },
-        "/transporte/public/api/area": {
+        "/transportev2/public/api/area": {
             "get": {
                 "tags": [
                     "Area"
@@ -16953,7 +16953,7 @@
                 ]
             }
         },
-        "/transporte/public/api/area/{id}": {
+        "/transportev2/public/api/area/{id}": {
             "get": {
                 "tags": [
                     "Area"
@@ -17188,7 +17188,7 @@
                 ]
             }
         },
-        "/transporte/public/api/dataCollection": {
+        "/transportev2/public/api/dataCollection": {
             "get": {
                 "tags": [
                     "CollectionData"

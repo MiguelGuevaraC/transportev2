@@ -19,7 +19,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reception",
+     *     path="/transportev2/public/api/reception",
      *     summary="Get all reception",
      *     tags={"Reception"},
      *     description="Show all reception",
@@ -127,7 +127,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/reception",
+     *     path="/transportev2/public/api/reception",
      *     summary="Create a new reception",
      *     tags={"Reception"},
      *     description="Create a new reception",
@@ -365,7 +365,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportev2/public/api/reception/{id}",
      *     summary="Get a reception by ID",
      *     tags={"Reception"},
      *     description="Retrieve a reception by its ID",
@@ -437,7 +437,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportev2/public/api/reception/{id}",
      *     summary="Update an existing reception",
      *     tags={"Reception"},
      *     description="Update an existing reception",
@@ -725,7 +725,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportev2/public/api/reception/{id}",
      *     summary="Delete a reception",
      *     tags={"Reception"},
      *     description="Delete a reception by ID",

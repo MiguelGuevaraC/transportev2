@@ -10,7 +10,7 @@ class TypeCompanyController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/typecompany",
+     *     path="/transportev2/public/api/typecompany",
      *     summary="Retrieve all Type Companies",
      *     tags={"Type Company"},
      *     description="Fetches a list of all available Type Companies in the system.",
@@ -40,7 +40,7 @@ class TypeCompanyController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/typecompany",
+ *     path="/transportev2/public/api/typecompany",
  *     summary="Create a new Type Company",
  *     tags={"Type Company"},
  *     description="Stores a new Type Company in the database.",
@@ -101,7 +101,7 @@ class TypeCompanyController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/typecompany/{id}",
+     *     path="/transportev2/public/api/typecompany/{id}",
      *     summary="Get a Type Company by ID",
      *     tags={"Type Company"},
      *     description="Retrieve a Type Company by its ID",
@@ -150,7 +150,7 @@ class TypeCompanyController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/typecompany/{id}",
+     *     path="/transportev2/public/api/typecompany/{id}",
      *     summary="Update an existing Type Company",
      *     tags={"Type Company"},
      *     description="Update an existing Type Company",
@@ -231,7 +231,7 @@ class TypeCompanyController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/typecompany/{id}",
+ *     path="/transportev2/public/api/typecompany/{id}",
  *     summary="Delete a Type Company",
  *     tags={"Type Company"},
  *     description="Delete a Type Company by ID",

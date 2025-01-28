@@ -11,7 +11,7 @@ class RouteController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/routes",
+     *     path="/transportev2/public/api/routes",
      *     summary="Get all routes",
      *     tags={"Routes"},
      *     description="Show all routes",
@@ -117,7 +117,7 @@ class RouteController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/routesFather",
+     *     path="/transportev2/public/api/routesFather",
      *     summary="Get all parent routes",
      *     tags={"Routes"},
      *     description="MUESTRA LOS QUE TIENEN GRUPO",
@@ -153,7 +153,7 @@ class RouteController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/routes/{id}",
+ *     path="/transportev2/public/api/routes/{id}",
  *     summary="Get a specific route by ID",
  *     tags={"Routes"},
  *     description="Show details of a specific route",
@@ -201,7 +201,7 @@ class RouteController extends Controller
     }
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/routes/{id}",
+ *     path="/transportev2/public/api/routes/{id}",
  *     summary="Delete a specific route by ID",
  *     tags={"Routes"},
  *     description="Delete a specific route",
@@ -251,7 +251,7 @@ class RouteController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/routes",
+ *     path="/transportev2/public/api/routes",
  *     summary="Create a new route",
  *     tags={"Routes"},
  *     description="Store a new route in the system and assign a parent route to specified routes.",
@@ -367,7 +367,7 @@ class RouteController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/routeStore",
+ *     path="/transportev2/public/api/routeStore",
  *     summary="Create a new route",
  *     tags={"Routes"},
  *     description="Store a new route in the system, specifying the starting and ending places.",
@@ -476,7 +476,7 @@ class RouteController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/searchRoute",
+     *     path="/transportev2/public/api/searchRoute",
      *     summary="Search for an existing route",
      *     tags={"Routes"},
      *     description="Search for a route in the system based on the starting and ending places.",
@@ -574,7 +574,7 @@ class RouteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/addSubRoute",
+     *     path="/transportev2/public/api/addSubRoute",
      *     summary="Store a new subroute with a parent route",
      *     tags={"Routes"},
      *     description="Creates a new subroute and associates it with a specified parent route. If the subroute already exists, it updates its association with the parent route.",
@@ -680,7 +680,7 @@ class RouteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/routes/assign-parent",
+     *     path="/transportev2/public/api/routes/assign-parent",
      *     summary="Assign a parent route to multiple routes",
      *     tags={"Routes"},
      *     description="Assign an existing route as a parent to multiple routes.",
@@ -778,7 +778,7 @@ class RouteController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/routes/{id}",
+     *     path="/transportev2/public/api/routes/{id}",
      *     summary="Update an existing route",
      *     tags={"Routes"},
      *     description="Update an existing route in the system and assign a parent route to specified routes.",

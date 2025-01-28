@@ -25,7 +25,7 @@ class VentaController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/sale",
+     *     path="/transportev2/public/api/sale",
      *     summary="Store a new sale",
      *     tags={"Sale"},
      *     description="Create a new sale",
@@ -783,7 +783,7 @@ class VentaController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/saleWithReceptions",
+ *     path="/transportev2/public/api/saleWithReceptions",
  *     summary="Store a new sale",
  *     tags={"Sale1"},
  *     description="Create a new sale",
@@ -2470,7 +2470,7 @@ class VentaController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transporte/public/api/sale",
+     *     path="/transportev2/public/api/sale",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -2493,10 +2493,10 @@ class VentaController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/MovimentRequest")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/sale?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/sale?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/sale?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/sale"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/sale?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportev2/public/api/sale"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -2677,7 +2677,7 @@ class VentaController extends Controller
  * Get all Moviments without CreditNote
  *
  * @OA\Get (
- *     path="/transporte/public/api/saleWithoutCreditNote",
+ *     path="/transportev2/public/api/saleWithoutCreditNote",
  *     tags={"Sale"},
  *     summary="Get Sales Moviments without Credit Notes",
  *     description="Retrieve a list of sales movements that do not have an associated credit note. You can filter the results by branch office, document type, and sequential number.",
@@ -2844,7 +2844,7 @@ class VentaController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transporte/public/api/saleIdNumber",
+     *     path="/transportev2/public/api/saleIdNumber",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -2928,7 +2928,7 @@ class VentaController extends Controller
     /**
      * Get all Receptions without a Sale
      * @OA\Get (
-     *     path="/transporte/public/api/receptionWithoutSale",
+     *     path="/transportev2/public/api/receptionWithoutSale",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(

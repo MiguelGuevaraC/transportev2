@@ -12,7 +12,7 @@ class BankController extends Controller
     /**
      * Get all banks with pagination
      * @OA\Get (
-     *      path="/transporte/public/api/bank",
+     *      path="/transportev2/public/api/bank",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Response(
@@ -21,10 +21,10 @@ class BankController extends Controller
      *          @OA\JsonContent(
      *              @OA\Property(property="current_page", type="integer", example=1),
      *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Bank")),
-     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank?page=1"),
+     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank?page=1"),
      *              @OA\Property(property="from", type="integer", example=1),
-     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank?page=2"),
-     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank"),
+     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank?page=2"),
+     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank"),
      *              @OA\Property(property="per_page", type="integer", example=15),
      *              @OA\Property(property="prev_page_url", type="string", example="null"),
      *              @OA\Property(property="to", type="integer", example=15)
@@ -47,7 +47,7 @@ class BankController extends Controller
     /**
      * Store a newly created bank in storage.
      * @OA\Post (
-     *      path="/transporte/public/api/bank",
+     *      path="/transportev2/public/api/bank",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\RequestBody(
@@ -102,7 +102,7 @@ class BankController extends Controller
     /**
      * Display the specified bank.
      * @OA\Get (
-     *      path="/transporte/public/api/bank/{id}",
+     *      path="/transportev2/public/api/bank/{id}",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(
@@ -147,7 +147,7 @@ class BankController extends Controller
     /**
      * Update the specified bank in storage.
      * @OA\Put (
-     *      path="/transporte/public/api/bank/{id}",
+     *      path="/transportev2/public/api/bank/{id}",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(
@@ -222,7 +222,7 @@ class BankController extends Controller
     /**
      * Remove the specified bank from storage.
      * @OA\Delete (
-     *      path="/transporte/public/api/bank/{id}",
+     *      path="/transportev2/public/api/bank/{id}",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(

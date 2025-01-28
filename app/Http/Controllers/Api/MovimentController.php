@@ -20,7 +20,7 @@ class MovimentController extends Controller
     /**
      * Get all Movimentes
      * @OA\Get (
-     *     path="/transporte/public/api/moviment",
+     *     path="/transportev2/public/api/moviment",
      *     tags={"Moviment"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -40,10 +40,10 @@ class MovimentController extends Controller
      *                 @OA\Property(property="MovCajaInternos", type="object",
      *                     @OA\Property(property="current_page", type="integer", example=1),
      *                     @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/MovimentRequest")),
-     *                     @OA\Property(property="first_page_url", type="string", example="http://localhost/transporte/public/api/moviment?page=1"),
+     *                     @OA\Property(property="first_page_url", type="string", example="http://localhost/transportev2/public/api/moviment?page=1"),
      *                     @OA\Property(property="from", type="integer", example=1),
      *                     @OA\Property(property="next_page_url", type="string", example="null"),
-     *                     @OA\Property(property="path", type="string", example="http://localhost/transporte/public/api/moviment"),
+     *                     @OA\Property(property="path", type="string", example="http://localhost/transportev2/public/api/moviment"),
      *                     @OA\Property(property="per_page", type="integer", example=15),
      *                     @OA\Property(property="prev_page_url", type="string", example="null"),
      *                     @OA\Property(property="to", type="integer", example=2)
@@ -108,7 +108,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/moviment/{id}",
+     *     path="/transportev2/public/api/moviment/{id}",
      *     summary="Get a moviment by ID",
      *     tags={"Moviment"},
      *     description="Retrieve a moviment by its ID",
@@ -159,7 +159,7 @@ class MovimentController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/moviment/last/{idBox}",
+ *     path="/transportev2/public/api/moviment/last/{idBox}",
  *     summary="Get the last moviment with paymentConcept_id = 2",
  *     tags={"Moviment"},
  *     description="Retrieve the last moviment with paymentConcept_id = 2 for a specific box",
@@ -217,7 +217,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/moviment/{id}",
+     *     path="/transportev2/public/api/moviment/{id}",
      *     summary="Delete a moviment",
      *     tags={"moviment"},
      *     description="Delete a moviment by ID",
@@ -267,7 +267,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/moviment",
+     *     path="/transportev2/public/api/moviment",
      *     summary="Store a new moviment",
      *     tags={"Moviment"},
      *     description="Create a new moviment",
@@ -597,7 +597,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/movimentAperturaCierre",
+     *     path="/transportev2/public/api/movimentAperturaCierre",
      *     summary="Store a new moviment",
      *     tags={"Moviment"},
      *     description="Create a new moviment Apertura/Cierre",
@@ -948,7 +948,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/validateBox/{id}",
+     *     path="/transportev2/public/api/validateBox/{id}",
      *     summary="Get a Moviment",
      *     tags={"Moviment"},
      *     description="Get a Moviment by ID",
@@ -1020,7 +1020,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/showAperturaMovements",
+     *     path="/transportev2/public/api/showAperturaMovements",
      *     summary="Listado de Aperturas",
      *     tags={"Moviment"},
      *     description="Por cada apertura, muestra su reporte con un filtro opcional por fechas basado en el campo created_at.",

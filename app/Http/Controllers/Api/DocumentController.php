@@ -15,7 +15,7 @@ class DocumentController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/document",
+     *     path="/transportev2/public/api/document",
      *     summary="Retrieve all Documents",
      *     tags={"Document"},
      *     description="Fetches a list of all available Documents in the system.",
@@ -204,7 +204,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/document",
+ *     path="/transportev2/public/api/document",
  *     summary="Create a new Document",
  *     tags={"Document"},
  *     description="Stores a new Document in the database.",
@@ -292,7 +292,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/document/{id}",
+ *     path="/transportev2/public/api/document/{id}",
  *     summary="Get a Document by ID",
  *     tags={"Document"},
  *     description="Retrieve a Document by its ID",
@@ -341,7 +341,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/document/{id}",
+ *     path="/transportev2/public/api/document/{id}",
  *     summary="Update an existing Document",
  *     tags={"Document"},
  *     description="Update an existing Document",
@@ -437,7 +437,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/document/{id}",
+ *     path="/transportev2/public/api/document/{id}",
  *     summary="Create or Update a Document",
  *     tags={"Document"},
  *     description="Stores a new Document in the database or updates an existing one if the ID is provided.",
@@ -568,7 +568,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/document/{id}",
+ *     path="/transportev2/public/api/document/{id}",
  *     summary="Delete a Document",
  *     tags={"Document"},
  *     description="Mark a Document as deleted by setting its state to inactive",

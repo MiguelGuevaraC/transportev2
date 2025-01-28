@@ -10,7 +10,7 @@ class TypeCarroceriaController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/typecarroceria",
+     *     path="/transportev2/public/api/typecarroceria",
      *     summary="Retrieve all Type Carrocerias",
      *     tags={"Type Carroceria"},
      *     description="Fetches a list of all available Type Carrocerias in the system.",
@@ -40,7 +40,7 @@ class TypeCarroceriaController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/typecarroceria",
+ *     path="/transportev2/public/api/typecarroceria",
  *     summary="Create a new Type Carroceria",
  *     tags={"Type Carroceria"},
  *     description="Stores a new Type Carroceria in the database.",
@@ -105,7 +105,7 @@ class TypeCarroceriaController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/typecarroceria/{id}",
+ *     path="/transportev2/public/api/typecarroceria/{id}",
  *     summary="Get a Type Carroceria by ID",
  *     tags={"Type Carroceria"},
  *     description="Retrieve a Type Carroceria by its ID",
@@ -154,7 +154,7 @@ class TypeCarroceriaController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/typecarroceria/{id}",
+ *     path="/transportev2/public/api/typecarroceria/{id}",
  *     summary="Update an existing Type Carroceria",
  *     tags={"Type Carroceria"},
  *     description="Update an existing Type Carroceria",
@@ -239,7 +239,7 @@ class TypeCarroceriaController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/typecarroceria/{id}",
+ *     path="/transportev2/public/api/typecarroceria/{id}",
  *     summary="Delete a Type Carroceria",
  *     tags={"Type Carroceria"},
  *     description="Delete a Type Carroceria by ID",
