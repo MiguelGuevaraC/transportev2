@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -67,35 +66,35 @@ class PersonController extends Controller
         DB::table('people')
             ->join('workers', 'workers.person_id', '=', 'people.id')
             ->where('people.type', '!=', 'Trabajador') // Solo actualiza si el tipo es diferente
-            ->whereNull('people.deleted_at') // Solo personas que no han sido eliminadas
-            ->whereNull('workers.deleted_at') // Solo trabajadores que no han sido eliminados
+            ->whereNull('people.deleted_at')           // Solo personas que no han sido eliminadas
+            ->whereNull('workers.deleted_at')          // Solo trabajadores que no han sido eliminados
             ->update(['people.type' => 'Trabajador']);
 
         // Obtener la sucursal del usuario o la proporcionada
         $branch_office_id = $request->input('branch_office_id', auth()->user()->worker->branchOffice_id);
-        $perPage = $request->input('per_page', 15); // Número de resultados por página, por defecto 15
+        $perPage          = $request->input('per_page', 15); // Número de resultados por página, por defecto 15
 
         $type = $request->input('type', 'Cliente'); // Número de resultados por página, por defecto 15
 
         // Validar la sucursal
-        if ($branch_office_id && !is_numeric($branch_office_id)) {
+        if ($branch_office_id && ! is_numeric($branch_office_id)) {
             return response()->json([
                 "message" => "Invalid Branch Office ID",
             ], 400);
         }
 
         $branchOffice = BranchOffice::find($branch_office_id);
-        if (!$branchOffice) {
+        if (! $branchOffice) {
             return response()->json([
                 "message" => "Branch Office Not Found",
             ], 404);
         }
 
         // Obtener filtros
-        $typePerson = strtoupper($request->input('typePerson', ''));
-        $nameFilter = $request->input('namesCadena', '');
+        $typePerson   = strtoupper($request->input('typePerson', ''));
+        $nameFilter   = $request->input('namesCadena', '');
         $nro_document = $request->input('nro_document', '');
-        $telephone = $request->input('telephone', '');
+        $telephone    = $request->input('telephone', '');
 
         // Construir la consulta
         $query = Person::query()
@@ -107,12 +106,12 @@ class PersonController extends Controller
         } elseif ($typePerson === 'NATURAL') {
             $query->where('typeofDocument', 'DNI');
         }
-        if (!empty($nro_document)) {
+        if (! empty($nro_document)) {
             $query->where('documentNumber', 'LIKE', "%$nro_document%");
         }
 
         // Agregar filtro por `telephone` si no está vacío
-        if (!empty($telephone)) {
+        if (! empty($telephone)) {
             $query->where('telephone', 'LIKE', "%$telephone%"); // Usa LIKE para coincidencias parciales
         }
 
@@ -146,18 +145,18 @@ class PersonController extends Controller
         // Estructura de respuesta
         return response()->json([
             'persons' => [
-                'total' => $persons->total(),
-                'data' => $persons->items(),
-                'current_page' => $persons->currentPage(),
-                'last_page' => $persons->lastPage(),
-                'per_page' => $persons->perPage(),
-                'pagination' => $perPage, // Nuevo campo para el tamaño de la paginación
+                'total'          => $persons->total(),
+                'data'           => $persons->items(),
+                'current_page'   => $persons->currentPage(),
+                'last_page'      => $persons->lastPage(),
+                'per_page'       => $persons->perPage(),
+                'pagination'     => $perPage, // Nuevo campo para el tamaño de la paginación
                 'first_page_url' => $persons->url(1),
-                'from' => $persons->firstItem(),
-                'next_page_url' => $persons->nextPageUrl(),
-                'path' => $persons->path(),
-                'prev_page_url' => $persons->previousPageUrl(),
-                'to' => $persons->lastItem(),
+                'from'           => $persons->firstItem(),
+                'next_page_url'  => $persons->nextPageUrl(),
+                'path'           => $persons->path(),
+                'prev_page_url'  => $persons->previousPageUrl(),
+                'to'             => $persons->lastItem(),
             ],
         ], 200);
     }
@@ -168,50 +167,48 @@ class PersonController extends Controller
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
-        $idPerson = $request->input('idPerson');
+        $idPerson      = $request->input('idPerson');
         $personInclude = Person::find($idPerson);
 
-        $type = $request->input('type',''); // Tipo por defecto Cliente
+        $type  = $request->input('type', ''); // Tipo por defecto Cliente
         $names = urldecode($request->input('names'));
-        
+
         $names = str_replace('%20%', ' ', $names);
-        
+
         // Consulta de personas según los filtros aplicados
-        $persons = Person::when(!empty($names), function ($query) use ($names) {
+        $persons = Person::when(! empty($names), function ($query) use ($names) {
             $query->where(function ($query) use ($names) {
                 $query->whereRaw('lower(concat_ws(" ", names, fatherSurname, motherSurname)) LIKE ?', ['%' . strtolower($names) . '%'])
                     ->orWhereRaw('lower(businessName) LIKE ?', ['%' . strtolower($names) . '%'])
                     ->orWhereRaw('lower(documentNumber) LIKE ?', ['%' . strtolower($names) . '%']);
             });
         })
-        ->when(!empty($type), function ($query) use ($type) {
-            
-            $query->where(function ($query) use ($type) {
-                $query->where('type', 'LIKE', '%' . $type . '%');
-           
-            });
-        })
-        ->when(!empty($names) || !empty($type), function ($query) {
-            $query->orWhere('id', '2');
-        })
-        ->orderByRaw('CASE
+            ->when(! empty($type), function ($query) use ($type) {
+
+                $query->where(function ($query) use ($type) {
+                    $query->where('type', 'LIKE', '%' . $type . '%');
+
+                });
+            })
+            ->when(! empty($names) || ! empty($type), function ($query) {
+                $query->orWhere('id', '2');
+            })
+            ->orderByRaw('CASE
             WHEN businessName IS NOT NULL THEN businessName
             ELSE names
         END ASC')
-        ->limit(20)
-        ->get();
-        
-        
+            ->limit(20)
+            ->get();
 
         // Si encuentra a la persona por ID, agregarla a los resultados
         if ($personInclude) {
@@ -351,13 +348,13 @@ class PersonController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'typeofDocument' => 'required',
-            'documentNumber' => [
+            'typeofDocument'   => 'required',
+            'documentNumber'   => [
                 'required',
                 Rule::unique('people')->whereNull('deleted_at'),
             ],
             'branch_office_id' => 'nullable|exists:branch_offices,id',
-            'file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'file'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -366,37 +363,37 @@ class PersonController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $clientData = [
-            'typeofDocument' => $request->input('typeofDocument'),
-            'documentNumber' => $request->input('documentNumber'),
-            'names' => $request->input('names') ?? null,
-            'fatherSurname' => $request->input('fatherSurname') ?? null,
-            'motherSurname' => $request->input('motherSurname') ?? null,
-            'birthDate' => $request->input('birthDate') ?? null,
-            'address' => $request->input('address') ?? null,
-            'telephone' => $request->input('telephone') ?? null,
-            'email' => $request->input('email') ?? null,
-            'businessName' => $request->input('businessName') ?? null,
-            'comercialName' => $request->input('comercialName') ?? null,
-            'fiscalAddress' => $request->input('fiscalAddress') ?? null,
-            'places' => $request->input('places') ?? null,
+            'typeofDocument'           => $request->input('typeofDocument'),
+            'documentNumber'           => $request->input('documentNumber'),
+            'names'                    => $request->input('names') ?? null,
+            'fatherSurname'            => $request->input('fatherSurname') ?? null,
+            'motherSurname'            => $request->input('motherSurname') ?? null,
+            'birthDate'                => $request->input('birthDate') ?? null,
+            'address'                  => $request->input('address') ?? null,
+            'telephone'                => $request->input('telephone') ?? null,
+            'email'                    => $request->input('email') ?? null,
+            'businessName'             => $request->input('businessName') ?? null,
+            'comercialName'            => $request->input('comercialName') ?? null,
+            'fiscalAddress'            => $request->input('fiscalAddress') ?? null,
+            'places'                   => $request->input('places') ?? null,
 
-            'daysCredit' => $request->input('daysCredit') ?? null,
-            'type' => $request->input('type') ?? null,
+            'daysCredit'               => $request->input('daysCredit') ?? null,
+            'type'                     => $request->input('type') ?? null,
 
-            'representativePersonDni' => $request->input('representativePersonDni') ?? null,
+            'representativePersonDni'  => $request->input('representativePersonDni') ?? null,
             'representativePersonName' => $request->input('representativePersonName') ?? null,
-            'branchOffice_id' => $branch_office_id,
+            'branchOffice_id'          => $branch_office_id,
         ];
 
         $client = Person::create($clientData);
@@ -406,15 +403,15 @@ class PersonController extends Controller
 
                 'typeofDocument' => $request->input('typeofDocument'),
                 'documentNumber' => $request->input('documentNumber'),
-                'names' => $request->input('names') ?? $client->businessName,
-                'fatherSurname' => $request->input('fatherSurname'),
-                'motherSurname' => $request->input('motherSurname'),
+                'names'          => $request->input('names') ?? $client->businessName,
+                'fatherSurname'  => $request->input('fatherSurname'),
+                'motherSurname'  => $request->input('motherSurname'),
 
-                'address' => $request->input('address') ?? null,
-                'telephone' => $request->input('telephone') ?? null,
-                'email' => $request->input('email') ?? null,
+                'address'        => $request->input('address') ?? null,
+                'telephone'      => $request->input('telephone') ?? null,
+                'email'          => $request->input('email') ?? null,
 
-                'person_id' => $client->id,
+                'person_id'      => $client->id,
 
             ];
 
@@ -472,7 +469,7 @@ class PersonController extends Controller
     public function show($id)
     {
         $client = Person::find($id);
-        if (!$client) {
+        if (! $client) {
             return response()->json(['message' => 'Client not found'], 422);
         }
         return response()->json($client, 200);
@@ -543,14 +540,14 @@ class PersonController extends Controller
     public function update(Request $request, $id)
     {
         $client = Person::find($id);
-        if (!$client) {
+        if (! $client) {
             return response()->json(['message' => 'Client not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
-            'typeofDocument' => 'required',
-            'documentNumber' => [
+            'typeofDocument'   => 'required',
+            'documentNumber'   => [
                 'required',
                 Rule::unique('people')->ignore($id)->whereNull('deleted_at'),
             ],
@@ -568,27 +565,27 @@ class PersonController extends Controller
         $routeData = array_filter([
             'typeofDocument' => $request->input('typeofDocument'),
             'documentNumber' => $request->input('documentNumber'),
-            'birthDate' => $request->input('birthDate'),
-            'address' => $request->input('address'),
-            'telephone' => $request->input('telephone'),
-            'email' => $request->input('email'),
-            'branch_office' => $request->input('branch_office'),
-            'daysCredit' => $request->input('daysCredit'),
-            'places' => $request->input('places'),
+            'birthDate'      => $request->input('birthDate'),
+            'address'        => $request->input('address'),
+            'telephone'      => $request->input('telephone'),
+            'email'          => $request->input('email'),
+            'branch_office'  => $request->input('branch_office'),
+            'daysCredit'     => $request->input('daysCredit'),
+            'places'         => $request->input('places'),
 
-            'type' => $request->input('type'),
+            'type'           => $request->input('type'),
         ], $filterNullValues);
 
         $client->update($routeData);
 
-        $client->names = $request->input('names') ?? null;
+        $client->names         = $request->input('names') ?? null;
         $client->fatherSurname = $request->input('fatherSurname') ?? null;
         $client->motherSurname = $request->input('motherSurname') ?? null;
 
-        $client->businessName = $request->input('businessName') ?? null;
-        $client->comercialName = $request->input('comercialName') ?? null;
-        $client->fiscalAddress = $request->input('fiscalAddress') ?? null;
-        $client->representativePersonDni = $request->input('representativePersonDni') ?? null;
+        $client->businessName             = $request->input('businessName') ?? null;
+        $client->comercialName            = $request->input('comercialName') ?? null;
+        $client->fiscalAddress            = $request->input('fiscalAddress') ?? null;
+        $client->representativePersonDni  = $request->input('representativePersonDni') ?? null;
         $client->representativePersonName = $request->input('representativePersonName') ?? null;
 
         // if ($request->hasFile('file')) {
@@ -649,7 +646,7 @@ class PersonController extends Controller
     public function destroy($id)
     {
         $client = Person::find($id);
-        if (!$client) {
+        if (! $client) {
             return response()->json(['message' => 'Client not found'], 422);
         }
         $client->delete();
@@ -699,12 +696,12 @@ class PersonController extends Controller
     public function changeState($id)
     {
         $client = Person::find($id);
-        if (!$client) {
+        if (! $client) {
             return response()->json(['message' => 'Client not found'], 422);
         }
 
         // Cambiar el estado del cliente
-        $client->state = !$client->state;
+        $client->state = ! $client->state;
 
         // Guardar los cambios en la base de datos
         $client->save();
@@ -762,26 +759,26 @@ class PersonController extends Controller
     public function personsWithDebt(Request $request)
     {
         $branch_office_id = $request->input('branch_office_id');
-        $person_id = $request->input('person_id');
-        $moviment_id = $request->input('moviment_id'); // Parámetro de Moviment
-        $person = Person::find($person_id);
+        $person_id        = $request->input('person_id');
+        $moviment_id      = $request->input('moviment_id'); // Parámetro de Moviment
+        $person           = Person::find($person_id);
 
         $conditionPay = $request->input('conditionPay') ?? '';
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $names = $request->input('names');
 
-        $user = Auth()->user();
+        $user    = Auth()->user();
         $user_id = $user->id ?? '';
 
         // Obteniendo personas con recepciones que tienen deudas y aplicando la lógica de filtrado por movimiento
@@ -792,7 +789,7 @@ class PersonController extends Controller
             if ($moviment_id) {
                 //dd(cf);
                 $query->where(function ($query) use ($moviment_id) {
-                    // Filtrar las recepciones que NO tienen moviment o que tienen el moviment_id específico
+                                                        // Filtrar las recepciones que NO tienen moviment o que tienen el moviment_id específico
                     $query->whereDoesntHave('moviment') // Todas las recepciones que NO tienen moviment
                         ->orWhereHas('moviment', function ($subQuery) use ($moviment_id) {
 
@@ -802,14 +799,16 @@ class PersonController extends Controller
                 });
 
             } else {
+
                 // Si no se envía moviment_id, incluir solo las recepciones que no tienen venta
                 $query->where(function ($query) use ($moviment_id) {
-                    // Filtrar las recepciones que NO tienen moviment o que tienen el moviment_id específico
+                                                        // Filtrar las recepciones que NO tienen moviment o que tienen el moviment_id específico
                     $query->whereDoesntHave('moviment') // Todas las recepciones que NO tienen moviment
                         ->orWhereHas('moviment', function ($subQuery) use ($moviment_id) {
 
                             // Si se envía moviment_id, incluir las que tienen ese movimiento
-                            $subQuery->where('status', 'Anulada');
+                            $subQuery->where('status_facturado', 'Anulada')
+                                ->orWhere('status', 'Anulada')->orWhere('status', 'Anulado');
                         });
                 });
             }
@@ -832,11 +831,13 @@ class PersonController extends Controller
                                 });
                         });
                     } else {
+
                         // Si no se envía moviment_id, incluir solo las recepciones que no tienen venta
                         $query->where(function ($query) use ($moviment_id) {
                             $query->whereDoesntHave('moviment') // Sin ventas
                                 ->orWhereHas('moviment', function ($subQuery) use ($moviment_id) {
-                                    $subQuery->where('status', 'Anulada'); // Con el movimiento específico
+                                    $subQuery->where('status', 'Anulada');             // Con el movimiento específico
+                                    $subQuery->orWhere('status_facturado', 'Anulada'); // Con el movimiento específico
                                 });
                         });
                     }
@@ -864,7 +865,7 @@ class PersonController extends Controller
         $persons->each(function ($person) {
             $person->receptionsWithDebt->each(function ($reception) {
                 // Obtener el nombre del origen y destino
-                $originName = strtoupper($reception->origin->name ?? 'ORIGEN DESCONOCIDO');
+                $originName      = strtoupper($reception->origin->name ?? 'ORIGEN DESCONOCIDO');
                 $destinationName = strtoupper($reception->destination->name ?? 'DESTINO DESCONOCIDO');
 
                 // Unir las descripciones de los detalles en una cadena separada por comas

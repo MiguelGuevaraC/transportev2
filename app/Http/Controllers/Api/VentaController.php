@@ -2633,6 +2633,9 @@ class VentaController extends Controller
                         $item->status = 'Pendiente';
                     }
                 }
+                if ($item->status_facturado == "Anulada") {
+                    $item->status = 'Anulada';
+                }
             }
             return $item;
         });

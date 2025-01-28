@@ -421,4 +421,9 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
 
     Route::get('notification', [NotificationController::class, 'index']);
+
+
+    require __DIR__ . '/Api/CarrierApi.php';        //CARRIER GUIDE
+
+
 });

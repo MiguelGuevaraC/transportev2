@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -207,7 +206,6 @@ class Moviment extends Model
         'movType',
         'typeCaja',
         'operationNumber',
- 
 
         'status',
         'status_facturado',
@@ -312,7 +310,7 @@ class Moviment extends Model
     {
         return $this->hasMany(Installment::class);
     }
- 
+
     public function installmentPendientes()
     {
         return $this->hasMany(Installment::class)
@@ -333,18 +331,23 @@ class Moviment extends Model
         // Actualizar el campo saldo
         $this->saldo = $totalDebt;
         if ($this->saldo == 0) {
+
             $this->status = 'Pagado';
+
         }
-        if($this->status == 'Pagado' && $this->saldo != 0){
+        if ($this->status_facturado == "Anulada") {
+            $this->status = 'Anulada';
+        }
+        if ($this->status == 'Pagado' && $this->saldo != 0) {
             $this->status = 'Pendiente';
         }
-        
+
         $this->save();
     }
     public function storeTotalInCredit()
     {
         // Sumar el totalDebt de todas las installments relacionadas
-        $totalDebt = $this->installments()->sum('totalDebt');
+        $totalDebt   = $this->installments()->sum('totalDebt');
         $this->total = $totalDebt;
         $this->saldo = $totalDebt;
         $this->save();
