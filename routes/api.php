@@ -106,7 +106,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::put('branchOffice/{id}', [BranchOfficeController::class, 'update']);
     Route::delete('branchOffice/{id}', [BranchOfficeController::class, 'destroy']);
 
-    // RECEPTION
+    // /RECEPTION
     Route::get('reception', [ReceptionController::class, 'index']);
     Route::get('reception/{id}', [ReceptionController::class, 'show']);
     Route::post('reception', [ReceptionController::class, 'store']);
@@ -197,8 +197,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-    Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
-    Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
+    // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    // Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
     Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
     
@@ -257,7 +257,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('box', [BoxController::class, 'index']);
     Route::get('boxAll', [BoxController::class, 'indexAll']);
     Route::get('boxByBranch/{id}', [BoxController::class, 'getBoxByBrandId']);
-    // Route::get('boxByBranch/{id}', [BoxController::class, 'indexNotAssigned']);
+    // /Route::get('boxByBranch/{id}', [BoxController::class, 'indexNotAssigned']);
     Route::get('box/{id}', [BoxController::class, 'show']);
     Route::post('box', [BoxController::class, 'store']);
     Route::delete('box/{id}', [BoxController::class, 'destroy']);
@@ -311,7 +311,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('reporteGuides', [ExcelController::class, 'guidesExcel'])->name('guidesExcel');
     Route::put('changeStatusFacturado/{id}', [CarrierGuideController::class, 'changeStatusFacturacion']);
     
-    // Route::get('reporteReception/{id}', [PdfController::class, 'reporteReception'])->name('reporteReception');
+    // /Route::get('reporteReception/{id}', [PdfController::class, 'reporteReception'])->name('reporteReception');
 
     //USERS
     Route::get('user', [UserController::class, 'index']);
@@ -328,12 +328,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('receptionWithoutSale', [VentaController::class, 'receptionWithoutSale']);
     Route::get('getArchivosDocument/{id}/{tipodocumento}', [VentaController::class, 'getArchivosDocument']);
     
-    Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
-    Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
-    Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
-    Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
+    // Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
+    // Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
+    // Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
+    // Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
     
-    Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+    // Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
 
     Route::get('saleWithoutCreditNote', [VentaController::class, 'saleWithoutCreditNote']);
     Route::get('salesbynumber', [VentaController::class, 'salesbynumber']);
@@ -370,7 +370,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('bank/{id}', [BankController::class, 'destroy']);
     Route::put('bank/{id}', [BankController::class, 'update']);
 
-    // ROUTES PLACE
+    // /ROUTES PLACE
     Route::get('routes', [RouteController::class, 'index']);
     Route::get('routesFather', [RouteController::class, 'indexRoutesFather']);
 
@@ -406,7 +406,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // TYPE CARROCERY
     Route::get('document', [DocumentController::class, 'index']);
-    // Route::get('indexReport', [DocumentController::class, 'indexReport']);
+    // /Route::get('indexReport', [DocumentController::class, 'indexReport']);
 
     Route::get('document/{id}', [DocumentController::class, 'show']);
     Route::post('document', [DocumentController::class, 'store']);

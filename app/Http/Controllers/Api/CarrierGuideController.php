@@ -969,6 +969,7 @@ class CarrierGuideController extends Controller
         return response()->json($carrierGuide, 200);
     }
 
+    //COMENTADO DESDE DEV
     public function declararGuia(Request $request, $idventa)
     {
         $carrier = CarrierGuide::find($idventa);
@@ -1080,7 +1081,7 @@ class CarrierGuideController extends Controller
 
         return response()->json($carrier, 200);
     }
-
+//COMENTADO DESDE DEV
     public function declararGuiaBack($fecha = null)
     {
         $fecha = $fecha ?? Carbon::now()->toDateString();

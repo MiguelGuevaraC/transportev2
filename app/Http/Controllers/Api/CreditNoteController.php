@@ -771,7 +771,7 @@ class CreditNoteController extends Controller
 
         return response()->json($object, 200);
     }
-
+//COMENTADO DESDE DEV
     public function declararNotaCredito(Request $request, $idventa)
     {
         $funcion = "enviarNotaCredito";
@@ -853,7 +853,7 @@ class CreditNoteController extends Controller
             'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
     }
-
+//COMENTADO DESDE DEV
     public function declararNCHoy()
     {
         $empresa_id = 1;

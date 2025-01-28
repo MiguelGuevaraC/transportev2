@@ -549,7 +549,7 @@ class VentaController extends Controller
         return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
 
     }
-
+//COMENTADO DESDE DEV
     public function declararBoletaFactura(Request $request, $idventa, $idtipodocumento)
     {
         $empresa_id = 1;
@@ -635,6 +635,7 @@ class VentaController extends Controller
         ]);
         return response()->json($moviment, 200);
     }
+    //COMENTADO DESDE DEV
     public function declararBoletaFacturaById($idventa, $idtipodocumento)
     {
         $empresa_id = 1;
@@ -696,7 +697,7 @@ class VentaController extends Controller
         $moviment->save();
         return response()->json($moviment, 200);
     }
-
+//COMENTADO DESDE DEV
     public function declararVentasHoy()
     {
         $empresa_id = 1;
