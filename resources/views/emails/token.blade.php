@@ -34,7 +34,6 @@
             font-size: 12px;
             color: #666;
         }
-
     </style>
 </head>
 
@@ -44,6 +43,20 @@
         <p>Se ha solicitado un token para verificar y otorgar permisos de administrador.</p>
         <p>Tu token de verificación es:</p>
         <p class="token">{{ $token }}</p>
+
+        <p>Número de venta: {{ $moviment_number }}</p>
+
+        @if (!empty($receptions))
+            <p>Recepciones:</p>
+            <ul>
+                @foreach ($receptions as $reception)
+                    <li>Código: {{ $reception['codeReception'] }} - GRT: {{ $reception['guideNumber'] }}</li>
+                @endforeach
+            </ul>
+        @else
+            <p>No hay recepciones disponibles.</p>
+        @endif
+
 
         <p>Gracias,</p>
         <p>El equipo de soporte</p>

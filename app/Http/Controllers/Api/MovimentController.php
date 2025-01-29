@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +8,7 @@ use App\Models\Installment;
 use App\Models\Moviment;
 use App\Models\PaymentConcept;
 use App\Models\User;
+use App\Services\MovimentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 
 class MovimentController extends Controller
 {
+
     /**
      * Get all Movimentes
      * @OA\Get (
@@ -82,14 +83,14 @@ class MovimentController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         $movCaja = Moviment::where('status', 'Activa')
@@ -150,7 +151,7 @@ class MovimentController extends Controller
     {
         $object = Moviment::with(['paymentConcept', 'person', 'user.worker.person'])->find($id);
 
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Moviment not found'], 422);
         }
 
@@ -198,7 +199,7 @@ class MovimentController extends Controller
     public function showLastMovPayment($idBox)
     {
         $box = Box::find($idBox);
-        if (!$box) {
+        if (! $box) {
             return response()->json(['message' => 'Box not found'], 422);
         }
         $object = Moviment::with(['paymentConcept', 'person', 'user.worker.person'])
@@ -208,7 +209,7 @@ class MovimentController extends Controller
             ->where('movType', 'Caja')
             ->first();
 
-        if (!$object) {
+        if (! $object) {
             return response()->json(null, 200);
         }
 
@@ -255,12 +256,12 @@ class MovimentController extends Controller
     public function destroy($id)
     {
         $object = Moviment::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Moviment not found'], 404); // Cambiado a 404 para mejor claridad
         }
 
-        // Aquí puedes agregar lógica para eliminar o procesar el objeto
-        // Si el objetivo es eliminar el registro:
+                           // Aquí puedes agregar lógica para eliminar o procesar el objeto
+                           // Si el objetivo es eliminar el registro:
         $object->delete(); // Cambia esto si se necesita otra lógica
         return response()->json(['message' => 'Moviment deleted successfully'], 200);
     }
@@ -430,26 +431,26 @@ class MovimentController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
+            'paymentDate'       => 'required|date',
 
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
+            'yape'              => 'nullable|numeric',
+            'deposit'           => 'nullable|numeric',
+            'cash'              => 'nullable|numeric',
+            'card'              => 'nullable|numeric',
+            'plin'              => 'nullable|numeric',
+            'comment'           => 'nullable|string',
 
-            'typeDocument' => 'nullable|string',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
+            'typeDocument'      => 'nullable|string',
+            'typePayment'       => 'nullable|string',
+            'typeSale'          => 'nullable|string',
 
-            'programming_id' => 'nullable|exists:programmings,id',
+            'programming_id'    => 'nullable|exists:programmings,id',
             'paymentConcept_id' => 'required|exists:payment_concepts,id',
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'reception_id' => 'nullable|exists:receptions,id',
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
+            'box_id'            => 'required|exists:boxes,id',
+            'branchOffice_id'   => 'required|exists:branch_offices,id',
+            'reception_id'      => 'nullable|exists:receptions,id',
+            'person_id'         => 'required|exists:people,id',
+            'installments'      => 'nullable|array',
 
         ]);
         if ($validator->fails()) {
@@ -463,7 +464,7 @@ class MovimentController extends Controller
         $paymentConcept = PaymentConcept::find($request->input('paymentConcept_id'));
 
         if ($paymentConcept->type == 'Egreso') {
-            $contraseña = $request->input('password');
+            $contraseña    = $request->input('password');
             $userPermitidos = User::whereIn('id', [1, 9])->get(); // Cambiado to whereIn
 
             if ($userPermitidos->isEmpty()) {
@@ -477,12 +478,12 @@ class MovimentController extends Controller
             foreach ($userPermitidos as $userAdmin) {
                 if (Hash::check($contraseña, $userAdmin->password)) {
                     $passwordCorrect = true; // La contraseña coincide con uno de los usuarios
-                    break; // Salir del bucle si se encuentra una coincidencia
+                    break;                   // Salir del bucle si se encuentra una coincidencia
                 }
             }
 
             // Si la contraseña no coincide con ninguno de los usuarios
-            if (!$passwordCorrect) {
+            if (! $passwordCorrect) {
                 return response()->json([
                     'message' => 'Las contraseñas no coinciden.',
                 ], 409);
@@ -495,14 +496,14 @@ class MovimentController extends Controller
 
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         $box = Box::find($request->input('box_id'));
@@ -516,7 +517,7 @@ class MovimentController extends Controller
             ->where('branchOffice_id', $branch_office_id)->first();
         $cadena = '';
         $estado = 0;
-        if (!$movCaja) {
+        if (! $movCaja) {
             return response()->json(['error' => 'Caja No está Aperturada'], 422);
 
         }
@@ -534,39 +535,39 @@ class MovimentController extends Controller
         $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         $data = [
-            'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total ?? 0,
-            'yape' => $request->input('yape') ?? 0,
-            'deposit' => $request->input('deposit') ?? 0,
-            'cash' => $request->input('cash') ?? 0,
-            'card' => $request->input('card') ?? 0,
-            'plin' => $request->input('plin') ?? 0,
+            'correlative'       => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'       => $request->input('paymentDate'),
+            'total'             => $total ?? 0,
+            'yape'              => $request->input('yape') ?? 0,
+            'deposit'           => $request->input('deposit') ?? 0,
+            'cash'              => $request->input('cash') ?? 0,
+            'card'              => $request->input('card') ?? 0,
+            'plin'              => $request->input('plin') ?? 0,
 
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => $request->input('typeDocument') ?? '-',
-            'movType' => 'Caja',
-            'typeCaja' => 'nullable|string',
-            'operationNumber' => $request->input('operationNumber'),
-            'typePayment' => $request->input('typePayment') ?? null,
-            'typeSale' => $request->input('typeSale') ?? '-',
-            'status' => 'Generada',
-            'programming_id' => $request->input('programming_id'),
+            'comment'           => $request->input('comment') ?? '-',
+            'typeDocument'      => $request->input('typeDocument') ?? '-',
+            'movType'           => 'Caja',
+            'typeCaja'          => 'nullable|string',
+            'operationNumber'   => $request->input('operationNumber'),
+            'typePayment'       => $request->input('typePayment') ?? null,
+            'typeSale'          => $request->input('typeSale') ?? '-',
+            'status'            => 'Generada',
+            'programming_id'    => $request->input('programming_id'),
             'paymentConcept_id' => $request->input('paymentConcept_id'),
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'reception_id' => $request->input('reception_id'),
-            'person_id' => $request->input('person_id'),
-            'user_id' => auth()->id(),
-            'box_id' => $request->input('box_id'),
+            'branchOffice_id'   => $request->input('branchOffice_id'),
+            'reception_id'      => $request->input('reception_id'),
+            'person_id'         => $request->input('person_id'),
+            'user_id'           => auth()->id(),
+            'box_id'            => $request->input('box_id'),
         ];
 
         $object = Moviment::create($data);
@@ -576,9 +577,9 @@ class MovimentController extends Controller
             foreach ($installments as $installment) {
 
                 $data = [
-                    'date' => $installment['date'],
-                    'total' => $installment['total'],
-                    'totalDebt' => $installment['total'],
+                    'date'        => $installment['date'],
+                    'total'       => $installment['total'],
+                    'totalDebt'   => $installment['total'],
 
                     'moviment_id' => $object->id,
                 ];
@@ -720,20 +721,20 @@ class MovimentController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
+            'paymentDate'       => 'required|date',
             'paymentConcept_id' => 'required|in:1,2|exists:payment_concepts,id',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'comment' => 'nullable|string',
-            'saldo' => 'nullable|numeric',
+            'yape'              => 'nullable|numeric',
+            'deposit'           => 'nullable|numeric',
+            'cash'              => 'nullable|numeric',
+            'plin'              => 'nullable|numeric',
+            'card'              => 'nullable|numeric',
+            'comment'           => 'nullable|string',
+            'saldo'             => 'nullable|numeric',
 
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
+            'box_id'            => 'required|exists:boxes,id',
+            'branchOffice_id'   => 'required|exists:branch_offices,id',
 
-            'person_id' => 'required|exists:people,id',
+            'person_id'         => 'required|exists:people,id',
 
         ]);
         if ($validator->fails()) {
@@ -743,29 +744,29 @@ class MovimentController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
         $branch_office_id = $request->input('branchOffice_id');
 
         if ($request->input('paymentConcept_id') == 1) {
-            $letra = 'A';
-            $status = 'Activa';
-            $box = Box::find($box_id);
+            $letra       = 'A';
+            $status      = 'Activa';
+            $box         = Box::find($box_id);
             $box->status = 'Activa';
             $box->save();
             $typeDocument = 'Ingreso';
         } else if (($request->input('paymentConcept_id') == 2)) {
-            $letra = 'C';
+            $letra  = 'C';
             $status = 'Inactiva';
 
-            $box = Box::find($box_id);
+            $box         = Box::find($box_id);
             $box->status = 'Inactiva';
             $box->save();
 
@@ -796,34 +797,34 @@ class MovimentController extends Controller
         $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         $data = [
-            'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total ?? 0,
-            'yape' => $request->input('yape') ?? 0,
-            'deposit' => $request->input('deposit') ?? 0,
-            'cash' => $request->input('cash') ?? 0,
-            'card' => $request->input('card') ?? 0,
-            'plin' => $request->input('plin') ?? 0,
-            'comment' => $request->input('comment') ?? '-',
-            'saldo' => $total,
-            'status' => $status,
-            'typeDocument' => $typeDocument,
-            'typeCaja' => 'nullable|string',
-            'operationNumber' => $request->input('operationNumber'),
+            'correlative'       => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'       => $request->input('paymentDate'),
+            'total'             => $total ?? 0,
+            'yape'              => $request->input('yape') ?? 0,
+            'deposit'           => $request->input('deposit') ?? 0,
+            'cash'              => $request->input('cash') ?? 0,
+            'card'              => $request->input('card') ?? 0,
+            'plin'              => $request->input('plin') ?? 0,
+            'comment'           => $request->input('comment') ?? '-',
+            'saldo'             => $total,
+            'status'            => $status,
+            'typeDocument'      => $typeDocument,
+            'typeCaja'          => 'nullable|string',
+            'operationNumber'   => $request->input('operationNumber'),
             'paymentConcept_id' => $request->input('paymentConcept_id'),
-            'branchOffice_id' => $branch_office_id,
-            'person_id' => $request->input('person_id'),
-            'user_id' => auth()->id(),
-            'box_id' => $box_id,
+            'branchOffice_id'   => $branch_office_id,
+            'person_id'         => $request->input('person_id'),
+            'user_id'           => auth()->id(),
+            'box_id'            => $box_id,
         ];
 
         $object = Moviment::create($data);
@@ -840,14 +841,14 @@ class MovimentController extends Controller
 
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         $movCajaAperturada = Moviment::where('id', $id)
@@ -856,7 +857,7 @@ class MovimentController extends Controller
             ->first();
 
         // $box_id = $movCajaAperturada->box_id;
-        if (!$movCajaAperturada) {
+        if (! $movCajaAperturada) {
             return response()->json([
                 "message" => "Movimiento de Apertura no encontrado",
             ], 404);
@@ -938,10 +939,10 @@ class MovimentController extends Controller
         return response()->json([
 
             'MovCajaApertura' => $movCajaAperturada,
-            'MovCajaCierre' => $movCajaCierre,
+            'MovCajaCierre'   => $movCajaCierre,
             'MovCajaInternos' => $movimientosCaja,
 
-            "resumenCaja" => $resumenCaja ?? null,
+            "resumenCaja"     => $resumenCaja ?? null,
         ]);
 
     }
@@ -1014,7 +1015,7 @@ class MovimentController extends Controller
             }
         }
 
-        // Continúa con el procesamiento si no hay problemas
+                                          // Continúa con el procesamiento si no hay problemas
         return response()->json([], 200); // Respuesta opcional
     }
 
@@ -1065,17 +1066,17 @@ class MovimentController extends Controller
     public function showAperturaMovements(Request $request)
     {
         $box = Box::find($request->input('box_id'));
-        if (!$box) {
+        if (! $box) {
             return response()->json(['message' => 'Box Not Found'], 404);
         }
-    
+
         $branchOfficeId = $box->branchOffice_id;
-    
+
         // Construir la consulta base
         $query = Moviment::with(['paymentConcept', 'person', 'user.worker.person'])
-            ->where('paymentConcept_id', 1) // Filtrar solo aperturas
+            ->where('paymentConcept_id', 1)  // Filtrar solo aperturas
             ->orderBy('created_at', 'desc'); // Orden inverso (más recientes primero)
-    
+
         // Filtrar por fechas y caja
         if ($request->filled('start_date')) {
             $query->whereDate('created_at', '>=', $request->input('start_date'));
@@ -1089,25 +1090,25 @@ class MovimentController extends Controller
         if ($branchOfficeId) {
             $query->where('branchOffice_id', $branchOfficeId);
         }
-    
+
         // Obtener movimientos paginados
-        $page = $request->input('page', 1);
-        $perPage = $request->input('per_page', 50);
+        $page      = $request->input('page', 1);
+        $perPage   = $request->input('per_page', 50);
         $aperturas = $query->paginate($perPage, ['*'], 'page', $page);
-    
+
         // Convertir los datos paginados a una colección y formatearlos
         $formattedMovements = collect($aperturas->items())->map(function ($apertura) use ($branchOfficeId) {
-            // Buscar el cierre asociado
+                                                              // Buscar el cierre asociado
             $cierre = Moviment::where('paymentConcept_id', 2) // Cierre
                 ->where('box_id', $apertura->box_id)
                 ->where('branchOffice_id', $branchOfficeId)
                 ->where('created_at', '>', $apertura->created_at) // Posterior a la apertura
                 ->orderBy('created_at', 'asc')
                 ->first();
-    
+
             return [
-                'apertura' => $apertura,
-                'cierre' => $cierre,
+                'apertura'    => $apertura,
+                'cierre'      => $cierre,
                 'resumenCaja' => $this->getMovementsSummary(
                     $apertura->id,
                     $cierre?->id,
@@ -1115,25 +1116,21 @@ class MovimentController extends Controller
                 ),
             ];
         });
-    
+
         // Respuesta con datos estructurados
         return response()->json([
-            'total' => $aperturas->total(),
-            'data' => $formattedMovements,
-            'current_page' => $aperturas->currentPage(),
-            'last_page' => $aperturas->lastPage(),
-            'per_page' => $aperturas->perPage(),
+            'total'          => $aperturas->total(),
+            'data'           => $formattedMovements,
+            'current_page'   => $aperturas->currentPage(),
+            'last_page'      => $aperturas->lastPage(),
+            'per_page'       => $aperturas->perPage(),
             'first_page_url' => $aperturas->url(1),
-            'from' => $aperturas->firstItem(),
-            'to' => $aperturas->lastItem(),
-            'next_page_url' => $aperturas->nextPageUrl(),
-            'prev_page_url' => $aperturas->previousPageUrl(),
+            'from'           => $aperturas->firstItem(),
+            'to'             => $aperturas->lastItem(),
+            'next_page_url'  => $aperturas->nextPageUrl(),
+            'prev_page_url'  => $aperturas->previousPageUrl(),
         ], 200);
     }
-    
-    
-    
-    
 
     /**
      * Obtener resumen de movimientos entre dos IDs de apertura y cierre.
@@ -1160,5 +1157,7 @@ class MovimentController extends Controller
 
         return $query->first();
     }
+
+
 
 }

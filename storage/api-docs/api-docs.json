@@ -6451,101 +6451,6 @@
                 ]
             }
         },
-        "/transportev2/public/api/payMasivo/{id}": {
-            "post": {
-                "tags": [
-                    "Installment"
-                ],
-                "summary": "Process bulk payments for a person",
-                "description": "Processes payments for a person identified by ID, updating pending installments and creating payment records.",
-                "operationId": "8b6b5596b4af401aeee7164fa5d97036",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the person for whom payments are being processed",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "paymentDate": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-09-01"
-                                    },
-                                    "totalPago": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 100
-                                    },
-                                    "comment": {
-                                        "type": "string",
-                                        "example": "Pago parcial"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Payments processed successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pagos procesados exitosamente."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation or processing error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "example": "El monto total debe ser mayor a cero."
-                                                },
-                                                "details": {
-                                                    "type": "string",
-                                                    "example": "El monto total del pago es menor que el monto total de las cuotas pendientes."
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/transportev2/public/api/modelFunctional": {
             "get": {
                 "tags": [
@@ -16142,6 +16047,162 @@
                 ]
             }
         },
+        "/transportev2/public/api/getSalesPendientesByPerson": {
+            "get": {
+                "tags": [
+                    "Sale"
+                ],
+                "summary": "Obtener cuotas pendientes de pago por cliente",
+                "description": "Obtiene las cuotas pendientes de pago de un cliente específico, filtrando por el nombre del cliente. Verifica el token de autorización antes de proceder.",
+                "operationId": "3ca6ffff9110e1a7810800e5aa5fb9ec",
+                "parameters": [
+                    {
+                        "name": "namesCadena",
+                        "in": "query",
+                        "description": "Nombre del cliente para filtrar las ventas pendientes",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "agrolmos"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sale created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Person"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación (cliente no encontrado)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cliente no encontrado o sin ventas pendientes"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/paymasivesalebyinstallmentdebt": {
+            "post": {
+                "tags": [
+                    "Sale"
+                ],
+                "summary": "Realiza un pago masivo por cuotas pendientes",
+                "description": "Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
+                "operationId": "6c325c2a0978e2d004ca9be9e99cf3af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "paymasive": {
+                                        "description": "Array de pagos masivos",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "installment_id": {
+                                                    "description": "ID de la cuota",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "amount": {
+                                                    "description": "Monto a pagar",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pago masivo realizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pago masivo procesado correctamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación - Monto excede la deuda total",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El monto ingresado (150.00) no puede ser mayor a la deuda total (100.00)."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado - El token de autenticación es inválido o ha expirado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No autorizado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transportev2/public/api/worker": {
             "get": {
                 "tags": [
@@ -17231,6 +17292,22 @@
                 ],
                 "summary": "Enviar código de verificación por correo",
                 "operationId": "ffd646a1a5949a4ba7dba273364054f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "moviment_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Código enviado correctamente",
@@ -17259,7 +17336,7 @@
         "/transportev2/public/api/desvinculatesale": {
             "post": {
                 "tags": [
-                    "Ventas"
+                    "Sale"
                 ],
                 "summary": "Desvincular guía de venta",
                 "description": "Desvincula una guía de una venta específica si cumple con las condiciones. Verifica el token y el estado de la venta antes de proceder.",
@@ -20024,10 +20101,6 @@
         {
             "name": "CollectionData",
             "description": "CollectionData"
-        },
-        {
-            "name": "Ventas",
-            "description": "Ventas"
         }
     ]
 }

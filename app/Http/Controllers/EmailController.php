@@ -25,6 +25,12 @@ class EmailController extends Controller
      *     summary="Enviar código de verificación por correo",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="moviment_id", type="integer", example=101)
+     *         )
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Código enviado correctamente",
@@ -37,12 +43,17 @@ class EmailController extends Controller
 
     public function validatemail(Request $request)
     {
+        $moviment_id = $request->moviment_id;
+        $moviment    = Moviment::find($moviment_id);
+        if (! $moviment) {
+            return response()->json(['message' => 'Venta No Encontrado'], 422);
+        }
 
         $username   = Auth::user()->username ?? "AdminPost";
         $correoSend = "guevaracajusolmiguel@gmail.com";
         $token      = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT); // Token de 8 dígitos
         Cache::put("username_verification_token:{$username}", $token, 300);   //5 minutos
-        Mail::to($correoSend)->send(new ConfirmationMail($token));
+        Mail::to($correoSend)->send(new ConfirmationMail($token, $moviment));
         return response()->json(['status' => 'success'], 200);
     }
 /**

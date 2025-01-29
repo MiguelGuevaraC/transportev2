@@ -424,6 +424,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
 
     require __DIR__ . '/Api/CarrierApi.php';        //CARRIER GUIDE
-
+    require __DIR__ . '/Api/SaleApi.php';        //SALES
 
 });

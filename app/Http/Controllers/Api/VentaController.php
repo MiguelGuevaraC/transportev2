@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SaleRequest\PayMasiveSaleRequest;
 use App\Models\Bitacora;
 use App\Models\Box;
 use App\Models\BranchOffice;
@@ -14,6 +14,7 @@ use App\Models\Moviment;
 use App\Models\PaymentConcept;
 use App\Models\Reception;
 use App\Models\ReceptionBySale;
+use App\Services\MovimentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,12 @@ use Illuminate\Support\Facades\Storage;
 
 class VentaController extends Controller
 {
+    protected $movimentService;
+
+    public function __construct(MovimentService $movimentService)
+    {
+        $this->movimentService = $movimentService;
+    }
     /**
      * @OA\Post(
      *     path="/transportev2/public/api/sale",
@@ -217,37 +224,37 @@ class VentaController extends Controller
 
         $validator = validator()->make($request->all(), [
 
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
+            'paymentDate'         => 'required|date',
+            'yape'                => 'nullable|numeric',
+            'deposit'             => 'nullable|numeric',
+            'cash'                => 'nullable|numeric',
+            'card'                => 'nullable|numeric',
+            'plin'                => 'nullable|numeric',
+            'comment'             => 'nullable|string',
 
-            'typeDocument' => 'nullable|string|in:F,T,B',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
-            'codeDetraction' => 'nullable|string',
+            'typeDocument'        => 'nullable|string|in:F,T,B',
+            'typePayment'         => 'nullable|string',
+            'typeSale'            => 'nullable|string',
+            'codeDetraction'      => 'nullable|string',
 
-            'programming_id' => 'nullable|exists:programmings,id',
+            'programming_id'      => 'nullable|exists:programmings,id',
 
-            'isBankPayment' => 'required|in:0,1',
+            'isBankPayment'       => 'required|in:0,1',
 
-            'bank_id' => 'nullable|exists:banks,id',
+            'bank_id'             => 'nullable|exists:banks,id',
 
             // 'paymentConcept_id' => 'required|exists:payment_concepts,id', //venta
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'reception_id' => 'nullable|exists:receptions,id',
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
+            'box_id'              => 'required|exists:boxes,id',
+            'branchOffice_id'     => 'required|exists:branch_offices,id',
+            'reception_id'        => 'nullable|exists:receptions,id',
+            'person_id'           => 'required|exists:people,id',
+            'installments'        => 'nullable|array',
 
-            'details' => 'nullable|array',
+            'details'             => 'nullable|array',
 
-            'data' => 'nullable|array',
+            'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
-            'data.*.description' => 'nullable|string',
+            'data.*.description'  => 'nullable|string',
 
         ]);
 
@@ -264,7 +271,7 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -276,7 +283,7 @@ class VentaController extends Controller
         // }
 
         $branch_office_id = $request->input('branchOffice_id');
-        $branchOffice = BranchOffice::find($request->input('branchOffice_id'));
+        $branchOffice     = BranchOffice::find($request->input('branchOffice_id'));
 
         // Mapeo de tipos de documento
         // Mapeo de tipos de documento
@@ -310,58 +317,58 @@ class VentaController extends Controller
         );
         $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
         $tipoCompleto = $tipo . $branchOfficeIdFormatted . '-' . $siguienteNum;
-        $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
-        $deposito = $request->input('deposit') ?? 0;
+        $efectivo     = $request->input('cash') ?? 0;
+        $yape         = $request->input('yape') ?? 0;
+        $plin         = $request->input('plin') ?? 0;
+        $tarjeta      = $request->input('card') ?? 0;
+        $deposito     = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
 
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
             $depositAmount = $request->input('deposit') ?? 0;
         }
         $paymentConcetp = PaymentConcept::find($request->input('paymentConcept_id'));
 
         $data = [
 
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total ?? 0,
-            'saldo' => $total ?? 0,
-            'yape' => $request->input('yape') ?? 0,
-            'deposit' => $depositAmount ?? 0,
-            'cash' => $request->input('cash') ?? 0,
-            'card' => $request->input('card') ?? 0,
-            'plin' => $request->input('plin') ?? 0,
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
-            'bank_id' => $bank_id,
-            'nroTransferencia' => $request->input('nroTransferencia') ?? '',
+            'sequentialNumber'    => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'         => $request->input('paymentDate'),
+            'total'               => $total ?? 0,
+            'saldo'               => $total ?? 0,
+            'yape'                => $request->input('yape') ?? 0,
+            'deposit'             => $depositAmount ?? 0,
+            'cash'                => $request->input('cash') ?? 0,
+            'card'                => $request->input('card') ?? 0,
+            'plin'                => $request->input('plin') ?? 0,
+            'comment'             => $request->input('comment') ?? '-',
+            'typeDocument'        => 'Ingreso',
+            'bank_id'             => $bank_id,
+            'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
 
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
-            'movType' => 'Venta',
+            'isBankPayment'       => $request->input('isBankPayment'),
+            'routeVoucher'        => $routeVoucher,
+            'numberVoucher'       => $numberVoucher,
+            'movType'             => 'Venta',
 
-            'typePayment' => $request->input('typePayment') ?? null,
-            'typeSale' => $request->input('typeSale') ?? '-',
-            'codeDetraction' => $request->input('codeDetraction'),
-            'status' => 'Pendiente',
-            'programming_id' => $request->input('programming_id'),
-            'paymentConcept_id' => 3, //venta
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'reception_id' => $request->input('reception_id'),
-            'person_id' => $request->input('person_id'),
-            'user_id' => auth()->id(),
-            'box_id' => $request->input('box_id'),
+            'typePayment'         => $request->input('typePayment') ?? null,
+            'typeSale'            => $request->input('typeSale') ?? '-',
+            'codeDetraction'      => $request->input('codeDetraction'),
+            'status'              => 'Pendiente',
+            'programming_id'      => $request->input('programming_id'),
+            'paymentConcept_id'   => 3, //venta
+            'branchOffice_id'     => $request->input('branchOffice_id'),
+            'reception_id'        => $request->input('reception_id'),
+            'person_id'           => $request->input('person_id'),
+            'user_id'             => auth()->id(),
+            'box_id'              => $request->input('box_id'),
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
@@ -385,7 +392,7 @@ class VentaController extends Controller
             $movProgramming = Reception::find($request->input('reception_id'));
 
             $movProgramming->debtAmount = $movProgramming->debtAmount - $total;
-            $movProgramming->status = 'Pago_Generado';
+            $movProgramming->status     = 'Pago_Generado';
             $movProgramming->save();
         }
 
@@ -393,15 +400,15 @@ class VentaController extends Controller
         if ($object) {
             $details = $request->input('details');
 
-            if (!empty($details)) {
+            if (! empty($details)) {
                 $descriptionArray = [];
 
                 foreach ($details as $detail) {
                     $objectData = [
-                        'product' => $detail['product'] ?? '-',
-                        'quantity' => $detail['quantity'] ?? 1,
-                        'weight' => $detail['weight'] ?? 0.00,
-                        'price' => $detail['price'] ?? 0.00,
+                        'product'     => $detail['product'] ?? '-',
+                        'quantity'    => $detail['quantity'] ?? 1,
+                        'weight'      => $detail['weight'] ?? 0.00,
+                        'price'       => $detail['price'] ?? 0.00,
                         'moviment_id' => $object->id,
                     ];
 
@@ -409,7 +416,7 @@ class VentaController extends Controller
                     $descriptionArray[] = $detail['product'] ?? '-';
                 }
 
-                $descriptionString = implode(', ', $descriptionArray);
+                $descriptionString   = implode(', ', $descriptionArray);
                 $object->productList = $descriptionString;
                 $object->save();
             }
@@ -417,7 +424,7 @@ class VentaController extends Controller
         $installments = $request->input('installments') ?? [];
         // if ($request->input('typePayment') == 'Contado') {
         if (empty($installments)) {
-            $tipo = 'M001';
+            $tipo      = 'M001';
             $resultado = DB::select(
                 'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
                  FROM moviments
@@ -429,43 +436,43 @@ class VentaController extends Controller
             $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
             $data = [
-                'sequentialNumber' => $object->sequentialNumber,
-                'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate' => $request->input('paymentDate'),
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
-                'typeDocument' => 'Ingreso',
-                'bank_id' => $bank_id,
+                'sequentialNumber'    => $object->sequentialNumber,
+                'correlative'         => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                'paymentDate'         => $request->input('paymentDate'),
+                'total'               => $total ?? 0,
+                'yape'                => $request->input('yape') ?? 0,
+                'deposit'             => $depositAmount ?? 0,
+                'cash'                => $request->input('cash') ?? 0,
+                'card'                => $request->input('card') ?? 0,
+                'plin'                => $request->input('plin') ?? 0,
+                'comment'             => $request->input('comment') ?? '-',
+                'typeDocument'        => 'Ingreso',
+                'bank_id'             => $bank_id,
 
-                'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
-                'numberVoucher' => $numberVoucher,
-                'movType' => 'Caja',
+                'isBankPayment'       => $request->input('isBankPayment'),
+                'routeVoucher'        => $routeVoucher,
+                'numberVoucher'       => $numberVoucher,
+                'movType'             => 'Caja',
 
-                'typePayment' => $request->input('typePayment') ?? null,
-                'typeSale' => $request->input('typeSale') ?? '-',
-                'codeDetraction' => $request->input('codeDetraction'),
-                'status' => 'Pagado',
-                'programming_id' => $request->input('programming_id'),
-                'paymentConcept_id' => 3, //venta
-                'branchOffice_id' => $request->input('branchOffice_id'),
-                'reception_id' => $request->input('reception_id'),
-                'person_id' => $request->input('person_id'),
-                'user_id' => auth()->id(),
-                'box_id' => $request->input('box_id'),
-                'mov_id' => $object->id,
+                'typePayment'         => $request->input('typePayment') ?? null,
+                'typeSale'            => $request->input('typeSale') ?? '-',
+                'codeDetraction'      => $request->input('codeDetraction'),
+                'status'              => 'Pagado',
+                'programming_id'      => $request->input('programming_id'),
+                'paymentConcept_id'   => 3, //venta
+                'branchOffice_id'     => $request->input('branchOffice_id'),
+                'reception_id'        => $request->input('reception_id'),
+                'person_id'           => $request->input('person_id'),
+                'user_id'             => auth()->id(),
+                'box_id'              => $request->input('box_id'),
+                'mov_id'              => $object->id,
                 'person_reception_id' => $request->input('person_reception_id'),
             ];
 
             $object2 = Moviment::create($data);
         } else {
 
-            if (!empty($installments)) {
+            if (! empty($installments)) {
                 // Variables para acumular el total
                 $totalAcumulado = 0;
 
@@ -474,10 +481,10 @@ class VentaController extends Controller
 
                     // Datos para crear una cuota
                     $data = [
-                        'date' => now()->addDays($dias),
-                        'days' => $dias,
-                        'total' => $installment['importe'],
-                        'totalDebt' => $installment['importe'],
+                        'date'        => now()->addDays($dias),
+                        'days'        => $dias,
+                        'total'       => $installment['importe'],
+                        'totalDebt'   => $installment['importe'],
                         'moviment_id' => $object->id,
                     ];
 
@@ -503,12 +510,12 @@ class VentaController extends Controller
 
         if ($image) {
             Log::info('Imagen recibida: ' . $image->getClientOriginalName());
-            $file = $image;
+            $file        = $image;
             $currentTime = now();
-            $filename = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/photosVouchers', $filename);
+            $filename    = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
+            $path        = $file->storeAs('public/photosVouchers', $filename);
             Log::info('Imagen almacenada en: ' . $path);
-            $rutaImagen = Storage::url($path);
+            $rutaImagen           = Storage::url($path);
             $object->routeVoucher = $rutaImagen;
             $object->save();
             Log::info('Imagen guardada en la base de datos con ruta: ' . $rutaImagen);
@@ -531,7 +538,7 @@ class VentaController extends Controller
             //     }
             // }
 
-            $jsonData = json_encode($request->data);
+            $jsonData            = json_encode($request->data);
             $object->productList = $jsonData;
             $object->save();
         }
@@ -557,13 +564,13 @@ class VentaController extends Controller
         $moviment = Moviment::find($idventa);
 
         $sequentialNumber = $moviment->sequentialNumber;
-        if (!in_array(substr($sequentialNumber, 0, 1), ['F', 'B'])) {
+        if (! in_array(substr($sequentialNumber, 0, 1), ['F', 'B'])) {
             return response()->json([
                 'error' => 'El número secuencial debe comenzar con "F" o "B".',
             ], 400);
         }
 
-        if (!$moviment) {
+        if (! $moviment) {
             return response()->json(['message' => 'VENTA NO ENCONTRADA'], 422);
         }
         if ($moviment->status_facturado != 'Pendiente') {
@@ -578,10 +585,10 @@ class VentaController extends Controller
         }
 
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
-            'idventa' => $idventa,
+            'funcion'    => $funcion,
+            'idventa'    => $idventa,
             'empresa_id' => $empresa_id,
         ];
         $url .= '?' . http_build_query($params);
@@ -624,14 +631,14 @@ class VentaController extends Controller
             'movVenta', 'installments'])->find($moviment->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'moviments', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Declarar Venta', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'moviments', // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Declarar Venta',      // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         return response()->json($moviment, 200);
     }
@@ -642,7 +649,7 @@ class VentaController extends Controller
 
         $moviment = Moviment::find($idventa);
 
-        if (!$moviment) {
+        if (! $moviment) {
             return response()->json(['message' => 'VENTA NO ENCONTRADA'], 422);
         }
         // if ($moviment->status_facturado != 'Pendiente') {
@@ -657,10 +664,10 @@ class VentaController extends Controller
         }
 
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
-            'idventa' => $idventa,
+            'funcion'    => $funcion,
+            'idventa'    => $idventa,
             'empresa_id' => $empresa_id,
         ];
         $url .= '?' . http_build_query($params);
@@ -726,10 +733,10 @@ class VentaController extends Controller
             $idventa = $venta->id;
             $contador++;
             // Construir la URL con los parámetros
-            $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+            $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
             $params = [
-                'funcion' => $funcion,
-                'idventa' => $idventa,
+                'funcion'    => $funcion,
+                'idventa'    => $idventa,
                 'empresa_id' => $empresa_id,
             ];
             $url .= '?' . http_build_query($params);
@@ -768,14 +775,14 @@ class VentaController extends Controller
             Log::info("Solicitud de VENTA finalizada para ID venta: $idventa. $funcion");
 
             Bitacora::create([
-                'user_id' => null, // ID del usuario que realiza la acción
-                'record_id' => $venta->id, // El ID del usuario afectado
-                'action' => 'CRON', // Acción realizada
-                'table_name' => 'moviments', // Tabla afectada
-                'data' => json_encode($venta),
+                'user_id'     => null,        // ID del usuario que realiza la acción
+                'record_id'   => $venta->id,  // El ID del usuario afectado
+                'action'      => 'CRON',      // Acción realizada
+                'table_name'  => 'moviments', // Tabla afectada
+                'data'        => json_encode($venta),
                 'description' => 'Declaración Automatica Ventas 23:45 pm', // Descripción de la acción
-                'ip_address' => null, // Dirección IP del usuario
-                'user_agent' => null, // Información sobre el navegador/dispositivo
+                'ip_address'  => null,                                      // Dirección IP del usuario
+                'user_agent'  => null,                                      // Información sobre el navegador/dispositivo
             ]);
         }
         Log::error("FINALIZADO ENVIO MASIVO $fecha, VENTAS ENVIADAS: $contador");
@@ -967,31 +974,31 @@ class VentaController extends Controller
     public function storeWithReceptions(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
-            'typeDocument' => 'nullable|string|in:F,T,B',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
-            'codeDetraction' => 'nullable|string',
-            'programming_id' => 'nullable|exists:programmings,id',
-            'isBankPayment' => 'required|in:0,1',
-            'bank_id' => 'nullable|exists:banks,id',
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'receptions' => 'nullable|array', // Array de recepciones
-            'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
-            'details' => 'nullable|array',
+            'paymentDate'         => 'required|date',
+            'yape'                => 'nullable|numeric',
+            'deposit'             => 'nullable|numeric',
+            'cash'                => 'nullable|numeric',
+            'card'                => 'nullable|numeric',
+            'plin'                => 'nullable|numeric',
+            'comment'             => 'nullable|string',
+            'typeDocument'        => 'nullable|string|in:F,T,B',
+            'typePayment'         => 'nullable|string',
+            'typeSale'            => 'nullable|string',
+            'codeDetraction'      => 'nullable|string',
+            'programming_id'      => 'nullable|exists:programmings,id',
+            'isBankPayment'       => 'required|in:0,1',
+            'bank_id'             => 'nullable|exists:banks,id',
+            'box_id'              => 'required|exists:boxes,id',
+            'branchOffice_id'     => 'required|exists:branch_offices,id',
+            'receptions'          => 'nullable|array',       // Array de recepciones
+            'receptions.*'        => 'exists:receptions,id', // Cada recepción debe existir
+            'person_id'           => 'required|exists:people,id',
+            'installments'        => 'nullable|array',
+            'details'             => 'nullable|array',
 
-            'data' => 'nullable|array',
+            'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
-            'data.*.description' => 'nullable|string',
+            'data.*.description'  => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -1004,21 +1011,21 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         // Lógica de documento secuencial
         $branch_office_id = $request->input('branchOffice_id');
-        $branchOffice = BranchOffice::find($request->input('branchOffice_id'));
-        $tipo = '';
-        $documentTypes = [
+        $branchOffice     = BranchOffice::find($request->input('branchOffice_id'));
+        $tipo             = '';
+        $documentTypes    = [
             'T' => 'T',
             'B' => 'B',
             'F' => 'F',
@@ -1049,54 +1056,54 @@ class VentaController extends Controller
 
         // Acumular montos
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
 
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
             $depositAmount = $request->input('deposit') ?? 0;
         }
 
         // Datos básicos del movimiento
         $data = [
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total,
-            'saldo' => $total,
-            'yape' => $yape,
-            'deposit' => $depositAmount,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
-            'nroTransferencia' => $request->input('nroTransferencia') ?? '',
-            'percentDetraction' => $request->input('percentDetraction'),
+            'sequentialNumber'    => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'         => $request->input('paymentDate'),
+            'total'               => $total,
+            'saldo'               => $total,
+            'yape'                => $yape,
+            'deposit'             => $depositAmount,
+            'cash'                => $efectivo,
+            'card'                => $tarjeta,
+            'plin'                => $plin,
+            'comment'             => $request->input('comment') ?? '-',
+            'typeDocument'        => 'Ingreso',
+            'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
+            'percentDetraction'   => $request->input('percentDetraction'),
 
-            'bank_id' => $bank_id,
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
-            'movType' => 'Venta',
-            'typePayment' => $request->input('typePayment'),
-            'typeSale' => $request->input('typeSale'),
-            'codeDetraction' => $request->input('codeDetraction'),
-            'status' => 'Pendiente',
-            'programming_id' => $request->input('programming_id'),
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'person_id' => $request->input('person_id'),
-            'user_id' => auth()->id(),
-            'box_id' => $request->input('box_id'),
+            'bank_id'             => $bank_id,
+            'isBankPayment'       => $request->input('isBankPayment'),
+            'routeVoucher'        => $routeVoucher,
+            'numberVoucher'       => $numberVoucher,
+            'movType'             => 'Venta',
+            'typePayment'         => $request->input('typePayment'),
+            'typeSale'            => $request->input('typeSale'),
+            'codeDetraction'      => $request->input('codeDetraction'),
+            'status'              => 'Pendiente',
+            'programming_id'      => $request->input('programming_id'),
+            'branchOffice_id'     => $request->input('branchOffice_id'),
+            'person_id'           => $request->input('person_id'),
+            'user_id'             => auth()->id(),
+            'box_id'              => $request->input('box_id'),
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
@@ -1112,8 +1119,8 @@ class VentaController extends Controller
 
                     if ($remainingAmount >= $reception->debtAmount) {
                         $remainingAmount -= $reception->debtAmount; // Restar la deuda completa de esta recepción
-                        $reception->debtAmount = 0; // Marcar esta recepción como completamente pagada
-                        $reception->status = 'Facturada';
+                        $reception->debtAmount = 0;                 // Marcar esta recepción como completamente pagada
+                        $reception->status     = 'Facturada';
                     } else {
                         // Si la cantidad restante es menor, solo restar lo que quede
                         $reception->debtAmount -= $remainingAmount;
@@ -1143,8 +1150,8 @@ class VentaController extends Controller
                 $reception->save();
                 $data = [
                     'reception_id' => $reception->id, // Reemplaza con el ID correspondiente
-                    'moviment_id' => $object->id, // Relacionamos con el ID del movimiento actual
-                    'status' => 'Activa',
+                    'moviment_id'  => $object->id,    // Relacionamos con el ID del movimiento actual
+                    'status'       => 'Activa',
                 ];
 
                 // Crear el registro en la base de datos
@@ -1155,7 +1162,7 @@ class VentaController extends Controller
 
         // if ($request->input('typePayment') == 'Contado') {
         if (empty($installments) && $installments == []) {
-            $tipo = 'M001';
+            $tipo      = 'M001';
             $resultado = DB::select(
                 'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
                  FROM moviments
@@ -1167,36 +1174,36 @@ class VentaController extends Controller
             $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
             $data = [
-                'sequentialNumber' => $object->sequentialNumber,
-                'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate' => $request->input('paymentDate'),
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
-                'typeDocument' => 'Ingreso',
-                'bank_id' => $bank_id,
+                'sequentialNumber'    => $object->sequentialNumber,
+                'correlative'         => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                'paymentDate'         => $request->input('paymentDate'),
+                'total'               => $total ?? 0,
+                'yape'                => $request->input('yape') ?? 0,
+                'deposit'             => $depositAmount ?? 0,
+                'cash'                => $request->input('cash') ?? 0,
+                'card'                => $request->input('card') ?? 0,
+                'plin'                => $request->input('plin') ?? 0,
+                'comment'             => $request->input('comment') ?? '-',
+                'typeDocument'        => 'Ingreso',
+                'bank_id'             => $bank_id,
 
-                'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
-                'numberVoucher' => $numberVoucher,
-                'movType' => 'Caja',
+                'isBankPayment'       => $request->input('isBankPayment'),
+                'routeVoucher'        => $routeVoucher,
+                'numberVoucher'       => $numberVoucher,
+                'movType'             => 'Caja',
 
-                'typePayment' => $request->input('typePayment') ?? null,
-                'typeSale' => $request->input('typeSale') ?? '-',
-                'codeDetraction' => $request->input('codeDetraction'),
-                'status' => 'Pagado',
-                'programming_id' => $request->input('programming_id'),
-                'paymentConcept_id' => 3, //venta
-                'branchOffice_id' => $request->input('branchOffice_id'),
-                'reception_id' => $request->input('reception_id'),
-                'person_id' => $request->input('person_id'),
-                'user_id' => auth()->id(),
-                'box_id' => $request->input('box_id'),
-                'mov_id' => $object->id,
+                'typePayment'         => $request->input('typePayment') ?? null,
+                'typeSale'            => $request->input('typeSale') ?? '-',
+                'codeDetraction'      => $request->input('codeDetraction'),
+                'status'              => 'Pagado',
+                'programming_id'      => $request->input('programming_id'),
+                'paymentConcept_id'   => 3, //venta
+                'branchOffice_id'     => $request->input('branchOffice_id'),
+                'reception_id'        => $request->input('reception_id'),
+                'person_id'           => $request->input('person_id'),
+                'user_id'             => auth()->id(),
+                'box_id'              => $request->input('box_id'),
+                'mov_id'              => $object->id,
                 'person_reception_id' => $request->input('person_reception_id'),
             ];
 
@@ -1206,17 +1213,17 @@ class VentaController extends Controller
             $object->save();
         } else {
 
-            if (!empty($installments)) {
+            if (! empty($installments)) {
 
                 foreach ($installments as $installment) {
 
                     $dias = $installment['date'];
 
                     $data = [
-                        'date' => now()->addDays($dias),
-                        'days' => $dias,
-                        'total' => $installment['importe'],
-                        'totalDebt' => $installment['importe'],
+                        'date'        => now()->addDays($dias),
+                        'days'        => $dias,
+                        'total'       => $installment['importe'],
+                        'totalDebt'   => $installment['importe'],
                         'moviment_id' => $object->id,
                     ];
                     Installment::create($data);
@@ -1229,7 +1236,7 @@ class VentaController extends Controller
                 if ($reception) {
 
                     $reception->debtAmount = 0;
-                    $reception->status = 'Facturada';
+                    $reception->status     = 'Facturada';
 
                     $reception->save();
                 }
@@ -1239,9 +1246,9 @@ class VentaController extends Controller
         }
         $additionalText = '';
         if ($request->input('isValue_ref') == 1 or $request->input('isValue_ref') == true) {
-            $valueRef = $request->input('value_ref', 0); // Si es null, toma 0.
+            $valueRef          = $request->input('value_ref', 0);              // Si es null, toma 0.
             $formattedValueRef = number_format((float) $valueRef, 2, '.', ''); // Asegura 2 decimales.
-            $additionalText = 'Valor Ref: ' . $formattedValueRef;
+            $additionalText    = 'Valor Ref: ' . $formattedValueRef;
         }
 
         if ($request->data != [] && $request->data) {
@@ -1251,23 +1258,23 @@ class VentaController extends Controller
                 $reception = Reception::find($item['reception_id']);
 
                 $data = [
-                    'description' => $item['description'] . ' - ' . $additionalText,
+                    'description'      => $item['description'] . ' - ' . $additionalText,
 
-                    'placa' => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
-                    'guia' => $reception?->firstCarrierGuide?->numero ?? '-',
-                    'os' => (array_key_exists('os', $item) && !is_null($item['os'])) ? $item['os'] : '-',
-                    'cantidad' => 1,
-                    'tract_id' => $reception?->firstCarrierGuide?->tract->id ?? null,
+                    'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
+                    'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
+                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                    'cantidad'         => 1,
+                    'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
                     'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
-                    'precioVenta' => $reception?->paymentAmount ?? 0,
-                    'moviment_id' => $object->id,
-                    'reception_id' => $reception->id,
+                    'precioVenta'      => $reception?->paymentAmount ?? 0,
+                    'moviment_id'      => $object->id,
+                    'reception_id'     => $reception->id,
                 ];
                 DetalleMoviment::create($data);
 
             }
 
-            $jsonData = json_encode($request->data);
+            $jsonData            = json_encode($request->data);
             $object->productList = $jsonData;
             $object->save();
         }
@@ -1275,9 +1282,9 @@ class VentaController extends Controller
         if ($request->input('isValue_ref') == 1 or $request->input('isValue_ref') == true) {
 
             $object->monto_detraction = $request->input('monto_detraction');
-            $object->monto_neto = $request->input('monto_neto');
-            $object->value_ref = $request->input('value_ref');
-            $object->isValue_ref = $request->input('isValue_ref');
+            $object->monto_neto       = $request->input('monto_neto');
+            $object->value_ref        = $request->input('value_ref');
+            $object->isValue_ref      = $request->input('isValue_ref');
             if ($object->total != 0) {
                 $object->percent_ref = $object->monto_detraction / $object->total * 100;
             } else {
@@ -1304,14 +1311,14 @@ class VentaController extends Controller
                 break;
         }
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'moviments', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'moviments', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Guardar Venta con Recepciones', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),                  // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),           // Información sobre el navegador/dispositivo
         ]);
 
         $totalDebtSum = Moviment::where('box_id', $request->input('box_id'))
@@ -1326,31 +1333,31 @@ class VentaController extends Controller
     public function storeManual(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
-            'typeDocument' => 'nullable|string|in:F,T,B',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
-            'codeDetraction' => 'nullable|string',
-            'programming_id' => 'nullable|exists:programmings,id',
-            'isBankPayment' => 'required|in:0,1',
-            'bank_id' => 'nullable|exists:banks,id',
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'receptions' => 'nullable|array', // Array de recepciones
-            // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
+            'paymentDate'            => 'required|date',
+            'yape'                   => 'nullable|numeric',
+            'deposit'                => 'nullable|numeric',
+            'cash'                   => 'nullable|numeric',
+            'card'                   => 'nullable|numeric',
+            'plin'                   => 'nullable|numeric',
+            'comment'                => 'nullable|string',
+            'typeDocument'           => 'nullable|string|in:F,T,B',
+            'typePayment'            => 'nullable|string',
+            'typeSale'               => 'nullable|string',
+            'codeDetraction'         => 'nullable|string',
+            'programming_id'         => 'nullable|exists:programmings,id',
+            'isBankPayment'          => 'required|in:0,1',
+            'bank_id'                => 'nullable|exists:banks,id',
+            'box_id'                 => 'required|exists:boxes,id',
+            'branchOffice_id'        => 'required|exists:branch_offices,id',
+            'receptions'             => 'nullable|array', // Array de recepciones
+                                                          // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+            'person_id'              => 'required|exists:people,id',
+            'installments'           => 'nullable|array',
             // 'details' => 'nullable|array',
 
-            'details' => 'nullable|array',
+            'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
-            'details.*.description' => 'nullable|string',
+            'details.*.description'  => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -1366,17 +1373,17 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
-        $tipo = '';
+        $tipo          = '';
         $documentTypes = [
             'T' => 'T',
             'B' => 'B',
@@ -1407,65 +1414,65 @@ class VentaController extends Controller
 
         // Acumular montos
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
 
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
             $depositAmount = $request->input('deposit') ?? 0;
         }
 
         // Datos básicos del movimiento
         $data = [
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total,
-            'saldo' => $total,
-            'yape' => $yape,
-            'deposit' => $depositAmount,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
-            'nroTransferencia' => $request->input('nroTransferencia') ?? '',
+            'sequentialNumber'    => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'         => $request->input('paymentDate'),
+            'total'               => $total,
+            'saldo'               => $total,
+            'yape'                => $yape,
+            'deposit'             => $depositAmount,
+            'cash'                => $efectivo,
+            'card'                => $tarjeta,
+            'plin'                => $plin,
+            'comment'             => $request->input('comment') ?? '-',
+            'typeDocument'        => 'Ingreso',
+            'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
 
-            'bank_id' => $bank_id,
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
-            'movType' => 'Venta',
-            'typePayment' => $request->input('typePayment'),
-            'typeSale' => $request->input('typeSale'),
-            'codeDetraction' => $request->input('codeDetraction'),
-            'percentDetraction' => $request->input('percentDetraction'),
+            'bank_id'             => $bank_id,
+            'isBankPayment'       => $request->input('isBankPayment'),
+            'routeVoucher'        => $routeVoucher,
+            'numberVoucher'       => $numberVoucher,
+            'movType'             => 'Venta',
+            'typePayment'         => $request->input('typePayment'),
+            'typeSale'            => $request->input('typeSale'),
+            'codeDetraction'      => $request->input('codeDetraction'),
+            'percentDetraction'   => $request->input('percentDetraction'),
 
-            'status' => 'Pendiente',
-            'programming_id' => $request->input('programming_id'),
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'person_id' => $request->input('person_id'),
-            'user_id' => auth()->id(),
-            'box_id' => $request->input('box_id'),
+            'status'              => 'Pendiente',
+            'programming_id'      => $request->input('programming_id'),
+            'branchOffice_id'     => $request->input('branchOffice_id'),
+            'person_id'           => $request->input('person_id'),
+            'user_id'             => auth()->id(),
+            'box_id'              => $request->input('box_id'),
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
         // $receptions = $request->input('receptions','personreception', []);
 
-        $object = Moviment::create($data);
+        $object       = Moviment::create($data);
         $installments = $request->input('installments') ?? [];
 
         if (empty($installments) && $installments == []) {
-            $tipo = 'M001';
+            $tipo      = 'M001';
             $resultado = DB::select(
                 'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
                  FROM moviments
@@ -1477,36 +1484,36 @@ class VentaController extends Controller
             $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
             $data = [
-                'sequentialNumber' => $object->sequentialNumber,
-                'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate' => $request->input('paymentDate'),
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
-                'typeDocument' => 'Ingreso',
-                'bank_id' => $bank_id,
+                'sequentialNumber'    => $object->sequentialNumber,
+                'correlative'         => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                'paymentDate'         => $request->input('paymentDate'),
+                'total'               => $total ?? 0,
+                'yape'                => $request->input('yape') ?? 0,
+                'deposit'             => $depositAmount ?? 0,
+                'cash'                => $request->input('cash') ?? 0,
+                'card'                => $request->input('card') ?? 0,
+                'plin'                => $request->input('plin') ?? 0,
+                'comment'             => $request->input('comment') ?? '-',
+                'typeDocument'        => 'Ingreso',
+                'bank_id'             => $bank_id,
 
-                'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
-                'numberVoucher' => $numberVoucher,
-                'movType' => 'Caja',
+                'isBankPayment'       => $request->input('isBankPayment'),
+                'routeVoucher'        => $routeVoucher,
+                'numberVoucher'       => $numberVoucher,
+                'movType'             => 'Caja',
 
-                'typePayment' => $request->input('typePayment') ?? null,
-                'typeSale' => $request->input('typeSale') ?? '-',
-                'codeDetraction' => $request->input('codeDetraction'),
-                'status' => 'Pagado',
-                'programming_id' => $request->input('programming_id'),
-                'paymentConcept_id' => 3, //venta
-                'branchOffice_id' => $request->input('branchOffice_id'),
-                'reception_id' => $request->input('reception_id'),
-                'person_id' => $request->input('person_id'),
-                'user_id' => auth()->id(),
-                'box_id' => $request->input('box_id'),
-                'mov_id' => $object->id,
+                'typePayment'         => $request->input('typePayment') ?? null,
+                'typeSale'            => $request->input('typeSale') ?? '-',
+                'codeDetraction'      => $request->input('codeDetraction'),
+                'status'              => 'Pagado',
+                'programming_id'      => $request->input('programming_id'),
+                'paymentConcept_id'   => 3, //venta
+                'branchOffice_id'     => $request->input('branchOffice_id'),
+                'reception_id'        => $request->input('reception_id'),
+                'person_id'           => $request->input('person_id'),
+                'user_id'             => auth()->id(),
+                'box_id'              => $request->input('box_id'),
+                'mov_id'              => $object->id,
                 'person_reception_id' => $request->input('person_reception_id'),
             ];
 
@@ -1516,17 +1523,17 @@ class VentaController extends Controller
             $object->save();
         } else {
 
-            if (!empty($installments)) {
+            if (! empty($installments)) {
 
                 foreach ($installments as $installment) {
 
                     $dias = $installment['date'];
 
                     $data = [
-                        'date' => now()->addDays($dias),
-                        'days' => $dias,
-                        'total' => $installment['importe'],
-                        'totalDebt' => $installment['importe'],
+                        'date'        => now()->addDays($dias),
+                        'days'        => $dias,
+                        'total'       => $installment['importe'],
+                        'totalDebt'   => $installment['importe'],
                         'moviment_id' => $object->id,
                     ];
                     Installment::create($data);
@@ -1537,9 +1544,9 @@ class VentaController extends Controller
         }
         $additionalText = '';
         if ($request->input('isValue_ref') == 1 or $request->input('isValue_ref') == true) {
-            $valueRef = $request->input('value_ref', 0); // Si es null, toma 0.
+            $valueRef          = $request->input('value_ref', 0);              // Si es null, toma 0.
             $formattedValueRef = number_format((float) $valueRef, 2, '.', ''); // Asegura 2 decimales.
-            $additionalText = 'Valor Ref: ' . $formattedValueRef;
+            $additionalText    = 'Valor Ref: ' . $formattedValueRef;
         }
 
         if ($request->details != [] && $request->details) {
@@ -1547,22 +1554,22 @@ class VentaController extends Controller
 
             foreach ($data as $item) {
                 $data = [
-                    'description' => $item['description'] . ' - ' . $additionalText,
-                    'placa' => $item['placa'] ?? '-',
-                    'guia' => $item['guia'] ?? '-',
-                    'os' => (array_key_exists('os', $item) && !is_null($item['os'])) ? $item['os'] : '-',
-                    'cantidad' => $item['cantidad'],
-                    'tract_id' => null,
+                    'description'      => $item['description'] . ' - ' . $additionalText,
+                    'placa'            => $item['placa'] ?? '-',
+                    'guia'             => $item['guia'] ?? '-',
+                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                    'cantidad'         => $item['cantidad'],
+                    'tract_id'         => null,
                     'carrier_guide_id' => null,
-                    'precioVenta' => $item['precio'],
-                    'moviment_id' => $object->id,
-                    'reception_id' => null,
+                    'precioVenta'      => $item['precio'],
+                    'moviment_id'      => $object->id,
+                    'reception_id'     => null,
                 ];
                 DetalleMoviment::create($data);
 
             }
 
-            $jsonData = json_encode($request->data);
+            $jsonData            = json_encode($request->data);
             $object->productList = $jsonData;
             $object->save();
         }
@@ -1575,9 +1582,9 @@ class VentaController extends Controller
         if ($request->input('isValue_ref') == "1" or $request->input('isValue_ref') == true) {
 
             $object->monto_detraction = $request->input('monto_detraction');
-            $object->monto_neto = $request->input('monto_neto');
-            $object->value_ref = $request->input('value_ref');
-            $object->isValue_ref = $request->input('isValue_ref');
+            $object->monto_neto       = $request->input('monto_neto');
+            $object->value_ref        = $request->input('value_ref');
+            $object->isValue_ref      = $request->input('isValue_ref');
             if ($object->total != 0) {
                 $object->percent_ref = $object->monto_detraction / $object->total * 100;
             } else {
@@ -1592,14 +1599,14 @@ class VentaController extends Controller
             'installments', 'installments.payInstallments'])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'moviments', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'moviments', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Guardar Venta Manual', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),         // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),  // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
@@ -1608,35 +1615,35 @@ class VentaController extends Controller
     public function updateManual(Request $request, $id)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
-            'typeDocument' => 'nullable|string|in:F,T,B',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
-            'codeDetraction' => 'nullable|string',
-            'programming_id' => 'nullable|exists:programmings,id',
-            'isBankPayment' => 'required|in:0,1',
-            'bank_id' => 'nullable|exists:banks,id',
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'receptions' => 'nullable|array', // Array de recepciones
-            // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
+            'paymentDate'            => 'required|date',
+            'yape'                   => 'nullable|numeric',
+            'deposit'                => 'nullable|numeric',
+            'cash'                   => 'nullable|numeric',
+            'card'                   => 'nullable|numeric',
+            'plin'                   => 'nullable|numeric',
+            'comment'                => 'nullable|string',
+            'typeDocument'           => 'nullable|string|in:F,T,B',
+            'typePayment'            => 'nullable|string',
+            'typeSale'               => 'nullable|string',
+            'codeDetraction'         => 'nullable|string',
+            'programming_id'         => 'nullable|exists:programmings,id',
+            'isBankPayment'          => 'required|in:0,1',
+            'bank_id'                => 'nullable|exists:banks,id',
+            'box_id'                 => 'required|exists:boxes,id',
+            'branchOffice_id'        => 'required|exists:branch_offices,id',
+            'receptions'             => 'nullable|array', // Array de recepciones
+                                                          // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+            'person_id'              => 'required|exists:people,id',
+            'installments'           => 'nullable|array',
             // 'details' => 'nullable|array',
 
-            'details' => 'nullable|array',
+            'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
-            'details.*.description' => 'nullable|string',
+            'details.*.description'  => 'nullable|string',
         ]);
 
         $object = Moviment::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 404);
         }
 
@@ -1653,17 +1660,17 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
-        $tipo = '';
+        $tipo          = '';
         $documentTypes = [
             'T' => 'T',
             'B' => 'B',
@@ -1685,77 +1692,77 @@ class VentaController extends Controller
 
         // Acumular montos
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
 
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
             $depositAmount = $request->input('deposit') ?? 0;
         }
 
         $data = [
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total,
-            'yape' => $yape,
-            'deposit' => $depositAmount,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
-            'nroTransferencia' => $request->input('nroTransferencia') ?? '',
-            'bank_id' => $bank_id,
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
-            'movType' => 'Venta',
-            'typePayment' => $request->input('typePayment'),
-            'typeSale' => $request->input('typeSale'),
-            'codeDetraction' => $request->input('codeDetraction'),
-            'percentDetraction' => $request->input('percentDetraction'),
-            'status' => 'Pendiente',
-            'programming_id' => $request->input('programming_id'),
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'person_id' => $request->input('person_id'),
+            'paymentDate'         => $request->input('paymentDate'),
+            'total'               => $total,
+            'yape'                => $yape,
+            'deposit'             => $depositAmount,
+            'cash'                => $efectivo,
+            'card'                => $tarjeta,
+            'plin'                => $plin,
+            'comment'             => $request->input('comment') ?? '-',
+            'typeDocument'        => 'Ingreso',
+            'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
+            'bank_id'             => $bank_id,
+            'isBankPayment'       => $request->input('isBankPayment'),
+            'routeVoucher'        => $routeVoucher,
+            'numberVoucher'       => $numberVoucher,
+            'movType'             => 'Venta',
+            'typePayment'         => $request->input('typePayment'),
+            'typeSale'            => $request->input('typeSale'),
+            'codeDetraction'      => $request->input('codeDetraction'),
+            'percentDetraction'   => $request->input('percentDetraction'),
+            'status'              => 'Pendiente',
+            'programming_id'      => $request->input('programming_id'),
+            'branchOffice_id'     => $request->input('branchOffice_id'),
+            'person_id'           => $request->input('person_id'),
             // 'user_id' => auth()->id(),
             // 'box_id' => $request->input('box_id'),
-            'user_edited_id' => Auth::user()->id,
+            'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
         // Actualiza el objeto
         $object->update($data);
 
-        $receptions = $request->input('receptions', 'personreception', []); // Obtiene las recepciones del request
-        $existingReceptions = $object->receptions()->pluck('id')->toArray(); // Obtiene las recepciones actuales del objeto
+        $receptions         = $request->input('receptions', 'personreception', []); // Obtiene las recepciones del request
+        $existingReceptions = $object->receptions()->pluck('id')->toArray();        // Obtiene las recepciones actuales del objeto
 
         // Eliminar recepciones que no están en la solicitud
         $receptionsToDelete = array_diff($existingReceptions, $receptions);
-        if (!empty($receptionsToDelete)) {
+        if (! empty($receptionsToDelete)) {
             // Actualizar las recepciones no deseadas para eliminar su relación con el objeto
             Reception::whereIn('id', $receptionsToDelete)->update(['moviment_id' => null]);
         }
 
         // Agregar nuevas recepciones que vienen en la solicitud
-        if (!empty($receptions)) {
+        if (! empty($receptions)) {
             foreach ($receptions as $reception_id) {
                 // Busca la recepción por su ID
                 $reception = Reception::find($reception_id);
 
                 // Si la recepción existe y no está ya asociada al objeto
-                if ($reception && !in_array($reception->id, $existingReceptions)) {
+                if ($reception && ! in_array($reception->id, $existingReceptions)) {
                     $reception->moviment_id = $object->id; // Establece la relación
-                    $reception->save(); // Guarda los cambios en la recepción
+                    $reception->save();                    // Guarda los cambios en la recepción
                 }
             }
         }
@@ -1767,8 +1774,8 @@ class VentaController extends Controller
             if ($reception) {
                 if ($remainingAmount >= $reception->debtAmount) {
                     $remainingAmount -= $reception->debtAmount; // Resta la deuda completa de esta recepción
-                    $reception->debtAmount = 0; // Marca esta recepción como completamente pagada
-                    $reception->status = 'Facturada';
+                    $reception->debtAmount = 0;                 // Marca esta recepción como completamente pagada
+                    $reception->status     = 'Facturada';
                 } else {
                     // Si la cantidad restante es menor, solo resta lo que quede
                     $reception->debtAmount -= $remainingAmount;
@@ -1792,32 +1799,32 @@ class VentaController extends Controller
 
             if ($object2) {
                 $data = [
-                    'paymentDate' => $request->input('paymentDate'),
-                    'total' => $total ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $depositAmount ?? 0,
-                    'cash' => $request->input('cash') ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Ingreso',
-                    'bank_id' => $bank_id,
-                    'isBankPayment' => $request->input('isBankPayment'),
-                    'routeVoucher' => $routeVoucher,
-                    'numberVoucher' => $numberVoucher,
-                    'movType' => 'Caja',
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'codeDetraction' => $request->input('codeDetraction'),
-                    'status' => 'Pagado',
-                    'programming_id' => $request->input('programming_id'),
+                    'paymentDate'       => $request->input('paymentDate'),
+                    'total'             => $total ?? 0,
+                    'yape'              => $request->input('yape') ?? 0,
+                    'deposit'           => $depositAmount ?? 0,
+                    'cash'              => $request->input('cash') ?? 0,
+                    'card'              => $request->input('card') ?? 0,
+                    'plin'              => $request->input('plin') ?? 0,
+                    'comment'           => $request->input('comment') ?? '-',
+                    'typeDocument'      => 'Ingreso',
+                    'bank_id'           => $bank_id,
+                    'isBankPayment'     => $request->input('isBankPayment'),
+                    'routeVoucher'      => $routeVoucher,
+                    'numberVoucher'     => $numberVoucher,
+                    'movType'           => 'Caja',
+                    'typePayment'       => $request->input('typePayment') ?? null,
+                    'typeSale'          => $request->input('typeSale') ?? '-',
+                    'codeDetraction'    => $request->input('codeDetraction'),
+                    'status'            => 'Pagado',
+                    'programming_id'    => $request->input('programming_id'),
                     'paymentConcept_id' => 3, // venta
-                    'branchOffice_id' => $request->input('branchOffice_id'),
-                    'reception_id' => $request->input('reception_id'),
-                    'person_id' => $request->input('person_id'),
+                    'branchOffice_id'   => $request->input('branchOffice_id'),
+                    'reception_id'      => $request->input('reception_id'),
+                    'person_id'         => $request->input('person_id'),
                     // 'user_id' => auth()->id(),
                     // 'box_id' => $request->input('box_id'),
-                    'deleted_at' => null,
+                    'deleted_at'        => null,
                 ];
                 if ($object2->trashed()) {
                     $object2->restore(); // Restore the soft-deleted record
@@ -1827,7 +1834,7 @@ class VentaController extends Controller
             }
 
             // Actualizar el estado del objeto original
-            $object->saldo = 0;
+            $object->saldo  = 0;
             $object->status = 'Pagado';
             $object->save();
 
@@ -1837,7 +1844,7 @@ class VentaController extends Controller
 
             if ($installments->isNotEmpty()) {
                 foreach ($installments as $installment) {
-                    // Asignar null a los installments relacionados
+                                                      // Asignar null a los installments relacionados
                     $installment->deleted_at = now(); // Marca como eliminado
                     $installment->save();
                 }
@@ -1845,10 +1852,10 @@ class VentaController extends Controller
 
         } else {
 
-            if (!empty($installments)) {
-                $monto = 0;
-                $installmentsActually = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
-                $processedInstallments = []; // Mantendrá los IDs procesados para verificar luego cuáles eliminar
+            if (! empty($installments)) {
+                $monto                 = 0;
+                $installmentsActually  = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
+                $processedInstallments = [];                                            // Mantendrá los IDs procesados para verificar luego cuáles eliminar
 
                 foreach ($installments as $installment) {
                     $dias = $installment['date'];
@@ -1856,9 +1863,9 @@ class VentaController extends Controller
                         // Actualizar la cuota existente si se encuentra el ID
                         $existingInstallment = Installment::find($installment['id']);
                         if ($existingInstallment) {
-                            $existingInstallment->days = $dias;
-                            $existingInstallment->date = now()->addDays($dias);
-                            $existingInstallment->total = $installment['importe'];
+                            $existingInstallment->days      = $dias;
+                            $existingInstallment->date      = now()->addDays($dias);
+                            $existingInstallment->total     = $installment['importe'];
                             $existingInstallment->totalDebt = $installment['importe'];
                             $existingInstallment->save();
 
@@ -1868,10 +1875,10 @@ class VentaController extends Controller
                     } else {
                         // Datos para crear una cuota
                         $data = [
-                            'date' => now()->addDays($dias),
-                            'days' => $dias,
-                            'total' => $installment['importe'],
-                            'totalDebt' => $installment['importe'],
+                            'date'        => now()->addDays($dias),
+                            'days'        => $dias,
+                            'total'       => $installment['importe'],
+                            'totalDebt'   => $installment['importe'],
                             'moviment_id' => $object->id,
                         ];
                         $monto += $installment['importe'];
@@ -1919,22 +1926,22 @@ class VentaController extends Controller
 
                 // Si no hay ID, crea un nuevo registro
                 DetalleMoviment::create([
-                    'description' => $item['description'],
-                    'placa' => $item['placa'] ?? '-',
-                    'guia' => $item['guia'] ?? '-',
-                    'os' => (array_key_exists('os', $item) && !is_null($item['os'])) ? $item['os'] : '-',
-                    'cantidad' => $item['cantidad'],
-                    'tract_id' => null,
+                    'description'      => $item['description'],
+                    'placa'            => $item['placa'] ?? '-',
+                    'guia'             => $item['guia'] ?? '-',
+                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                    'cantidad'         => $item['cantidad'],
+                    'tract_id'         => null,
                     'carrier_guide_id' => null,
-                    'precioVenta' => $item['precio'],
-                    'moviment_id' => $object->id,
-                    'reception_id' => null,
+                    'precioVenta'      => $item['precio'],
+                    'moviment_id'      => $object->id,
+                    'reception_id'     => null,
                 ]);
 
             }
 
             // Actualizar la lista de productos
-            $jsonData = json_encode($request->data);
+            $jsonData            = json_encode($request->data);
             $object->productList = $jsonData;
             $object->save();
         }
@@ -1946,9 +1953,9 @@ class VentaController extends Controller
         if ($request->input('isValue_ref') == "1" or $request->input('isValue_ref') == true) {
 
             $object->monto_detraction = $request->input('monto_detraction');
-            $object->monto_neto = $request->input('monto_neto');
-            $object->value_ref = $request->input('value_ref');
-            $object->isValue_ref = $request->input('isValue_ref');
+            $object->monto_neto       = $request->input('monto_neto');
+            $object->value_ref        = $request->input('value_ref');
+            $object->isValue_ref      = $request->input('isValue_ref');
             if ($object->total != 0) {
                 $object->percent_ref = $object->monto_detraction / $object->total * 100;
             } else {
@@ -1962,49 +1969,49 @@ class VentaController extends Controller
             'installments', 'installments.payInstallments'])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'moviments', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'PUT',       // Acción realizada
+            'table_name'  => 'moviments', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Actualizar Venta con Recepciones', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),                     // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),              // Información sobre el navegador/dispositivo
         ]);
         return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
     }
     public function updateReceptions(Request $request, $id)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
-            'typeDocument' => 'nullable|string|in:F,T,B',
-            'typePayment' => 'nullable|string',
-            'typeSale' => 'nullable|string',
-            'codeDetraction' => 'nullable|string',
-            'programming_id' => 'nullable|exists:programmings,id',
-            'isBankPayment' => 'required|in:0,1',
-            'bank_id' => 'nullable|exists:banks,id',
-            'box_id' => 'required|exists:boxes,id',
-            'branchOffice_id' => 'required|exists:branch_offices,id',
-            'receptions' => 'nullable|array', // Array de recepciones
-            // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
-            'person_id' => 'required|exists:people,id',
-            'installments' => 'nullable|array',
+            'paymentDate'         => 'required|date',
+            'yape'                => 'nullable|numeric',
+            'deposit'             => 'nullable|numeric',
+            'cash'                => 'nullable|numeric',
+            'card'                => 'nullable|numeric',
+            'plin'                => 'nullable|numeric',
+            'comment'             => 'nullable|string',
+            'typeDocument'        => 'nullable|string|in:F,T,B',
+            'typePayment'         => 'nullable|string',
+            'typeSale'            => 'nullable|string',
+            'codeDetraction'      => 'nullable|string',
+            'programming_id'      => 'nullable|exists:programmings,id',
+            'isBankPayment'       => 'required|in:0,1',
+            'bank_id'             => 'nullable|exists:banks,id',
+            'box_id'              => 'required|exists:boxes,id',
+            'branchOffice_id'     => 'required|exists:branch_offices,id',
+            'receptions'          => 'nullable|array', // Array de recepciones
+                                                       // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+            'person_id'           => 'required|exists:people,id',
+            'installments'        => 'nullable|array',
             // 'details' => 'nullable|array',
 
-            'data' => 'nullable|array',
+            'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
-            'data.*.description' => 'nullable|string',
+            'data.*.description'  => 'nullable|string',
         ]);
 
         $object = Moviment::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 404);
         }
 
@@ -2030,17 +2037,17 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
-        $tipo = '';
+        $tipo          = '';
         $documentTypes = [
             'T' => 'T',
             'B' => 'B',
@@ -2062,77 +2069,77 @@ class VentaController extends Controller
 
         // Acumular montos
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
 
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
             $depositAmount = $request->input('deposit') ?? 0;
         }
 
         $data = [
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total,
-            'yape' => $yape,
-            'deposit' => $depositAmount,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
-            'nroTransferencia' => $request->input('nroTransferencia') ?? '',
-            'bank_id' => $bank_id,
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
-            'movType' => 'Venta',
-            'typePayment' => $request->input('typePayment'),
-            'typeSale' => $request->input('typeSale'),
-            'codeDetraction' => $request->input('codeDetraction'),
-            'percentDetraction' => $request->input('percentDetraction'),
-            'status' => 'Pendiente',
-            'programming_id' => $request->input('programming_id'),
-            'branchOffice_id' => $request->input('branchOffice_id'),
-            'person_id' => $request->input('person_id'),
+            'paymentDate'         => $request->input('paymentDate'),
+            'total'               => $total,
+            'yape'                => $yape,
+            'deposit'             => $depositAmount,
+            'cash'                => $efectivo,
+            'card'                => $tarjeta,
+            'plin'                => $plin,
+            'comment'             => $request->input('comment') ?? '-',
+            'typeDocument'        => 'Ingreso',
+            'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
+            'bank_id'             => $bank_id,
+            'isBankPayment'       => $request->input('isBankPayment'),
+            'routeVoucher'        => $routeVoucher,
+            'numberVoucher'       => $numberVoucher,
+            'movType'             => 'Venta',
+            'typePayment'         => $request->input('typePayment'),
+            'typeSale'            => $request->input('typeSale'),
+            'codeDetraction'      => $request->input('codeDetraction'),
+            'percentDetraction'   => $request->input('percentDetraction'),
+            'status'              => 'Pendiente',
+            'programming_id'      => $request->input('programming_id'),
+            'branchOffice_id'     => $request->input('branchOffice_id'),
+            'person_id'           => $request->input('person_id'),
             // 'user_id' => auth()->id(),
             // 'box_id' => $request->input('box_id'),
-            'user_edited_id' => Auth::user()->id,
+            'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
         // Actualiza el objeto
         $object->update($data);
 
-        $receptions = $request->input('receptions', 'personreception', []); // Obtiene las recepciones del request
-        $existingReceptions = $object->receptions()->pluck('id')->toArray(); // Obtiene las recepciones actuales del objeto
+        $receptions         = $request->input('receptions', 'personreception', []); // Obtiene las recepciones del request
+        $existingReceptions = $object->receptions()->pluck('id')->toArray();        // Obtiene las recepciones actuales del objeto
 
         // Eliminar recepciones que no están en la solicitud
         $receptionsToDelete = array_diff($existingReceptions, $receptions);
-        if (!empty($receptionsToDelete)) {
+        if (! empty($receptionsToDelete)) {
             // Actualizar las recepciones no deseadas para eliminar su relación con el objeto
             Reception::whereIn('id', $receptionsToDelete)->update(['moviment_id' => null]);
         }
 
         // Agregar nuevas recepciones que vienen en la solicitud
-        if (!empty($receptions)) {
+        if (! empty($receptions)) {
             foreach ($receptions as $reception_id) {
                 // Busca la recepción por su ID
                 $reception = Reception::find($reception_id);
 
                 // Si la recepción existe y no está ya asociada al objeto
-                if ($reception && !in_array($reception->id, $existingReceptions)) {
+                if ($reception && ! in_array($reception->id, $existingReceptions)) {
                     $reception->moviment_id = $object->id; // Establece la relación
-                    $reception->save(); // Guarda los cambios en la recepción
+                    $reception->save();                    // Guarda los cambios en la recepción
                 }
             }
         }
@@ -2144,8 +2151,8 @@ class VentaController extends Controller
             if ($reception) {
                 if ($remainingAmount >= $reception->debtAmount) {
                     $remainingAmount -= $reception->debtAmount; // Resta la deuda completa de esta recepción
-                    $reception->debtAmount = 0; // Marca esta recepción como completamente pagada
-                    $reception->status = 'Facturada';
+                    $reception->debtAmount = 0;                 // Marca esta recepción como completamente pagada
+                    $reception->status     = 'Facturada';
                 } else {
                     // Si la cantidad restante es menor, solo resta lo que quede
                     $reception->debtAmount -= $remainingAmount;
@@ -2176,22 +2183,22 @@ class VentaController extends Controller
                 $reception = Reception::find($item['reception_id']);
 
                 $data = [
-                    'description' => $item['description'],
-                    'placa' => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
-                    'guia' => $reception?->firstCarrierGuide?->numero ?? '-',
-                    'os' => (array_key_exists('os', $item) && !is_null($item['os'])) ? $item['os'] : '-',
-                    'cantidad' => 1,
-                    'tract_id' => $reception?->firstCarrierGuide?->tract->id ?? null,
+                    'description'      => $item['description'],
+                    'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
+                    'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
+                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                    'cantidad'         => 1,
+                    'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
                     'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
-                    'precioVenta' => $reception?->paymentAmount ?? 0,
-                    'moviment_id' => $object->id,
-                    'reception_id' => $reception->id,
+                    'precioVenta'      => $reception?->paymentAmount ?? 0,
+                    'moviment_id'      => $object->id,
+                    'reception_id'     => $reception->id,
                 ];
                 DetalleMoviment::create($data);
             }
 
             // Actualizar la lista de productos
-            $jsonData = json_encode($request->data);
+            $jsonData            = json_encode($request->data);
             $object->productList = $jsonData;
             $object->save();
         }
@@ -2205,32 +2212,32 @@ class VentaController extends Controller
 
             if ($object2) {
                 $data = [
-                    'paymentDate' => $request->input('paymentDate'),
-                    'total' => $total ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $depositAmount ?? 0,
-                    'cash' => $request->input('cash') ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Ingreso',
-                    'bank_id' => $bank_id,
-                    'isBankPayment' => $request->input('isBankPayment'),
-                    'routeVoucher' => $routeVoucher,
-                    'numberVoucher' => $numberVoucher,
-                    'movType' => 'Caja',
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'codeDetraction' => $request->input('codeDetraction'),
-                    'status' => 'Pagado',
-                    'programming_id' => $request->input('programming_id'),
+                    'paymentDate'       => $request->input('paymentDate'),
+                    'total'             => $total ?? 0,
+                    'yape'              => $request->input('yape') ?? 0,
+                    'deposit'           => $depositAmount ?? 0,
+                    'cash'              => $request->input('cash') ?? 0,
+                    'card'              => $request->input('card') ?? 0,
+                    'plin'              => $request->input('plin') ?? 0,
+                    'comment'           => $request->input('comment') ?? '-',
+                    'typeDocument'      => 'Ingreso',
+                    'bank_id'           => $bank_id,
+                    'isBankPayment'     => $request->input('isBankPayment'),
+                    'routeVoucher'      => $routeVoucher,
+                    'numberVoucher'     => $numberVoucher,
+                    'movType'           => 'Caja',
+                    'typePayment'       => $request->input('typePayment') ?? null,
+                    'typeSale'          => $request->input('typeSale') ?? '-',
+                    'codeDetraction'    => $request->input('codeDetraction'),
+                    'status'            => 'Pagado',
+                    'programming_id'    => $request->input('programming_id'),
                     'paymentConcept_id' => 3, // venta
-                    'branchOffice_id' => $request->input('branchOffice_id'),
-                    'reception_id' => $request->input('reception_id'),
-                    'person_id' => $request->input('person_id'),
+                    'branchOffice_id'   => $request->input('branchOffice_id'),
+                    'reception_id'      => $request->input('reception_id'),
+                    'person_id'         => $request->input('person_id'),
                     // 'user_id' => auth()->id(),
                     // 'box_id' => $request->input('box_id'),
-                    'deleted_at' => null,
+                    'deleted_at'        => null,
                 ];
 
                 // Actualiza el movimiento existente
@@ -2244,7 +2251,7 @@ class VentaController extends Controller
 
                 if ($installments->isNotEmpty()) {
                     foreach ($installments as $installment) {
-                        // Asignar null a los installments relacionados
+                                                          // Asignar null a los installments relacionados
                         $installment->deleted_at = now(); // Marca como eliminado
                         $installment->save();
                     }
@@ -2256,11 +2263,11 @@ class VentaController extends Controller
 
         } else {
 
-            if (!empty($installments)) {
+            if (! empty($installments)) {
 
-                $monto = 0;
-                $installmentsActually = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
-                $processedInstallments = []; // Mantendrá los IDs procesados para verificar luego cuáles eliminar
+                $monto                 = 0;
+                $installmentsActually  = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
+                $processedInstallments = [];                                            // Mantendrá los IDs procesados para verificar luego cuáles eliminar
 
                 foreach ($installments as $installment) {
                     $dias = $installment['date'];
@@ -2268,9 +2275,9 @@ class VentaController extends Controller
                         // Actualizar la cuota existente si se encuentra el ID
                         $existingInstallment = Installment::find($installment['id']);
                         if ($existingInstallment) {
-                            $existingInstallment->days = $dias;
-                            $existingInstallment->date = now()->addDays($dias);
-                            $existingInstallment->total = $installment['importe'];
+                            $existingInstallment->days      = $dias;
+                            $existingInstallment->date      = now()->addDays($dias);
+                            $existingInstallment->total     = $installment['importe'];
                             $existingInstallment->totalDebt = $installment['importe'];
                             $existingInstallment->save();
 
@@ -2280,10 +2287,10 @@ class VentaController extends Controller
                     } else {
                         // Datos para crear una cuota
                         $data = [
-                            'date' => now()->addDays($dias),
-                            'days' => $dias,
-                            'total' => $installment['importe'],
-                            'totalDebt' => $installment['importe'],
+                            'date'        => now()->addDays($dias),
+                            'days'        => $dias,
+                            'total'       => $installment['importe'],
+                            'totalDebt'   => $installment['importe'],
                             'moviment_id' => $object->id,
                         ];
                         $monto += $installment['importe'];
@@ -2322,9 +2329,9 @@ class VentaController extends Controller
         if ($request->input('isValue_ref') == 1 or $request->input('isValue_ref') == true) {
 
             $object->monto_detraction = $request->input('monto_detraction');
-            $object->monto_neto = $request->input('monto_neto');
-            $object->value_ref = $request->input('value_ref');
-            $object->isValue_ref = $request->input('isValue_ref');
+            $object->monto_neto       = $request->input('monto_neto');
+            $object->value_ref        = $request->input('value_ref');
+            $object->isValue_ref      = $request->input('isValue_ref');
             if ($object->total != 0) {
                 $object->percent_ref = $object->monto_detraction / $object->total * 100;
             } else {
@@ -2338,14 +2345,14 @@ class VentaController extends Controller
             'installments', 'installments.payInstallments'])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'moviments', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'PUT',       // Acción realizada
+            'table_name'  => 'moviments', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Actualizar Venta Manual', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),            // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),     // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
@@ -2355,16 +2362,16 @@ class VentaController extends Controller
     {
         $validator = validator()->make($request->all(), [
 
-            'yape' => 'nullable|numeric',
+            'yape'    => 'nullable|numeric',
             'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
+            'cash'    => 'nullable|numeric',
+            'card'    => 'nullable|numeric',
+            'plin'    => 'nullable|numeric',
 
         ]);
 
         $object = Moviment::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 404);
         }
 
@@ -2373,10 +2380,10 @@ class VentaController extends Controller
         }
         $aperturaMovement = Moviment::with(['paymentConcept', 'person', 'user.worker.person'])
             ->where('paymentConcept_id', 1) // Asumiendo que '1' es el ID del concepto de apertura
-            ->where('id', '<=', $id) // Limitar a movimientos anteriores o iguales
+            ->where('id', '<=', $id)        // Limitar a movimientos anteriores o iguales
             ->orderBy('id', 'desc')
             ->first();
-        if (!$aperturaMovement) {
+        if (! $aperturaMovement) {
             return response()->json([
                 'error' => 'No se encontró un movimiento de apertura para el movimiento dado.',
             ], 404);
@@ -2386,41 +2393,41 @@ class VentaController extends Controller
         }
         // Acumular montos
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
-        $routeVoucher = null;
+        $total         = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $routeVoucher  = null;
         $numberVoucher = null;
-        $bank_id = null;
+        $bank_id       = null;
         $depositAmount = 0;
         $depositAmount = $request->input('deposit') ?? 0;
         if ($request->input('isBankPayment') == 1) {
-            $routeVoucher = 'ruta.jpg';
+            $routeVoucher  = 'ruta.jpg';
             $numberVoucher = $request->input('numberVoucher');
-            $bank_id = $request->input('bank_id');
+            $bank_id       = $request->input('bank_id');
 
         }
 
         $data = [
 
-            'total' => $total,
-            'yape' => $yape,
-            'deposit' => $depositAmount,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'comment' => $request->input('comment') ?? '-',
+            'total'            => $total,
+            'yape'             => $yape,
+            'deposit'          => $depositAmount,
+            'cash'             => $efectivo,
+            'card'             => $tarjeta,
+            'plin'             => $plin,
+            'comment'          => $request->input('comment') ?? '-',
 
             'nroTransferencia' => $request->input('nroTransferencia') ?? '',
-            'bank_id' => $bank_id,
-            'isBankPayment' => $request->input('isBankPayment'),
-            'routeVoucher' => $routeVoucher,
-            'numberVoucher' => $numberVoucher,
+            'bank_id'          => $bank_id,
+            'isBankPayment'    => $request->input('isBankPayment'),
+            'routeVoucher'     => $routeVoucher,
+            'numberVoucher'    => $numberVoucher,
 
-            'user_edited_id' => Auth::user()->id,
+            'user_edited_id'   => Auth::user()->id,
 
         ];
 
@@ -2434,17 +2441,17 @@ class VentaController extends Controller
         if ($movCaja) {
             $data = [
 
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
+                'total'         => $total ?? 0,
+                'yape'          => $request->input('yape') ?? 0,
+                'deposit'       => $depositAmount ?? 0,
+                'cash'          => $request->input('cash') ?? 0,
+                'card'          => $request->input('card') ?? 0,
+                'plin'          => $request->input('plin') ?? 0,
+                'comment'       => $request->input('comment') ?? '-',
 
-                'bank_id' => $bank_id,
+                'bank_id'       => $bank_id,
                 'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
+                'routeVoucher'  => $routeVoucher,
                 'numberVoucher' => $numberVoucher,
             ];
             // if ($movCaja->trashed()) {
@@ -2523,11 +2530,11 @@ class VentaController extends Controller
     public function index(Request $request)
     {
         $branch_office_id = $request->input('branch_office_id');
-        $typeDocument = $request->input('typeDocument') ?? '';
+        $typeDocument     = $request->input('typeDocument') ?? '';
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -2537,7 +2544,7 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -2546,59 +2553,58 @@ class VentaController extends Controller
 
         // Parámetros de búsqueda
         $branch_office_id = $request->input('branch_office_id');
-        $typeDocument = $request->input('typeDocument');
-        $status = $request->input('status');
-        $personId = $request->input('person_id');
-        $start = $request->input('start'); // Fecha de inicio
-        $end = $request->input('end'); // Fecha de fin
+        $typeDocument     = $request->input('typeDocument');
+        $status           = $request->input('status');
+        $personId         = $request->input('person_id');
+        $start            = $request->input('start');            // Fecha de inicio
+        $end              = $request->input('end');              // Fecha de fin
         $sequentialNumber = $request->input('sequentialNumber'); // Número secuencial (opcional)
 
-        // Obtener per_page y page de los parámetros de la solicitud
+                                                    // Obtener per_page y page de los parámetros de la solicitud
         $perPage = $request->input('per_page', 15); // Valor por defecto es 15
-        $page = $request->input('page', 1); // Valor por defecto es 1
+        $page    = $request->input('page', 1);      // Valor por defecto es 1
 
         // Obtener el total de la deuda sin paginación
         $totalDebtSum = Moviment::query()
-        ->when(!empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
-        ->when(!empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
-        ->when(!empty($box_id), fn($query) => $query->where('box_id', $box_id))
-        ->when(!empty($personId), fn($query) => $query->where('person_id', $personId))
-        ->when(!empty($status), fn($query) => $query->where('status', $status))
-        ->when(!empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
-        ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
-        ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
-        ->where('movType', 'Venta')
-        ->with('creditNote') // Cargar la relación creditNote para cálculos
-        ->get() // Obtener todos los resultados
-        ->map(function ($item) {
-            $ventaTotal = $item->total; // Total de la venta
-    
-            if ($item->creditNote || $item->status == "Anulada") {
-                $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
-    
-                // Calculamos el nuevo total, asegurándonos de que no sea negativo
-                $item->total = max($ventaTotal - $notaCreditoTotal, 0);
-    
-                // Calculamos el saldo, asegurándonos de que no sea negativo
-                $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
-    
-            }
-    
-            return $item->total; // Retornar solo el total ajustado
-        })
-        ->sum(); // Sumar los valores ajustados
-    
+            ->when(! empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
+            ->when(! empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
+            ->when(! empty($box_id), fn($query) => $query->where('box_id', $box_id))
+            ->when(! empty($personId), fn($query) => $query->where('person_id', $personId))
+            ->when(! empty($status), fn($query) => $query->where('status', $status))
+            ->when(! empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
+            ->when(! empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
+            ->when(! empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
+            ->where('movType', 'Venta')
+            ->with('creditNote') // Cargar la relación creditNote para cálculos
+            ->get()              // Obtener todos los resultados
+            ->map(function ($item) {
+                $ventaTotal = $item->total; // Total de la venta
+
+                if ($item->creditNote || $item->status == "Anulada") {
+                    $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
+
+                    // Calculamos el nuevo total, asegurándonos de que no sea negativo
+                    $item->total = max($ventaTotal - $notaCreditoTotal, 0);
+
+                    // Calculamos el saldo, asegurándonos de que no sea negativo
+                    $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
+
+                }
+
+                return $item->total; // Retornar solo el total ajustado
+            })
+            ->sum(); // Sumar los valores ajustados
 
         // Consulta con paginación
         $movCaja = Moviment::query()
-            ->when(!empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
-            ->when(!empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
-            ->when(!empty($box_id), fn($query) => $query->where('box_id', $box_id))
-            ->when(!empty($personId), fn($query) => $query->where('person_id', $personId))
-            ->when(!empty($status), fn($query) => $query->where('status', $status))
-            ->when(!empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
-            ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
-            ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
+            ->when(! empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
+            ->when(! empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
+            ->when(! empty($box_id), fn($query) => $query->where('box_id', $box_id))
+            ->when(! empty($personId), fn($query) => $query->where('person_id', $personId))
+            ->when(! empty($status), fn($query) => $query->where('status', $status))
+            ->when(! empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
+            ->when(! empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
+            ->when(! empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
             ->where('movType', 'Venta')
             ->with([
                 'receptions', 'personreception', 'branchOffice', 'paymentConcept', 'box', 'detailsMoviment', 'detalles',
@@ -2613,10 +2619,10 @@ class VentaController extends Controller
         }
 
         $movCaja->getCollection()->transform(function ($item) {
-            // $mov->updateSaldo(); // Ejecutar updateSaldo() en cada registro
+                                        // $mov->updateSaldo(); // Ejecutar updateSaldo() en cada registro
             $ventaTotal = $item->total; // Total de la venta
 
-            if ($item->creditNote || $item->status=="Anulada") {
+            if ($item->creditNote || $item->status == "Anulada") {
                 $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
 
                 // Calculamos el nuevo total, asegurándonos de que no sea negativo
@@ -2626,13 +2632,16 @@ class VentaController extends Controller
                 $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
 
                 if ($ventaTotal == $notaCreditoTotal) {
-                    $item->status = 'Anulada por Nota: '.$item->creditNote->number; // Total igual al monto de la nota de crédito
+                    $item->status = 'Anulada por Nota: ' . $item->creditNote->number; // Total igual al monto de la nota de crédito
                 } else {
                     if ($item->saldo == 0) {
                         $item->status = 'Pagado';
                     } else {
                         $item->status = 'Pendiente';
                     }
+                }
+                if ($item->creditNote->reason != "13") {
+                    $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
                 }
                 if ($item->status_facturado == "Anulada") {
                     $item->status = 'Anulada';
@@ -2643,20 +2652,20 @@ class VentaController extends Controller
         // $totalDebtSum = $movCaja->getCollection()->sum('total');
 
         return response()->json([
-            'total' => $movCaja->total(),
-            'data' => $movCaja->items(),
-            'current_page' => $movCaja->currentPage(),
-            'last_page' => $movCaja->lastPage(),
-            'per_page' => $perPage,
-            'page' => $page,
-            'pagination' => $perPage,
+            'total'          => $movCaja->total(),
+            'data'           => $movCaja->items(),
+            'current_page'   => $movCaja->currentPage(),
+            'last_page'      => $movCaja->lastPage(),
+            'per_page'       => $perPage,
+            'page'           => $page,
+            'pagination'     => $perPage,
             'first_page_url' => $movCaja->url(1),
-            'from' => $movCaja->firstItem(),
-            'next_page_url' => $movCaja->nextPageUrl(),
-            'path' => $movCaja->path(),
-            'prev_page_url' => $movCaja->previousPageUrl(),
-            'to' => $movCaja->lastItem(),
-            'totalSum' => $totalDebtSum, // Total sin paginación
+            'from'           => $movCaja->firstItem(),
+            'next_page_url'  => $movCaja->nextPageUrl(),
+            'path'           => $movCaja->path(),
+            'prev_page_url'  => $movCaja->previousPageUrl(),
+            'to'             => $movCaja->lastItem(),
+            'totalSum'       => $totalDebtSum, // Total sin paginación
         ], 200);
     }
 
@@ -2664,7 +2673,7 @@ class VentaController extends Controller
     {
         $object = Moviment::find($id);
 
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 422);
         }
 
@@ -2744,10 +2753,10 @@ class VentaController extends Controller
     public function saleWithoutCreditNote(Request $request)
     {
         $branch_office_id = $request->input('branch_office_id');
-        $typeDocument = $request->input('typeDocument');
+        $typeDocument     = $request->input('typeDocument');
         $sequentialNumber = $request->input('sequentialNumber');
-        $idNotaCredito = $request->input('idNotaCredito'); // Capturar el ID de la nota de crédito
-        $nota = '';
+        $idNotaCredito    = $request->input('idNotaCredito'); // Capturar el ID de la nota de crédito
+        $nota             = '';
         if ($idNotaCredito) {
             $nota = CreditNote::find($idNotaCredito);
         }
@@ -2755,7 +2764,7 @@ class VentaController extends Controller
         // Validar la existencia de la sucursal
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -2769,7 +2778,7 @@ class VentaController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -2783,10 +2792,10 @@ class VentaController extends Controller
         // Realizar la consulta con los filtros
         $movCaja = Moviment::with(['person'])
         // ->where('branchOffice_id', $branch_office_id)
-            ->when(!empty($typeDocument), function ($query) use ($typeDocument) {
+            ->when(! empty($typeDocument), function ($query) use ($typeDocument) {
                 return $query->where('typeDocument', $typeDocument);
             })
-            ->when(!empty($sequentialNumber), function ($query) use ($sequentialNumber) {
+            ->when(! empty($sequentialNumber), function ($query) use ($sequentialNumber) {
                 return $query->where('sequentialNumber', 'LIKE', "%{$sequentialNumber}%"); // Filtro por sequentialNumber
             })
         //  ->when(!empty($box_id), function ($query) use ($box_id) {
@@ -2803,7 +2812,7 @@ class VentaController extends Controller
             ->where('movType', 'Venta')
             ->where('status_facturado', 'Enviado')
             ->where(function ($query) use ($idNotaCredito, $nota) {
-                // Incluir movimientos que no tienen nota de crédito o que están asociados a la nota de crédito actual
+                                                  // Incluir movimientos que no tienen nota de crédito o que están asociados a la nota de crédito actual
                 $query->doesntHave('creditNote'); // Movimientos sin nota de crédito
 
                 if ($nota) {
@@ -2825,7 +2834,7 @@ class VentaController extends Controller
         $sequentialNumber = $request->input('sequentialNumber', '');
 
         $movCaja = Moviment::select('id', 'sequentialNumber')
-            ->when(!empty($sequentialNumber), function ($query) use ($sequentialNumber) {
+            ->when(! empty($sequentialNumber), function ($query) use ($sequentialNumber) {
                 return $query->where('sequentialNumber', 'LIKE', "%{$sequentialNumber}%"); // Filtro por sequentialNumber
             })
 
@@ -2895,7 +2904,7 @@ class VentaController extends Controller
     public function saleIdNumber(Request $request)
     {
         $branch_office_id = $request->input('branch_office_id') ?? '';
-        $typeDocument = $request->input('typeDocument') ?? '';
+        $typeDocument     = $request->input('typeDocument') ?? '';
 
         // if ($branch_office_id && is_numeric($branch_office_id)) {
         //     $branchOffice = BranchOffice::find($branch_office_id);
@@ -2984,19 +2993,19 @@ class VentaController extends Controller
 
     public function getArchivosDocument($idventa, $typeDocument)
     {
-        // Habilitar CORS para un origen específico
+                                                                                                // Habilitar CORS para un origen específico
         header("Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app"); // Permitir solo este origen
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Permitir métodos HTTP específicos
-        header("Access-Control-Allow-Headers: Content-Type, Authorization"); // Permitir tipos de encabezados específicos
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                             // Permitir métodos HTTP específicos
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");                    // Permitir tipos de encabezados específicos
 
         // Si es una solicitud OPTIONS (preflight), responde sin ejecutar más lógica
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
             http_response_code(200); // Código de éxito
-            exit; // Termina el script aquí
+            exit;                    // Termina el script aquí
         }
 
         $funcion = 'buscarNumeroSolicitud';
-        $url = 'https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php?funcion=' . $funcion . "&typeDocument=" . $typeDocument;
+        $url     = 'https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php?funcion=' . $funcion . "&typeDocument=" . $typeDocument;
 
         // Parámetros para la solicitud
         $params = http_build_query(['idventa' => $idventa]);
@@ -3050,7 +3059,7 @@ class VentaController extends Controller
 
     public function getNextCorrelative($prefix, $box_id)
     {
-        if (!in_array($prefix, ['B', 'F', 'T'])) {
+        if (! in_array($prefix, ['B', 'F', 'T'])) {
             return response()->json([
                 "message" => "El prefijo debe ser 'B', 'F' o 'T'.",
             ], 422);
@@ -3058,7 +3067,7 @@ class VentaController extends Controller
 
         // Validar que el box_id exista en la tabla 'boxes'
         $box = Box::find($box_id);
-        if (!$box) {
+        if (! $box) {
             return response()->json([
                 "message" => "La caja enviada no Existe",
             ], 422);
@@ -3083,17 +3092,17 @@ class VentaController extends Controller
         if ($lastMovement) {
 
             $lastSequentialNumber = $lastMovement->sequentialNumber;
-            $lastNumber = substr($lastSequentialNumber, strrpos($lastSequentialNumber, '-') + 1);
-            $serie = substr($lastSequentialNumber, 0, 4);
+            $lastNumber           = substr($lastSequentialNumber, strrpos($lastSequentialNumber, '-') + 1);
+            $serie                = substr($lastSequentialNumber, 0, 4);
             // Verificar si el número extraído es numérico
             if (is_numeric($lastNumber)) {
-                // Incrementar el número
+                                                                              // Incrementar el número
                 $nextNumber = str_pad($lastNumber + 1, 8, '0', STR_PAD_LEFT); // Mantener 8 dígitos
 
                 // Generar el siguiente número secuencial con el prefijo y el guion
                 $nextSequentialNumber = $serie . '-' . $nextNumber;
             } else {
-                // Si el valor no es numérico, manejar el error o devolver un valor por defecto
+                                                              // Si el valor no es numérico, manejar el error o devolver un valor por defecto
                 $nextSequentialNumber = $serie . '-00000001'; // Valor predeterminado si no es numérico
             }
         } else {
@@ -3112,7 +3121,7 @@ class VentaController extends Controller
         ]);
 
         $object = Reception::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 404);
         }
         // if ($object->nro_sale != null) {
@@ -3132,14 +3141,14 @@ class VentaController extends Controller
         $object->update($data);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'receptions', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),   // ID del usuario que realiza la acción
+            'record_id'   => $object->id,  // El ID del usuario afectado
+            'action'      => 'PUT',        // Acción realizada
+            'table_name'  => 'receptions', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Actualizar nro Venta', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),         // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),  // Información sobre el navegador/dispositivo
         ]);
         $object = Reception::find($object->id);
 
@@ -3156,13 +3165,13 @@ class VentaController extends Controller
         $funcion = "getstatusservidor";
 
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
+            'funcion'         => $funcion,
             'nombresolicitud' => $nombre,
-            'empresa_id' => 437,
-            'fecini' => '',
-            'fecfin' => '',
+            'empresa_id'      => 437,
+            'fecini'          => '',
+            'fecfin'          => '',
         ];
         $url .= '?' . http_build_query($params);
 
@@ -3175,7 +3184,7 @@ class VentaController extends Controller
 
         // Ejecutar la solicitud y obtener la respuesta
         $response = curl_exec($ch);
-        $data = [];
+        $data     = [];
 
         // Verificar si ocurrió algún error
         if (curl_errno($ch)) {
@@ -3183,20 +3192,20 @@ class VentaController extends Controller
 
             // Definir la respuesta de error
             $data = [
-                "mensaje" => 'Error',
+                "mensaje"           => 'Error',
                 "nombre-solicitado" => $nombre,
-                "response" => [],
-                "status" => null,
+                "response"          => [],
+                "status"            => null,
             ];
         } else {
             // Verificar si la respuesta está vacía o no es válida
             if (empty($response)) {
 
                 $data = [
-                    "mensaje" => 'Error',
+                    "mensaje"           => 'Error',
                     "nombre-solicitado" => $nombre,
-                    "response" => [],
-                    "status" => null,
+                    "response"          => [],
+                    "status"            => null,
                 ];
             } else {
                 $responseArray = json_decode($response, true); // Convertir JSON a array
@@ -3205,10 +3214,10 @@ class VentaController extends Controller
                 $status = isset($responseArray['data'][0]['descripcion']) ? $responseArray['data'][0]['descripcion'] : null;
 
                 $data = [
-                    "mensaje" => 'Correcto',
+                    "mensaje"           => 'Correcto',
                     "nombre-solicitado" => $nombre,
-                    "response" => $responseArray,
-                    "status" => $status,
+                    "response"          => $responseArray,
+                    "status"            => $status,
                 ];
             }
         }
@@ -3219,4 +3228,108 @@ class VentaController extends Controller
         return response()->json($data, 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/transportev2/public/api/getSalesPendientesByPerson",
+     *     summary="Obtener cuotas pendientes de pago por cliente",
+     *     description="Obtiene las cuotas pendientes de pago de un cliente específico, filtrando por el nombre del cliente. Verifica el token de autorización antes de proceder.",
+     *     tags={"Sale"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="namesCadena",
+     *         in="query",
+     *         required=true,
+     *         description="Nombre del cliente para filtrar las ventas pendientes",
+     *         @OA\Schema(
+     *             type="string",
+     *             example="agrolmos"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sale created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/Person")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Error de validación (cliente no encontrado)",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cliente no encontrado o sin ventas pendientes")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getSalesPendientesByPerson(Request $request)
+    {
+        $name     = $request->namesCadena ?? '';
+        $moviment = $this->movimentService->getSalesPendientesByPerson($name);
+        return $moviment;
+    }
+
+    /**
+ * @OA\Post(
+ *     path="/transportev2/public/api/paymasivesalebyinstallmentdebt",
+ *     summary="Realiza un pago masivo por cuotas pendientes",
+ *     description="Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
+ *     tags={"Sale"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="paymasive",
+ *                 type="array",
+ *                 description="Array de pagos masivos",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="installment_id", type="integer", example=1, description="ID de la cuota"),
+ *                     @OA\Property(property="amount", type="number", format="float", example=100.00, description="Monto a pagar")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Pago masivo realizado exitosamente",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="message", type="string", example="Pago masivo procesado correctamente.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error de validación - Monto excede la deuda total",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="El monto ingresado (150.00) no puede ser mayor a la deuda total (100.00).")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="No autorizado - El token de autenticación es inválido o ha expirado",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="No autorizado")
+ *         )
+ *     )
+ * )
+ */
+
+    public function paymasivesalebyinstallmentdebt(PayMasiveSaleRequest $request)
+    {
+
+        $validatedData = $request->validated();
+        Bitacora::create([
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => null,        // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'paymasive', // Tabla afectada
+            'data'        => json_encode($validatedData),
+            'description' => 'Pago Masivo',         // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+        ]);
+
+        $response = $this->movimentService->setPayMasiveInstallments($validatedData);
+        return $response;
+    }
 }

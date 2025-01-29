@@ -180,4 +180,7 @@ class Person extends Model
         return $this->hasMany(Moviment::class, 'person_id')->where('movType', 'Venta');
     }
 
+
+
+
 }
