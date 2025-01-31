@@ -990,8 +990,17 @@ class VentaController extends Controller
             'bank_id'             => 'nullable|exists:banks,id',
             'box_id'              => 'required|exists:boxes,id',
             'branchOffice_id'     => 'required|exists:branch_offices,id',
-            'receptions'          => 'nullable|array',       // Array de recepciones
-            'receptions.*'        => 'exists:receptions,id', // Cada recepción debe existir
+            'receptions.*'        => [
+                'exists:receptions,id',
+                function ($attribute, $value, $fail) {
+                    if (DB::table('receptions')->where('id', $value)
+                        ->whereNotNull('moviment_id')->exists()) {
+                        $reception = Reception::find($value);
+                        $fail("La recepción con ID {$reception->codeReception} ya tiene una venta anidada.");
+                    }
+                },
+            ],
+
             'person_id'           => 'required|exists:people,id',
             'installments'        => 'nullable|array',
             'details'             => 'nullable|array',
@@ -999,6 +1008,7 @@ class VentaController extends Controller
             'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
             'data.*.description'  => 'nullable|string',
+
         ]);
 
         if ($validator->fails()) {
@@ -1999,8 +2009,20 @@ class VentaController extends Controller
             'bank_id'             => 'nullable|exists:banks,id',
             'box_id'              => 'required|exists:boxes,id',
             'branchOffice_id'     => 'required|exists:branch_offices,id',
-            'receptions'          => 'nullable|array', // Array de recepciones
-                                                       // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+            'receptions.*'        => [
+                'exists:receptions,id',
+                function ($attribute, $value, $fail) use ($id) {
+                    if (DB::table('receptions')->where('id', $value)
+                        ->whereNotNull('moviment_id')
+                        ->where('moviment_id', '!=', $id) // Ignorar el ID pasado como variable
+                        ->exists()) {
+
+                        $reception = Reception::find($value);
+                        $fail("La recepción con código {$reception->codeReception} ya tiene una venta anidada.");
+                    }
+                },
+            ],
+
             'person_id'           => 'required|exists:people,id',
             'installments'        => 'nullable|array',
             // 'details' => 'nullable|array',
@@ -2994,7 +3016,7 @@ class VentaController extends Controller
     public function getArchivosDocument($idventa, $typeDocument)
     {
                                                                                                 // Habilitar CORS para un origen específico
-        header("Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app"); // Permitir solo este origen
+        header("Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app"); // Permitir solo este origen
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                             // Permitir métodos HTTP específicos
         header("Access-Control-Allow-Headers: Content-Type, Authorization");                    // Permitir tipos de encabezados específicos
 
@@ -3268,51 +3290,51 @@ class VentaController extends Controller
     }
 
     /**
- * @OA\Post(
- *     path="/transportev2/public/api/paymasivesalebyinstallmentdebt",
- *     summary="Realiza un pago masivo por cuotas pendientes",
- *     description="Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
- *     tags={"Sale"},
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             @OA\Property(
- *                 property="paymasive",
- *                 type="array",
- *                 description="Array de pagos masivos",
- *                 @OA\Items(
- *                     type="object",
- *                     @OA\Property(property="installment_id", type="integer", example=1, description="ID de la cuota"),
- *                     @OA\Property(property="amount", type="number", format="float", example=100.00, description="Monto a pagar")
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Pago masivo realizado exitosamente",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="message", type="string", example="Pago masivo procesado correctamente.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Error de validación - Monto excede la deuda total",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="El monto ingresado (150.00) no puede ser mayor a la deuda total (100.00).")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="No autorizado - El token de autenticación es inválido o ha expirado",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="No autorizado")
- *         )
- *     )
- * )
- */
+     * @OA\Post(
+     *     path="/transportev2/public/api/paymasivesalebyinstallmentdebt",
+     *     summary="Realiza un pago masivo por cuotas pendientes",
+     *     description="Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
+     *     tags={"Sale"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="paymasive",
+     *                 type="array",
+     *                 description="Array de pagos masivos",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="installment_id", type="integer", example=1, description="ID de la cuota"),
+     *                     @OA\Property(property="amount", type="number", format="float", example=100.00, description="Monto a pagar")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pago masivo realizado exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="message", type="string", example="Pago masivo procesado correctamente.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Error de validación - Monto excede la deuda total",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="El monto ingresado (150.00) no puede ser mayor a la deuda total (100.00).")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="No autorizado - El token de autenticación es inválido o ha expirado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No autorizado")
+     *         )
+     *     )
+     * )
+     */
 
     public function paymasivesalebyinstallmentdebt(PayMasiveSaleRequest $request)
     {

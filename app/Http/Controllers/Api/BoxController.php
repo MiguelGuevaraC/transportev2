@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class BoxController extends Controller
+
 {
     /**
      * Get all Boxes
