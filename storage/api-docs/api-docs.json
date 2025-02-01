@@ -17249,6 +17249,381 @@
                 ]
             }
         },
+        "/transportev2/public/api/cargaDocument": {
+            "get": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Obtener información de CargaDocuments con filtros y ordenamiento",
+                "operationId": "17578472768412ab43b902100c242d46",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por nombre de CargaDocument",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Filtrar por fecha de inicio",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Filtrar por fecha de fin",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "proyect_id",
+                        "in": "query",
+                        "description": "Filtrar por ID del proyecto",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "objective",
+                        "in": "query",
+                        "description": "Filtrar por objetivo de la actividad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "total_amount",
+                        "in": "query",
+                        "description": "Filtrar por monto total de la actividad",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "collected_amount",
+                        "in": "query",
+                        "description": "Filtrar por monto recolectado",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtrar por estado de la actividad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de CargaDocuments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CargaDocument"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Crear CargaDocument",
+                "operationId": "5e9b91a7a7eaabd84c3c79f68929e31c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CargaDocumentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documento de Carga creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CargaDocument"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/cargaDocument/{id}": {
+            "get": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Obtener detalles de un Documento de Carga por ID",
+                "operationId": "dcf5b7d21e8fc92a14dfb8fe22605997",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del CargaDocument",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Documento de Carga encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CargaDocument"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Documento de Carga no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Documento de Carga no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Actualizar un CargaDocument",
+                "operationId": "09552fa04d0c7bf72409e3bd50148897",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CargaDocumentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Documento de Carga actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CargaDocument"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Documento de Carga no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Documento de Carga no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/cargadocument/{id}": {
+            "delete": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Eliminar un Documento de Cargapor ID",
+                "operationId": "3749fe00456a3ec473d3c253c2436226",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Documento de Carga eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Documento de Carga eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Documento de Carga no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transportev2/public/api/dataCollection": {
             "get": {
                 "tags": [
@@ -17405,10 +17780,1051 @@
                     }
                 ]
             }
+        },
+        "/transportev2/public/api/product": {
+            "get": {
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Obtener información de Products con filtros y ordenamiento",
+                "operationId": "6da5a452b087c443f2e25276b004d0b8",
+                "parameters": [
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "Filtrar por descripción",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stock",
+                        "in": "query",
+                        "description": "Filtrar por stock",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "description": "Filtrar por peso",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filtrar por categoría",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "unity",
+                        "in": "query",
+                        "description": "Filtrar por unidad de medida",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "unity_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de unidad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "person_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de persona",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de Products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Crear Product",
+                "operationId": "7b1c71085ea45db265cdf77bfe7ae70c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/product/{id}": {
+            "get": {
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Obtener detalles de un Product por ID",
+                "operationId": "65ad9d40f7e945bbd9a90e72333d28b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del Product",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Producto no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Actualizar un Product",
+                "operationId": "1b506485bdbdc82adc87d12e0233e76a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Producto no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Eliminar un Productpor ID",
+                "operationId": "6fbaff8f4b686e77d337cec19989b037",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Product eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Producto no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/tarifario": {
+            "get": {
+                "tags": [
+                    "Tarifario"
+                ],
+                "summary": "Obtener información de Tarifarios con filtros y ordenamiento",
+                "operationId": "18e12ed5d6f092e49275e4e470e5f040",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "tarifa",
+                        "in": "query",
+                        "description": "Filtrar por tarifa",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "quantity",
+                        "in": "query",
+                        "description": "Filtrar por cantidad",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "in": "query",
+                        "description": "Filtrar por descripción",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "unity",
+                        "in": "query",
+                        "description": "Filtrar por unidad de medida",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "person_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de persona",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de Tarifarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tarifario"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Tarifario"
+                ],
+                "summary": "Crear Tarifario",
+                "operationId": "cef0137e7acb00113c77884b9c1cb435",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TarifarioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarifario creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tarifario"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/tarifario/{id}": {
+            "get": {
+                "tags": [
+                    "Tarifario"
+                ],
+                "summary": "Obtener detalles de un Tarifario por ID",
+                "operationId": "ce617efad87251135a53832c316a67d4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del Tarifario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarifario encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tarifario"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tarifario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Tarifario no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Tarifario"
+                ],
+                "summary": "Actualizar un Tarifario",
+                "operationId": "80e7e510a48aa45abc9b78fe0d0ffdf8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TarifarioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarifario actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tarifario"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tarifario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Tarifario no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tarifario"
+                ],
+                "summary": "Eliminar un Tarifariopor ID",
+                "operationId": "d88779799b3979347b6064225eb699dc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarifario eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarifario eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Tarifario no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "schemas": {
+            "CargaDocumentRequest": {
+                "title": "CargaDocumentRequest",
+                "description": "Request model for loading a document with product details",
+                "required": [
+                    "movement_date",
+                    "quantity",
+                    "unit_price",
+                    "total_cost",
+                    "weight",
+                    "movement_type",
+                    "product_id",
+                    "person_id"
+                ],
+                "properties": {
+                    "movement_date": {
+                        "description": "Date of the movement",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "quantity": {
+                        "description": "Quantity of the product in the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "unit_price": {
+                        "description": "Unit price of the product",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "total_cost": {
+                        "description": "Total cost of the product in the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "weight": {
+                        "description": "Weight of the product in the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "movement_type": {
+                        "description": "Type of movement (e.g., entry, exit, etc.)",
+                        "type": "string"
+                    },
+                    "comment": {
+                        "description": "Optional comment about the movement",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "product_id": {
+                        "description": "ID of the product being moved",
+                        "type": "integer"
+                    },
+                    "person_id": {
+                        "description": "ID of the person associated with the movement",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductRequest": {
+                "title": "ProductRequest",
+                "description": "Request model for Product information with filters and sorting",
+                "required": [
+                    "id",
+                    "quantity",
+                    "person_id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "ID of the Product",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "tarifa": {
+                        "description": "Tarifa description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "quantity": {
+                        "description": "Quantity of the item",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "description": "Description of the Product",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unity_id": {
+                        "description": "ID of the unity associated with the Product",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "person_id": {
+                        "description": "ID of the person associated with the Product",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "TarifarioRequest": {
+                "title": "TarifarioRequest",
+                "description": "Request model for Tarifario information with filters and sorting",
+                "required": [
+                    "id",
+                    "quantity",
+                    "person_id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "ID of the Tarifario",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "tarifa": {
+                        "description": "Tarifa description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "quantity": {
+                        "description": "Quantity of the item",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "description": "Description of the Tarifario",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unity_id": {
+                        "description": "ID of the unity associated with the Tarifario",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "person_id": {
+                        "description": "ID of the person associated with the Tarifario",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CargaDocument": {
+                "title": "CargaDocument",
+                "description": "Carga model",
+                "required": [
+                    "id",
+                    "movement_date",
+                    "quantity",
+                    "unit_price",
+                    "total_cost",
+                    "movement_type",
+                    "stock_balance",
+                    "product_id",
+                    "person_id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Carga ID",
+                        "type": "integer"
+                    },
+                    "movement_date": {
+                        "description": "Date of movement",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "quantity": {
+                        "description": "Quantity of product moved",
+                        "type": "integer"
+                    },
+                    "unit_price": {
+                        "description": "Unit price of the product",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "total_cost": {
+                        "description": "Total cost of the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "weight": {
+                        "description": "Weight of the product",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "movement_type": {
+                        "description": "Type of movement (e.g., IN, OUT)",
+                        "type": "string"
+                    },
+                    "stock_balance": {
+                        "description": "Stock balance after movement",
+                        "type": "integer"
+                    },
+                    "comment": {
+                        "description": "Additional comments",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "product_id": {
+                        "description": "ID of related product",
+                        "type": "integer"
+                    },
+                    "person_id": {
+                        "description": "ID of responsible person",
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "description": "Creation date",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Product": {
+                "title": "Product",
+                "description": "Product model",
+                "required": [
+                    "id",
+                    "description",
+                    "stock",
+                    "unity"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Product ID",
+                        "type": "integer"
+                    },
+                    "description": {
+                        "description": "Product description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "description": "Product stock",
+                        "type": "integer"
+                    },
+                    "weight": {
+                        "description": "Product weight",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "category": {
+                        "description": "Product category",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unity": {
+                        "description": "Unit of measurement",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation date",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Tarifario": {
+                "title": "Tarifario",
+                "description": "Model representing a Tariff",
+                "required": [
+                    "id",
+                    "tarifa",
+                    "unity_id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Tariff ID",
+                        "type": "integer"
+                    },
+                    "tarifa": {
+                        "description": "Rate or tariff value",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "description": {
+                        "description": "Description of the tariff",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unity_id": {
+                        "description": "ID of the associated unity",
+                        "type": "integer"
+                    },
+                    "unity": {
+                        "$ref": "#/components/schemas/Unity"
+                    },
+                    "person_id": {
+                        "description": "ID of the associated person",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "person": {
+                        "$ref": "#/components/schemas/Person"
+                    },
+                    "created_at": {
+                        "description": "Creation date of the tariff",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Unity": {
+                "title": "Unity",
+                "description": "Model representing a Unity",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unity ID",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Name of the unity",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation date of the unity",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Address": {
                 "title": "address",
                 "description": "address Model",
@@ -20099,8 +21515,20 @@
             "description": "Area"
         },
         {
+            "name": "CargaDocument",
+            "description": "CargaDocument"
+        },
+        {
             "name": "CollectionData",
             "description": "CollectionData"
+        },
+        {
+            "name": "Product",
+            "description": "Product"
+        },
+        {
+            "name": "Tarifario",
+            "description": "Tarifario"
         }
     ]
 }

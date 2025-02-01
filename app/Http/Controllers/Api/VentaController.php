@@ -2601,18 +2601,17 @@ class VentaController extends Controller
             ->get()              // Obtener todos los resultados
             ->map(function ($item) {
                 $ventaTotal = $item->total; // Total de la venta
-
-                if ($item->creditNote || $item->status == "Anulada") {
+                if ($item->creditNote) {
                     $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
-
-                    // Calculamos el nuevo total, asegurándonos de que no sea negativo
                     $item->total = max($ventaTotal - $notaCreditoTotal, 0);
-
-                    // Calculamos el saldo, asegurándonos de que no sea negativo
                     $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
 
+                }else{
+                    if($item->status == "Anulada"){
+                        $item->total = 0;
+                        $item->saldo = 0;
+                    }
                 }
-
                 return $item->total; // Retornar solo el total ajustado
             })
             ->sum(); // Sumar los valores ajustados
@@ -2662,8 +2661,10 @@ class VentaController extends Controller
                         $item->status = 'Pendiente';
                     }
                 }
-                if ($item->creditNote->reason != "13") {
-                    $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
+                if ($item->creditNote ) {
+                    if ($item->creditNote->reason !="13") {
+                        $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
+                    }
                 }
                 if ($item->status_facturado == "Anulada") {
                     $item->status = 'Anulada';
