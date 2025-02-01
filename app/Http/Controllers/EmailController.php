@@ -41,21 +41,23 @@ class EmailController extends Controller
      * )
      */
 
-    public function validatemail(Request $request)
-    {
-        $moviment_id = $request->moviment_id;
-        $moviment    = Moviment::find($moviment_id);
-        if (! $moviment) {
-            return response()->json(['message' => 'Venta No Encontrado'], 422);
-        }
-
-        $username   = Auth::user()->username ?? "AdminPost";
-        $correoSend = "guevaracajusolmiguel@gmail.com";
-        $token      = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT); // Token de 8 dígitos
-        Cache::put("username_verification_token:{$username}", $token, 300);   //5 minutos
-        Mail::to($correoSend)->send(new ConfirmationMail($token, $moviment));
-        return response()->json(['status' => 'success'], 200);
-    }
+     public function validatemail(Request $request)
+     {
+         $moviment_id = $request->moviment_id;
+         $moviment    = Moviment::find($moviment_id);
+         if (! $moviment) {
+             return response()->json(['message' => 'Venta No Encontrado'], 422);
+         }
+     
+         $username   = Auth::user()->username ?? "AdminPost";
+         $correoSend = "guevaracajusolmiguel@gmail.com";
+         $correoSend2 = "alvarorent2001@gmail.com";
+         $token      = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT); // Token de 8 dígitos
+         Cache::put("username_verification_token:{$username}", $token, 300);   //5 minutos
+         Mail::to([$correoSend, $correoSend2])->send(new ConfirmationMail($token, $moviment));
+         return response()->json(['status' => 'success'], 200);
+     }
+     
 /**
  * @OA\Post(
  *     path="/transportev2/public/api/desvinculatesale",
