@@ -25,29 +25,37 @@ class UpdateProductRequest extends UpdateRequest
     public function rules()
     {
         return [
-            'description' => 'required|string', // Descripción es obligatoria y debe ser un texto
-            'weight' => 'required|numeric|min:0', // El peso es obligatorio, debe ser numérico y no menor a 0
-    
-            'unity_id' => 'required|exists:unities,id,deleted_at,NULL', // La unidad es obligatoria y debe existir
-            'person_id' => 'required|exists:people,id,deleted_at,NULL', // La persona es obligatoria y debe existir
+            'description' => 'required|string',
+            'category'    => 'required|string',
+            'weight'      => 'required|numeric|min:0',
+            'stock'       => 'nullable|numeric|min:0',
+
+            'unity_id'    => 'required|exists:unities,id,deleted_at,NULL',
+            'person_id'   => 'required|exists:people,id,deleted_at,NULL',
         ];
     }
-    
+
     public function messages()
     {
         return [
-            'description.required'   => 'La descripción es obligatoria.',
-            'description.string'     => 'La descripción debe ser un texto válido.',
-            
-            'weight.required'        => 'El peso es obligatorio.',
-            'weight.numeric'         => 'El peso debe ser un número.',
-            'weight.min'             => 'El peso no puede ser menor a 0.',
-    
-            'unity_id.required'      => 'La unidad es obligatoria.',
-            'unity_id.exists'        => 'La unidad seleccionada no es válida o ha sido eliminada.',
-            
-            'person_id.required'     => 'El ID de la persona es obligatorio.',
-            'person_id.exists'       => 'La persona seleccionada no es válida o ha sido eliminada.',
+            'description.required' => 'La descripción es obligatoria.',
+            'description.string'   => 'La descripción debe ser un texto válido.',
+
+            'category.required'    => 'La categoría es obligatoria.',
+            'category.string'      => 'La categoría debe ser un texto válido.',
+
+            'weight.required'      => 'El peso es obligatorio.',
+            'weight.numeric'       => 'El peso debe ser un número.',
+            'weight.min'           => 'El peso no puede ser menor a 0.',
+
+            'stock.numeric'        => 'El stock debe ser un número.',
+            'stock.min'            => 'El stock no puede ser menor a 0.',
+
+            'unity_id.required'    => 'La unidad es obligatoria.',
+            'unity_id.exists'      => 'La unidad seleccionada no es válida o ha sido eliminada.',
+
+            'person_id.required'   => 'El responsable es obligatorio.',
+            'person_id.exists'     => 'El responsable seleccionado no es válido o ha sido eliminado.',
         ];
     }
 

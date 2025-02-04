@@ -17258,56 +17258,18 @@
                 "operationId": "17578472768412ab43b902100c242d46",
                 "parameters": [
                     {
-                        "name": "name",
+                        "name": "quantity",
                         "in": "query",
-                        "description": "Filtrar por nombre de CargaDocument",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "description": "Filtrar por fecha de inicio",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "description": "Filtrar por fecha de fin",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "proyect_id",
-                        "in": "query",
-                        "description": "Filtrar por ID del proyecto",
+                        "description": "Filtrar por cantidad de producto movido",
                         "required": false,
                         "schema": {
                             "type": "integer"
                         }
                     },
                     {
-                        "name": "objective",
+                        "name": "unit_price",
                         "in": "query",
-                        "description": "Filtrar por objetivo de la actividad",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "total_amount",
-                        "in": "query",
-                        "description": "Filtrar por monto total de la actividad",
+                        "description": "Filtrar por precio unitario del producto",
                         "required": false,
                         "schema": {
                             "type": "number",
@@ -17315,9 +17277,9 @@
                         }
                     },
                     {
-                        "name": "collected_amount",
+                        "name": "total_cost",
                         "in": "query",
-                        "description": "Filtrar por monto recolectado",
+                        "description": "Filtrar por costo total del movimiento",
                         "required": false,
                         "schema": {
                             "type": "number",
@@ -17325,12 +17287,58 @@
                         }
                     },
                     {
-                        "name": "status",
+                        "name": "weight",
                         "in": "query",
-                        "description": "Filtrar por estado de la actividad",
+                        "description": "Filtrar por peso del producto",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "movement_type",
+                        "in": "query",
+                        "description": "Filtrar por tipo de movimiento (IN, OUT)",
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stock_balance",
+                        "in": "query",
+                        "description": "Filtrar por saldo de stock después del movimiento",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "comment",
+                        "in": "query",
+                        "description": "Filtrar por comentario adicional",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "query",
+                        "description": "Filtrar por ID del producto relacionado",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "person_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de la persona responsable",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],
@@ -17340,7 +17348,10 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CargaDocument"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CargaDocument"
+                                    }
                                 }
                             }
                         }
@@ -18882,40 +18893,41 @@
                 "title": "ProductRequest",
                 "description": "Request model for Product information with filters and sorting",
                 "required": [
-                    "id",
-                    "quantity",
+                    "description",
+                    "category",
+                    "weight",
+                    "unity_id",
                     "person_id"
                 ],
                 "properties": {
-                    "id": {
-                        "description": "ID of the Product",
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "tarifa": {
-                        "description": "Tarifa description",
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "quantity": {
-                        "description": "Quantity of the item",
-                        "type": "string",
-                        "nullable": true
-                    },
                     "description": {
                         "description": "Description of the Product",
-                        "type": "string",
+                        "type": "string"
+                    },
+                    "category": {
+                        "description": "Category of the Product",
+                        "type": "string"
+                    },
+                    "weight": {
+                        "description": "Weight of the Product",
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0
+                    },
+                    "stock": {
+                        "description": "Stock quantity of the Product",
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0,
                         "nullable": true
                     },
                     "unity_id": {
                         "description": "ID of the unity associated with the Product",
-                        "type": "string",
-                        "nullable": true
+                        "type": "integer"
                     },
                     "person_id": {
                         "description": "ID of the person associated with the Product",
-                        "type": "string",
-                        "nullable": true
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -19045,12 +19057,18 @@
                         "description": "ID of related product",
                         "type": "integer"
                     },
+                    "product": {
+                        "$ref": "#/components/schemas/Product"
+                    },
                     "person_id": {
                         "description": "ID of responsible person",
                         "type": "integer"
                     },
+                    "person": {
+                        "$ref": "#/components/schemas/Person"
+                    },
                     "created_at": {
-                        "description": "Creation date",
+                        "description": "Creation date in YYYY-MM-DD HH:MM:SS format",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -19064,7 +19082,8 @@
                     "id",
                     "description",
                     "stock",
-                    "unity"
+                    "unity_id",
+                    "person_id"
                 ],
                 "properties": {
                     "id": {
@@ -19089,12 +19108,22 @@
                         "type": "string",
                         "nullable": true
                     },
+                    "unity_id": {
+                        "description": "Unit of measurement ID",
+                        "type": "integer"
+                    },
                     "unity": {
-                        "description": "Unit of measurement",
-                        "type": "string"
+                        "$ref": "#/components/schemas/Unity"
+                    },
+                    "person_id": {
+                        "description": "Person ID associated with the product",
+                        "type": "integer"
+                    },
+                    "person": {
+                        "$ref": "#/components/schemas/Person"
                     },
                     "created_at": {
-                        "description": "Creation date",
+                        "description": "Creation date in YYYY-MM-DD HH:MM:SS format",
                         "type": "string",
                         "format": "date-time"
                     }

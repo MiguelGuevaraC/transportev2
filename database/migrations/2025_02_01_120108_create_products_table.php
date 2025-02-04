@@ -19,8 +19,8 @@ return new class extends Migration
             $table->integer('stock')->default(0); // Stock del producto
             $table->decimal('weight', 8, 2)->nullable(); // Peso del producto (puede ser decimal)
             $table->string('category')->nullable(); // Categoría del producto
-            $table->string('unity')->nullable(); // Unidad de medida (ej. kg, unidades, litros)
             $table->foreignId('unity_id')->nullable()->unsigned()->constrained('unities');
+            $table->foreignId('person_id')->nullable()->unsigned()->constrained('people');
             $table->timestamps(); // created_at y updated_at
             $table->softDeletes();   
         });

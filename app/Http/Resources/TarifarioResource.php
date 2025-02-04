@@ -33,7 +33,7 @@ class TarifarioResource extends JsonResource
             'unity_id'    => $this->unity_id ?? null,
             'unity'    => $this->unity ?? null,
             'person_id'   => $this->person_id ?? null,
-            'person'   => $this->person ?? null,
+            'person'       => $this->person? $this->person : null,
             'created_at'  => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

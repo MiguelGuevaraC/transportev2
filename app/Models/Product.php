@@ -15,7 +15,6 @@ class Product extends Model
         'stock',
         'weight',
         'category',
-        'unity',
         'unity_id',
         'person_id',
         'created_at',

@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest\IndexProductRequest;
 use App\Http\Requests\ProductRequest\StoreProductRequest;
 use App\Http\Requests\ProductRequest\UpdateProductRequest;
-use App\Http\Resources\CargaResource;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\CarrierGuideService;
 use App\Services\ProductService;
@@ -47,7 +47,7 @@ class ProductController extends Controller
          $request,
          Product::filters,
          Product::sorts,
-         CargaResource::class
+         ProductResource::class
      );
  }
 /**
@@ -73,7 +73,7 @@ class ProductController extends Controller
          ], 404);
      }
 
-     return new CargaResource($tarifario);
+     return new ProductResource($tarifario);
  }
 
 /**
@@ -107,7 +107,7 @@ class ProductController extends Controller
  public function store(StoreProductRequest $request)
  {
      $tarifario = $this->productService->createProduct($request->validated());
-     return new CargaResource($tarifario);
+     return new ProductResource($tarifario);
  }
 
 /**
@@ -171,7 +171,7 @@ class ProductController extends Controller
      }
 
      $updatedcarga = $this->productService->updateProduct($tarifario, $validatedData);
-     return new CargaResource($updatedcarga);
+     return new ProductResource($updatedcarga);
  }
 
 /**

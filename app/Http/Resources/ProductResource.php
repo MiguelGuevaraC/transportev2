@@ -10,14 +10,18 @@ class ProductResource extends JsonResource
  *     schema="Product",
  *     title="Product",
  *     description="Product model",
- *     required={"id", "description", "stock", "unity"},
+ *     required={"id", "description", "stock", "unity_id", "person_id"},
+ *
  *     @OA\Property(property="id", type="integer", description="Product ID"),
  *     @OA\Property(property="description", type="string", description="Product description"),
  *     @OA\Property(property="stock", type="integer", description="Product stock"),
  *     @OA\Property(property="weight", type="number", format="float", description="Product weight"),
  *     @OA\Property(property="category", type="string", nullable=true, description="Product category"),
- *     @OA\Property(property="unity", type="string", description="Unit of measurement"),
- *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation date")
+ *     @OA\Property(property="unity_id", type="integer", description="Unit of measurement ID"),
+ *     @OA\Property(property="unity", ref="#/components/schemas/Unity"),
+ *     @OA\Property(property="person_id", type="integer", description="Person ID associated with the product"),
+ *     @OA\Property(property="person", ref="#/components/schemas/Person"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation date in YYYY-MM-DD HH:MM:SS format")
  * )
  */
 
@@ -29,7 +33,10 @@ class ProductResource extends JsonResource
             'stock'       => $this->stock ?? null,
             'weight'      => $this->weight ?? null,
             'category'    => $this->category ?? null,
-            'unity'       => $this->unity ?? null,
+            'unity_id'    => $this->unity_id ?? null,
+            'unity'       => $this->unity ? new UnityResource($this->unity) : null,
+            'person_id'   => $this->person_id ?? null,
+            'person'      => $this->person ? $this->person : null,
             'created_at'  => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
