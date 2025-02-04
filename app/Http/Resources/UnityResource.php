@@ -14,6 +14,7 @@ class UnityResource extends JsonResource
      *     required={"id", "name"},
      *     @OA\Property(property="id", type="integer", description="Unity ID"),
      *     @OA\Property(property="name", type="string", description="Name of the unity"),
+     *     @OA\Property(property="code", type="string", description="Code of the unity"),
      *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation date of the unity")
      * )
      */
@@ -23,6 +24,7 @@ class UnityResource extends JsonResource
         return [
             'id'         => $this->id ?? null,
             'name'       => $this->name ?? null,
+            'code'       => $this->code ?? null,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

@@ -22,35 +22,37 @@ class UpdateTarifarioRequest extends UpdateRequest
      *
      * @return array
      */
+
     public function rules()
     {
+        $id = $this->route('id'); // Obtén el ID de la ruta, que se asume que es el ID del usuario
+
         return [
-            'tarifa'       => 'nullable|string',
-            'quantity'     => 'nullable|string',
-            'description'  => 'nullable|string',
-            'unity'        => 'nullable|string',
-            'person_id'    => 'nullable|string',
-            'product_id'   => 'required|exists:products,id,deleted_at,NULL',
-            'unity_id'     => 'required|exists:unities,id,deleted_at,NULL',
+            'tarifa'      => 'nullable|string',
+            'description' => 'nullable|string',
+            'person_id'   => 'nullable|string',
+            'unity_id'    => [
+                'required',
+                'exists:unities,id,deleted_at,NULL', // Verifica que la unidad exista y no esté eliminada
+                Rule::unique('tarifarios')
+                    ->where('person_id', $this->person_id)
+                    ->where('unity_id', $this->unity_id)
+                    ->whereNull('deleted_at')     // Verifica que no haya tarifas activas para esa persona y unidad
+                    ->ignore($id), // Ignora el registro actual si es una actualización
+            ],
         ];
     }
-    
+
     public function messages()
     {
         return [
-            'tarifa.string'       => 'La tarifa debe ser un texto válido.',
-            'quantity.string'     => 'La cantidad debe ser un texto válido.',
-            'description.string'  => 'La descripción debe ser un texto válido.',
-            'unity.string'        => 'La unidad debe ser un texto válido.',
-            'person_id.string'    => 'El ID de la persona debe ser un texto válido.',
-            
-            'product_id.required' => 'El producto es obligatorio.',
-            'product_id.exists'   => 'El producto seleccionado no es válido o ha sido eliminado.',
-            
-            'unity_id.required'   => 'La unidad es obligatoria.',
-            'unity_id.exists'     => 'La unidad seleccionada no es válida o ha sido eliminada.',
+            'tarifa.string'      => 'La tarifa debe ser un texto válido.',
+            'description.string' => 'La descripción debe ser un texto válido.',
+            'person_id.string'   => 'El ID de la persona debe ser un texto válido.',
+            'unity_id.required'  => 'La unidad es obligatoria.',
+            'unity_id.exists'    => 'La unidad seleccionada no es válida o no está activa.',
+            'unity_id.unique'    => 'La persona ya tiene una tarifa asociada a esta unidad.',
         ];
     }
-    
 
 }

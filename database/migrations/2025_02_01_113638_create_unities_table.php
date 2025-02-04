@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('unities', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable(); // Descripción del producto
+            $table->string('code')->nullable(); // Descripción del producto
             $table->timestamps();
             $table->softDeletes();  
         });

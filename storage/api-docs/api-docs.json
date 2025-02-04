@@ -18491,6 +18491,330 @@
                     }
                 ]
             }
+        },
+        "/transportev2/public/api/unity": {
+            "get": {
+                "tags": [
+                    "Unity"
+                ],
+                "summary": "Obtener información de Unitys con filtros y ordenamiento",
+                "operationId": "c981bb7d6ee88f4ae33a9c21bf1ac2de",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Filtrar por codigo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de Unitys",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unity"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Unity"
+                ],
+                "summary": "Crear Unity",
+                "operationId": "316695d69251e3497d7ff2a5b98d6948",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnityRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Unity creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unity"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/unity/{id}": {
+            "get": {
+                "tags": [
+                    "Unity"
+                ],
+                "summary": "Obtener detalles de un Unity por ID",
+                "operationId": "044af217dbfb18da0684764d605a3853",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del Unity",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unity encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unity"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Unidad no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unidad no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Unity"
+                ],
+                "summary": "Actualizar un Unity",
+                "operationId": "993c3477a7d8c4305946c3814d773706",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnityRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Unity actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unity"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Unidad no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unidad no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Unity"
+                ],
+                "summary": "Eliminar un Unitypor ID",
+                "operationId": "0fdf02c9529ed5b50a51a1c1f5440bfc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unity eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unity eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unidad no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -18632,6 +18956,28 @@
                     },
                     "person_id": {
                         "description": "ID of the person associated with the Tarifario",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UnityRequest": {
+                "title": "UnityRequest",
+                "description": "Request model for Unity information with filters and sorting",
+                "required": [
+                    "id",
+                    "name",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nombre Unidad",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "code": {
+                        "description": "Codigo Unidad",
                         "type": "string",
                         "nullable": true
                     }
@@ -18815,6 +19161,10 @@
                     },
                     "name": {
                         "description": "Name of the unity",
+                        "type": "string"
+                    },
+                    "code": {
+                        "description": "Code of the unity",
                         "type": "string"
                     },
                     "created_at": {
@@ -21529,6 +21879,10 @@
         {
             "name": "Tarifario",
             "description": "Tarifario"
+        },
+        {
+            "name": "Unity",
+            "description": "Unity"
         }
     ]
 }

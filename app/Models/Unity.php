@@ -12,7 +12,7 @@ class Unity extends Model
     protected $fillable = [
         'id',
         'name',
-     
+        'code',
         'created_at',
     ];
     protected $hidden = [
@@ -22,6 +22,7 @@ class Unity extends Model
     ];
     const filters = [
         'name' => 'like',
+        'code' => 'like',
     ];
 
     /**

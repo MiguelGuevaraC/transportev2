@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TarifarioRequest\IndexTarifarioRequest;
 use App\Http\Requests\TarifarioRequest\StoreTarifarioRequest;
 use App\Http\Requests\TarifarioRequest\UpdateTarifarioRequest;
-use App\Http\Resources\CargaResource;
+use App\Http\Resources\TarifarioResource;
 use App\Models\Tarifario;
 use App\Services\CarrierGuideService;
 use App\Services\TarifarioService;
@@ -46,7 +46,7 @@ class TarifarioController extends Controller
          $request,
          Tarifario::filters,
          Tarifario::sorts,
-         CargaResource::class
+         TarifarioResource::class
      );
  }
 /**
@@ -72,7 +72,7 @@ class TarifarioController extends Controller
          ], 404);
      }
 
-     return new CargaResource($tarifario);
+     return new TarifarioResource($tarifario);
  }
 
 /**
@@ -106,7 +106,7 @@ class TarifarioController extends Controller
  public function store(StoreTarifarioRequest $request)
  {
      $tarifario = $this->tarofarioService->createTarifario($request->validated());
-     return new CargaResource($tarifario);
+     return new TarifarioResource($tarifario);
  }
 
 /**
@@ -170,7 +170,7 @@ class TarifarioController extends Controller
      }
 
      $updatedcarga = $this->tarofarioService->updateTarifario($tarifario, $validatedData);
-     return new CargaResource($updatedcarga);
+     return new TarifarioResource($updatedcarga);
  }
 
 /**
