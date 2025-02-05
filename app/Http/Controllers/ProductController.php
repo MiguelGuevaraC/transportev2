@@ -7,7 +7,6 @@ use App\Http\Requests\ProductRequest\StoreProductRequest;
 use App\Http\Requests\ProductRequest\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use App\Services\CarrierGuideService;
 use App\Services\ProductService;
 
 class ProductController extends Controller
@@ -19,7 +18,6 @@ class ProductController extends Controller
         $this->productService = $ProductService;
     }
 
-    
 /**
  * @OA\Get(
  *     path="/transportev2/public/api/product",
@@ -38,170 +36,179 @@ class ProductController extends Controller
  * )
  */
 
+    public function index(IndexProductRequest $request)
+    {
+        // Obtener los productos filtrados
+        $products = $this->getFilteredResults(
+            Product::class,
+            $request,
+            Product::filters,
+            Product::sorts,
+            ProductResource::class
+        );
 
- public function index(IndexProductRequest $request)
- {
+        // Mapeo para actualizar el stock de cada producto
+        $products->map(function ($product) {
+            $this->productService->updatestock(Product::find($product->id));
+            return $product; // Es importante devolver el producto actualizado
+        });
 
-     return $this->getFilteredResults(
-         Product::class,
-         $request,
-         Product::filters,
-         Product::sorts,
-         ProductResource::class
-     );
- }
-/**
-* @OA\Get(
-*     path="/transportev2/public/api/product/{id}",
-*     summary="Obtener detalles de un Product por ID",
-*     tags={"Product"},
-*     security={{"bearerAuth": {}}},
-*     @OA\Parameter(name="id", in="path", description="ID del Product", required=true, @OA\Schema(type="integer", example=1)),
-*     @OA\Response(response=200, description="Product encontrado", @OA\JsonContent(ref="#/components/schemas/Product")),
-*     @OA\Response(response=404, description="Producto no encontrado", @OA\JsonContent(type="object", @OA\Property(property="error", type="string", example="Producto no encontrado")))
-* )
-*/
-
- public function show($id)
- {
-
-     $tarifario = $this->productService->getProductById($id);
-
-     if (! $tarifario) {
-         return response()->json([
-             'error' => 'Producto No Encontrado',
-         ], 404);
-     }
-
-     return new ProductResource($tarifario);
- }
+        return $products;
+    }
 
 /**
-* @OA\Post(
-*     path="/transportev2/public/api/product",
-*     summary="Crear Product",
-*     tags={"Product"},
-*     security={{"bearerAuth": {}}},  
-*     @OA\RequestBody(
-*         required=true,
-*         @OA\MediaType(
-*             mediaType="multipart/form-data",
-*             @OA\Schema(ref="#/components/schemas/ProductRequest")
-*         )
-*     ),
-*     @OA\Response(
-*         response=200,
-*         description="Product creada exitosamente",
-*         @OA\JsonContent(ref="#/components/schemas/Product")
-*     ),
-*     @OA\Response(
-*         response=422,
-*         description="Error de validación",
-*         @OA\JsonContent(
-*             @OA\Property(property="error", type="string", example="Error de validación")
-*         )
-*     )
-* )
-*/
+ * @OA\Get(
+ *     path="/transportev2/public/api/product/{id}",
+ *     summary="Obtener detalles de un Product por ID",
+ *     tags={"Product"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="id", in="path", description="ID del Product", required=true, @OA\Schema(type="integer", example=1)),
+ *     @OA\Response(response=200, description="Product encontrado", @OA\JsonContent(ref="#/components/schemas/Product")),
+ *     @OA\Response(response=404, description="Producto no encontrado", @OA\JsonContent(type="object", @OA\Property(property="error", type="string", example="Producto no encontrado")))
+ * )
+ */
 
- public function store(StoreProductRequest $request)
- {
-     $tarifario = $this->productService->createProduct($request->validated());
-     return new ProductResource($tarifario);
- }
+    public function show($id)
+    {
+
+        $producto = $this->productService->getProductById($id);
+        $this->productService->updatestock(Product::find($producto->id));
+
+        if (! $producto) {
+            return response()->json([
+                'error' => 'Producto No Encontrado',
+            ], 404);
+        }
+
+        return new ProductResource($producto);
+    }
 
 /**
-* @OA\Put(
-*     path="/transportev2/public/api/product/{id}",
-*     summary="Actualizar un Product",
-*     tags={"Product"},
-*     security={{"bearerAuth": {}}},  
-*     @OA\Parameter(
-*         name="id",
-*         in="path",
-*         required=true,
-*         @OA\Schema(type="integer", example=1)
-*     ),
-*     @OA\RequestBody(
-*         required=true,
-*         @OA\MediaType(
-*             mediaType="multipart/form-data",
-*             @OA\Schema(ref="#/components/schemas/ProductRequest")
-*         )
-*     ),
-*     @OA\Response(
-*         response=200,
-*         description="Product actualizada exitosamente",
-*         @OA\JsonContent(ref="#/components/schemas/Product")
-*     ),
-*     @OA\Response(
-*         response=422,
-*         description="Error de validación",
-*         @OA\JsonContent(
-*             @OA\Property(property="error", type="string", example="Error de validación")
-*         )
-*     ),
-*     @OA\Response(
-*         response=404,
-*         description="Producto no encontrado",
-*         @OA\JsonContent(
-*             @OA\Property(property="error", type="string", example="Producto no encontrado")
-*         )
-*     ),
-*     @OA\Response(
-*         response=500,
-*         description="Error interno",
-*         @OA\JsonContent(
-*             @OA\Property(property="error", type="string", example="Error interno del servidor")
-*         )
-*     )
-* )
-*/
+ * @OA\Post(
+ *     path="/transportev2/public/api/product",
+ *     summary="Crear Product",
+ *     tags={"Product"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(ref="#/components/schemas/ProductRequest")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Product creada exitosamente",
+ *         @OA\JsonContent(ref="#/components/schemas/Product")
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error de validación",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error de validación")
+ *         )
+ *     )
+ * )
+ */
 
- public function update(UpdateProductRequest $request, $id)
- {
-
-     $validatedData = $request->validated();
-
-     $tarifario = $this->productService->getProductById($id);
-     if (! $tarifario) {
-         return response()->json([
-             'error' => 'Producto No Encontrado',
-         ], 404);
-     }
-
-     $updatedcarga = $this->productService->updateProduct($tarifario, $validatedData);
-     return new ProductResource($updatedcarga);
- }
+    public function store(StoreProductRequest $request)
+    {
+        $producto = $this->productService->createProduct($request->validated());
+        return new ProductResource($producto);
+    }
 
 /**
-* @OA\Delete(
-*     path="/transportev2/public/api/product/{id}",
-*     summary="Eliminar un Productpor ID",
-*     tags={"Product"},
-*     security={{"bearerAuth": {}}},
-*     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
-*     @OA\Response(response=200, description="Product eliminado", @OA\JsonContent(@OA\Property(property="message", type="string", example="Product eliminado exitosamente"))),
-*     @OA\Response(response=404, description="No encontrado", @OA\JsonContent(@OA\Property(property="error", type="string", example="Producto no encontrado"))),
+ * @OA\Put(
+ *     path="/transportev2/public/api/product/{id}",
+ *     summary="Actualizar un Product",
+ *     tags={"Product"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(ref="#/components/schemas/ProductRequest")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Product actualizada exitosamente",
+ *         @OA\JsonContent(ref="#/components/schemas/Product")
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error de validación",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error de validación")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Producto no encontrado",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Producto no encontrado")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Error interno",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error interno del servidor")
+ *         )
+ *     )
+ * )
+ */
 
-* )
-*/
+    public function update(UpdateProductRequest $request, $id)
+    {
 
- public function destroy($id)
- {
+        $validatedData = $request->validated();
 
-     $proyect = $this->productService->getProductById($id);
+        $producto = $this->productService->getProductById($id);
+        if (! $producto) {
+            return response()->json([
+                'error' => 'Producto No Encontrado',
+            ], 404);
+        }
 
-     if (! $proyect) {
-         return response()->json([
-             'error' => 'Producto No Encontrado.',
-         ], 404);
-     }
-     $proyect = $this->productService->destroyById($id);
+        $updatedcarga = $this->productService->updateProduct($producto, $validatedData);
+        return new ProductResource($updatedcarga);
+    }
 
-     return response()->json([
-         'message' => 'Producto eliminado exitosamente',
-     ], 200);
- }
+/**
+ * @OA\Delete(
+ *     path="/transportev2/public/api/product/{id}",
+ *     summary="Eliminar un Productpor ID",
+ *     tags={"Product"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+ *     @OA\Response(response=200, description="Product eliminado", @OA\JsonContent(@OA\Property(property="message", type="string", example="Product eliminado exitosamente"))),
+ *     @OA\Response(response=404, description="No encontrado", @OA\JsonContent(@OA\Property(property="error", type="string", example="Producto no encontrado"))),
+
+ * )
+ */
+
+    public function destroy($id)
+    {
+
+        $proyect = $this->productService->getProductById($id);
+
+        if (! $proyect) {
+            return response()->json([
+                'error' => 'Producto No Encontrado.',
+            ], 404);
+        }
+        $proyect = $this->productService->destroyById($id);
+
+        return response()->json([
+            'message' => 'Producto eliminado exitosamente',
+        ], 200);
+    }
 
 }

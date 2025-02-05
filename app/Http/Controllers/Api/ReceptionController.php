@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -69,19 +68,19 @@ class ReceptionController extends Controller
      */
     public function index(Request $request)
     {
-        $startPlace = $request->input('startPlace_id');
-        $endPlace = $request->input('endPlace_id');
+        $startPlace       = $request->input('startPlace_id');
+        $endPlace         = $request->input('endPlace_id');
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $list = $this->filterReceptions($request, $branch_office_id);
@@ -93,7 +92,7 @@ class ReceptionController extends Controller
     public function filterReceptions(Request $request, $branch_office_id)
     {
         $startPlace = $request->input('startPlace_id');
-        $endPlace = $request->input('endPlace_id');
+        $endPlace   = $request->input('endPlace_id');
 
         // Buscar la ruta principal
         $route = Route::where('placeStart_id', $startPlace)
@@ -104,8 +103,8 @@ class ReceptionController extends Controller
         $allRoutes = collect([$route])->merge($subRoutes)->filter(); // Incluye la ruta padre y las subrutas
 
         $receptions = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-        'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos','branchOffice',
-        'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')
+            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
+            'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')
             ->where(function ($query) use ($subRoutes) {
                 foreach ($subRoutes as $subRoute) {
                     $query->orWhere(function ($q) use ($subRoute) {
@@ -206,34 +205,34 @@ class ReceptionController extends Controller
 
         $validator = validator()->make($request->all(), [
 
-            'typeService' => 'required',
-            'typeDelivery' => 'required',
-            'conditionPay' => 'required',
+            'typeService'         => 'required',
+            'typeDelivery'        => 'required',
+            'conditionPay'        => 'required',
             // 'comment' => 'required',
 
-            'paymentAmount' => 'required',
+            'paymentAmount'       => 'required',
 
-            'receptionDate' => 'required',
-            'transferLimitDate' => 'required',
+            'receptionDate'       => 'required',
+            'transferLimitDate'   => 'required',
 
-            'origin_id' => 'required|exists:places,id',
-            'destination_id' => 'required|exists:places,id',
+            'origin_id'           => 'required|exists:places,id',
+            'destination_id'      => 'required|exists:places,id',
 
-            'sender_id' => 'required|exists:people,id',
-            'recipient_id' => 'required|exists:people,id',
+            'sender_id'           => 'required|exists:people,id',
+            'recipient_id'        => 'required|exists:people,id',
 
             // 'pickupResponsible_id' => 'nullable|exists:contact_infos,id',
-            'payResponsible_id' => 'required|exists:people,id',
+            'payResponsible_id'   => 'required|exists:people,id',
 
-            'seller_id' => 'required|exists:workers,id',
+            'seller_id'           => 'required|exists:workers,id',
 
             'pointDestination_id' => 'required|exists:addresses,id',
-            'pointSender_id' => 'required|exists:addresses,id',
+            'pointSender_id'      => 'required|exists:addresses,id',
 
-            'branch_office_id' => 'nullable|exists:branch_offices,id',
-            'office_id' => 'nullable|exists:branch_offices,id',
+            'branch_office_id'    => 'nullable|exists:branch_offices,id',
+            'office_id'           => 'nullable|exists:branch_offices,id',
 
-            'details' => 'nullable|array',
+            'details'             => 'nullable|array',
 
             // 'isload' => 'required|in:0,1',
 
@@ -246,98 +245,100 @@ class ReceptionController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $branchOffice = BranchOffice::find($branch_office_id);
 
         if ($branchOffice) {
-            $tipo = 'R' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
+            $tipo        = 'R' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
             $tipoDetalle = 'D' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
         } else {
             return response()->json(['error' => 'Branch Office not found'], 422);
         }
 
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(codeReception, LOCATE("-", codeReception) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM receptions WHERE SUBSTRING(codeReception, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(codeReception, LOCATE("-", codeReception) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM receptions WHERE SUBSTRING(codeReception, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $data = [
-            'codeReception' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'typeService' => $request->input('typeService') ?? null,
-            'type_responsiblePay' => $request->input('type_responsiblePay') ?? null,
-            'typeDelivery' => $request->input('typeDelivery') ?? null,
-            'conditionPay' => $request->input('conditionPay') ?? null,
-            'numberDays' => $request->input('numberDays') ?? null,
-            'creditAmount' => $request->input('creditAmount') ?? null,
-            'address' => $request->input('address') ?? null,
-            'tokenResponsible' => $request->input('tokenResponsible') ?? null,
+            'codeReception'        => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'typeService'          => $request->input('typeService') ?? null,
+            'type_responsiblePay'  => $request->input('type_responsiblePay') ?? null,
+            'typeDelivery'         => $request->input('typeDelivery') ?? null,
+            'conditionPay'         => $request->input('conditionPay') ?? null,
+            'numberDays'           => $request->input('numberDays') ?? null,
+            'creditAmount'         => $request->input('creditAmount') ?? null,
+            'address'              => $request->input('address') ?? null,
+            'tokenResponsible'     => $request->input('tokenResponsible') ?? null,
 
-            'comment' => $request->input('comment') ?? null,
-            'paymentAmount' => $request->input('paymentAmount') ?? null,
-            'debtAmount' => $request->input('paymentAmount') ?? null,
-            'bultosTicket' => $request->input('bultosTicket') ?? null,
+            'comment'              => $request->input('comment') ?? null,
+            'paymentAmount'        => $request->input('paymentAmount') ?? null,
+            'debtAmount'           => $request->input('paymentAmount') ?? null,
+            'bultosTicket'         => $request->input('bultosTicket') ?? null,
 
-            'receptionDate' => $request->input('receptionDate') ?? null,
-            'transferLimitDate' => $request->input('transferLimitDate') ?? null,
-            'origin_id' => $request->input('origin_id') ?? null,
-            'destination_id' => $request->input('destination_id') ?? null,
-            'sender_id' => $request->input('sender_id') ?? null,
-            'user_id' => auth()->user()->id ?? '1',
-            'recipient_id' => $request->input('recipient_id') ?? null,
+            'receptionDate'        => $request->input('receptionDate') ?? null,
+            'transferLimitDate'    => $request->input('transferLimitDate') ?? null,
+            'origin_id'            => $request->input('origin_id') ?? null,
+            'destination_id'       => $request->input('destination_id') ?? null,
+            'sender_id'            => $request->input('sender_id') ?? null,
+            'user_id'              => auth()->user()->id ?? '1',
+            'recipient_id'         => $request->input('recipient_id') ?? null,
             'pickupResponsible_id' => $request->input('pickupResponsible_id') ?? null,
-            'payResponsible_id' => $request->input('payResponsible_id') ?? null,
-            'seller_id' => $request->input('seller_id') ?? null,
-            'pointDestination_id' => $request->input('pointDestination_id') ?? null,
-            'pointSender_id' => $request->input('pointSender_id') ?? null,
-            'branchOffice_id' => $branch_office_id,
-            'office_id' => $request->input('office_id'),
+            'payResponsible_id'    => $request->input('payResponsible_id') ?? null,
+            'seller_id'            => $request->input('seller_id') ?? null,
+            'pointDestination_id'  => $request->input('pointDestination_id') ?? null,
+            'pointSender_id'       => $request->input('pointSender_id') ?? null,
+            'branchOffice_id'      => $branch_office_id,
+            'office_id'            => $request->input('office_id'),
 
         ];
 
         $object = Reception::create($data);
 
         if ($request->input('conditionPay') == "Crédito") {
-            $object->creditAmount = $object->paymentAmount;
+            $object->creditAmount  = $object->paymentAmount;
             $object->paymentAmount = 0;
             $object->save();
         }
 
         if ($object) {
             //ASIGNAR DETALLES
-            $details = $request->input('details');
+            $details    = $request->input('details');
             $idDetalles = [];
 
             foreach ($details as $detail) {
 
                 $tipo = $tipoDetalle;
 
-                $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+                $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
                 $siguienteNum = (int) $resultado;
 
                 $objectData = [
-                    'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                    'description' => $detail['description'] ?? '-',
-                    'weight' => $detail['weight'] ?? 0.00,
-                    'cant' => $detail['cant'] ?? 1,
-                    'unit' => $detail['unit'] ?? 'NIU',
+                    'numero'            => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                    'description'       => $detail['description'] ?? '-',
+                    'weight'            => $detail['weight'] ?? 0.00,
+                    'cant'              => $detail['cant'] ?? 1,
+                    'unit'              => $detail['unit'] ?? 'NIU',
 
-                    'paymentAmount' => $detail['paymentAmount'] ?? 0.00,
-                    'debtAmount' => $detail['debtAmount'] ?? 0.00,
-                    'costFreight' => $detail['costFreight'] ?? 0.00,
-                    'comissionAmount' => $detail['comissionAmount'] ?? 0.00,
-                    'costLoad' => $detail['costLoad'] ?? 0.00,
-                    'costDownload' => $detail['costDownload'] ?? 0.00,
-                    'comment' => $detail['comment'] ?? '-',
-                    'status' => 'Pendiente',
+                    'paymentAmount'     => $detail['paymentAmount'] ?? 0.00,
+                    'debtAmount'        => $detail['debtAmount'] ?? 0.00,
+                    'costFreight'       => $detail['costFreight'] ?? 0.00,
+                    'comissionAmount'   => $detail['comissionAmount'] ?? 0.00,
+                    'costLoad'          => $detail['costLoad'] ?? 0.00,
+                    'costDownload'      => $detail['costDownload'] ?? 0.00,
+                    'comment'           => $detail['comment'] ?? '-',
+                    'status'            => 'Pendiente',
                     'comissionAgent_id' => $detail['comissionAgent_id'] ?? null,
-                    'reception_id' => $object->id,
+                    'reception_id'      => $object->id,
+                    'product_id'        => isset($detail['product_id']) ? $detail['product_id'] : null,
+
                 ];
                 $idDetalles[] = DetailReception::create($objectData)->id;
 
@@ -347,19 +348,19 @@ class ReceptionController extends Controller
         $object->storeWeight();
 
         $object = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos','branchOffice',
+            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
             'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')->find($object->id);
 
-            Bitacora::create([
-                'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                'record_id' => $object->id, // El ID del usuario afectado
-                'action' => 'POST', // Acción realizada
-                'table_name' => 'receptions', // Tabla afectada
-                'data' => json_encode($object),
-                'description' => 'Guardar Recepción', // Descripción de la acción
-                'ip_address' => $request->ip(), // Dirección IP del usuario
-                'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
-            ]);
+        Bitacora::create([
+            'user_id'     => Auth::id(),   // ID del usuario que realiza la acción
+            'record_id'   => $object->id,  // El ID del usuario afectado
+            'action'      => 'POST',       // Acción realizada
+            'table_name'  => 'receptions', // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Guardar Recepción',  // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+        ]);
         return response()->json($object, 200);
     }
 
@@ -412,16 +413,16 @@ class ReceptionController extends Controller
         ])->find($id);
 
         // Verificar si la recepción existe
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Reception not found'], 422);
         }
 
         try {
             // Verifica que la relación 'firstCarrierGuide' exista
-            if (!isset($object->firstCarrierGuide)) {
+            if (! isset($object->firstCarrierGuide)) {
                 $object->status = 'Sin Guia';
                 // Verifica que 'Programming' exista en 'firstCarrierGuide'
-            } elseif (isset($object->firstCarrierGuide) && !isset($object->firstCarrierGuide->Programming)) {
+            } elseif (isset($object->firstCarrierGuide) && ! isset($object->firstCarrierGuide->Programming)) {
                 $object->status = 'Sin Programar';
             } else {
                 $object->status = 'Programado';
@@ -521,32 +522,32 @@ class ReceptionController extends Controller
     public function update(Request $request, $id)
     {
         $object = Reception::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Reception not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
 
-            'origin_id' => 'nullable|exists:places,id',
-            'destination_id' => 'nullable|exists:places,id',
+            'origin_id'            => 'nullable|exists:places,id',
+            'destination_id'       => 'nullable|exists:places,id',
 
-            'sender_id' => 'nullable|exists:people,id',
-            'recipient_id' => 'nullable|exists:people,id',
+            'sender_id'            => 'nullable|exists:people,id',
+            'recipient_id'         => 'nullable|exists:people,id',
 
             'pickupResponsible_id' => 'nullable|exists:contact_infos,id',
-            'payResponsible_id' => 'nullable|exists:people,id',
+            'payResponsible_id'    => 'nullable|exists:people,id',
 
-            'seller_id' => 'nullable|exists:workers,id',
+            'seller_id'            => 'nullable|exists:workers,id',
 
-            'pointDestination_id' => 'nullable|exists:addresses,id',
-            'pointSender_id' => 'nullable|exists:addresses,id',
-            'details' => 'nullable|array',
-            'branch_office_id' => 'nullable|exists:branch_offices,id',
+            'pointDestination_id'  => 'nullable|exists:addresses,id',
+            'pointSender_id'       => 'nullable|exists:addresses,id',
+            'details'              => 'nullable|array',
+            'branch_office_id'     => 'nullable|exists:branch_offices,id',
 
-            'office_id' => 'nullable|exists:branch_offices,id',
+            'office_id'            => 'nullable|exists:branch_offices,id',
             // 'isload' => 'required|in:0,1',
-            'paymentAmount' => 'required',
+            'paymentAmount'        => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -559,50 +560,50 @@ class ReceptionController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $Data = [
             // 'codeReception' => $request->input('codeReception'),
-            'typeService' => $request->input('typeService'),
-            'type_responsiblePay' => $request->input('type_responsiblePay'),
-            'typeDelivery' => $request->input('typeDelivery'),
-            'conditionPay' => $request->input('conditionPay'),
+            'typeService'          => $request->input('typeService'),
+            'type_responsiblePay'  => $request->input('type_responsiblePay'),
+            'typeDelivery'         => $request->input('typeDelivery'),
+            'conditionPay'         => $request->input('conditionPay'),
 
-            'numberDays' => $request->input('numberDays'),
-            'creditAmount' => $request->input('creditAmount'),
+            'numberDays'           => $request->input('numberDays'),
+            'creditAmount'         => $request->input('creditAmount'),
 
-            'address' => $request->input('address'),
-            'tokenResponsible' => $request->input('tokenResponsible'),
+            'address'              => $request->input('address'),
+            'tokenResponsible'     => $request->input('tokenResponsible'),
 
-            'comment' => $request->input('comment'),
-            'paymentAmount' => $request->input('paymentAmount'),
+            'comment'              => $request->input('comment'),
+            'paymentAmount'        => $request->input('paymentAmount'),
 
-            'receptionDate' => $request->input('receptionDate'),
-            'transferLimitDate' => $request->input('transferLimitDate'),
-            'origin_id' => $request->input('origin_id'),
-            'destination_id' => $request->input('destination_id'),
-            'bultosTicket' => $request->input('bultosTicket'),
+            'receptionDate'        => $request->input('receptionDate'),
+            'transferLimitDate'    => $request->input('transferLimitDate'),
+            'origin_id'            => $request->input('origin_id'),
+            'destination_id'       => $request->input('destination_id'),
+            'bultosTicket'         => $request->input('bultosTicket'),
 
-            'sender_id' => $request->input('sender_id'),
+            'sender_id'            => $request->input('sender_id'),
             // 'user_id' => auth()->user()->id ?? '1',
-            'recipient_id' => $request->input('recipient_id'),
+            'recipient_id'         => $request->input('recipient_id'),
             'pickupResponsible_id' => $request->input('pickupResponsible_id'),
-            'payResponsible_id' => $request->input('payResponsible_id'),
-            'seller_id' => $request->input('seller_id'),
+            'payResponsible_id'    => $request->input('payResponsible_id'),
+            'seller_id'            => $request->input('seller_id'),
 
-            'pointDestination_id' => $request->input('pointDestination_id'),
-            'pointSender_id' => $request->input('pointSender_id'),
+            'pointDestination_id'  => $request->input('pointDestination_id'),
+            'pointSender_id'       => $request->input('pointSender_id'),
             // 'branchOffice_id' => $request->input('branch_office_id'),
-            'office_id' => $request->input('office_id'),
-            'user_edited_id' => Auth::user()->id,
+            'office_id'            => $request->input('office_id'),
+            'user_edited_id'       => Auth::user()->id,
 
         ];
 
@@ -617,11 +618,11 @@ class ReceptionController extends Controller
 
         if ($object) {
             $currentDetailIds = $object->details()->pluck('id')->toArray();
-            $detailsUpdate = $request->input('details');
+            $detailsUpdate    = $request->input('details');
 
             $newDetailIds = [];
-            $user = Auth()->user();
-            $worker = Worker::find($user->worker_id);
+            $user         = Auth()->user();
+            $worker       = Worker::find($user->worker_id);
 
             if ($worker) {
                 $branchOffice = BranchOffice::find($worker->branchOffice_id);
@@ -647,38 +648,40 @@ class ReceptionController extends Controller
                     if ($detail) {
 
                         $data = [
-                            'description' => $detailData['description'] ?? '-',
-                            'weight' => $detailData['weight'] ?? 0.00,
+                            'description'   => $detailData['description'] ?? '-',
+                            'weight'        => $detailData['weight'] ?? 0.00,
                             'paymentAmount' => $detailData['paymentAmount'] ?? 0.00,
-                            'reception_id' => $id ?? null,
-                            'cant' => $detailData['cant'] ?? 1,
-                            'unit' => $detailData['unit'] ?? 'NIU',
+                            'reception_id'  => $id ?? null,
+                            'cant'          => $detailData['cant'] ?? 1,
+                            'unit'          => $detailData['unit'] ?? 'NIU',
+                            'product_id'        => isset($detail['product_id']) ? $detail['product_id'] : null,
                         ];
                         $detail->update($data);
                     }
                 } else {
 
-                    $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
-                    $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+                    $tipo         = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
+                    $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
                     $siguienteNum = (int) $resultado;
 
                     $data = [
-                        'numero' => $detailData['numero'] ?? $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                        'description' => $detailData['description'] ?? '-',
-                        'weight' => $detailData['weight'] ?? 0.00,
-                        'paymentAmount' => $detailData['paymentAmount'] ?? 0.00,
-                        'debtAmount' => $detailData['debtAmount'] ?? 0.00,
-                        'costFreight' => $detailData['costFreight'] ?? 0.00,
-                        'comissionAmount' => $detailData['comissionAmount'] ?? 0.00,
-                        'costLoad' => $detailData['costLoad'] ?? 0.00,
-                        'costDownload' => $detailData['costDownload'] ?? 0.00,
-                        'comment' => $detailData['comment'] ?? '-',
-                        'status' => $detailData['status'] ?? 'Generada',
+                        'numero'            => $detailData['numero'] ?? $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                        'description'       => $detailData['description'] ?? '-',
+                        'weight'            => $detailData['weight'] ?? 0.00,
+                        'paymentAmount'     => $detailData['paymentAmount'] ?? 0.00,
+                        'debtAmount'        => $detailData['debtAmount'] ?? 0.00,
+                        'costFreight'       => $detailData['costFreight'] ?? 0.00,
+                        'comissionAmount'   => $detailData['comissionAmount'] ?? 0.00,
+                        'costLoad'          => $detailData['costLoad'] ?? 0.00,
+                        'costDownload'      => $detailData['costDownload'] ?? 0.00,
+                        'comment'           => $detailData['comment'] ?? '-',
+                        'status'            => $detailData['status'] ?? 'Generada',
                         'comissionAgent_id' => $detailData['comissionAgent_id'] ?? null,
-                        'reception_id' => $object->id ?? null,
+                        'reception_id'      => $object->id ?? null,
+                        'product_id'        => isset($detailData['product_id']) ? $detailData['product_id'] : null,
                     ];
 
-                    $newDetail = $object->details()->create($data);
+                    $newDetail      = $object->details()->create($data);
                     $newDetailIds[] = $newDetail->id;
                 }
             }
@@ -689,15 +692,15 @@ class ReceptionController extends Controller
         }
         $object->storeWeight();
         $object = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-        'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos','branchOffice',
-        'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')->find($id);
+            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
+            'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')->find($id);
 
         try {
             // Verifica que la relación 'firstCarrierGuide' exista
-            if (!isset($object->firstCarrierGuide)) {
+            if (! isset($object->firstCarrierGuide)) {
                 $object->status = 'Sin Guia';
                 // Verifica que 'Programming' exista en 'firstCarrierGuide'
-            } elseif (isset($object->firstCarrierGuide) && !isset($object->firstCarrierGuide->Programming)) {
+            } elseif (isset($object->firstCarrierGuide) && ! isset($object->firstCarrierGuide->Programming)) {
                 $object->status = 'Sin Programar';
             } else {
                 $object->status = 'Programado';
@@ -707,16 +710,15 @@ class ReceptionController extends Controller
             Log::error('Error al procesar el estado de la recepción al crear una guía: ' . $e->getMessage());
         }
 
-
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'receptions', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Editar Recepción', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),   // ID del usuario que realiza la acción
+            'record_id'   => $object->id,  // El ID del usuario afectado
+            'action'      => 'PUT',        // Acción realizada
+            'table_name'  => 'receptions', // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Editar Recepción',   // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         // Retornar la recepción con el estado actualizado
         return response()->json($object, 200);
@@ -760,26 +762,26 @@ class ReceptionController extends Controller
      * )
      */
 
-     public function destroy($id)
-     {
-         $object = Reception::find($id);
-     
-         if (!$object) {
-             return response()->json(['message' => 'Reception not found'], 422);
-         }
-     
-         // Verifica si la recepción tiene una relación con CarrierGuide o Moviment
-         if ($object->firstCarrierGuide || $object->moviment) {
-             return response()->json(['message' => 'No se puede eliminar la recepción porque tiene relaciones asociadas'], 422);
-         }
-     
-         // Marca el usuario que eliminó y elimina la recepción
-         $object->user_deleted_id = Auth::user()->id;
-         $object->save();
-     
-         $object->delete();
-     
-         return response()->json(['message' => 'Recepción eliminada con éxito']);
-     }
-     
+    public function destroy($id)
+    {
+        $object = Reception::find($id);
+
+        if (! $object) {
+            return response()->json(['message' => 'Reception not found'], 422);
+        }
+
+        // Verifica si la recepción tiene una relación con CarrierGuide o Moviment
+        if ($object->firstCarrierGuide || $object->moviment) {
+            return response()->json(['message' => 'No se puede eliminar la recepción porque tiene relaciones asociadas'], 422);
+        }
+
+        // Marca el usuario que eliminó y elimina la recepción
+        $object->user_deleted_id = Auth::user()->id;
+        $object->save();
+
+        $object->delete();
+
+        return response()->json(['message' => 'Recepción eliminada con éxito']);
+    }
+
 }

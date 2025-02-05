@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\DB;
 class CargaDocumentService
 {
     protected $commonService;
+    protected $productService;
 
-    public function __construct(CommonService $commonService)
+    public function __construct(CommonService $commonService, ProductService $productService)
     {
-        $this->commonService = $commonService;
+        $this->commonService  = $commonService;
+        $this->productService = $productService;
     }
 
     public function getCargaDocumentById(int $id): ?CargaDocument
@@ -24,27 +26,30 @@ class CargaDocumentService
     {
         return DB::transaction(function () use ($data) {
             // Obtener el stock actual del producto
-            $product = Product::findOrFail($data['product_id']);
+            $product      = Product::findOrFail($data['product_id']);
             $currentStock = $product->stock;
 
             // Crear el documento de carga, incluyendo el stock actual
             $cargaDocument = CargaDocument::create([
-                'movement_date'   => $data['movement_date'],
-                'quantity'        => $data['quantity'],
-                'unit_price'      => $data['unit_price'],
-                'total_cost'      => $data['total_cost'],
-                'weight'          => $data['weight'],
-                'movement_type'   => $data['movement_type'],
-                'comment'         => $data['comment'] ?? null,
-                'product_id'      => $data['product_id'],
-                'person_id'       => $data['person_id'],
-                'created_at'      => now(),
-                'stock_balance'   => $currentStock, // Guardar el stock actual
+                'movement_date'        => isset($data['movement_date']) ? $data['movement_date'] : null,
+                'quantity'             => isset($data['quantity']) ? $data['quantity'] : null,
+                'unit_price'           => isset($data['unit_price']) ? $data['unit_price'] : null,
+                'total_cost'           => isset($data['total_cost']) ? $data['total_cost'] : null,
+                'weight'               => isset($data['weight']) ? $data['weight'] : null,
+                'movement_type'        => isset($data['movement_type']) ? $data['movement_type'] : null,
+                'comment'              => isset($data['comment']) ? $data['comment'] : null,
+                'product_id'           => isset($data['product_id']) ? $data['product_id'] : null,
+                'person_id'            => isset($data['person_id']) ? $data['person_id'] : null,
+                'created_at'           => now(),
+                'stock_balance_before' => $currentStock ?? 0, // Asegura que currentStock no sea null
             ]);
 
             // Actualizar el stock del producto
-            $this->updateProductStock($data['product_id'], $data['quantity'], $data['movement_type']);
 
+            $afterStock = $this->updateProductStock($data['product_id'], $data['quantity'], $data['movement_type']);
+            $cargaDocument->update([
+                'stock_balance_after' => $afterStock,
+            ]);
             return $cargaDocument;
         });
     }
@@ -56,26 +61,29 @@ class CargaDocumentService
             $this->updateProductStock($cargaDocument->product_id, $cargaDocument->quantity, $cargaDocument->movement_type, true);
 
             // Obtener el stock actual del producto
-            $product = Product::findOrFail($data['product_id']);
+            $product      = Product::findOrFail($data['product_id']);
             $currentStock = $product->stock;
 
             // Actualizar los datos del documento, incluyendo el stock actual
             $cargaDocument->update([
-                'movement_date'   => $data['movement_date'],
-                'quantity'        => $data['quantity'],
-                'unit_price'      => $data['unit_price'],
-                'total_cost'      => $data['total_cost'],
-                'weight'          => $data['weight'],
-                'movement_type'   => $data['movement_type'],
-                'comment'         => $data['comment'] ?? null,
-                'product_id'      => $data['product_id'],
-                'person_id'       => $data['person_id'],
-                'stock_balance'   => $currentStock, // Guardar el stock actual
+                'movement_date'        => isset($data['movement_date']) ? $data['movement_date'] : null,
+                'quantity'             => isset($data['quantity']) ? $data['quantity'] : null,
+                'unit_price'           => isset($data['unit_price']) ? $data['unit_price'] : null,
+                'total_cost'           => isset($data['total_cost']) ? $data['total_cost'] : null,
+                'weight'               => isset($data['weight']) ? $data['weight'] : null,
+                'movement_type'        => isset($data['movement_type']) ? $data['movement_type'] : null,
+                'comment'              => isset($data['comment']) ? $data['comment'] : null,
+                'product_id'           => isset($data['product_id']) ? $data['product_id'] : null,
+                'person_id'            => isset($data['person_id']) ? $data['person_id'] : null,
+                'stock_balance_before' => $currentStock ?? 0, // Asegura que currentStock no sea null
             ]);
 
             // Aplicar el nuevo stock
-            $this->updateProductStock($data['product_id'], $data['quantity'], $data['movement_type']);
+            $afterStock = $this->updateProductStock($data['product_id'], $data['quantity'], $data['movement_type']);
 
+            $cargaDocument->update([
+                'stock_balance_after' => $afterStock,
+            ]);
             return $cargaDocument;
         });
     }
@@ -85,7 +93,7 @@ class CargaDocumentService
         return DB::transaction(function () use ($id) {
             $cargaDocument = CargaDocument::find($id);
 
-            if (!$cargaDocument) {
+            if (! $cargaDocument) {
                 throw new ModelNotFoundException("El documento de carga no existe.");
             }
 
@@ -96,18 +104,10 @@ class CargaDocumentService
         });
     }
 
-    private function updateProductStock(int $productId, float $quantity, string $movementType, bool $isReversal = false)
+    private function updateProductStock(int $productId, float $quantity, string $movementType, bool $isReversal = false): Int
     {
         $product = Product::findOrFail($productId);
-
-        if ($movementType === 'INGRESO') {
-            // Si es reversión, restar; de lo contrario, sumar
-            $product->stock += $isReversal ? -$quantity : $quantity;
-        } elseif ($movementType === 'EGRESO') {
-            // Si es reversión, sumar; de lo contrario, restar
-            $product->stock -= $isReversal ? -$quantity : $quantity;
-        }
-
-        $product->save();
+        $this->productService->updatestock($product);
+        return $product->stock;
     }
 }

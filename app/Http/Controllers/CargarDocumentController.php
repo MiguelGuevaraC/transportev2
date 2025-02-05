@@ -1,13 +1,17 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\KardexExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CargaDocumentRequest\IndexCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\StoreCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\UpdateCargaDocumentRequest;
 use App\Http\Resources\CargaResource;
 use App\Models\CargaDocument;
+use App\Models\Product;
 use App\Services\CargaDocumentService;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CargarDocumentController extends Controller
 {
@@ -23,7 +27,7 @@ class CargarDocumentController extends Controller
  *     summary="Obtener información de CargaDocuments con filtros y ordenamiento",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
- *     
+ *
  *     @OA\Parameter(name="quantity", in="query", description="Filtrar por cantidad de producto movido", required=false, @OA\Schema(type="integer")),
  *     @OA\Parameter(name="unit_price", in="query", description="Filtrar por precio unitario del producto", required=false, @OA\Schema(type="number", format="float")),
  *     @OA\Parameter(name="total_cost", in="query", description="Filtrar por costo total del movimiento", required=false, @OA\Schema(type="number", format="float")),
@@ -34,15 +38,14 @@ class CargarDocumentController extends Controller
  *     @OA\Parameter(name="product_id", in="query", description="Filtrar por ID del producto relacionado", required=false, @OA\Schema(type="integer")),
  *     @OA\Parameter(name="person_id", in="query", description="Filtrar por ID de la persona responsable", required=false, @OA\Schema(type="integer")),
 
- *     @OA\Response(response=200, description="Lista de CargaDocuments", 
+ *     @OA\Response(response=200, description="Lista de CargaDocuments",
  *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/CargaDocument"))
  *     ),
- *     @OA\Response(response=422, description="Validación fallida", 
+ *     @OA\Response(response=422, description="Validación fallida",
  *         @OA\JsonContent(type="object", @OA\Property(property="error", type="string"))
  *     )
  * )
  */
-
 
     public function index(IndexCargaDocumentRequest $request)
     {
@@ -207,6 +210,26 @@ class CargarDocumentController extends Controller
         return response()->json([
             'message' => 'Documento de Cargaeliminado exitosamente',
         ], 200);
+    }
+
+    public function exportKardex(Request $request)
+    {
+        $idproducto = $request->product_id ?? null;
+        $from = $request->from ?? null;
+        $to = $request->to ?? null;
+
+        $name       = "Productos";
+        // Buscar el producto
+        $product = Product::find($idproducto);
+
+        if ($product) {
+            //$name = preg_replace('/[^A-Za-z0-9_-]/', '_', $product->description);
+        }
+        // Generar el nombre del archivo
+        $fileName = "Kardex_{$name}_" . now()->format('Ymd') . ".xlsx";
+
+        // Retornar la exportación
+        return Excel::download(new KardexExport($idproducto, $from, $to), $fileName);
     }
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -98,6 +97,11 @@ class DetailReception extends Model
      *         description="Reception ID"
      *     ),
      *     @OA\Property(
+     *         property="product_id",
+     *         type="integer",
+     *         description="Product ID"
+     *     ),
+     *     @OA\Property(
      *         property="created_at",
      *         type="string",
      *         format="date-time",
@@ -147,7 +151,7 @@ class DetailReception extends Model
         'comissionAgent_id',
         'reception_id',
         'programming_id',
-
+        'product_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -160,5 +164,9 @@ class DetailReception extends Model
     public function reception()
     {
         return $this->belongsTo(Reception::class, 'reception_id');
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

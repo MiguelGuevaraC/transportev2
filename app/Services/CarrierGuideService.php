@@ -1,7 +1,10 @@
 <?php
 namespace App\Services;
 
+use App\Models\CargaDocument;
+use App\Models\DetailReception;
 use App\Models\Moviment;
+use App\Models\Product;
 use App\Models\Reception;
 use App\Models\ReceptionBySale;
 
@@ -12,7 +15,7 @@ class CarrierGuideService
 
         $moviment   = Moviment::find($sale_id);
         $receptions = $moviment->receptions;
-     
+
         foreach ($receptions as $reception) {
 
             $receptionBySale = ReceptionBySale::where('reception_id', $reception->id)
@@ -27,9 +30,13 @@ class CarrierGuideService
             $reception->moviment_id = null;
             $reception->save();
         }
-        $moviment->status = "Anulado";
+        $moviment->status           = "Anulado";
         $moviment->status_facturado = "Anulada";
         $moviment->save();
         return $moviment;
     }
+
+
+    
+
 }

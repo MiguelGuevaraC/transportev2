@@ -11,6 +11,7 @@ use App\Models\Motive;
 use App\Models\Person;
 use App\Models\Vehicle;
 use App\Models\Worker;
+use App\Services\CarrierGuideService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,12 @@ use Illuminate\Support\Facades\Log;
 class CarrierGuideController extends Controller
 {
 
+    protected $carrierGuideService;
+
+    public function __construct(CarrierGuideService $CarrierGuideService)
+    {
+        $this->carrierGuideService = $CarrierGuideService;
+    }
     /**
      * @OA\Get(
      *     path="/transportev2/public/api/carrierGuide",

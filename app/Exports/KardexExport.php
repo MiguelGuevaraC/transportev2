@@ -1,82 +1,168 @@
-<?php
+<?php 
 
 namespace App\Exports;
 
 use App\Models\CargaDocument;
+use App\Models\DetailReception;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize
+class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles
 {
-    // Método para obtener los datos de la base de datos
-    public function collection()
+    protected $product_id;
+    protected $from;
+    protected $to;
+
+    public function __construct($product_id = null, $from = null, $to = null)
     {
-        return CargaDocument::with('product', 'person') // Relacionar con productos y personas
-            ->orderBy('movement_date', 'asc')
-            ->get();
+
+        $this->product_id = $product_id;
+        $this->from = $from;
+        $this->to = $to;
     }
 
-    // Definir las cabeceras del archivo Excel
+    public function collection()
+    {
+        $queryCarga = CargaDocument::query()->whereNull('deleted_at');
+        $queryRecep = DetailReception::query()->whereNull('deleted_at');
+    
+        if ($this->product_id != null) {
+            $queryCarga->where('product_id', $this->product_id);
+            $queryRecep->where('product_id', $this->product_id);
+        } else {
+            $queryRecep->whereNotNull('product_id');
+        }
+        if ($this->from) {
+            $toDate = $this->to ?? now();
+            
+            $queryCarga->where('movement_date', '>=', $this->from)
+                       ->where('movement_date', '<=', $toDate);
+        
+            $queryRecep->whereHas('reception.firstCarrierGuide', function ($query) use ($toDate) {
+                $query->where('transferStartDate', '>=', $this->from)
+                      ->where('transferStartDate', '<=', $toDate);
+            });
+        }
+        
+
+        
+        $cargaDocuments = $queryCarga->orderBy('id', 'asc')->get()->map(function ($doc) {
+            return [
+                'id'            => $doc->id,
+                'movement_date' => $doc->movement_date,
+                'type'          => $doc->movement_type,
+                'concept'       => $doc->product->description ?? "SIN DESCRIPCIÓN",
+                'document'      => 'D' . str_pad($doc->product_id, 3, '0', STR_PAD_LEFT) . '-' . str_pad($doc->id, 8, '0', STR_PAD_LEFT),
+                'quantity'      => $doc->quantity,
+                'unit_price'    => $doc->unit_price,
+                'total_cost'    => $doc->total_cost,
+                'stock_before'  => $doc->stock_balance_before ?? 0,
+                'stock_after'   => $doc->stock_balance_after ?? 0,
+                'comment'       => $doc->comment ?? "-",
+            ];
+        });
+    
+        $detailReceptions = $queryRecep->whereHas('reception.firstCarrierGuide', function ($query) {
+            $query->where('status_facturado', '!=', 'Anulada');
+        })
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($detail) {
+                return [
+                    'id'            => "G-{$detail->id}",
+                    'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate,
+                    'type'          => 'SALIDA',
+                    'concept'       => 'GUIA TRANSPORTE',
+                    'document'      => $detail->reception->firstCarrierGuide->numero ?? 'N/A',
+                    'quantity'      => $detail->cant,
+                    'unit_price'    => 0,
+                    'total_cost'    => 0,
+                    'stock_before'  => 0,
+                    'stock_after'   => 0,
+                    'comment'       => '-',
+                ];
+            });
+        return (new Collection(array_merge($cargaDocuments->toArray(), $detailReceptions->toArray())))->sortBy('movement_date')->values();
+    }
+
     public function headings(): array
     {
         return [
-            'Fecha Movimiento',
-            'Descripción Producto',
-            'Cantidad',
-            'Peso',
-            'Saldo Anterior',
-            'Entrada',
-            'Salida',
-            'Saldo Final',
-            'Nombre Persona / Razón Social',
-            'Tipo de Movimiento',
-            'Comentario',
+            ['REPORTE DE KARDEX'],
+            ['Fecha de Generación:', now()->format('d/m/Y')],
+            [],
+            [
+                'Fecha Movimiento',
+                'Tipo Movimiento',
+                'Producto',
+                'Documento',
+                'Cantidad Entrada',
+                'Cantidad Salida',
+                'Cantidad Saldo',
+                'Comentario',
+            ],
         ];
     }
 
-    // Mapeo de cada fila para el archivo Excel
-    public function map($document): array
+    public function map($row): array
     {
-        static $saldo = 0; // Variable estática para calcular el saldo acumulado
+        static $saldo = 0;
 
-        // Calculamos las entradas y salidas
-        $entrada = $document->movement_type === 'INGRESO' ? $document->quantity : 0;
-        $salida = $document->movement_type === 'EGRESO' ? $document->quantity : 0;
-
-        // Calculamos el saldo acumulado
-        $saldoAnterior = $saldo;
-        $saldo += $entrada; // Aumenta por las entradas
-        $saldo -= $salida; // Disminuye por las salidas
-
-        // Nombre de la persona o razón social dependiendo del tipo de documento
-        $persona = $document->person;
-        if ($persona->typeofDocument === 'DNI') {
-            $nombrePersona = "{$persona->names} {$persona->fatherSurname} {$persona->motherSurname}";
-        } else {
-            $nombrePersona = $persona->businessName;
-        }
+        $entradaCantidad = $row['type'] === 'ENTRADA' ? $row['quantity'] : 0;
+        $salidaCantidad  = $row['type'] === 'SALIDA' ? $row['quantity'] : 0;
+        $saldo = ($saldo + $entradaCantidad - $salidaCantidad);
 
         return [
-            $document->movement_date,
-            $document->product->name, // Descripción Producto
-            $document->quantity, // Cantidad
-            $document->weight, // Peso
-            $saldoAnterior, // Saldo anterior
-            $entrada,  // Entrada
-            $salida,   // Salida
-            $saldo,    // Saldo final
-            $nombrePersona, // Nombre de la Persona o Razón Social
-            $document->movement_type,
-            $document->comment,
+            (string) $row['movement_date'],
+            (string) $row['type'],
+            (string) $row['concept'],
+            (string) $row['document'],
+            (string) $entradaCantidad,
+            (string) $salidaCantidad,
+            (string) $saldo,
+            (string) $row['comment'],
         ];
     }
 
-    // Título de la hoja Excel
     public function title(): string
     {
         return 'Kardex';
     }
+
+    public function styles(Worksheet $sheet)
+    {
+        $highestRow = $sheet->getHighestRow();
+        if ($highestRow < 5) {
+            return [];
+        }
+    
+        foreach ($sheet->getRowIterator(5) as $row) {
+            $cell = 'B' . $row->getRowIndex();
+            $type = $sheet->getCell($cell)->getValue();
+            $color = $type === 'SALIDA' ? 'FF9999' : ($type === 'ENTRADA' ? '99FF99' : null);
+            if ($color) {
+                $sheet->getStyle("A{$row->getRowIndex()}:H{$row->getRowIndex()}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => $color]
+                    ]
+                ]);
+            }
+        }
+    
+        return [
+            1 => ['font' => ['bold' => true, 'size' => 14]],
+            2 => ['font' => ['bold' => true]],
+            4 => ['font' => ['bold' => true, 'size' => 12], 'alignment' => ['horizontal' => 'center']],
+        ];
+    }
+    
 }
