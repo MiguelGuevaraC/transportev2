@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Exports\KardexExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CargaDocumentRequest\IndexCargaDocumentRequest;
+use App\Http\Requests\CargaDocumentRequest\KardexRequest;
 use App\Http\Requests\CargaDocumentRequest\StoreCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\UpdateCargaDocumentRequest;
 use App\Http\Resources\CargaResource;
@@ -212,13 +213,14 @@ class CargarDocumentController extends Controller
         ], 200);
     }
 
-    public function exportKardex(Request $request)
+    public function exportKardex(KardexRequest $request)
     {
-        $idproducto = $request->product_id ?? null;
-        $from = $request->from ?? null;
-        $to = $request->to ?? null;
+        $validatedData = $request->validated();
+        $idproducto    = $request->product_id ?? null;
+        $from          = $request->from ?? null;
+        $to            = $request->to ?? null;
 
-        $name       = "Productos";
+        $name = "Productos";
         // Buscar el producto
         $product = Product::find($idproducto);
 

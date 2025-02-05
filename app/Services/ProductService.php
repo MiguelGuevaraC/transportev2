@@ -46,7 +46,6 @@ class ProductService
             ->whereHas('reception.firstCarrierGuide', function ($query) {
                 $query->where('status_facturado', '!=', 'Anulada');
             })->whereNull('deleted_at')->sum('cant');
-
         $product->stock = ($movimientos->stock_calculado ?? 0) - $detallesRecepcion;
         $product->save();
     }

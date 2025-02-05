@@ -179,12 +179,33 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
     }
 
     private function getStockBefore($productId)
-    {
-        return CargaDocument::whereNull('deleted_at')
-            ->where('product_id', $productId)
-            ->where('movement_date', '<', $this->from)
-            ->sum('quantity');
-    }
+{
+    $toDate=$this->from;
+    // Obtener la suma de las entradas y salidas en una sola consulta para optimizar el rendimiento
+    $movimientos = CargaDocument::where('product_id', $productId)
+        ->whereNull('deleted_at')
+        ->where('movement_date', '<', $this->from) // Filtro por fecha de movimiento
+        ->selectRaw("SUM(CASE WHEN movement_type = 'ENTRADA' THEN quantity ELSE 0 END)
+            - SUM(CASE WHEN movement_type = 'SALIDA' THEN quantity ELSE 0 END) AS stock_calculado")
+        ->first();
+
+    // Obtener los detalles de las recepciones con el filtro de fechas usando whereBetween
+    $detailReceptions = DetailReception::where('product_id', $productId)
+        ->whereHas('reception.firstCarrierGuide', function ($query) use ($toDate) {
+            $query->whereBetween('transferStartDate', [$this->from, $toDate]); // Filtro de fechas
+        })
+        ->whereNull('deleted_at');
+
+    // Obtener el total de las cantidades de los detalles de las recepciones
+    $totalDetailQuantity = $detailReceptions->sum('cant');
+
+    // Calcular el stock final
+    $totalStock = ($movimientos->stock_calculado ?? 0) - $totalDetailQuantity;
+
+    return $totalStock;
+}
+
+    
 
     public function title(): string
     {
@@ -194,11 +215,11 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
     public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
-        
+
         // Iterar por cada fila para aplicar los estilos dinámicamente
         foreach ($sheet->getRowIterator(1, $highestRow) as $row) {
             $rowIndex = $row->getRowIndex();
-            
+
             // Obtener los valores de las celdas A a G de la fila
             $cellA = trim($sheet->getCell("A{$rowIndex}")->getValue());
             $cellB = trim($sheet->getCell("B{$rowIndex}")->getValue());
@@ -207,7 +228,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $cellE = trim($sheet->getCell("E{$rowIndex}")->getValue());
             $cellF = trim($sheet->getCell("F{$rowIndex}")->getValue());
             $cellG = trim($sheet->getCell("G{$rowIndex}")->getValue());
-            
+
             // 1. Estilo para la cabecera del producto (ej.: "PRODUCTO 01", "PRODUCTO 03", etc.)
             // Se asume que esa fila tiene contenido solo en la columna A y las demás vacías.
             if ($cellA !== '' && $cellB === '' && $cellC === '' && $cellD === '' && $cellE === '' && $cellF === '' && $cellG === '') {
@@ -215,57 +236,56 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 $sheet->mergeCells("A{$rowIndex}:G{$rowIndex}");
                 // Aplicar estilo: fondo blanco, borde negro, texto centrado y en negrita
                 $sheet->getStyle("A{$rowIndex}")->applyFromArray([
-                    'fill' => [
+                    'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'D9D9D9'],
                     ],
-                    'borders' => [
+                    'borders'   => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '000000'], // Color negro para los bordes
+                            'color'       => ['rgb' => '000000'], // Color negro para los bordes
                         ],
                     ],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                         'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     ],
-                    'font' => [
+                    'font'      => [
                         'bold' => true,
                     ],
                 ]);
             }
-            
-            
+
             // 2. Estilo para el cabezal de la tabla (encabezados de columna)
             // Se asume que la fila cuyo valor en A es "Fecha Movimiento" es el cabezal.
             if (strcasecmp($cellA, 'Fecha Movimiento') === 0) {
                 $sheet->getStyle("A{$rowIndex}:G{$rowIndex}")->applyFromArray([
-                    'fill' => [
+                    'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'D9D9D9'], // Color de fondo para el encabezado (gris claro)
                     ],
-                    'borders' => [
+                    'borders'   => [
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                     ],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                         'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     ],
-                    'font' => [
+                    'font'      => [
                         'bold' => true,
                     ],
                 ]);
             }
-            
+
             // 3. Estilos para los registros de movimientos
             // a) Filas de SALIDA (fondo rojo suave)
             if ($cellB === 'SALIDA') {
                 $sheet->getStyle("A{$rowIndex}:G{$rowIndex}")->applyFromArray([
-                    'fill' => [
+                    'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'FF9999'],
                     ],
-                    'borders' => [
+                    'borders'   => [
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                     ],
                     'alignment' => [
@@ -273,15 +293,15 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                     ],
                 ]);
             }
-            
+
             // b) Filas de ENTRADA y SALDO INICIAL (se tratará SALDO INICIAL igual que ENTRADA, fondo verde suave)
             if ($cellB === 'ENTRADA' || $cellB === 'SALDO INICIAL') {
                 $sheet->getStyle("A{$rowIndex}:G{$rowIndex}")->applyFromArray([
-                    'fill' => [
+                    'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => '99FF99'],
                     ],
-                    'borders' => [
+                    'borders'   => [
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                     ],
                     'alignment' => [
@@ -290,11 +310,8 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 ]);
             }
         }
-        
+
         return [];
     }
-    
-    
-    
-    
+
 }
