@@ -493,14 +493,11 @@ class CarrierGuideController extends Controller
         $object->save();
 
         if ($object->subcontract_id != null) {
-            $cost = $request->costsubcontract ?? null;
-            $data = $request->datasubcontrata ?? [];
-            $validator = Validator::make($data, (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()->first()], 422);
-            }else{
-                $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $cost, $data);
-            }
+            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
+            if ($validator->fails()) {return response()->json(['errors' => $validator->errors()->first()], 422);}
+            $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
+            if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
+            $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
         }
 
         $object = CarrierGuide::with([
@@ -826,15 +823,13 @@ class CarrierGuideController extends Controller
         $object->save();
 
         if ($object->subcontract_id != null) {
-            $cost = $request->costsubcontract ?? null;
-            $data = $request->datasubcontrata ?? [];
-            $validator = Validator::make($data, (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()->first()], 422);
-            }else{
-                $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $cost, $data);
-            }
+            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
+            if ($validator->fails()) {return response()->json(['errors' => $validator->errors()->first()], 422);}
+            $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
+            if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
+            $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
         }
+        
         $object = CarrierGuide::with('tract', 'platform', 'motive',
             'origin', 'destination',
             'sender', 'recipient',
