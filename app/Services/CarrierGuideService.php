@@ -1,10 +1,8 @@
 <?php
 namespace App\Services;
 
-use App\Models\CargaDocument;
-use App\Models\DetailReception;
+use App\Models\CarrierGuide;
 use App\Models\Moviment;
-use App\Models\Product;
 use App\Models\Reception;
 use App\Models\ReceptionBySale;
 
@@ -36,7 +34,17 @@ class CarrierGuideService
         return $moviment;
     }
 
+    public function updatedatasubcontrata($carrier_id, $cost, $data): CarrierGuide
+    {
+        $carrier = CarrierGuide::findOrFail($carrier_id);
 
+        $carrier->update([
+            'costsubcontract' => $cost,
+            'datasubcontract' => json_encode($data),
+        ]);
+
+        return $carrier;
+    }
     
 
 }

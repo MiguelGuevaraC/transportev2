@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CarrierGuideRequest\SubcontractDataRequest;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
 use App\Models\CarrierGuide;
@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CarrierGuideController extends Controller
 {
@@ -49,53 +50,53 @@ class CarrierGuideController extends Controller
      * )
      */
 
-     public function applyNameFilter($query, $searchTermUpper)
-     {
-         // Crear un campo virtual concatenado
-         $query->where(DB::raw("UPPER(CONCAT_WS(' ', names, fatherSurname, motherSurname, businessName))"), 'LIKE', '%' . $searchTermUpper . '%')
-             ->orWhere(DB::raw('UPPER(documentNumber)'), 'LIKE', '%' . $searchTermUpper . '%');
-     }
+    public function applyNameFilter($query, $searchTermUpper)
+    {
+        // Crear un campo virtual concatenado
+        $query->where(DB::raw("UPPER(CONCAT_WS(' ', names, fatherSurname, motherSurname, businessName))"), 'LIKE', '%' . $searchTermUpper . '%')
+            ->orWhere(DB::raw('UPPER(documentNumber)'), 'LIKE', '%' . $searchTermUpper . '%');
+    }
     public function index(Request $request)
     {
         // Obtener el branch_office_id desde la solicitud o usar el del usuario autenticado
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         // Paginación
         $perPage = $request->input('per_page', 10);
-        $page = $request->input('page', 1);
+        $page    = $request->input('page', 1);
 
-        if (!is_numeric($perPage) || (int) $perPage <= 0) {
+        if (! is_numeric($perPage) || (int) $perPage <= 0) {
             $perPage = 10;
         }
 
         // FILTROS
-        $numero = $request->input('numero');
+        $numero      = $request->input('numero');
         $id_sucursal = $request->input('branch_office_id');
 
-        $document = $request->input('document');
-        $startDate = $request->input('startDate');
-        $endDate = $request->input('endDate');
-        $route = $request->input('route');
-        $typeGuia = $request->input('typeGuia');
-        $statusGuia = $request->input('statusGuia');
+        $document        = $request->input('document');
+        $startDate       = $request->input('startDate');
+        $endDate         = $request->input('endDate');
+        $route           = $request->input('route');
+        $typeGuia        = $request->input('typeGuia');
+        $statusGuia      = $request->input('statusGuia');
         $statusFacturado = $request->input('statusFacturado');
-        $observation = $request->input('observation');
-        $vehicles = $request->input('vehicles');
-        $drivers = $request->input('drivers');
+        $observation     = $request->input('observation');
+        $vehicles        = $request->input('vehicles');
+        $drivers         = $request->input('drivers');
 
-        $nombreClientePaga = $request->input('nombreClientePaga');
-        $nombreRemitente = $request->input('nombreRemitente');
+        $nombreClientePaga  = $request->input('nombreClientePaga');
+        $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
 
         // Iniciar consulta base
@@ -105,15 +106,15 @@ class CarrierGuideController extends Controller
         );
 
         // Aplicación de los filtros con comparaciones en minúsculas
-        if (!empty($numero)) {
+        if (! empty($numero)) {
             $carrierGuides->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($numero) . '%']);
         }
 
-        if (!empty($document)) {
+        if (! empty($document)) {
             $carrierGuides->whereRaw('LOWER(document) LIKE ?', ['%' . strtolower($document) . '%']);
         }
 
-        if (!empty($nombreClientePaga)) {
+        if (! empty($nombreClientePaga)) {
             $nombreClientePagaUpper = strtoupper($nombreClientePaga);
 
             $carrierGuides->where(function ($query) use ($nombreClientePagaUpper) {
@@ -125,7 +126,7 @@ class CarrierGuideController extends Controller
                 });
             });
         }
-        if (!empty($nombreRemitente)) {
+        if (! empty($nombreRemitente)) {
             $nombreRemitenteUpper = strtoupper($nombreRemitente);
 
             $carrierGuides->where(function ($query) use ($nombreRemitenteUpper) {
@@ -137,7 +138,7 @@ class CarrierGuideController extends Controller
                 });
             });
         }
-        if (!empty($nombreDestinatario)) {
+        if (! empty($nombreDestinatario)) {
             $nombreDestinatarioUpper = strtoupper($nombreDestinatario);
 
             $carrierGuides->where(function ($query) use ($nombreDestinatarioUpper) {
@@ -150,7 +151,7 @@ class CarrierGuideController extends Controller
             });
         }
 
-        if (!empty($drivers)) {
+        if (! empty($drivers)) {
             $lowerDrivers = strtolower($drivers);
             $carrierGuides->where(function ($query) use ($lowerDrivers) {
                 $query->whereHas('driver.person', function ($q) use ($lowerDrivers) {
@@ -161,7 +162,7 @@ class CarrierGuideController extends Controller
             });
         }
 
-        if (!empty($route)) {
+        if (! empty($route)) {
             $routeParts = explode('-', $route);
 
             if (count($routeParts) === 1) {
@@ -179,7 +180,7 @@ class CarrierGuideController extends Controller
             }
         }
 
-        if (!empty($vehicles)) {
+        if (! empty($vehicles)) {
             $carrierGuides->where(function ($query) use ($vehicles) {
                 $lowerVehicles = strtolower($vehicles);
                 $query->whereHas('tract', function ($query) use ($lowerVehicles) {
@@ -192,30 +193,30 @@ class CarrierGuideController extends Controller
             });
         }
 
-        if (!empty($typeGuia)) {
+        if (! empty($typeGuia)) {
             $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
         }
-        if (!empty($id_sucursal)) {
+        if (! empty($id_sucursal)) {
             $carrierGuides->where('branchOffice_id', $id_sucursal);
         }
 
-        if (!empty($statusGuia)) {
+        if (! empty($statusGuia)) {
             $carrierGuides->whereRaw('LOWER(status) = ?', [strtolower($statusGuia)]);
         }
 
-        if (!empty($statusFacturado)) {
+        if (! empty($statusFacturado)) {
             $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
         }
 
-        if (!empty($observation)) {
+        if (! empty($observation)) {
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
         }
 
-        if (!empty($startDate) && !empty($endDate)) {
+        if (! empty($startDate) && ! empty($endDate)) {
             $carrierGuides->whereBetween(DB::raw('DATE(transferStartDate)'), [$startDate, $endDate]);
-        } elseif (!empty($startDate)) {
+        } elseif (! empty($startDate)) {
             $carrierGuides->whereDate('transferStartDate', '>=', $startDate);
-        } elseif (!empty($endDate)) {
+        } elseif (! empty($endDate)) {
             $carrierGuides->whereDate('transferStartDate', '<=', $endDate);
         }
 
@@ -224,18 +225,18 @@ class CarrierGuideController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'total' => $carrierGuides->total(),
-            'data' => $carrierGuides->items(),
-            'current_page' => $carrierGuides->currentPage(),
-            'last_page' => $carrierGuides->lastPage(),
-            'per_page' => $carrierGuides->perPage(),
-            'pagination' => $perPage,
+            'total'          => $carrierGuides->total(),
+            'data'           => $carrierGuides->items(),
+            'current_page'   => $carrierGuides->currentPage(),
+            'last_page'      => $carrierGuides->lastPage(),
+            'per_page'       => $carrierGuides->perPage(),
+            'pagination'     => $perPage,
             'first_page_url' => $carrierGuides->url(1),
-            'from' => $carrierGuides->firstItem(),
-            'next_page_url' => $carrierGuides->nextPageUrl(),
-            'path' => $carrierGuides->path(),
-            'prev_page_url' => $carrierGuides->previousPageUrl(),
-            'to' => $carrierGuides->lastItem(),
+            'from'           => $carrierGuides->firstItem(),
+            'next_page_url'  => $carrierGuides->nextPageUrl(),
+            'path'           => $carrierGuides->path(),
+            'prev_page_url'  => $carrierGuides->previousPageUrl(),
+            'to'             => $carrierGuides->lastItem(),
         ], 200);
     }
 
@@ -298,52 +299,48 @@ class CarrierGuideController extends Controller
 
     public function store(Request $request)
     {
+
         $validator = validator()->make($request->all(), [
 
-            // 'document' => 'required',
-            // 'subContract' => 'required',
-            // 'transferStartDate' => 'required',
-            // 'carrier' => 'required',
+            'ubigeoStart'       => 'nullable',
+            'ubigeoEnd'         => 'nullable',
+            'addressStart'      => 'required',
+            'addressEnd'        => 'required',
+            'motive_id'         => 'required|exists:motives,id',
 
-            'ubigeoStart' => 'nullable',
-            'ubigeoEnd' => 'nullable',
-            'addressStart' => 'required',
-            'addressEnd' => 'required',
-            'motive_id' => 'required|exists:motives,id',
+            'tract_id'          => 'required|exists:vehicles,id',
+            'platform_id'       => 'nullable|exists:vehicles,id',
 
-            'tract_id' => 'required|exists:vehicles,id',
-            'platform_id' => 'nullable|exists:vehicles,id',
+            'origin_id'         => 'required|exists:places,id',
+            'destination_id'    => 'required|exists:places,id',
 
-            'origin_id' => 'required|exists:places,id',
-            'destination_id' => 'required|exists:places,id',
-
-            'sender_id' => 'required|exists:people,id',
-            'recipient_id' => 'required|exists:people,id',
+            'sender_id'         => 'required|exists:people,id',
+            'recipient_id'      => 'required|exists:people,id',
 
             'payResponsible_id' => 'required|exists:people,id',
 
-            'reception_id' => 'required|exists:receptions,id',
+            'reception_id'      => 'required|exists:receptions,id',
 
-            'branch_office_id' => 'nullable|exists:branch_offices,id',
-            'driver_id' => 'required|exists:workers,id',
-            'copilot_id' => 'nullable|exists:workers,id',
-            'subcontract_id' => 'nullable|exists:subcontracts,id',
+            'branch_office_id'  => 'nullable|exists:branch_offices,id',
+            'driver_id'         => 'required|exists:workers,id',
+            'copilot_id'        => 'nullable|exists:workers,id',
+            'subcontract_id'    => 'nullable|exists:subcontracts,id',
 
-            'districtStart_id' => 'required|exists:districts,id',
-            'districtEnd_id' => 'required|exists:districts,id',
+            'districtStart_id'  => 'required|exists:districts,id',
+            'districtEnd_id'    => 'required|exists:districts,id',
 
         ]);
 
         if ($validator->fails()) {
             Bitacora::create([
-                'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                'record_id' => null, // El ID del usuario afectado
-                'action' => 'POST', // Acción realizada
-                'table_name' => 'carrier_guides', // Tabla afectada
-                'data' => null,
+                'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+                'record_id'   => null,             // El ID del usuario afectado
+                'action'      => 'POST',           // Acción realizada
+                'table_name'  => 'carrier_guides', // Tabla afectada
+                'data'        => null,
                 'description' => 'Error al Guardar GRT: ' . $validator->errors()->first(), // Descripción de la acción
-                'ip_address' => $request->ip(), // Dirección IP del usuario
-                'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+                'ip_address'  => $request->ip(),                                           // Dirección IP del usuario
+                'user_agent'  => $request->userAgent(),                                    // Información sobre el navegador/dispositivo
             ]);
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
@@ -358,12 +355,12 @@ class CarrierGuideController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json(["message" => "Branch Office Not Found"], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         if ($branchOffice) {
@@ -372,34 +369,34 @@ class CarrierGuideController extends Controller
             return response()->json(['error' => 'Branch Office not found'], 422);
         }
 
-        $motive = Motive::find($request->input('motive_id'));
+        $motive       = Motive::find($request->input('motive_id'));
         $motivoNombre = '';
-        $motivoCode = '';
+        $motivoCode   = '';
         if ($motive->id == 13) {
             $motivoNombre = $request->input('motivo') ?? $motive->name;
-            $motivoCode = $motive->code;
+            $motivoCode   = $motive->code;
         } else {
             $motivoNombre = $motive->name;
-            $motivoCode = $motive->code;
+            $motivoCode   = $motive->code;
         }
 
         $branch_office_id = $request->input('branch_office_id');
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
         $tipo = 'V' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
         $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
 
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM carrier_guides WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM carrier_guides WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $vehicle = Vehicle::find($request->input('tract_id'));
@@ -420,14 +417,14 @@ class CarrierGuideController extends Controller
                 }
             }
         }
-        if( $request->input('type') != "Electronica"){
+        if ($request->input('type') != "Electronica") {
             $correlativo_manual = $request->input('serie') . "-" . $request->input('number');
             $correlativo_manual = $this->algoritmoanexos($correlativo_manual);
 
             $exists = Carrierguide::where('numero', $correlativo_manual)
-            ->where('status_facturado', '!=', 'Anulada')
-            ->where('type', 'manual')
-            ->exists();
+                ->where('status_facturado', '!=', 'Anulada')
+                ->where('type', 'manual')
+                ->exists();
             if ($exists) {
                 return response()->json(['error' => 'Este número ya se tiene registrado'], 422);
             }
@@ -435,54 +432,53 @@ class CarrierGuideController extends Controller
 
         $data = [
             // 'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'status' => $request->input('status') ?? 'Pendiente',
-            'document' => $document,
-            'observation' => $request->input('observation') ?? '-',
-            'subContract' => $request->input('subContract') ?? null,
-            'transferStartDate' => $request->input('transferStartDate') ?? null,
+            'status'                => $request->input('status') ?? 'Pendiente',
+            'document'              => $document,
+            'observation'           => $request->input('observation') ?? '-',
+            'subContract'           => $request->input('subContract') ?? null,
+            'transferStartDate'     => $request->input('transferStartDate') ?? null,
             'transferDateEstimated' => $request->input('transferDateEstimated') ?? null,
 
-            'ubigeoStart' => $request->input('ubigeoStart') ?? null,
-            'ubigeoEnd' => $request->input('ubigeoEnd') ?? null,
-            'addressStart' => $request->input('addressStart') ?? null,
-            'addressEnd' => $request->input('addressEnd') ?? null,
-            'motive_id' => $request->input('motive_id') ?? null,
+            'ubigeoStart'           => $request->input('ubigeoStart') ?? null,
+            'ubigeoEnd'             => $request->input('ubigeoEnd') ?? null,
+            'addressStart'          => $request->input('addressStart') ?? null,
+            'addressEnd'            => $request->input('addressEnd') ?? null,
+            'motive_id'             => $request->input('motive_id') ?? null,
 
-            'districtStart_id' => $request->input('districtStart_id') ?? null,
-            'districtEnd_id' => $request->input('districtEnd_id') ?? null,
+            'districtStart_id'      => $request->input('districtStart_id') ?? null,
+            'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
 
-            'motivo' => $motivoNombre,
-            'codemotivo' => $motivoCode,
-            'placa' => $vehicle->currentPlate ?? '-',
+            'motivo'                => $motivoNombre,
+            'codemotivo'            => $motivoCode,
+            'placa'                 => $vehicle->currentPlate ?? '-',
 
-            'tract_id' => $request->input('tract_id') ?? null,
-            'platform_id' => $request->input('platform_id') ?? null,
-            'origin_id' => $request->input('origin_id') ?? null,
-            'destination_id' => $request->input('destination_id') ?? null,
-            'sender_id' => $request->input('sender_id') ?? null,
-            'recipient_id' => $request->input('recipient_id') ?? null,
-            'reception_id' => $request->input('reception_id') ?? null,
-            'reasonForTransfer' => $request->input('reasonForTransfer') ?? null,
+            'tract_id'              => $request->input('tract_id') ?? null,
+            'platform_id'           => $request->input('platform_id') ?? null,
+            'origin_id'             => $request->input('origin_id') ?? null,
+            'destination_id'        => $request->input('destination_id') ?? null,
+            'sender_id'             => $request->input('sender_id') ?? null,
+            'recipient_id'          => $request->input('recipient_id') ?? null,
+            'reception_id'          => $request->input('reception_id') ?? null,
+            'reasonForTransfer'     => $request->input('reasonForTransfer') ?? null,
 
-            'payResponsible_id' => $request->input('payResponsible_id') ?? null,
-            'driver_id' => $request->input('driver_id') ?? null,
-            'copilot_id' => $request->input('copilot_id') ?? null,
-            'subcontract_id' => $request->input('subcontract_id') ?? null,
-            'branchOffice_id' => $branch_office_id,
-            'user_created_id' => Auth::user()->id,
+            'payResponsible_id'     => $request->input('payResponsible_id') ?? null,
+            'driver_id'             => $request->input('driver_id') ?? null,
+            'copilot_id'            => $request->input('copilot_id') ?? null,
+            'subcontract_id'        => $request->input('subcontract_id') ?? null,
+            'branchOffice_id'       => $branch_office_id,
+            'user_created_id'       => Auth::user()->id,
         ];
 
         $object = CarrierGuide::create($data);
 
         $object->ubigeoStart = District::find($request->input('districtStart_id'))->ubigeo_code;
-        $object->ubigeoEnd = District::find($request->input('districtEnd_id'))->ubigeo_code;
+        $object->ubigeoEnd   = District::find($request->input('districtEnd_id'))->ubigeo_code;
         $object->save();
 
-      
         $object->type = $request->input('type') ?? 'Electronica';
 
         $object->number = $request->input('number');
-        $object->serie = $request->input('serie');
+        $object->serie  = $request->input('serie');
 
         $object->save();
 
@@ -495,6 +491,17 @@ class CarrierGuideController extends Controller
             $object->numero = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
         }
         $object->save();
+
+        if ($object->subcontract_id != null) {
+            $cost = $request->costsubcontract ?? null;
+            $data = $request->datasubcontrata ?? [];
+            $validator = Validator::make($data, (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()->first()], 422);
+            }else{
+                $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $cost, $data);
+            }
+        }
 
         $object = CarrierGuide::with([
             'tract',
@@ -516,10 +523,10 @@ class CarrierGuideController extends Controller
                 $query->get()->transform(function ($reception) {
                     try {
                         // Verifica que la relación 'firstCarrierGuide' exista
-                        if (!isset($reception->firstCarrierGuide)) {
+                        if (! isset($reception->firstCarrierGuide)) {
                             $reception->status = 'Sin Guia';
                             // Verifica que 'Programming' exista en 'firstCarrierGuide'
-                        } elseif (isset($reception->firstCarrierGuide) && !isset($reception->firstCarrierGuide->Programming)) {
+                        } elseif (isset($reception->firstCarrierGuide) && ! isset($reception->firstCarrierGuide->Programming)) {
                             $reception->status = 'Sin Programar';
                         } else {
                             $reception->status = 'Programado';
@@ -533,14 +540,14 @@ class CarrierGuideController extends Controller
         ])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'carrier_guides', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Guarda GRT', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+            'record_id'   => $object->id,      // El ID del usuario afectado
+            'action'      => 'POST',           // Acción realizada
+            'table_name'  => 'carrier_guides', // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Guarda GRT',          // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($object, 200);
@@ -591,7 +598,7 @@ class CarrierGuideController extends Controller
             'sender', 'recipient',
             'payResponsible', 'driver', 'copilot', 'districtStart.province.department', 'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception'
         )->find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Carrier Guide not found'], 422);
         }
 
@@ -661,7 +668,7 @@ class CarrierGuideController extends Controller
     public function update(Request $request, $id)
     {
         $object = CarrierGuide::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'CarrierGuide not found'], 422);
         }
 
@@ -673,52 +680,52 @@ class CarrierGuideController extends Controller
             // 'transferStartDate' => 'required',
             // 'carrier' => 'required',
 
-            'tract_id' => 'nullable|exists:vehicles,id',
-            'platform_id' => 'nullable|exists:vehicles,id',
+            'tract_id'          => 'nullable|exists:vehicles,id',
+            'platform_id'       => 'nullable|exists:vehicles,id',
 
-            'origin_id' => 'nullable|exists:places,id',
-            'destination_id' => 'nullable|exists:places,id',
+            'origin_id'         => 'nullable|exists:places,id',
+            'destination_id'    => 'nullable|exists:places,id',
 
-            'sender_id' => 'nullable|exists:people,id',
-            'recipient_id' => 'nullable|exists:people,id',
+            'sender_id'         => 'nullable|exists:people,id',
+            'recipient_id'      => 'nullable|exists:people,id',
 
             'payResponsible_id' => 'nullable|exists:people,id',
-            'driver_id' => 'nullable|exists:workers,id',
-            'copilot_id' => 'nullable|exists:workers,id',
-            'subcontract_id' => 'nullable|exists:subcontracts,id',
-            'motive_id' => 'required|exists:motives,id',
+            'driver_id'         => 'nullable|exists:workers,id',
+            'copilot_id'        => 'nullable|exists:workers,id',
+            'subcontract_id'    => 'nullable|exists:subcontracts,id',
+            'motive_id'         => 'required|exists:motives,id',
 
-            'reception_id' => 'nullable|exists:receptions,id',
+            'reception_id'      => 'nullable|exists:receptions,id',
 
-            'districtStart_id' => 'required|exists:districts,id',
-            'districtEnd_id' => 'required|exists:districts,id',
+            'districtStart_id'  => 'required|exists:districts,id',
+            'districtEnd_id'    => 'required|exists:districts,id',
 
         ]);
 
         if ($validator->fails()) {
             Bitacora::create([
-                'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                'record_id' => $object->id, // El ID del usuario afectado
-                'action' => 'PUT', // Acción realizada
-                'table_name' => 'carrier_guides', // Tabla afectada
-                'data' => json_encode($object),
+                'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+                'record_id'   => $object->id,      // El ID del usuario afectado
+                'action'      => 'PUT',            // Acción realizada
+                'table_name'  => 'carrier_guides', // Tabla afectada
+                'data'        => json_encode($object),
                 'description' => 'Error al Actualizar GRT: ' . $validator->errors()->first(), // Descripción de la acción
-                'ip_address' => $request->ip(), // Dirección IP del usuario
-                'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+                'ip_address'  => $request->ip(),                                              // Dirección IP del usuario
+                'user_agent'  => $request->userAgent(),                                       // Información sobre el navegador/dispositivo
             ]);
 
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        $motive = Motive::find($request->input('motive_id'));
+        $motive       = Motive::find($request->input('motive_id'));
         $motivoNombre = '';
-        $motivoCode = '';
+        $motivoCode   = '';
         if ($motive->id == 13) {
             $motivoNombre = $request->input('motivo') ?? $motive->name;
-            $motivoCode = $motive->code;
+            $motivoCode   = $motive->code;
         } else {
             $motivoNombre = $motive->name;
-            $motivoCode = $motive->code;
+            $motivoCode   = $motive->code;
         }
 
         $vehicle = Vehicle::find($request->input('tract_id'));
@@ -729,85 +736,84 @@ class CarrierGuideController extends Controller
         $document = $request->input('document') ?? null;
         if ($document != null) {
             $document = $this->algoritmoanexos($document);
-               // Verifica que el 'sender_id' esté presente en la solicitud antes de buscar la persona.
-               $senderId = $request->input('sender_id');
-               if ($senderId) {
-                   $persona = Person::find($senderId);
-   
-                   // Si la persona existe, verifica que el tipo de documento sea "ruc" (sin importar mayúsculas/minúsculas).
-                   if ($persona && strtolower($persona->typeofDocument) !== 'ruc') {
-                       return response()->json(['error' => 'Si se agregó Documento Anexo, el Remitente debe ser una Empresa'], 422);
-                   }
-               }
+            // Verifica que el 'sender_id' esté presente en la solicitud antes de buscar la persona.
+            $senderId = $request->input('sender_id');
+            if ($senderId) {
+                $persona = Person::find($senderId);
+
+                // Si la persona existe, verifica que el tipo de documento sea "ruc" (sin importar mayúsculas/minúsculas).
+                if ($persona && strtolower($persona->typeofDocument) !== 'ruc') {
+                    return response()->json(['error' => 'Si se agregó Documento Anexo, el Remitente debe ser una Empresa'], 422);
+                }
+            }
         }
 
-        if( $request->input('type') != "Electronica"){
+        if ($request->input('type') != "Electronica") {
             $correlativo_manual = $request->input('serie') . "-" . $request->input('number');
             $correlativo_manual = $this->algoritmoanexos($correlativo_manual);
 
             $exists = Carrierguide::where('numero', $correlativo_manual)
-            ->where('status_facturado', '!=', 'Anulada')
-            ->where('type', 'manual')
-            ->where('id', '!=', $id) // Excluir el registro actual
-            ->exists();
+                ->where('status_facturado', '!=', 'Anulada')
+                ->where('type', 'manual')
+                ->where('id', '!=', $id) // Excluir el registro actual
+                ->exists();
             if ($exists) {
                 return response()->json(['error' => 'Este número ya se tiene registrado'], 422);
             }
         }
 
-
         $Data = [
 
             // 'status' => $request->input('status') ?? null,
-            'document' => $document ?? null,
-            'subContract' => $request->input('subContract') ?? null,
-            'transferStartDate' => $request->input('transferStartDate') ?? null,
+            'document'              => $document ?? null,
+            'subContract'           => $request->input('subContract') ?? null,
+            'transferStartDate'     => $request->input('transferStartDate') ?? null,
             'transferDateEstimated' => $request->input('transferDateEstimated') ?? null,
-            'observation' => $request->input('observation') ?? null,
+            'observation'           => $request->input('observation') ?? null,
 
-            'carrier' => $request->input('carrier') ?? null,
-            'tract_id' => $request->input('tract_id') ?? null,
-            'platform_id' => $request->input('platform_id') ?? null,
-            'origin_id' => $request->input('origin_id') ?? null,
-            'destination_id' => $request->input('destination_id') ?? null,
-            'sender_id' => $request->input('sender_id') ?? null,
-            'recipient_id' => $request->input('recipient_id') ?? null,
-            'reasonForTransfer' => $request->input('reasonForTransfer') ?? null,
-            'payResponsible_id' => $request->input('payResponsible_id') ?? null,
-            'driver_id' => $request->input('driver_id') ?? null,
-            'copilot_id' => $request->input('copilot_id') ?? null,
-            'subcontract_id' => $request->input('subcontract_id') ?? null,
+            'carrier'               => $request->input('carrier') ?? null,
+            'tract_id'              => $request->input('tract_id') ?? null,
+            'platform_id'           => $request->input('platform_id') ?? null,
+            'origin_id'             => $request->input('origin_id') ?? null,
+            'destination_id'        => $request->input('destination_id') ?? null,
+            'sender_id'             => $request->input('sender_id') ?? null,
+            'recipient_id'          => $request->input('recipient_id') ?? null,
+            'reasonForTransfer'     => $request->input('reasonForTransfer') ?? null,
+            'payResponsible_id'     => $request->input('payResponsible_id') ?? null,
+            'driver_id'             => $request->input('driver_id') ?? null,
+            'copilot_id'            => $request->input('copilot_id') ?? null,
+            'subcontract_id'        => $request->input('subcontract_id') ?? null,
 
-            'districtStart_id' => $request->input('districtStart_id') ?? null,
-            'districtEnd_id' => $request->input('districtEnd_id') ?? null,
+            'districtStart_id'      => $request->input('districtStart_id') ?? null,
+            'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
 
-            'motivo' => $motivoNombre ?? null,
-            'codemotivo' => $motivoCode ?? null,
-            'placa' => $vehicle->currentPlate ?? '-' ?? null,
+            'motivo'                => $motivoNombre ?? null,
+            'codemotivo'            => $motivoCode ?? null,
+            'placa'                 => $vehicle->currentPlate ?? '-' ?? null,
 
-            'branch_office' => $request->input('branch_office') ?? null,
-            'reception_id' => $request->input('reception_id') ?? null,
+            'branch_office'         => $request->input('branch_office') ?? null,
+            'reception_id'          => $request->input('reception_id') ?? null,
 
-            'ubigeoStart' => $request->input('ubigeoStart') ?? null,
-            'ubigeoEnd' => $request->input('ubigeoEnd') ?? null,
-            'addressStart' => $request->input('addressStart') ?? null,
-            'addressEnd' => $request->input('addressEnd') ?? null,
+            'ubigeoStart'           => $request->input('ubigeoStart') ?? null,
+            'ubigeoEnd'             => $request->input('ubigeoEnd') ?? null,
+            'addressStart'          => $request->input('addressStart') ?? null,
+            'addressEnd'            => $request->input('addressEnd') ?? null,
 
-            'motive_id' => $request->input('motive_id') ?? null,
-            'user_edited_id' => Auth::user()->id,
+            'motive_id'             => $request->input('motive_id') ?? null,
+            'user_edited_id'        => Auth::user()->id,
 
         ];
 
         $object->update($Data);
 
         $object->ubigeoStart = District::find($request->input('districtStart_id'))->ubigeo_code;
-        $object->ubigeoEnd = District::find($request->input('districtEnd_id'))->ubigeo_code;
+        $object->ubigeoEnd   = District::find($request->input('districtEnd_id'))->ubigeo_code;
         $object->save();
 
         $object->type = $request->input('type') ?? 'Electronica';
 
         $object->number = $request->input('number');
-        $object->serie = $request->input('serie');
+        $object->serie  = $request->input('serie');
 
         $object->save();
 
@@ -819,6 +825,16 @@ class CarrierGuideController extends Controller
         }
         $object->save();
 
+        if ($object->subcontract_id != null) {
+            $cost = $request->costsubcontract ?? null;
+            $data = $request->datasubcontrata ?? [];
+            $validator = Validator::make($data, (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()->first()], 422);
+            }else{
+                $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $cost, $data);
+            }
+        }
         $object = CarrierGuide::with('tract', 'platform', 'motive',
             'origin', 'destination',
             'sender', 'recipient',
@@ -828,14 +844,14 @@ class CarrierGuideController extends Controller
         )->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'carrier_guides', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Actualizar GRT', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+            'record_id'   => $object->id,      // El ID del usuario afectado
+            'action'      => 'PUT',            // Acción realizada
+            'table_name'  => 'carrier_guides', // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Actualizar GRT',      // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         return response()->json($object, 200);
     }
@@ -946,11 +962,11 @@ class CarrierGuideController extends Controller
 
         $carrierGuide = CarrierGuide::find($id);
 
-        if (!$carrierGuide) {
+        if (! $carrierGuide) {
             return response()->json(['message' => 'Carrier Guide not found'], 422);
         }
 
-        $carrierGuide->status = $request->input('status');
+        $carrierGuide->status         = $request->input('status');
         $carrierGuide->user_edited_id = Auth::user()->id;
         $carrierGuide->save();
 
@@ -963,14 +979,14 @@ class CarrierGuideController extends Controller
             ->find($id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $carrierGuide->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'carrier_guides', // Tabla afectada
-            'data' => json_encode($carrierGuide),
+            'user_id'     => Auth::id(),        // ID del usuario que realiza la acción
+            'record_id'   => $carrierGuide->id, // El ID del usuario afectado
+            'action'      => 'POST',            // Acción realizada
+            'table_name'  => 'carrier_guides',  // Tabla afectada
+            'data'        => json_encode($carrierGuide),
             'description' => 'Actualizó Estado de GRT', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),             // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),      // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($carrierGuide, 200);
@@ -987,14 +1003,14 @@ class CarrierGuideController extends Controller
         } else {
             if ($authuser->id != $carrier->user_created_id) {
                 Bitacora::create([
-                    'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                    'record_id' => $carrier->id, // El ID del usuario afectado
-                    'action' => 'POST', // Acción realizada
-                    'table_name' => 'carrier_guides', // Tabla afectada
-                    'data' => json_encode($carrier),
+                    'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+                    'record_id'   => $carrier->id,     // El ID del usuario afectado
+                    'action'      => 'POST',           // Acción realizada
+                    'table_name'  => 'carrier_guides', // Tabla afectada
+                    'data'        => json_encode($carrier),
                     'description' => 'Declarar GRT Manual - Validación El usuario logueado no es el usuario que creó la GRT', // Descripción de la acción
-                    'ip_address' => $request->ip(), // Dirección IP del usuario
-                    'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+                    'ip_address'  => $request->ip(),                                                                            // Dirección IP del usuario
+                    'user_agent'  => $request->userAgent(),                                                                     // Información sobre el navegador/dispositivo
                 ]);
                 return response()->json(['message' => 'El usuario logueado no es el usuario que creó la GRT'], 422);
             }
@@ -1002,7 +1018,7 @@ class CarrierGuideController extends Controller
 
         $funcion = "enviarGuiaRemision";
 
-        if (!$carrier) {
+        if (! $carrier) {
             return response()->json(['message' => 'GUIA NO ENCONTRADA'], 422);
         }
         if ($carrier->status_facturado != 'Pendiente') {
@@ -1010,10 +1026,10 @@ class CarrierGuideController extends Controller
         }
 
         //Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
-            'idventa' => $idventa,
+            'funcion'    => $funcion,
+            'idventa'    => $idventa,
             'empresa_id' => 1,
         ];
         $url .= '?' . http_build_query($params);
@@ -1035,14 +1051,14 @@ class CarrierGuideController extends Controller
             Log::error("Error en cURL al enviar VENTA. ID venta: $idventa,$funcion Error: $error");
             // echo 'Error en cURL: ' . $error;
             Bitacora::create([
-                'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                'record_id' => null, // El ID del usuario afectado
-                'action' => 'POST', // Acción realizada
-                'table_name' => 'carrier_guides', // Tabla afectada
-                'data' => null,
+                'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+                'record_id'   => null,             // El ID del usuario afectado
+                'action'      => 'POST',           // Acción realizada
+                'table_name'  => 'carrier_guides', // Tabla afectada
+                'data'        => null,
                 'description' => 'DECLARAR GUIA: Error en cURL al enviar GUIA. ID guia: $idventa,$funcion Error: $error', // Descripción de la acción
-                'ip_address' => $request->ip(), // Dirección IP del usuario
-                'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+                'ip_address'  => $request->ip(),                                                                          // Dirección IP del usuario
+                'user_agent'  => $request->userAgent(),                                                                   // Información sobre el navegador/dispositivo
             ]);
         } else {
             // Registrar la respuesta en el log
@@ -1076,14 +1092,14 @@ class CarrierGuideController extends Controller
         )->find($carrier->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $carrier->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'carrier_guides', // Tabla afectada
-            'data' => json_encode($carrier),
+            'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+            'record_id'   => $carrier->id,     // El ID del usuario afectado
+            'action'      => 'POST',           // Acción realizada
+            'table_name'  => 'carrier_guides', // Tabla afectada
+            'data'        => json_encode($carrier),
             'description' => 'Declarar GRT Manual', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($carrier, 200);
@@ -1111,10 +1127,10 @@ class CarrierGuideController extends Controller
             $idventa = $carrier->id;
             $contador++;
             // Construir la URL con los parámetros
-            $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+            $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
             $params = [
-                'funcion' => $funcion,
-                'idventa' => $idventa,
+                'funcion'    => $funcion,
+                'idventa'    => $idventa,
                 'empresa_id' => 1,
             ];
             $url .= '?' . http_build_query($params);
@@ -1156,8 +1172,8 @@ class CarrierGuideController extends Controller
 
     public function algoritmoanexos($document)
     {
-        $pattern = '/([A-Za-z0-9]+)-([0-9]{1,8})/';
-        $documentsArray = explode(',', $document);
+        $pattern            = '/([A-Za-z0-9]+)-([0-9]{1,8})/';
+        $documentsArray     = explode(',', $document);
         $formattedDocuments = []; // Inicializar arreglo para documentos formateados
 
         if (strpos($document, '-') !== false && $document != '' && $document != null) {
@@ -1176,9 +1192,9 @@ class CarrierGuideController extends Controller
                     $serie = strtoupper(substr(str_replace(' ', '', $beforeDash), -4));
                     $serie = str_pad($serie, 4, '0', STR_PAD_LEFT); // Completar la serie con ceros si es necesario
 
-                    // Limpiar el correlativo y tomar solo los últimos 8 dígitos
-                    $correlativo = preg_replace('/\D/', '', $afterDash); // Eliminar caracteres no numéricos
-                    $correlativo = substr($correlativo, -8); // Tomar solo los últimos 8 dígitos
+                                                                                // Limpiar el correlativo y tomar solo los últimos 8 dígitos
+                    $correlativo = preg_replace('/\D/', '', $afterDash);        // Eliminar caracteres no numéricos
+                    $correlativo = substr($correlativo, -8);                    // Tomar solo los últimos 8 dígitos
                     $correlativo = str_pad($correlativo, 8, '0', STR_PAD_LEFT); // Completar con ceros si es necesario
 
                     // Combinar la serie y el correlativo en el formato requerido
@@ -1206,7 +1222,7 @@ class CarrierGuideController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'GUIA NO ENCONTRADA'], 422);
         }
 
@@ -1230,75 +1246,75 @@ class CarrierGuideController extends Controller
         if (empty($nombre)) {
             return response()->json(['error' => 'El campo Nombre es Requerido'], 422);
         }
-    
+
         $funcion = "getstatusservidor";
-    
+
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
+            'funcion'         => $funcion,
             'nombresolicitud' => $nombre,
-            'empresa_id' => 437,
-            'fecini' => '',
-            'fecfin' => '',
+            'empresa_id'      => 437,
+            'fecini'          => '',
+            'fecfin'          => '',
         ];
         $url .= '?' . http_build_query($params);
-    
+
         // Inicializar cURL
         $ch = curl_init();
-    
+
         // Configurar opciones cURL
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
+
         // Ejecutar la solicitud y obtener la respuesta
         $response = curl_exec($ch);
-        $data = [];
-    
+        $data     = [];
+
         // Verificar si ocurrió algún error
         if (curl_errno($ch)) {
             $error = curl_error($ch);
             // Registrar el error en el log
             Log::error("Error en cURL al Consultar estado de facturación. Nombre: $nombre,$funcion Error: $error");
-    
+
             // Definir la respuesta de error
             $data = [
-                "mensaje" => 'Error',
+                "mensaje"           => 'Error',
                 "nombre-solicitado" => $nombre,
-                "response" => [],
-                "status" => null,
+                "response"          => [],
+                "status"            => null,
             ];
         } else {
             // Verificar si la respuesta está vacía o no es válida
             if (empty($response)) {
                 Log::error("Respuesta vacía al Consultar estado de facturación. Nombre: $nombre, $funcion");
-    
+
                 $data = [
-                    "mensaje" => 'Error',
+                    "mensaje"           => 'Error',
                     "nombre-solicitado" => $nombre,
-                    "response" => [],
-                    "status" => null,
+                    "response"          => [],
+                    "status"            => null,
                 ];
             } else {
                 Log::info("Respuesta recibida al Consultar estado de facturación. Nombre: $nombre,$funcion Respuesta: $response");
                 $responseArray = json_decode($response, true); // Convertir JSON a array
-    
+
                 // Verificar si 'data' existe en la respuesta
                 $status = isset($responseArray['data'][0]['descripcion']) ? $responseArray['data'][0]['descripcion'] : null;
-    
+
                 $data = [
-                    "mensaje" => 'Correcto',
+                    "mensaje"           => 'Correcto',
                     "nombre-solicitado" => $nombre,
-                    "response" => $responseArray,
-                    "status" => $status,
+                    "response"          => $responseArray,
+                    "status"            => $status,
                 ];
             }
         }
-    
+
         // Cerrar cURL
         curl_close($ch);
-    
+
         return response()->json($data, 200);
     }
-    
+
 }

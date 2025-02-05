@@ -222,6 +222,8 @@ class CarrierGuide extends Model
         'driver_id',
         'copilot_id',
         'subcontract_id',
+        'costsubcontract',
+        'datasubcontract',
 
         'branchOffice_id',
 
