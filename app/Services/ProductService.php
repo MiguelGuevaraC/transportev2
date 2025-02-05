@@ -47,7 +47,7 @@ class ProductService
                 $query->where('status_facturado', '!=', 'Anulada');
             })->whereNull('deleted_at')->sum('cant');
 
-        $product->stock = max(0, ($movimientos->stock_calculado ?? 0) - $detallesRecepcion);
+        $product->stock = ($movimientos->stock_calculado ?? 0) - $detallesRecepcion;
         $product->save();
     }
 
