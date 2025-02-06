@@ -179,8 +179,14 @@ class Person extends Model
     {
         return $this->hasMany(Moviment::class, 'person_id')->where('movType', 'Venta');
     }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 
-
-
+    public function tarifas()
+    {
+        return $this->hasMany(Tarifario::class);
+    }
 
 }

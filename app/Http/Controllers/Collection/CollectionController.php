@@ -371,10 +371,12 @@ public function applyNameFilter($query, $searchTermUpper)
             $clients_per_page = 10; // Default value if NaN or non-positive
         }
 
-        $clients = Person::where('branchOffice_id', $branch_office_id)
+        $clients = Person::with(['tarifas.unity','products.unity'])
+        ->where('branchOffice_id', $branch_office_id)
             ->where("type", 'Cliente')
 
-            ->orderBy('id', 'desc')->paginate($clients_per_page, ['*'], 'clients_page', $clients_page);
+            ->orderBy('id', 'desc')
+            ->paginate($clients_per_page, ['*'], 'clients_page', $clients_page);
 
         // Subcontracts pagination
         $subcontracts_page = $request->input('subcontracts_page', 1);

@@ -3292,7 +3292,7 @@ class VentaController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/paymasivesalebyinstallmentdebt",
+     *     path="/transportev2/public/api/paymasive",
      *     summary="Realiza un pago masivo por cuotas pendientes",
      *     description="Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
      *     tags={"Sale"},
