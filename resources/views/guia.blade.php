@@ -32,7 +32,7 @@
         // Corregido el operador ternario y la concatenación
         return $cadena;
     }
-   
+
     function getArchivosDocument($idventa, $typeDocument)
     {
         $funcion = 'buscarNumeroSolicitud';
@@ -77,10 +77,30 @@
         }
     }
 
-
     $receptionDetails = $object->reception->details;
     $descriptions = $receptionDetails->pluck('description')->toArray();
     $descriptionString = implode(', ', $descriptions);
+
+    $conductor1name = personNames($object->driver?->person ?? '');
+    $conductor2name = personNames($object->copilot?->person ?? '');
+    $licencia1 = $object->driver?->licencia ?? '';
+    $licencia2 = $object->copilot?->licencia ?? '';
+    $placa1 = $object->tract?->currentPlate ?? '';
+    $placa2 = $object->platform?->currentPlate ?? '';
+    $mtc1 = $object->tract?->numberMtc ?? '';
+    $mtc2 = $object->platform?->numberMtc ?? '';
+
+    if ($object->subcontract_id !== null) {
+        $data = json_decode($object->datasubcontract, true);
+        $conductor1name = $data['namedriver'] . ' ' . $data['lastnamedriver'] ?? '';
+        $conductor2name ='';
+        $licencia1 = $data['licenciadriver'] ?? '';
+        $placa1 = $data['placa1'] ?? '';
+        $placa2 = $data['placa2'] ?? '';
+        $mtc1 = $data['mtc1'] ?? '';
+        $mtc2 = $data['mtc2'] ?? '';
+        
+    }
 
 @endphp
 
@@ -435,19 +455,19 @@
         <table>
             <tr>
                 <th class="blue left" style="font-size: 10px; width: 41%;">
-                    
+
                 </th>
                 <th class="blue left" style="font-size: 10px; width: 39%;">
                     <b> Número de Registro o MTC: 1596501CNG</b>
                 </th>
                 <th class="blue left" style="font-size: 10px; width: 20%;">
-                    
+
                 </th>
             </tr>
         </table>
         <br>
         <table>
-    
+
             <tr>
                 <td class="w10 blue left" style="font-size: 10px">
                     <b> OPERACIONES LOGISTICAS HERNANDEZ S.A.C.</b>
@@ -455,13 +475,15 @@
             </tr>
             <tr>
                 <td class="w10 blue left font-10">
-                    Domicilio Fiscal: CAL.TAHUANTINSUYO NRO. 812 P.J. LA ESPERANZA LA LIBERTAD - TRUJILLO - LA ESPERANZA.
-                    
+                    Domicilio Fiscal: CAL.TAHUANTINSUYO NRO. 812 P.J. LA ESPERANZA LA LIBERTAD - TRUJILLO - LA
+                    ESPERANZA.
+
                 </td>
             </tr>
             <tr>
                 <td class="w10 blue left font-10">
-                    Domicilio Comercial: MZA. 38 LOTE. 4A INT. 302 P.J. CHOSICA DEL NORTE LAMBAYEQUE CHICLAYO LA VICTORIA
+                    Domicilio Comercial: MZA. 38 LOTE. 4A INT. 302 P.J. CHOSICA DEL NORTE LAMBAYEQUE CHICLAYO LA
+                    VICTORIA
                 </td>
             </tr>
         </table>
@@ -655,7 +677,7 @@
 
             </tr>
 
-   
+
 
 
 
@@ -783,41 +805,39 @@
                     Conductor:
                 </th>
                 <td class="w20">
-                    {{ personNames($object->driver?->person ?? '') }}
+                    {{ $conductor1name }}
                 </td>
 
                 <th class="w20 blue">
-                    @if ($object->copilot?->person)
+                    @if ($conductor2name!='')
                         Copiloto
                     @else
                     @endif
                 </th>
                 <td class="w20">
-                    @if ($object->copilot?->person)
-                        {{ personNames($object->copilot?->person) }}
+                    @if ($conductor2name!='')
+                        {{ $conductor2name }}
                     @else
                     @endif
                 </td>
             </tr>
 
             <tr>
-
                 <th class="w20 blue">
                     Licencia
                 </th>
-                <td class="w20">{{ $object->driver?->licencia ?? '' }}
+                <td class="w20">{{ $licencia1 }}
                 </td>
 
-
                 <th class="w20 blue">
-                    @if ($object->copilot?->person)
+                    @if ($conductor2name!='')
                         Licencia
                     @else
                     @endif
                 </th>
                 <td class="w20">
-                    @if ($object->copilot?->person)
-                        {{ $object->copilot?->licencia }}
+                    @if ($conductor2name!='')
+                        {{ $licencia2 }}
                     @else
                     @endif
                 </td>
@@ -832,19 +852,19 @@
                     Placa:
                 </th>
                 <td class="w50">
-                    {{ $object->tract?->currentPlate }}
+                    {{ $placa1 }}
                 </td>
 
 
                 <th class="w20 blue">
-                    @if ($object->platform?->currentPlate)
+                    @if ($placa2 != '')
                         Carreta
                     @else
                     @endif
                 </th>
                 <td class="w50">
-                    @if ($object->platform?->currentPlate)
-                        {{ $object->platform->currentPlate }}
+                    @if ($placa2 != '')
+                        {{ $placa2 }}
                     @else
                     @endif
                 </td>
@@ -857,18 +877,18 @@
                     N° MTC:
                 </th>
                 <td class="w20">
-                    {{ $object?->tract?->numberMtc ?? '' }}
+                    {{ $mtc1 }}
                 </td>
 
                 <th class="w20 blue">
-                    @if ($object->platform?->currentPlate)
+                    @if ($placa2 != '')
                         N° MTC:
                     @else
                     @endif
                 </th>
                 <td class="w20">
-                    @if ($object->platform?->currentPlate)
-                        {{ $object->platform?->numberMtc }}
+                    @if ($placa2 != '')
+                        {{ $mtc2 }}
                     @else
                     @endif
                 </td>
@@ -892,26 +912,31 @@
 
 
 
-        
-        <table class="footer" style="width: 100%; border-collapse: collapse; background-color: white; 
+
+        <table class="footer"
+            style="width: 100%; border-collapse: collapse; background-color: white; 
         margin-top:150px;text-align: right;">
             <tr>
                 <th style="width: 30%; text-align: center; font-weight: normal;">
                     {{ getArchivosDocument($object->id, 'guia') }}
                 </th>
-                <th style="width: 25%; text-align: left; font-weight: normal;">Representación impresa de la GUIA DE REMISIÓN REMITENTE ELECTRÓNICA. Consulte en 
-                    <a href="https://facturae-garzasoft.com" style="text-decoration: none; color: inherit;" target="_blank">
+                <th style="width: 25%; text-align: left; font-weight: normal;">Representación impresa de la GUIA DE
+                    REMISIÓN REMITENTE ELECTRÓNICA. Consulte en
+                    <a href="https://facturae-garzasoft.com" style="text-decoration: none; color: inherit;"
+                        target="_blank">
                         https://facturae-garzasoft.com
                     </a>
                 </th>
                 <th style="width: 45%;  text-align: center; font-weight: normal;">
-                    <div style="border: 1px solid black;text-align: center; width: 230px; height: 80px; 
-                    margin: 10px auto; border-radius: 10px;"></div> <!-- Cuadrado para firma -->
+                    <div
+                        style="border: 1px solid black;text-align: center; width: 230px; height: 80px; 
+                    margin: 10px auto; border-radius: 10px;">
+                    </div> <!-- Cuadrado para firma -->
                     <div><b>Recibí Conforme</b></div>
                 </th>
             </tr>
         </table>
-            
+
 
     </div>
 

@@ -17,7 +17,7 @@ class CargoController extends Controller
             'reception_id' => 'required|integer|exists:receptions,id',
             'cargos' => 'required|array', // Validar que "cargos" es un array
             'cargos.*.description' => 'nullable|string', // Cada cargo puede tener una descripción
-            'cargos.*.file' => 'required|file|mimes:pdf,jpg,png,doc,docx|max:2048', // Validar cada archivo
+            'cargos.*.file' => 'required|file|mimes:pdf,jpg,png,doc,docx', // Validar cada archivo
         ]);
 
         if ($validator->fails()) {

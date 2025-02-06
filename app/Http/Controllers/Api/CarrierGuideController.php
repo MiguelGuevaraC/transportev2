@@ -301,35 +301,36 @@ class CarrierGuideController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-
             'ubigeoStart'       => 'nullable',
             'ubigeoEnd'         => 'nullable',
             'addressStart'      => 'required',
             'addressEnd'        => 'required',
             'motive_id'         => 'required|exists:motives,id',
-
-            'tract_id'          => 'required|exists:vehicles,id',
+        
+            'tract_id'          => 'required_without:subcontract_id|exists:vehicles,id',
             'platform_id'       => 'nullable|exists:vehicles,id',
-
+        
             'origin_id'         => 'required|exists:places,id',
             'destination_id'    => 'required|exists:places,id',
-
+        
             'sender_id'         => 'required|exists:people,id',
             'recipient_id'      => 'required|exists:people,id',
-
+        
             'payResponsible_id' => 'required|exists:people,id',
-
             'reception_id'      => 'required|exists:receptions,id',
-
             'branch_office_id'  => 'nullable|exists:branch_offices,id',
-            'driver_id'         => 'required|exists:workers,id',
+        
+            'driver_id'         => 'required_without:subcontract_id|exists:workers,id',
             'copilot_id'        => 'nullable|exists:workers,id',
+        
             'subcontract_id'    => 'nullable|exists:subcontracts,id',
-
+        
             'districtStart_id'  => 'required|exists:districts,id',
             'districtEnd_id'    => 'required|exists:districts,id',
-
         ]);
+        
+        
+        
 
         if ($validator->fails()) {
             Bitacora::create([
