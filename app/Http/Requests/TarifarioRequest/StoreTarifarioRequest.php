@@ -42,7 +42,7 @@ class StoreTarifarioRequest extends StoreRequest
      public function rules()
      {
          return [
-             'tarifa'       => 'nullable|string',
+             'tarifa'       => 'nullable|numeric',
              'description'  => 'nullable|string',
              'person_id'    => 'nullable|string',
              'unity_id'     => [
@@ -60,7 +60,7 @@ class StoreTarifarioRequest extends StoreRequest
      public function messages()
      {
          return [
-             'tarifa.string'       => 'La tarifa debe ser un texto válido.',
+             'tarifa.numeric'       => 'La tarifa debe ser decimal.',
              'description.string'  => 'La descripción debe ser un texto válido.',
              'person_id.string'    => 'El ID de la persona debe ser un texto válido.',
              'unity_id.required'   => 'La unidad es obligatoria.',

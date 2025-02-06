@@ -28,7 +28,7 @@ class UpdateTarifarioRequest extends UpdateRequest
         $id = $this->route('id'); // Obtén el ID de la ruta, que se asume que es el ID del usuario
 
         return [
-            'tarifa'      => 'nullable|string',
+            'tarifa'       => 'nullable|numeric',
             'description' => 'nullable|string',
             'person_id'   => 'nullable|string',
             'unity_id'    => [
@@ -46,7 +46,7 @@ class UpdateTarifarioRequest extends UpdateRequest
     public function messages()
     {
         return [
-            'tarifa.string'      => 'La tarifa debe ser un texto válido.',
+            'tarifa.numeric'       => 'La tarifa debe ser decimal.',
             'description.string' => 'La descripción debe ser un texto válido.',
             'person_id.string'   => 'El ID de la persona debe ser un texto válido.',
             'unity_id.required'  => 'La unidad es obligatoria.',
