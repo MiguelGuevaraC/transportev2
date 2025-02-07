@@ -27,9 +27,9 @@ class UpdateCargaDocumentRequest extends UpdateRequest
         return [
             'movement_date' => 'required|date',
             'quantity'      => 'required|numeric|min:0',
-            // 'unit_price'    => 'nullable|numeric|min:0',
-            // 'total_cost'    => 'nullable|numeric|min:0',
-            // 'weight'        => 'nullable|numeric|min:0',
+            'unit_price'    => 'nullable|numeric|min:0',
+            'total_cost'    => 'nullable|numeric|min:0',
+            'weight'        => 'nullable|numeric|min:0',
             'movement_type' => 'required|string|in:ENTRADA,SALIDA',
 
             'comment'       => 'nullable|string|max:500',
