@@ -32,7 +32,6 @@
         // Corregido el operador ternario y la concatenación
         return $cadena;
     }
-
     function getArchivosDocument($idventa, $typeDocument)
     {
         $funcion = 'buscarNumeroSolicitud';
