@@ -24,13 +24,13 @@ class IndexProductRequest extends IndexRequest
     {
         return [
  
-            'description' => 'nullable|integer',
-            'stock' => 'nullable|integer',
-            'weight' => 'nullable|integer',
-            'category' => 'nullable|integer',
-            'unity' => 'nullable|integer',
-            'unity_id' => 'nullable|integer',
-            'person_id' => 'nullable|integer',
+            'description' => 'nullable|string',
+            'stock' => 'nullable|string',
+            'weight' => 'nullable|string',
+            'category' => 'nullable|string',
+            'unity' => 'nullable|string',
+            'unity_id' => 'nullable|string',
+            'person_id' => 'nullable|string',
         ];
     }
     

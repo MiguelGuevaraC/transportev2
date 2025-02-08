@@ -72,14 +72,15 @@ class ProductController extends Controller
     {
 
         $producto = $this->productService->getProductById($id);
-        $this->productService->updatestock(Product::find($producto->id));
+
 
         if (! $producto) {
             return response()->json([
                 'error' => 'Producto No Encontrado',
             ], 404);
         }
-
+        $this->productService->updatestock(Product::find($producto->id));
+        
         return new ProductResource($producto);
     }
 
