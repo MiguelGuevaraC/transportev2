@@ -20,7 +20,7 @@ class ProductResource extends JsonResource
  *     @OA\Property(property="unity_id", type="integer", description="Unit of measurement ID"),
  *     @OA\Property(property="unity", ref="#/components/schemas/Unity"),
  *     @OA\Property(property="person_id", type="integer", description="Person ID associated with the product"),
- *     @OA\Property(property="person", ref="#/components/schemas/Person"),
+
  *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation date in YYYY-MM-DD HH:MM:SS format")
  * )
  */
@@ -36,7 +36,7 @@ class ProductResource extends JsonResource
             'unity_id'    => $this->unity_id ?? null,
             'unity'       => $this->unity ? new UnityResource($this->unity) : null,
             'person_id'   => $this->person_id ?? null,
-            'person'      => $this->person ? $this->person : null,
+
             'created_at'  => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
