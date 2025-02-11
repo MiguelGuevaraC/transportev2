@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Exports\CajaExport;
@@ -71,7 +70,7 @@ class PdfController extends Controller
     {
         $object = CarrierGuide::find($id);
 
-        if (!$object) {
+        if (! $object) {
             abort(404);
         }
         $this->generarQrGuia();
@@ -96,14 +95,14 @@ class PdfController extends Controller
         // return view('guia')->render();
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'GET', // Acción realizada
-            'table_name' => 'carrier_guides', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),       // ID del usuario que realiza la acción
+            'record_id'   => $object->id,      // El ID del usuario afectado
+            'action'      => 'GET',            // Acción realizada
+            'table_name'  => 'carrier_guides', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'DESCARGÓ PDF DE GUIA', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),          // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),   // Información sobre el navegador/dispositivo
         ]);
 
         $html = view('guia', compact('object'))->render();
@@ -130,7 +129,7 @@ class PdfController extends Controller
             'payResponsible', 'driver', 'copilot', 'copilot.person', 'subcontract', 'driver.person', 'reception'
         )->find($id);
 
-        if (!$object) {
+        if (! $object) {
             abort(404);
         }
         $this->generarQrGuia();
@@ -157,15 +156,15 @@ class PdfController extends Controller
 
         $Movimiento = Moviment::with(['reception',
             'reception.firstCarrierGuide.origin', 'reception.firstCarrierGuide.destination'])->find($object->moviment_id);
-        $linkRevisarFact = false;
-        $pointSend = strtoupper($Movimiento->reception?->pointSender?->name) ?? '';
-        $pointDestination = strtoupper($Movimiento->reception?->pointDestination?->name ?? '');
-        $ruta = $pointSend . ' - ' . $pointDestination;
-        $receptionDetails = $Movimiento?->reception?->details() ?? [];
+        $linkRevisarFact   = false;
+        $pointSend         = strtoupper($Movimiento->reception?->pointSender?->name) ?? '';
+        $pointDestination  = strtoupper($Movimiento->reception?->pointDestination?->name ?? '');
+        $ruta              = $pointSend . ' - ' . $pointDestination;
+        $receptionDetails  = $Movimiento?->reception?->details() ?? [];
         $descriptionString = '';
         if ($receptionDetails != []) {
-            $descriptions = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
-            $descriptionString = implode(', ', $descriptions); // Une las descripciones con comas
+            $descriptions      = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
+            $descriptionString = implode(', ', $descriptions);                               // Une las descripciones con comas
         }
         if ($Movimiento) {
             $productList = $Movimiento->detalles;
@@ -174,15 +173,15 @@ class PdfController extends Controller
         $detalles = [];
 
         $motiveMap = [
-            1 => 'Anulación de la Operación',
-            2 => 'Anulación por error en el RUC',
-            3 => 'Corrección por error en la descripción',
-            4 => 'Descuento global',
-            5 => 'Descuento por ítem',
-            6 => 'Devolución total',
-            7 => 'Devolución por ítem',
-            8 => 'Bonificación',
-            9 => 'Disminución en el valor',
+            1  => 'Anulación de la Operación',
+            2  => 'Anulación por error en el RUC',
+            3  => 'Corrección por error en la descripción',
+            4  => 'Descuento global',
+            5  => 'Descuento por ítem',
+            6  => 'Devolución total',
+            7  => 'Devolución por ítem',
+            8  => 'Bonificación',
+            9  => 'Disminución en el valor',
             10 => 'Otros conceptos',
             13 => 'Ajuste Monto y Fecha',
         ];
@@ -193,11 +192,11 @@ class PdfController extends Controller
         if ($object->total < $object->totalReferido) {
 
             $detalles[] = [
-                "descripcion" => $motiveName ?? '-',
-                "os" => '-',
-                "guia" => '-',
-                "placaVehiculo" => '-',
-                "cantidad" => 1, // Cantidad fija (es un servicio)
+                "descripcion"              => $motiveName ?? '-',
+                "os"                       => '-',
+                "guia"                     => '-',
+                "placaVehiculo"            => '-',
+                "cantidad"                 => 1, // Cantidad fija (es un servicio)
                 "precioventaunitarioxitem" => $object->total ?? 0,
             ];
 
@@ -209,26 +208,26 @@ class PdfController extends Controller
 
                     // Usar operadores de navegación segura y coalescencia para evitar errores y asignar valores por defecto
                     $detalles[] = [
-                        "descripcion" => $producto->description ?? '-',
-                        "os" => $producto->os ?? '-',
-                        "guia" => $producto->guia ?? '-',
-                        "placaVehiculo" => $producto->placa ?? '-',
-                        "cantidad" => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
+                        "descripcion"              => $producto->description ?? '-',
+                        "os"                       => $producto->os ?? '-',
+                        "guia"                     => $producto->guia ?? '-',
+                        "placaVehiculo"            => $producto->placa ?? '-',
+                        "cantidad"                 => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
                         "precioventaunitarioxitem" => $producto->precioVenta ?? 0,
                     ];
                 }
             }
         }
         $tipoDocumento = '';
-        $num = $Movimiento->sequentialNumber;
+        $num           = $Movimiento->sequentialNumber;
         if (strpos($num, 'B') === 0) {
-            $tipoDocumento = 'BOLETA ELECTRÓNICA';
+            $tipoDocumento   = 'BOLETA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'F') === 0) {
-            $tipoDocumento = 'FACTURA ELECTRÓNICA';
+            $tipoDocumento   = 'FACTURA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'T') === 0) {
-            $tipoDocumento = 'TICKET ELECTRÓNICO';
+            $tipoDocumento   = 'TICKET ELECTRÓNICO';
             $linkRevisarFact = false;
         } else {
             abort(404);
@@ -236,16 +235,16 @@ class PdfController extends Controller
         $dateTime = Carbon::now()->format('Y-m-d H:i:s');
         // $personaCliente = Person::find($Movimiento->person_id);
         $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
-        $fechaInicio = $Movimiento->created_at;
-        $rucOdni = $personaCliente->documentNumber;
-        $direccion = "";
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
+        $direccion      = "";
         if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
             $nombreCliente = $personaCliente->businessName;
-            $direccion = $personaCliente->fiscalAddress ?? '-';
+            $direccion     = $personaCliente->fiscalAddress ?? '-';
         } else {
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
-            $direccion = $personaCliente->address ?? '-';
+            $direccion     = $personaCliente->address ?? '-';
         }
 
         if ($personaCliente->names == 'VARIOS') {
@@ -270,40 +269,40 @@ class PdfController extends Controller
         // }
         // Storage::disk('public')->put($filePath, $qrImage->getString());
         $dataE = [
-            'object' => $object,
-            'title' => 'NOTA DE CREDITO',
-            'linkRevisarFact' => $linkRevisarFact,
-            'ruc_dni' => $rucOdni,
-            'direccion' => $direccion,
-            'tipoElectronica' => 'NOTA DE CREDITO ELECTRÓNICA',
-            'typePayment' => $Movimiento->typePayment ?? '-',
-            'nroReferencia' => $Movimiento->sequentialNumber ?? '-',
+            'object'            => $object,
+            'title'             => 'NOTA DE CREDITO',
+            'linkRevisarFact'   => $linkRevisarFact,
+            'ruc_dni'           => $rucOdni,
+            'direccion'         => $direccion,
+            'tipoElectronica'   => 'NOTA DE CREDITO ELECTRÓNICA',
+            'typePayment'       => $Movimiento->typePayment ?? '-',
+            'nroReferencia'     => $Movimiento->sequentialNumber ?? '-',
             'numeroNotaCredito' => $object->number ?? '',
-            'comment' => $object->comment ?? '',
-            'numeroVenta' => $num,
-            'fechaemision' => $object->created_at->format('Y-m-d'),
-            'cliente' => $nombreCliente,
-            'detalles' => $detalles,
-            'vuelto' => '0.00',
-            'totalPagado' => $Movimiento->total,
-            'totalNota' => $object->total,
-            'idMovimiento' => $object->id,
+            'comment'           => $object->comment ?? '',
+            'numeroVenta'       => $num,
+            'fechaemision'      => $object->created_at->format('Y-m-d'),
+            'cliente'           => $nombreCliente,
+            'detalles'          => $detalles,
+            'vuelto'            => '0.00',
+            'totalPagado'       => $Movimiento->total,
+            'totalNota'         => $object->total,
+            'idMovimiento'      => $object->id,
 
-            'motive' => $object?->reason ?? '',
-            'formaPago' => $Movimiento->formaPago ?? '-',
-            'fechaInicio' => $fechaInicio,
-            'guia' => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
-            'placa' => $Movimiento->reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
+            'motive'            => $object?->reason ?? '',
+            'formaPago'         => $Movimiento->formaPago ?? '-',
+            'fechaInicio'       => $fechaInicio,
+            'guia'              => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'             => $Movimiento->reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
         ];
 
-        $pdf = PDF::loadView('creditNote', $dataE);
+        $pdf    = PDF::loadView('creditNote', $dataE);
         $canvas = $pdf->getDomPDF()->get_canvas();
         // $contenidoAncho = $canvas->get_width();
         $contenidoAlto = $canvas->get_height();
 
         $tipoDocumento = "07";
-        $fileName = '20605597484-' . $tipoDocumento . '-' . $object->number . '.pdf'; // Formato del nombre
-        $fileName = str_replace(' ', '_', $fileName); // Reemplazar espacios con guiones bajos
+        $fileName      = '20605597484-' . $tipoDocumento . '-' . $object->number . '.pdf'; // Formato del nombre
+        $fileName      = str_replace(' ', '_', $fileName);                                 // Reemplazar espacios con guiones bajos
         return $pdf->stream($fileName);
 
     }
@@ -356,7 +355,7 @@ class PdfController extends Controller
 
         $object = Programming::find($id);
 
-        if (!$object) {
+        if (! $object) {
             abort(404);
         }
 
@@ -367,21 +366,21 @@ class PdfController extends Controller
             'detailReceptions', 'carrierGuides.reception.details'
         )->find($id);
         $tract = $object->tract;
-        // Obtén los IDs de las guías desde la relación
+                                                                          // Obtén los IDs de las guías desde la relación
         $relationGuides = $object->carrierGuides->pluck('id')->toArray(); // IDs de las guías desde la relación
 
 // Obtén las guías directamente desde la tabla, excluyendo los eliminados
         $dbGuides = DB::table('carrier_by_programmings')
             ->where('programming_id', $id)
-            ->whereNull('deleted_at') // Excluir registros eliminados
+            ->whereNull('deleted_at')   // Excluir registros eliminados
             ->pluck('carrier_guide_id') // Obtén solo los IDs de las guías
             ->toArray();
 
 // Combina ambas fuentes y elimina duplicados
         $uniqueGuidesIds = collect($relationGuides)
             ->merge($dbGuides)
-            ->unique() // Elimina duplicados
-            ->values() // Re-indexa los valores
+            ->unique()   // Elimina duplicados
+            ->values()   // Re-indexa los valores
             ->toArray(); // Convierte a un array
 
         // Obtén los detalles completos de las guías únicas
@@ -396,14 +395,14 @@ class PdfController extends Controller
         // return view('manifiesto', compact('object'))->render();
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'GET', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'GET',          // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Descargó pdf de Manifiesto', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),                // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),         // Información sobre el navegador/dispositivo
         ]);
 
         $html = view('manifiesto', compact('object', 'titulo', 'tract'))->render();
@@ -422,7 +421,7 @@ class PdfController extends Controller
 
         $object = Programming::find($id);
 
-        if (!$object) {
+        if (! $object) {
             abort(404);
         }
 
@@ -448,15 +447,15 @@ class PdfController extends Controller
         // Obtén las guías directamente desde la tabla, excluyendo los eliminados
         $dbGuides = DB::table('carrier_by_programmings')
             ->where('programming_id', $id)
-            ->whereNull('deleted_at') // Excluir registros eliminados
+            ->whereNull('deleted_at')   // Excluir registros eliminados
             ->pluck('carrier_guide_id') // Obtén solo los IDs de las guías
             ->toArray();
 
         // Combina ambas fuentes y elimina duplicados
         $uniqueGuidesIds = collect($relationGuides)
             ->merge($dbGuides)
-            ->unique() // Elimina duplicados
-            ->values() // Re-indexa los valores
+            ->unique()   // Elimina duplicados
+            ->values()   // Re-indexa los valores
             ->toArray(); // Convierte a un array
 
         // Obtén los detalles completos de las guías únicas
@@ -469,8 +468,8 @@ class PdfController extends Controller
         foreach ($object->carrierGuides as $carrierGuide) {
             if ($carrierGuide->reception && $carrierGuide->reception->conditionPay === 'Créditos') {
                 $carrierGuide->reception->paymentAmount = -1;
-                $carrierGuide->reception->creditAmount = -1;
-                $carrierGuide->reception->debtAmount = -1;
+                $carrierGuide->reception->creditAmount  = -1;
+                $carrierGuide->reception->debtAmount    = -1;
             }
         }
 
@@ -479,14 +478,14 @@ class PdfController extends Controller
         // return view('manifiesto', compact('object'))->render();
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'GET', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'GET',          // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Descargó pdf de Manifiesto Conductor', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),                          // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),                   // Información sobre el navegador/dispositivo
         ]);
 
         $html = view('manifiesto', compact('object', 'titulo'))->render();
@@ -535,14 +534,14 @@ class PdfController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         $movCaja = Moviment::where('status', 'Activa')
@@ -550,7 +549,7 @@ class PdfController extends Controller
             ->where('box_id', $box_id)
             ->first();
 
-        if (!$box) {
+        if (! $box) {
             return response()->json([
                 "message" => "Este usuario no tiene caja",
             ], 422);
@@ -564,7 +563,7 @@ class PdfController extends Controller
                 ->where('box_id', $box_id)
                 ->first();
 
-            if (!$movCajaAperturada) {
+            if (! $movCajaAperturada) {
                 return response()->json([
                     "message" => "Movimiento de Apertura no encontrado",
                 ], 404);
@@ -588,16 +587,16 @@ class PdfController extends Controller
                 $movimientosCaja = $query->paginate(15);
 
                 $movimientosCaja = [
-                    'current_page' => $movimientosCaja->currentPage(),
-                    'data' => $movimientosCaja->items(), // Los datos paginados
-                    'total' => $movimientosCaja->total(), // El total de registros
+                    'current_page'   => $movimientosCaja->currentPage(),
+                    'data'           => $movimientosCaja->items(), // Los datos paginados
+                    'total'          => $movimientosCaja->total(), // El total de registros
                     'first_page_url' => $movimientosCaja->url(1),
-                    'from' => $movimientosCaja->firstItem(),
-                    'next_page_url' => $movimientosCaja->nextPageUrl(),
-                    'path' => $movimientosCaja->path(),
-                    'per_page' => $movimientosCaja->perPage(),
-                    'prev_page_url' => $movimientosCaja->previousPageUrl(),
-                    'to' => $movimientosCaja->lastItem(),
+                    'from'           => $movimientosCaja->firstItem(),
+                    'next_page_url'  => $movimientosCaja->nextPageUrl(),
+                    'path'           => $movimientosCaja->path(),
+                    'per_page'       => $movimientosCaja->perPage(),
+                    'prev_page_url'  => $movimientosCaja->previousPageUrl(),
+                    'to'             => $movimientosCaja->lastItem(),
                 ];
 
                 $resumenCaja = Moviment::selectRaw('
@@ -657,10 +656,10 @@ class PdfController extends Controller
             $data = [
 
                 'MovCajaApertura' => $movCajaAperturada,
-                'MovCajaCierre' => $movCajaCierre,
+                'MovCajaCierre'   => $movCajaCierre,
                 'MovCajaInternos' => $movimientosCaja,
 
-                "resumenCaja" => $resumenCaja ?? null,
+                "resumenCaja"     => $resumenCaja ?? null,
             ];
         } else {
             abort(404, 'MovCajaCierre not found');
@@ -696,15 +695,15 @@ class PdfController extends Controller
             'reception.firstCarrierGuide.origin', 'reception.firstCarrierGuide.destination'])->find($idMov);
         $linkRevisarFact = false;
 
-        $pointSend = strtoupper($Movimiento->reception?->pointSender?->name ?? '');
+        $pointSend        = strtoupper($Movimiento->reception?->pointSender?->name ?? '');
         $pointDestination = strtoupper($Movimiento->reception?->pointDestination?->name ?? '');
 
-        $ruta = $pointSend . ' - ' . $pointDestination;
-        $receptionDetails = $Movimiento?->reception?->details() ?? [];
+        $ruta              = $pointSend . ' - ' . $pointDestination;
+        $receptionDetails  = $Movimiento?->reception?->details() ?? [];
         $descriptionString = '';
         if ($receptionDetails != []) {
-            $descriptions = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
-            $descriptionString = implode(', ', $descriptions); // Une las descripciones con comas
+            $descriptions      = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
+            $descriptionString = implode(', ', $descriptions);                               // Une las descripciones con comas
         }
 
         // Inicializar el array de detalles
@@ -723,42 +722,42 @@ class PdfController extends Controller
 
                 // Usar operadores de navegación segura y coalescencia para evitar errores y asignar valores por defecto
                 $detalles[] = [
-                    "descripcion" => $producto->description ?? '-',
-                    "os" => $producto->os ?? '-',
-                    "guia" => $producto->guia ?? '-',
-                    "placaVehiculo" => $producto->placa ?? '-',
-                    "cantidad" => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
+                    "descripcion"              => $producto->description ?? '-',
+                    "os"                       => $producto->os ?? '-',
+                    "guia"                     => $producto->guia ?? '-',
+                    "placaVehiculo"            => $producto->placa ?? '-',
+                    "cantidad"                 => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
                     "precioventaunitarioxitem" => $producto->precioVenta ?? 0,
                 ];
             }
         }
 
         $tipoDocumento = '';
-        $num = $Movimiento->sequentialNumber;
+        $num           = $Movimiento->sequentialNumber;
         if (strpos($num, 'B') === 0) {
-            $tipoDocumento = 'BOLETA ELECTRÓNICA';
+            $tipoDocumento   = 'BOLETA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'F') === 0) {
-            $tipoDocumento = 'FACTURA ELECTRÓNICA';
+            $tipoDocumento   = 'FACTURA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'T') === 0) {
-            $tipoDocumento = 'TICKET ELECTRÓNICO';
+            $tipoDocumento   = 'TICKET ELECTRÓNICO';
             $linkRevisarFact = false;
         } else {
             abort(404);
         }
 
-        $dateTime = Carbon::now()->format('Y-m-d H:i:s');
+        $dateTime       = Carbon::now()->format('Y-m-d H:i:s');
         $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
-        $fechaInicio = $Movimiento->created_at;
-        $rucOdni = $personaCliente->documentNumber;
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
 
         if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
             $nombreCliente = $personaCliente->businessName;
-            $direccion = $personaCliente->fiscalAddress ?? '-';
+            $direccion     = $personaCliente->fiscalAddress ?? '-';
         } else {
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
-            $direccion = $personaCliente->address ?? '-';
+            $direccion     = $personaCliente->address ?? '-';
         }
 
         if ($personaCliente->names == 'VARIOS') {
@@ -771,33 +770,33 @@ class PdfController extends Controller
         }
 
         $dataE = [
-            'title' => 'DOCUMENTO DE PAGO',
-            'ruc_dni' => $rucOdni,
-            'direccion' => $direccion,
-            'idMovimiento' => $Movimiento->id,
+            'title'           => 'DOCUMENTO DE PAGO',
+            'ruc_dni'         => $rucOdni,
+            'direccion'       => $direccion,
+            'idMovimiento'    => $Movimiento->id,
             'tipoElectronica' => $tipoDocumento,
-            'typePayment' => $Movimiento->typePayment ?? '-',
-            'numeroVenta' => $num,
-            'porcentaje' => $Movimiento->percentDetraction,
+            'typePayment'     => $Movimiento->typePayment ?? '-',
+            'numeroVenta'     => $num,
+            'porcentaje'      => $Movimiento->percentDetraction,
 
-            'fechaemision' => $Movimiento->created_at->format('Y-m-d'),
-            'cliente' => $nombreCliente,
-            'detalles' => $detalles,
-            'cuentas' => $Movimiento->installments,
-            'vuelto' => '0.00',
-            'totalPagado' => $Movimiento->total,
+            'fechaemision'    => $Movimiento->created_at->format('Y-m-d'),
+            'cliente'         => $nombreCliente,
+            'detalles'        => $detalles,
+            'cuentas'         => $Movimiento->installments,
+            'vuelto'          => '0.00',
+            'totalPagado'     => $Movimiento->total,
             'linkRevisarFact' => $linkRevisarFact,
-            'formaPago' => $Movimiento->formaPago ?? '-',
-            'fechaInicio' => $fechaInicio,
-            'guia' => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
-            'placa' => $Movimiento->reception->id ?? '-',
-            'typeSale' => $Movimiento->typeSale ?? '-',
-            'codeDetraction' => $Movimiento->codeDetraction ?? '-',
+            'formaPago'       => $Movimiento->formaPago ?? '-',
+            'fechaInicio'     => $fechaInicio,
+            'guia'            => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'           => $Movimiento->reception->id ?? '-',
+            'typeSale'        => $Movimiento->typeSale ?? '-',
+            'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
         ];
 
         // Utiliza el método loadView() directamente en la fachada PDF
-        $pdf = PDF::loadView('export-pdf-ticket', $dataE);
-        $canvas = $pdf->getDomPDF()->get_canvas();
+        $pdf           = PDF::loadView('export-pdf-ticket', $dataE);
+        $canvas        = $pdf->getDomPDF()->get_canvas();
         $contenidoAlto = $canvas->get_height();
         $pdf->setPaper([15, 5, 172, 599], 'portrait');
 
@@ -813,15 +812,15 @@ class PdfController extends Controller
             'reception.firstCarrierGuide.origin', 'reception.firstCarrierGuide.destination'])->find($idMov);
         $linkRevisarFact = false;
 
-        $pointSend = strtoupper($Movimiento->reception?->pointSender?->name ?? '');
+        $pointSend        = strtoupper($Movimiento->reception?->pointSender?->name ?? '');
         $pointDestination = strtoupper($Movimiento->reception?->pointDestination?->name ?? '');
 
-        $ruta = $pointSend . ' - ' . $pointDestination;
-        $receptionDetails = $Movimiento?->reception?->details() ?? [];
+        $ruta              = $pointSend . ' - ' . $pointDestination;
+        $receptionDetails  = $Movimiento?->reception?->details() ?? [];
         $descriptionString = '';
         if ($receptionDetails != []) {
-            $descriptions = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
-            $descriptionString = implode(', ', $descriptions); // Une las descripciones con comas
+            $descriptions      = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
+            $descriptionString = implode(', ', $descriptions);                               // Une las descripciones con comas
         }
         $productList = [];
         // if ($Movimiento) {
@@ -840,44 +839,44 @@ class PdfController extends Controller
 
                 // Usar operadores de navegación segura y coalescencia para evitar errores y asignar valores por defecto
                 $detalles[] = [
-                    "descripcion" => $producto->description ?? '-',
-                    "os" => $producto->os ?? '-',
-                    "guia" => $producto->guia ?? '-',
-                    "placaVehiculo" => ($producto->placa === '-') 
-                    ? CarrierGuide::where('numero', $producto->guia)->value('placa') ?? '-' 
+                    "descripcion"              => $producto->description ?? '-',
+                    "os"                       => $producto->os ?? '-',
+                    "guia"                     => $producto->guia ?? '-',
+                    "placaVehiculo"            => ($producto->placa === '-')
+                    ? CarrierGuide::where('numero', $producto->guia)->value('placa') ?? '-'
                     : $producto->placa,
-                    "cantidad" => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
+                    "cantidad"                 => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
                     "precioventaunitarioxitem" => $producto->precioVenta ?? 0,
                 ];
             }
         }
 
         $tipoDocumento = '';
-        $num = $Movimiento->sequentialNumber;
+        $num           = $Movimiento->sequentialNumber;
         if (strpos($num, 'B') === 0) {
-            $tipoDocumento = 'BOLETA ELECTRÓNICA';
+            $tipoDocumento   = 'BOLETA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'F') === 0) {
-            $tipoDocumento = 'FACTURA ELECTRÓNICA';
+            $tipoDocumento   = 'FACTURA ELECTRÓNICA';
             $linkRevisarFact = true;
         } elseif (strpos($num, 'T') === 0) {
-            $tipoDocumento = 'TICKET ELECTRÓNICO';
+            $tipoDocumento   = 'TICKET ELECTRÓNICO';
             $linkRevisarFact = false;
         } else {
             abort(404);
         }
-        $dateTime = Carbon::now()->format('Y-m-d H:i:s');
+        $dateTime       = Carbon::now()->format('Y-m-d H:i:s');
         $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
-        $fechaInicio = $Movimiento->created_at;
-        $rucOdni = $personaCliente->documentNumber;
-        $direccion = "";
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
+        $direccion      = "";
         if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
             $nombreCliente = $personaCliente->businessName;
 
             $direccion = $personaCliente->fiscalAddress ?? '-';
         } else {
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
-            $direccion = $personaCliente->address ?? '-';
+            $direccion     = $personaCliente->address ?? '-';
         }
 
         if ($personaCliente->names == 'VARIOS') {
@@ -904,34 +903,34 @@ class PdfController extends Controller
         // }
         // Storage::disk('public')->put($filePath, $qrImage->getString());
         $dataE = [
-            'title' => 'DOCUMENTO DE PAGO',
-            'ruc_dni' => $rucOdni,
-            'direccion' => $direccion,
-            'idMovimiento' => $Movimiento->id,
+            'title'           => 'DOCUMENTO DE PAGO',
+            'ruc_dni'         => $rucOdni,
+            'direccion'       => $direccion,
+            'idMovimiento'    => $Movimiento->id,
             'tipoElectronica' => $tipoDocumento,
-            'typePayment' => $Movimiento->typePayment ?? '-',
-            'numeroVenta' => $num,
-            'porcentaje' => $Movimiento->percentDetraction,
-            'fechaemision' => $Movimiento->created_at->format('Y-m-d'),
-            'cliente' => $nombreCliente,
-            'detalles' => $detalles,
-            'cuentas' => $Movimiento->installments,
+            'typePayment'     => $Movimiento->typePayment ?? '-',
+            'numeroVenta'     => $num,
+            'porcentaje'      => $Movimiento->percentDetraction,
+            'fechaemision'    => $Movimiento->created_at->format('Y-m-d'),
+            'cliente'         => $nombreCliente,
+            'detalles'        => $detalles,
+            'cuentas'         => $Movimiento->installments,
             'montodetraccion' => $Movimiento->monto_detraction,
-            'valueref' => $Movimiento->value_ref,
-            'isvalueref' => $Movimiento->isValue_ref,
-            'montoneto' => $Movimiento->monto_neto,
-            'vuelto' => '0.00',
-            'totalPagado' => $Movimiento->total,
+            'valueref'        => $Movimiento->value_ref,
+            'isvalueref'      => $Movimiento->isValue_ref,
+            'montoneto'       => $Movimiento->monto_neto,
+            'vuelto'          => '0.00',
+            'totalPagado'     => $Movimiento->total,
             'linkRevisarFact' => $linkRevisarFact,
-            'formaPago' => $Movimiento->formaPago ?? '-',
-            'fechaInicio' => $fechaInicio,
-            'guia' => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
-            'placa' => $Movimiento->reception->id ?? '-',
-            'typeSale' => $Movimiento->typeSale ?? '-',
-            'codeDetraction' => $Movimiento->codeDetraction ?? '-',
+            'formaPago'       => $Movimiento->formaPago ?? '-',
+            'fechaInicio'     => $fechaInicio,
+            'guia'            => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'           => $Movimiento->reception->id ?? '-',
+            'typeSale'        => $Movimiento->typeSale ?? '-',
+            'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
         ];
         // Utiliza el método loadView() directamente en la fachada PDF
-        $pdf = PDF::loadView('documentoA4', $dataE);
+        $pdf    = PDF::loadView('documentoA4', $dataE);
         $canvas = $pdf->getDomPDF()->get_canvas();
         // $contenidoAncho = $canvas->get_width();
 
@@ -953,13 +952,162 @@ class PdfController extends Controller
         }
 
         $fileName = '20605597484-' . $tipoDocumento . '-' . $num . '.pdf'; // Formato del nombre
-        $fileName = str_replace(' ', '_', $fileName); // Reemplazar espacios con guiones bajos
+        $fileName = str_replace(' ', '_', $fileName);                      // Reemplazar espacios con guiones bajos
+        return $pdf->stream($fileName);
+    }
+    public function documentoA4F2(Request $request, $idMov = 0)
+    {
+        $Movimiento = Moviment::with(['reception',
+            'reception.firstCarrierGuide.origin', 'reception.firstCarrierGuide.destination'])->find($idMov);
+        $linkRevisarFact = false;
+
+        $pointSend        = strtoupper($Movimiento->reception?->pointSender?->name ?? '');
+        $pointDestination = strtoupper($Movimiento->reception?->pointDestination?->name ?? '');
+
+        $ruta              = $pointSend . ' - ' . $pointDestination;
+        $receptionDetails  = $Movimiento?->reception?->details() ?? [];
+        $descriptionString = '';
+        if ($receptionDetails != []) {
+            $descriptions      = $receptionDetails?->pluck('description')?->toArray() ?? []; // Obtiene todas las descripciones
+            $descriptionString = implode(', ', $descriptions);                               // Une las descripciones con comas
+        }
+        $productList = [];
+        // if ($Movimiento) {
+        //     $productList = json_decode($Movimiento->productList, true) ?? [];
+        // }
+        if ($Movimiento) {
+            $productList = $Movimiento->detalles;
+        }
+        // Inicializar el array de detalles
+        $detalles = [];
+
+        if (($productList) != []) {
+            foreach ($productList as $producto) {
+                // Buscar la recepción si existe 'reception_id', si no asigna null
+                // $reception = Reception::find($producto->reception_id ?? null);
+
+                // Usar operadores de navegación segura y coalescencia para evitar errores y asignar valores por defecto
+                $detalles[] = [
+                    "descripcion"              => $producto->description ?? '-',
+                    "os"                       => $producto->os ?? '-',
+                    "guia"                     => $producto->guia ?? '-',
+                    "placaVehiculo"            => ($producto->placa === '-')
+                    ? CarrierGuide::where('numero', $producto->guia)->value('placa') ?? '-'
+                    : $producto->placa,
+                    "cantidad"                 => $producto->cantidad ?? 1, // Cantidad fija (es un servicio)
+                    "precioventaunitarioxitem" => $producto->precioVenta ?? 0,
+                ];
+            }
+        }
+
+        $tipoDocumento = '';
+        $num           = $Movimiento->sequentialNumber;
+        if (strpos($num, 'B') === 0) {
+            $tipoDocumento   = 'BOLETA ELECTRÓNICA';
+            $linkRevisarFact = true;
+        } elseif (strpos($num, 'F') === 0) {
+            $tipoDocumento   = 'FACTURA ELECTRÓNICA';
+            $linkRevisarFact = true;
+        } elseif (strpos($num, 'T') === 0) {
+            $tipoDocumento   = 'TICKET ELECTRÓNICO';
+            $linkRevisarFact = false;
+        } else {
+            abort(404);
+        }
+        $dateTime       = Carbon::now()->format('Y-m-d H:i:s');
+        $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
+        $direccion      = "";
+        if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
+            $nombreCliente = $personaCliente->businessName;
+
+            $direccion = $personaCliente->fiscalAddress ?? '-';
+        } else {
+            $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
+            $direccion     = $personaCliente->address ?? '-';
+        }
+
+        if ($personaCliente->names == 'VARIOS') {
+            $nombreCliente = "VARIOS";
+            if (strpos($num, 'B') === 0) {
+                $rucOdni = '11111111';
+
+            } elseif (strpos($num, 'F') === 0) {
+                $rucOdni = '11111111111';
+
+            }
+        }
+
+        // Generar el código QR
+        // $qrCode = new QrCode($num);
+        // $writer = new PngWriter();
+        // $qrImage = $writer->write($qrCode);
+        // // Generar un nombre único para el archivo
+        // $fileName = $num . '.png';
+        // $filePath = 'qr_images/' . $fileName;
+        // if (Storage::disk('public')->exists($filePath)) {
+        //     $fileName = $num . '.png';
+        //     $filePath = 'qr_images/' . $fileName;
+        // }
+        // Storage::disk('public')->put($filePath, $qrImage->getString());
+        $dataE = [
+            'title'           => 'DOCUMENTO DE PAGO',
+            'ruc_dni'         => $rucOdni,
+            'direccion'       => $direccion,
+            'idMovimiento'    => $Movimiento->id,
+            'tipoElectronica' => $tipoDocumento,
+            'typePayment'     => $Movimiento->typePayment ?? '-',
+            'numeroVenta'     => $num,
+            'porcentaje'      => $Movimiento->percentDetraction,
+            'fechaemision'    => $Movimiento->created_at->format('Y-m-d'),
+            'cliente'         => $nombreCliente,
+            'detalles'        => $detalles,
+            'cuentas'         => $Movimiento->installments,
+            'montodetraccion' => $Movimiento->monto_detraction,
+            'valueref'        => $Movimiento->value_ref,
+            'isvalueref'      => $Movimiento->isValue_ref,
+            'montoneto'       => $Movimiento->monto_neto,
+            'vuelto'          => '0.00',
+            'totalPagado'     => $Movimiento->total,
+            'linkRevisarFact' => $linkRevisarFact,
+            'formaPago'       => $Movimiento->formaPago ?? '-',
+            'fechaInicio'     => $fechaInicio,
+            'guia'            => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'           => $Movimiento->reception->id ?? '-',
+            'typeSale'        => $Movimiento->typeSale ?? '-',
+            'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
+        ];
+        // Utiliza el método loadView() directamente en la fachada PDF
+        $pdf    = PDF::loadView('documentoA4F2', $dataE);
+        $canvas = $pdf->getDomPDF()->get_canvas();
+        // $contenidoAncho = $canvas->get_width();
+
+        $qrUrl = $this->getArchivosDocument($Movimiento->id, 'venta');
+
+// Verificamos si la URL es válida (no es null o vacía)
+        // if ($qrUrl) {
+        //     // Si la URL está disponible, podemos agregar la imagen al PDF
+        //     $canvas->image($qrUrl, 480, 730, 70, 80); // Ajusta las coordenadas y el tamaño según sea necesario
+        // }
+
+        $contenidoAlto = $canvas->get_height();
+        if (strpos($num, 'B') === 0) {
+            $tipoDocumento = '01'; // Boleta
+        } elseif (strpos($num, 'F') === 0) {
+            $tipoDocumento = '03'; // Factura
+        } elseif (strpos($num, 'T') === 0) {
+            $tipoDocumento = '00'; // Ticket
+        }
+
+        $fileName = '20605597484-' . $tipoDocumento . '-' . $num . '.pdf'; // Formato del nombre
+        $fileName = str_replace(' ', '_', $fileName);                      // Reemplazar espacios con guiones bajos
         return $pdf->stream($fileName);
     }
     public function getArchivosDocument($idventa, $typeDocument)
     {
         $funcion = 'buscarNumeroSolicitud';
-        $url = 'https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php?funcion=' . $funcion . '&typeDocument=' . $typeDocument;
+        $url     = 'https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php?funcion=' . $funcion . '&typeDocument=' . $typeDocument;
 
         // Parámetros para la solicitud
         $params = http_build_query(['idventa' => $idventa]);
@@ -1003,14 +1151,14 @@ class PdfController extends Controller
         $dateTime = Carbon::now()->format('Y-m-d H:i:s');
 
         $dataE = [
-            'title' => 'TICKET RECEPCIÓN',
+            'title'     => 'TICKET RECEPCIÓN',
             'recepcion' => $recepcion,
         ];
 
         // Cargar la vista con los datos
         $pdf = PDF::loadView('recepcion-ticket', $dataE);
 
-        // Configurar el tamaño del papel a un cuadrado de 11 cm por 11 cm
+                                                            // Configurar el tamaño del papel a un cuadrado de 11 cm por 11 cm
         $pdf->setPaper([0, 0, 312.28, 312.28], 'portrait'); // 11 cm por cada lado
 
         $fileName = 'RECPECIÓN_' . $dateTime . '.pdf';
@@ -1059,14 +1207,14 @@ class PdfController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
         $moviment_id = $request->input('moviment_id');
 
@@ -1090,7 +1238,7 @@ class PdfController extends Controller
             $movCajaAperturada = Moviment::where('id', $movCaja->id)->where('paymentConcept_id', 1)
                 ->first();
 
-            if (!$movCajaAperturada) {
+            if (! $movCajaAperturada) {
                 return response()->json([
                     "message" => "Movimiento de Apertura no encontrado",
                 ], 404);
@@ -1115,16 +1263,16 @@ class PdfController extends Controller
                 $movimientosCaja = $query->paginate(150);
 
                 $movimientosCaja = [
-                    'current_page' => $movimientosCaja->currentPage(),
-                    'data' => $movimientosCaja->items(), // Los datos paginados
-                    'total' => $movimientosCaja->total(), // El total de registros
+                    'current_page'   => $movimientosCaja->currentPage(),
+                    'data'           => $movimientosCaja->items(), // Los datos paginados
+                    'total'          => $movimientosCaja->total(), // El total de registros
                     'first_page_url' => $movimientosCaja->url(1),
-                    'from' => $movimientosCaja->firstItem(),
-                    'next_page_url' => $movimientosCaja->nextPageUrl(),
-                    'path' => $movimientosCaja->path(),
-                    'per_page' => $movimientosCaja->perPage(),
-                    'prev_page_url' => $movimientosCaja->previousPageUrl(),
-                    'to' => $movimientosCaja->lastItem(),
+                    'from'           => $movimientosCaja->firstItem(),
+                    'next_page_url'  => $movimientosCaja->nextPageUrl(),
+                    'path'           => $movimientosCaja->path(),
+                    'per_page'       => $movimientosCaja->perPage(),
+                    'prev_page_url'  => $movimientosCaja->previousPageUrl(),
+                    'to'             => $movimientosCaja->lastItem(),
                 ];
 
             } else {
@@ -1139,16 +1287,16 @@ class PdfController extends Controller
                     ->paginate(150);
 
                 $movimientosCaja = [
-                    'current_page' => $movimientosCaja->currentPage(),
-                    'data' => $movimientosCaja->items(), // Los datos paginados
-                    'total' => $movimientosCaja->total(), // El total de registros
+                    'current_page'   => $movimientosCaja->currentPage(),
+                    'data'           => $movimientosCaja->items(), // Los datos paginados
+                    'total'          => $movimientosCaja->total(), // El total de registros
                     'first_page_url' => $movimientosCaja->url(1),
-                    'from' => $movimientosCaja->firstItem(),
-                    'next_page_url' => $movimientosCaja->nextPageUrl(),
-                    'path' => $movimientosCaja->path(),
-                    'per_page' => $movimientosCaja->perPage(),
-                    'prev_page_url' => $movimientosCaja->previousPageUrl(),
-                    'to' => $movimientosCaja->lastItem(),
+                    'from'           => $movimientosCaja->firstItem(),
+                    'next_page_url'  => $movimientosCaja->nextPageUrl(),
+                    'path'           => $movimientosCaja->path(),
+                    'per_page'       => $movimientosCaja->perPage(),
+                    'prev_page_url'  => $movimientosCaja->previousPageUrl(),
+                    'to'             => $movimientosCaja->lastItem(),
                 ];
             }
 
@@ -1172,21 +1320,21 @@ class PdfController extends Controller
             }
             $nombresPersona = $moviment->person->documentNumber . ' | ' . $nombresPersona;
 
-            $factor = $moviment->typeDocument == 'Ingreso' ? 1 : -1;
+            $factor       = $moviment->typeDocument == 'Ingreso' ? 1 : -1;
             $exportData[] = [
-                'Date' => (string) ($moviment->created_at->format('Y-m-d H:i:s')),
-                'Numero' => (string) ($moviment->sequentialNumber ?? ''),
-                'Tipo' => (string) ($moviment->typeDocument ?? '-'),
+                'Date'    => (string) ($moviment->created_at->format('Y-m-d H:i:s')),
+                'Numero'  => (string) ($moviment->sequentialNumber ?? ''),
+                'Tipo'    => (string) ($moviment->typeDocument ?? '-'),
                 'Concept' => (string) ($moviment->paymentConcept->name ?? ''),
-                'Person' => (string) ($nombresPersona ?? ''),
-                'Guias' => (string) implode(',', $moviment?->movVenta?->detalles()->pluck('guia')->toArray() ?? []),
+                'Person'  => (string) ($nombresPersona ?? ''),
+                'Guias'   => (string) implode(',', $moviment?->movVenta?->detalles()->pluck('guia')->toArray() ?? []),
 
-                'Cash' => (string) (($moviment->cash * $factor) ?? '0'),
-                'Card' => (string) (($moviment->card * $factor) ?? '0'),
+                'Cash'    => (string) (($moviment->cash * $factor) ?? '0'),
+                'Card'    => (string) (($moviment->card * $factor) ?? '0'),
                 'Deposit' => (string) (($moviment->deposit * $factor) ?? '0'),
-                'Yape' => (string) (($moviment->yape * $factor) ?? '0'),
-                'Plin' => (string) (($moviment->plin * $factor) ?? '0'),
-                'Total' => (string) (($moviment->total * $factor) ?? '0'),
+                'Yape'    => (string) (($moviment->yape * $factor) ?? '0'),
+                'Plin'    => (string) (($moviment->plin * $factor) ?? '0'),
+                'Total'   => (string) (($moviment->total * $factor) ?? '0'),
                 'Comment' => (string) ($moviment->comment ?? ''),
 
             ];
@@ -1198,16 +1346,16 @@ class PdfController extends Controller
 
     public function reporteCuentasPorCobrarExcel(Request $request)
     {
-        $status = $request->input('status') ?? '';
-        $personId = $request->input('person_id') ?? '';
-        $start = $request->input('start') ?? ''; // Fecha de inicio de Installment
-        $end = $request->input('end') ?? ''; // Fecha de fin de Installment
+        $status           = $request->input('status') ?? '';
+        $personId         = $request->input('person_id') ?? '';
+        $start            = $request->input('start') ?? '';            // Fecha de inicio de Installment
+        $end              = $request->input('end') ?? '';              // Fecha de fin de Installment
         $sequentialNumber = $request->input('sequentialNumber') ?? ''; // Este campo está dentro de Moviment
 
         $branchOffice_id = $request->input('branchOffice_id') ?? '';
         if ($branchOffice_id && is_numeric($branchOffice_id)) {
             $branchOffice = BranchOffice::find($branchOffice_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -1217,7 +1365,7 @@ class PdfController extends Controller
         $box_id = $request->input('box_id') ?? '';
         if ($box_id != '') {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -1226,43 +1374,43 @@ class PdfController extends Controller
 
         // Actualizar estado de cuotas vencidas
         Installment::where('status', 'Pendiente')
-            ->where('date', '<', now()) // Si la fecha actual es mayor que la fecha de vencimiento
+            ->where('date', '<', now())        // Si la fecha actual es mayor que la fecha de vencimiento
             ->update(['status' => 'Vencido']); // Actualiza el estado a "Vencido"
 
         // Iniciar la consulta base
         $query = Installment::with(['moviment', 'moviment.person', 'payInstallments', 'payInstallments.bank']);
 
-        if (!empty($status) && $status != '""') {
+        if (! empty($status) && $status != '""') {
             $query->where('status', $status);
         }
 
-        if (!empty($personId)) {
+        if (! empty($personId)) {
             $query->whereHas('moviment', function ($q) use ($personId) {
                 $q->where('person_id', $personId);
             });
         }
 
-        if (!empty($branchOffice_id)) {
+        if (! empty($branchOffice_id)) {
             $query->whereHas('moviment', function ($q) use ($branchOffice_id) {
                 $q->where('branchOffice_id', $branchOffice_id);
             });
         }
 
-        if (!empty($box_id)) {
+        if (! empty($box_id)) {
             $query->whereHas('moviment', function ($q) use ($box_id) {
                 $q->where('box_id', $box_id);
             });
         }
 
-        if (!empty($sequentialNumber)) {
+        if (! empty($sequentialNumber)) {
             $query->whereHas('moviment', function ($q) use ($sequentialNumber) {
                 $q->where('sequentialNumber', 'like', '%' . $sequentialNumber . '%');
             });
         }
-        if (!empty($start)) {
+        if (! empty($start)) {
             $query->where('date', '>=', $start);
         }
-        if (!empty($end)) {
+        if (! empty($end)) {
             $query->where('date', '<=', $end);
         }
 
@@ -1273,19 +1421,19 @@ class PdfController extends Controller
         $data = $query->orderBy('id', 'desc')->get();
 
         // Inicializar las variables de totales
-        $total = 0;
-        $totalDebt = 0;
-        $totalPagado = 0;
-        $totalSaldo = 0;
+        $total           = 0;
+        $totalDebt       = 0;
+        $totalPagado     = 0;
+        $totalSaldo      = 0;
         $totalDetraccion = 0;
-        $totalSaldoNeto = 0;
+        $totalSaldoNeto  = 0;
 
         $exportData = [];
-        $i = 1;
+        $i          = 1;
         foreach ($data as $item) {
             // Verificar si la cuota (installment) existe
             $installment = Installment::find($item->id);
-            if (!$installment) {
+            if (! $installment) {
                 continue; // Si no existe la cuota, pasar al siguiente item
             }
 
@@ -1304,7 +1452,7 @@ class PdfController extends Controller
 
             // Validar el cliente y construir el nombre
             $personaCliente = $moviment->person ?? null;
-            $nombreCliente = '-';
+            $nombreCliente  = '-';
             if ($personaCliente) {
                 $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
                 ? ($personaCliente->businessName ?? '-')
@@ -1312,9 +1460,9 @@ class PdfController extends Controller
             }
 
             // Calcular la detracción
-            $totalDetalle = $item->total ?? 0;
+            $totalDetalle     = $item->total ?? 0;
             $totalDetalleDebt = $item->totalDebt ?? 0;
-            $montoDetraccion = 0;
+            $montoDetraccion  = 0;
 
             if ($moviment && isset($moviment->codeDetraction)) {
                 if ($moviment->codeDetraction == '027') {
@@ -1329,7 +1477,7 @@ class PdfController extends Controller
 
             // Calcular montos pagados y saldos
             $pagado = $totalDetalle - ($item->totalDebt ?? 0);
-            $saldo = $item->totalDebt ?? 0;
+            $saldo  = $item->totalDebt ?? 0;
 
             // Acumular los totales
             $total += $totalDetalle;
@@ -1350,34 +1498,34 @@ class PdfController extends Controller
 
             // Construir el array de exportación con validaciones
             $exportData[] = [
-                'Item' => $i++,
-                'RUC / DNI' => $moviment->person->documentNumber ?? '',
-                'Razón Social' => $razon,
+                'Item'                 => $i++,
+                'RUC / DNI'            => $moviment->person->documentNumber ?? '',
+                'Razón Social'         => $razon,
 
-                'Fecha de Emision' => isset($moviment->paymentDate) ? (string) Carbon::parse($moviment->paymentDate)->format('Y-m-d') : '',
+                'Fecha de Emision'     => isset($moviment->paymentDate) ? (string) Carbon::parse($moviment->paymentDate)->format('Y-m-d') : '',
                 'Fecha de Vencimiento' => $item->date ?? '',
-                'Documento' => $moviment->sequentialNumber ?? '',
-                'Total' => (string) $totalDetalle, // Convertir a cadena
-                'Total Deuda' => (string) $totalDetalleDebt, // Convertir a cadena
-                'Detraccion' => (string) $montoDetraccion, // Convertir a cadena
-                'Saldo Neto' => (string) $saldoNeto, // Convertir a cadena
-                'Obs' => $item->status ?? 'Desconocido',
+                'Documento'            => $moviment->sequentialNumber ?? '',
+                'Total'                => (string) $totalDetalle,     // Convertir a cadena
+                'Total Deuda'          => (string) $totalDetalleDebt, // Convertir a cadena
+                'Detraccion'           => (string) $montoDetraccion,  // Convertir a cadena
+                'Saldo Neto'           => (string) $saldoNeto,        // Convertir a cadena
+                'Obs'                  => $item->status ?? 'Desconocido',
             ];
         }
 
         $exportData[] = [
-            'Item' => '',
-            'RUC / DNI' => '',
-            'Razón Social' => '',
+            'Item'                 => '',
+            'RUC / DNI'            => '',
+            'Razón Social'         => '',
 
-            'Fecha de Emision' => '',
+            'Fecha de Emision'     => '',
             'Fecha de Vencimiento' => '',
-            'Documento' => 'TOTAL',
-            'Total' => (string) $total, // Convertir a cadena
-            'Total Deuda' => (string) $totalDebt, // Convertir a cadena
-            'Detraccion' => (string) $totalDetraccion, // Convertir a cadena
-            'Saldo Neto' => (string) $totalSaldoNeto, // Convertir a cadena
-            'Obs' => '',
+            'Documento'            => 'TOTAL',
+            'Total'                => (string) $total,           // Convertir a cadena
+            'Total Deuda'          => (string) $totalDebt,       // Convertir a cadena
+            'Detraccion'           => (string) $totalDetraccion, // Convertir a cadena
+            'Saldo Neto'           => (string) $totalSaldoNeto,  // Convertir a cadena
+            'Obs'                  => '',
         ];
         // Agregar una fila adicional para los totales
 
@@ -1391,7 +1539,7 @@ class PdfController extends Controller
 
         if ($branch_office_id) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -1402,16 +1550,16 @@ class PdfController extends Controller
             // $branchOffice = BranchOffice::find($branch_office_id);
         }
 
-        $codeReception = $request->input('codeReception');
-        $dateStart = $request->input('dateStart');
-        $dateEnd = $request->input('dateEnd');
-        $nombreClientePaga = $request->input('nombreClientePaga');
-        $nombreRemitente = $request->input('nombreRemitente');
+        $codeReception      = $request->input('codeReception');
+        $dateStart          = $request->input('dateStart');
+        $dateEnd            = $request->input('dateEnd');
+        $nombreClientePaga  = $request->input('nombreClientePaga');
+        $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
-        $numberVenta = $request->input('numberVenta');
+        $numberVenta        = $request->input('numberVenta');
 
         $origenOrDestino = $request->input('origenOrDestino');
-        $isCargos = $request->input('isCargos');
+        $isCargos        = $request->input('isCargos');
         $statusReception = $request->input('statusReception');
 
         // Consulta de recepciones con sus relaciones
@@ -1423,27 +1571,27 @@ class PdfController extends Controller
         ]);
         //
 
-        if (!empty($branch_office_id)) {
+        if (! empty($branch_office_id)) {
             $receptions->where('branchOffice_id', $branch_office_id);
         }
 
         // Filtro por código de recepción
-        if (!empty($codeReception)) {
+        if (! empty($codeReception)) {
             $receptions->where('codeReception', 'LIKE', '%' . $codeReception . '%');
         }
 
         // Filtro por fecha inicio (>=) y fecha fin (<=)
-        if (!empty($dateStart)) {
+        if (! empty($dateStart)) {
             $receptions->whereDate('created_at', '>=', $dateStart);
         }
 
-        if (!empty($dateEnd)) {
+        if (! empty($dateEnd)) {
             $receptions->whereDate('created_at', '<=', $dateEnd);
         }
 
         // Filtro por nombre del cliente que paga
         // Filtro por nombre del cliente que paga
-        if (!empty($nombreRemitente)) {
+        if (! empty($nombreRemitente)) {
             $nombreRemitenteUpper = strtoupper($nombreRemitente);
 
             $receptions->where(function ($query) use ($nombreRemitenteUpper) {
@@ -1456,7 +1604,7 @@ class PdfController extends Controller
             });
         }
 
-        if (!empty($nombreDestinatario)) {
+        if (! empty($nombreDestinatario)) {
             $nombreDestinatarioUpper = strtoupper($nombreDestinatario);
 
             $receptions->where(function ($query) use ($nombreDestinatarioUpper) {
@@ -1469,7 +1617,7 @@ class PdfController extends Controller
             });
         }
 
-        if (!empty($nombreClientePaga)) {
+        if (! empty($nombreClientePaga)) {
             $nombreClientePagaUpper = strtoupper($nombreClientePaga);
 
             $receptions->where(function ($query) use ($nombreClientePagaUpper) {
@@ -1482,7 +1630,7 @@ class PdfController extends Controller
             });
         }
         // Filtro por origen o destino
-        if (!empty($origenOrDestino)) {
+        if (! empty($origenOrDestino)) {
             $origenOrDestinoUpper = strtoupper($origenOrDestino);
             $receptions->where(function ($query) use ($origenOrDestinoUpper) {
                 $query->whereHas('origin', function ($q) use ($origenOrDestinoUpper) {
@@ -1493,7 +1641,7 @@ class PdfController extends Controller
             });
         }
 
-        if (!empty($numberVenta)) {
+        if (! empty($numberVenta)) {
             $receptions->where(function ($query) use ($numberVenta) {
                 // Filtrar primero por el campo nro_sale
                 $query->where('nro_sale', $numberVenta)
@@ -1508,7 +1656,7 @@ class PdfController extends Controller
         }
 
         // Filtro por isCargos (recepciones que tienen cargos)
-        if (!empty($isCargos)) {
+        if (! empty($isCargos)) {
             if ($isCargos == "true") {
                 $receptions->whereHas('cargos');
             } else {
@@ -1516,7 +1664,7 @@ class PdfController extends Controller
             }
         }
 
-        if (!empty($statusReception)) {
+        if (! empty($statusReception)) {
             $receptions->where(function ($query) use ($statusReception) {
                 if ($statusReception === 'Sin Guia') {
                     $query->whereDoesntHave('firstCarrierGuide');
@@ -1539,15 +1687,15 @@ class PdfController extends Controller
         // Inicializar las variables de totales
         $flete = 0;
         $deuda = 0;
-        $peso = 0;
+        $peso  = 0;
 
         $exportData = [];
 
         foreach ($receptions as $reception) {
             $recept = Reception::find($reception->id);
-            if (!$recept->firstCarrierGuide) {
+            if (! $recept->firstCarrierGuide) {
                 $recept->status = 'Sin Guia';
-            } elseif ($recept->firstCarrierGuide && !$recept->firstCarrierGuide->programming) {
+            } elseif ($recept->firstCarrierGuide && ! $recept->firstCarrierGuide->programming) {
                 $recept->status = 'Sin Programar';
             } else {
                 $recept->status = 'Programado';
@@ -1558,25 +1706,25 @@ class PdfController extends Controller
                 ->implode(', ') ?? '-';
             // Construir el array de exportación con validaciones y convertir todo a string
             $exportData[] = [
-                'COD RECEPCION' => (string) ($recept->codeReception ?? ''),
-                'FECHA SOLIC.' => $recept->receptionDate
+                'COD RECEPCION'     => (string) ($recept->codeReception ?? ''),
+                'FECHA SOLIC.'      => $recept->receptionDate
                 ? Carbon::parse($recept->receptionDate)->format('Y-m-d')
                 : '',
-                'REMITENTE' => (string) ($this->namePerson($recept->sender) ?? ''),
-                'DESTINATARIO.' => (string) $this->namePerson($recept->recipient),
+                'REMITENTE'         => (string) ($this->namePerson($recept->sender) ?? ''),
+                'DESTINATARIO.'     => (string) $this->namePerson($recept->recipient),
 
-                'ORIGEN' => (string) ($recept->origin->name ?? ''),
-                'DESTINO' => (string) ($recept->destination->name ?? ''),
-                'CLIENTE PAGA' => (string) $this->namePerson($recept->payResponsible),
+                'ORIGEN'            => (string) ($recept->origin->name ?? ''),
+                'DESTINO'           => (string) ($recept->destination->name ?? ''),
+                'CLIENTE PAGA'      => (string) $this->namePerson($recept->payResponsible),
                 'DOCUMENTOS ANEXOS' => (string) ($recept->comment ?? ''),
-                'FLETE' => (string) ($recept->paymentAmount ?? 0),
-                'DEUDA' => (string) ($recept->debtAmount ?? 0),
-                'CARGA' => (string) ($carga ?? '-'),
-                'PESO' => (string) ($recept->netWeight ?? 0),
-                'GUIA' => (string) ($recept->firstCarrierGuide->numero ?? 'Sin Guia'),
-                'DOC. VENTA' => (string) ($recept->nro_sale ?? $recept->moviment->sequentialNumber ?? 'Sin Venta'),
-                'ESTADO RECEPCIÓN' => (string) ($recept->status ?? 'No asignado'),
-                'USUARIO' => (string) ($recept->user->username ?? 'No asignado'),
+                'FLETE'             => (string) ($recept->paymentAmount ?? 0),
+                'DEUDA'             => (string) ($recept->debtAmount ?? 0),
+                'CARGA'             => (string) ($carga ?? '-'),
+                'PESO'              => (string) ($recept->netWeight ?? 0),
+                'GUIA'              => (string) ($recept->firstCarrierGuide->numero ?? 'Sin Guia'),
+                'DOC. VENTA'        => (string) ($recept->nro_sale ?? $recept->moviment->sequentialNumber ?? 'Sin Venta'),
+                'ESTADO RECEPCIÓN'  => (string) ($recept->status ?? 'No asignado'),
+                'USUARIO'           => (string) ($recept->user->username ?? 'No asignado'),
             ];
 
             // Acumular totales
@@ -1587,23 +1735,23 @@ class PdfController extends Controller
 
         // Agregar una fila adicional para los totales, convertir todo a string
         $exportData[] = [
-            'COD RECEPCION' => '',
-            'FECHA SOLIC.' => '',
-            'REMITENTE' => '',
-            'DESTINATARIO.' => '',
+            'COD RECEPCION'     => '',
+            'FECHA SOLIC.'      => '',
+            'REMITENTE'         => '',
+            'DESTINATARIO.'     => '',
 
-            'ORIGEN' => '',
-            'DESTINO' => '',
-            'CLIENTE PAGA' => '',
+            'ORIGEN'            => '',
+            'DESTINO'           => '',
+            'CLIENTE PAGA'      => '',
             'DOCUMENTOS ANEXOS' => 'TOTAL',
-            'FLETE' => (string) $flete,
-            'DEUDA' => (string) $deuda,
-            'CARGA' => (string) '',
-            'PESO' => (string) $peso,
-            'GUIA' => '',
-            'DOC. VENTA' => '',
-            'ESTADO RECEPCIÓN' => '',
-            'USUARIO' => '',
+            'FLETE'             => (string) $flete,
+            'DEUDA'             => (string) $deuda,
+            'CARGA'             => (string) '',
+            'PESO'              => (string) $peso,
+            'GUIA'              => '',
+            'DOC. VENTA'        => '',
+            'ESTADO RECEPCIÓN'  => '',
+            'USUARIO'           => '',
         ];
 
         return Excel::download(new ReceptionsExport($exportData, $dateStart, $dateEnd), 'reporte_recepciones.xlsx');
@@ -1613,38 +1761,38 @@ class PdfController extends Controller
     {
         // Variables de entrada
         $branch_office_id = $request->input('branch_office_id');
-        $typeDocument = $request->input('typeDocument') ?? '';
-        $status = $request->input('status') ?? '';
-        $personId = $request->input('person_id') ?? '';
-        $start = $request->input('start') ?? ''; // Fecha de inicio
-        $end = $request->input('end') ?? ''; // Fecha de fin
+        $typeDocument     = $request->input('typeDocument') ?? '';
+        $status           = $request->input('status') ?? '';
+        $personId         = $request->input('person_id') ?? '';
+        $start            = $request->input('start') ?? '';            // Fecha de inicio
+        $end              = $request->input('end') ?? '';              // Fecha de fin
         $sequentialNumber = $request->input('sequentialNumber') ?? ''; // Número secuencial (opcional)
 
         // Buscar sucursal
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         // Buscar caja
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
             }
         } else {
             $box_id = auth()->user()->box_id;
-            $box = Box::find($box_id);
+            $box    = Box::find($box_id);
         }
 
         // Obtener datos que NO tienen nota de crédito
@@ -1712,18 +1860,18 @@ class PdfController extends Controller
             ->get();
 
         // Procesar los datos para la exportación
-        $totalAfecto = 0;
-        $totalInafecto = 0;
-        $totalIgv = 0;
-        $totalDetalle = 0;
+        $totalAfecto     = 0;
+        $totalInafecto   = 0;
+        $totalIgv        = 0;
+        $totalDetalle    = 0;
         $totalDetraccion = 0;
-        $totalSaldoNeto = 0;
+        $totalSaldoNeto  = 0;
 
         $exportDataSinNotaCredito = [];
         foreach ($ventasSinNotaCredito as $moviment) {
 
             $personaCliente = $moviment->person ?? null;
-            $nombreCliente = '-';
+            $nombreCliente  = '-';
             if ($personaCliente) {
                 $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
                 ? ($personaCliente->businessName ?? '-')
@@ -1732,9 +1880,9 @@ class PdfController extends Controller
 
             // Cálculos
             $totalDetalle = $moviment->total ?? 0;
-            $afecto = $totalDetalle ? $totalDetalle / 1.18 : 0;
-            $igv = $afecto * 0.18;
-            $total = $afecto + $igv;
+            $afecto       = $totalDetalle ? $totalDetalle / 1.18 : 0;
+            $igv          = $afecto * 0.18;
+            $total        = $afecto + $igv;
 
             $montoDetraccion = 0;
             if ($moviment && isset($moviment->codeDetraction)) {
@@ -1757,18 +1905,18 @@ class PdfController extends Controller
             $exportDataSinNotaCredito[] = [
 
                 'FECHA DE EMISION' => $moviment->paymentDate,
-                'NUMERO' => $moviment->sequentialNumber,
-                'DNI/RUC' => $personaCliente->documentNumber ?? '',
-                'RAZON SOCIAL' => $nombreCliente,
-                'AFECTO S/' => (string) number_format($afecto, 2, '.', ''),
-                'INAFECTO S/' => (string) number_format(0, 2, '.', ''),
-                'IGV S/' => (string) number_format($igv, 2, '.', ''),
-                'TOTAL S/' => (string) number_format($total, 2, '.', ''),
+                'NUMERO'           => $moviment->sequentialNumber,
+                'DNI/RUC'          => $personaCliente->documentNumber ?? '',
+                'RAZON SOCIAL'     => $nombreCliente,
+                'AFECTO S/'        => (string) number_format($afecto, 2, '.', ''),
+                'INAFECTO S/'      => (string) number_format(0, 2, '.', ''),
+                'IGV S/'           => (string) number_format($igv, 2, '.', ''),
+                'TOTAL S/'         => (string) number_format($total, 2, '.', ''),
 
-                'DETRACCION' => (string) number_format($montoDetraccion, 2, '.', ''),
-                'SALDO NETO' => (string) number_format($saldoNeto, 2, '.', ''),
-                'ESTADO' => $moviment->status,
-                'USUARIO' => $moviment->user->username,
+                'DETRACCION'       => (string) number_format($montoDetraccion, 2, '.', ''),
+                'SALDO NETO'       => (string) number_format($saldoNeto, 2, '.', ''),
+                'ESTADO'           => $moviment->status,
+                'USUARIO'          => $moviment->user->username,
             ];
         }
 
@@ -1776,32 +1924,32 @@ class PdfController extends Controller
         $exportDataSinNotaCredito[] = [
 
             'FECHA DE EMISION' => '',
-            'NUMERO' => '',
-            'DNI/RUC' => '',
-            'RAZON SOCIAL' => 'TOTALES',
-            'AFECTO S/' => (string) number_format($totalAfecto, 2, '.', ''),
-            'INAFECTO S/' => (string) number_format($totalInafecto, 2, '.', ''),
-            'IGV S/' => (string) number_format($totalIgv, 2, '.', ''),
-            'TOTAL S/' => (string) number_format($totalDetalle, 2, '.', ''),
+            'NUMERO'           => '',
+            'DNI/RUC'          => '',
+            'RAZON SOCIAL'     => 'TOTALES',
+            'AFECTO S/'        => (string) number_format($totalAfecto, 2, '.', ''),
+            'INAFECTO S/'      => (string) number_format($totalInafecto, 2, '.', ''),
+            'IGV S/'           => (string) number_format($totalIgv, 2, '.', ''),
+            'TOTAL S/'         => (string) number_format($totalDetalle, 2, '.', ''),
 
-            'DETRACCION' => (string) number_format($totalDetraccion, 2, '.', ''),
-            'SALDO NETO' => (string) number_format($totalSaldoNeto, 2, '.', ''),
-            'ESTADO' => '',
-            'USUARIO' => '',
+            'DETRACCION'       => (string) number_format($totalDetraccion, 2, '.', ''),
+            'SALDO NETO'       => (string) number_format($totalSaldoNeto, 2, '.', ''),
+            'ESTADO'           => '',
+            'USUARIO'          => '',
         ];
 
         // Procesar los datos de ventas con nota de crédito
-        $totalAfectoCredito = 0;
-        $totalInafectoCredito = 0;
-        $totalIgvCredito = 0;
-        $totalDetalleCredito = 0;
+        $totalAfectoCredito     = 0;
+        $totalInafectoCredito   = 0;
+        $totalIgvCredito        = 0;
+        $totalDetalleCredito    = 0;
         $totalDetraccionCredito = 0;
-        $totalSaldoNetoCredito = 0;
+        $totalSaldoNetoCredito  = 0;
 
         $exportDataConNotaCredito = [];
         foreach ($ventasConNotaCredito as $moviment) {
             $personaCliente = $moviment->person ?? null;
-            $nombreCliente = '-';
+            $nombreCliente  = '-';
             if ($personaCliente) {
                 $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
                 ? ($personaCliente->businessName ?? '-')
@@ -1810,9 +1958,9 @@ class PdfController extends Controller
 
             // Cálculos
             $totalDetalleCredito = $moviment->total ?? 0;
-            $afectoCredito = $totalDetalleCredito ? $totalDetalleCredito / 1.18 : 0;
-            $igvCredito = $afectoCredito * 0.18;
-            $totalCredito = $afectoCredito + $igvCredito;
+            $afectoCredito       = $totalDetalleCredito ? $totalDetalleCredito / 1.18 : 0;
+            $igvCredito          = $afectoCredito * 0.18;
+            $totalCredito        = $afectoCredito + $igvCredito;
 
             $montoDetraccionCredito = 0;
             if ($moviment && isset($moviment->codeDetraction)) {
@@ -1833,15 +1981,15 @@ class PdfController extends Controller
             $totalSaldoNetoCredito += $saldoNetoCredito;
 
             $razones = [
-                1 => 'Anulacion de la Operación',
-                2 => 'Anulacion por error en el RUC',
-                3 => 'Correción por error en la descripción',
-                4 => 'Descuento global',
-                5 => 'Descuento por item',
-                6 => 'Devolución total',
-                7 => 'Devolución por ítem',
-                8 => 'Bonificación',
-                9 => 'Disminución en el valor',
+                1  => 'Anulacion de la Operación',
+                2  => 'Anulacion por error en el RUC',
+                3  => 'Correción por error en la descripción',
+                4  => 'Descuento global',
+                5  => 'Descuento por item',
+                6  => 'Devolución total',
+                7  => 'Devolución por ítem',
+                8  => 'Bonificación',
+                9  => 'Disminución en el valor',
                 10 => 'Otros conceptos',
             ];
 
@@ -1853,42 +2001,42 @@ class PdfController extends Controller
 
             $exportDataConNotaCredito[] = [
                 'FECHA DE EMISION NOTA CREDITO' => isset($moviment->creditNote->created_at) ? Carbon::parse($moviment->creditNote->created_at)->format('Y-m-d H:i:s') : '', // Agregar la fecha de emisión de la nota de crédito
-                'NUMERO NOTA CREDITO' => $moviment->creditNote->number ?? '', // Agregar el número de la nota de crédito
-                'RAZON' => $razonName ?? '', // Agregar la razón de la nota de crédito
-                'FECHA DE EMISION VENTA' => $moviment->paymentDate,
-                'NUMERO VENTA' => $moviment->sequentialNumber,
-                'DNI/RUC' => $personaCliente->documentNumber ?? '',
-                'RAZON SOCIAL' => $nombreCliente,
-                'AFECTO S/' => (string) number_format($afectoCredito, 2, '.', ''),
-                'INAFECTO S/' => (string) number_format(0, 2, '.', ''),
-                'IGV S/' => (string) number_format($igvCredito, 2, '.', ''),
-                'TOTAL S/' => (string) number_format($totalCredito, 2, '.', ''),
+                'NUMERO NOTA CREDITO'           => $moviment->creditNote->number ?? '',                                                                                     // Agregar el número de la nota de crédito
+                'RAZON'                         => $razonName ?? '',                                                                                                        // Agregar la razón de la nota de crédito
+                'FECHA DE EMISION VENTA'        => $moviment->paymentDate,
+                'NUMERO VENTA'                  => $moviment->sequentialNumber,
+                'DNI/RUC'                       => $personaCliente->documentNumber ?? '',
+                'RAZON SOCIAL'                  => $nombreCliente,
+                'AFECTO S/'                     => (string) number_format($afectoCredito, 2, '.', ''),
+                'INAFECTO S/'                   => (string) number_format(0, 2, '.', ''),
+                'IGV S/'                        => (string) number_format($igvCredito, 2, '.', ''),
+                'TOTAL S/'                      => (string) number_format($totalCredito, 2, '.', ''),
 
-                'DETRACCION' => (string) number_format($montoDetraccionCredito, 2, '.', ''),
-                'SALDO NETO' => (string) number_format($saldoNetoCredito, 2, '.', ''),
-                'ESTADO' => $moviment->status,
-                'USUARIO' => $moviment->user->username,
+                'DETRACCION'                    => (string) number_format($montoDetraccionCredito, 2, '.', ''),
+                'SALDO NETO'                    => (string) number_format($saldoNetoCredito, 2, '.', ''),
+                'ESTADO'                        => $moviment->status,
+                'USUARIO'                       => $moviment->user->username,
             ];
         }
 
         // Agregar fila de totales para ventas con nota de crédito
         $exportDataConNotaCredito[] = [
             'FECHA DE EMISION NOTA CREDITO' => '', // Agregar la fecha de emisión de la nota de crédito
-            'NUMERO NOTA CREDITO' => '', // Agregar el número de la nota de crédito
-            'RAZON' => '', // Agregar la razón de la nota de crédito
-            'FECHA DE EMISION VENTA' => '',
-            'NUMERO VENTA' => '',
-            'DNI/RUC' => '',
-            'RAZON SOCIAL' => 'TOTALES',
-            'AFECTO S/' => (string) number_format($totalAfectoCredito, 2, '.', ''),
-            'INAFECTO S/' => (string) number_format($totalInafectoCredito, 2, '.', ''),
-            'IGV S/' => (string) number_format($totalIgvCredito, 2, '.', ''),
-            'TOTAL S/' => (string) number_format($totalDetalleCredito, 2, '.', ''),
+            'NUMERO NOTA CREDITO'           => '', // Agregar el número de la nota de crédito
+            'RAZON'                         => '', // Agregar la razón de la nota de crédito
+            'FECHA DE EMISION VENTA'        => '',
+            'NUMERO VENTA'                  => '',
+            'DNI/RUC'                       => '',
+            'RAZON SOCIAL'                  => 'TOTALES',
+            'AFECTO S/'                     => (string) number_format($totalAfectoCredito, 2, '.', ''),
+            'INAFECTO S/'                   => (string) number_format($totalInafectoCredito, 2, '.', ''),
+            'IGV S/'                        => (string) number_format($totalIgvCredito, 2, '.', ''),
+            'TOTAL S/'                      => (string) number_format($totalDetalleCredito, 2, '.', ''),
 
-            'DETRACCION' => (string) number_format($totalDetraccionCredito, 2, '.', ''),
-            'SALDO NETO' => (string) number_format($totalSaldoNetoCredito, 2, '.', ''),
-            'ESTADO' => '',
-            'USUARIO' => '',
+            'DETRACCION'                    => (string) number_format($totalDetraccionCredito, 2, '.', ''),
+            'SALDO NETO'                    => (string) number_format($totalSaldoNetoCredito, 2, '.', ''),
+            'ESTADO'                        => '',
+            'USUARIO'                       => '',
         ];
 // dd('xd');
         // Devolvemos los datos en un archivo Excel
@@ -1908,7 +2056,7 @@ class PdfController extends Controller
             return '-'; // Si $person es nulo, retornamos un valor predeterminado
         }
 
-        $typeD = $person->typeofDocument ?? 'dni';
+        $typeD  = $person->typeofDocument ?? 'dni';
         $cadena = '';
 
         if (strtolower($typeD) === 'ruc') {
@@ -1924,15 +2072,15 @@ class PdfController extends Controller
     public function generarQrGuia()
     {
 
-        $funcion = "actualizarEstadoServidor2";
-        $fechaHoy = Carbon::now()->format('Y-m-d');
+        $funcion   = "actualizarEstadoServidor2";
+        $fechaHoy  = Carbon::now()->format('Y-m-d');
         $fechaAyer = Carbon::now()->subDay()->format('Y-m-d');
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
-            'fecini' => $fechaAyer,
-            'fecfin' => $fechaHoy,
+            'funcion'    => $funcion,
+            'fecini'     => $fechaAyer,
+            'fecfin'     => $fechaHoy,
             // 'estado' => 1,
             'id_empresa' => 437,
         ];
@@ -1968,60 +2116,60 @@ class PdfController extends Controller
         $detalles = [];
 
         $detalles[] = [
-            "descripcion" => $Movimiento?->paymentConcept?->name ?? '-',
-            "cantidad" => 1, // Cantidad fija (es un servicio)
+            "descripcion"              => $Movimiento?->paymentConcept?->name ?? '-',
+            "cantidad"                 => 1, // Cantidad fija (es un servicio)
             "precioventaunitarioxitem" => $Movimiento->total ?? 0,
         ];
 
         $tipoDocumento = '';
-        $num = $Movimiento->sequentialNumber;
+        $num           = $Movimiento->sequentialNumber;
 
-        $dateTime = Carbon::now()->format('Y-m-d H:i:s');
+        $dateTime       = Carbon::now()->format('Y-m-d H:i:s');
         $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
-        $fechaInicio = $Movimiento->created_at;
-        $rucOdni = $personaCliente->documentNumber;
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
 
         if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
             $nombreCliente = $personaCliente->businessName;
-            $direccion = $personaCliente->fiscalAddress ?? '-';
+            $direccion     = $personaCliente->fiscalAddress ?? '-';
         } else {
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
-            $direccion = $personaCliente->address ?? '-';
+            $direccion     = $personaCliente->address ?? '-';
         }
 
-        $formapago = DB::select('SELECT obtenerFormaPagoPorCaja(:id) AS forma_pago', ['id' => $Movimiento->id]);
+        $formapago   = DB::select('SELECT obtenerFormaPagoPorCaja(:id) AS forma_pago', ['id' => $Movimiento->id]);
         $typePayment = $formapago[0]->forma_pago ?? '-';
 
         $dataE = [
-            'title' => 'DOCUMENTO DE PAGO123',
-            'ruc_dni' => $rucOdni,
-            'direccion' => $direccion,
-            'idMovimiento' => $Movimiento->id,
+            'title'           => 'DOCUMENTO DE PAGO123',
+            'ruc_dni'         => $rucOdni,
+            'direccion'       => $direccion,
+            'idMovimiento'    => $Movimiento->id,
             'tipoElectronica' => $tipoDocumento,
-            'typePayment' => $typePayment,
-            'numeroVenta' => $num,
-            'numeroCaja' => $Movimiento->correlative,
-            'porcentaje' => $Movimiento->percentDetraction,
-            'mov_id' => $Movimiento->mov_id ?? null,
-            'fechaemision' => $Movimiento->created_at->format('Y-m-d'),
-            'cliente' => $nombreCliente,
-            'detalles' => $detalles,
-            'cuentas' => $Movimiento->installments,
-            'vuelto' => '0.00',
-            'totalPagado' => $Movimiento->total,
+            'typePayment'     => $typePayment,
+            'numeroVenta'     => $num,
+            'numeroCaja'      => $Movimiento->correlative,
+            'porcentaje'      => $Movimiento->percentDetraction,
+            'mov_id'          => $Movimiento->mov_id ?? null,
+            'fechaemision'    => $Movimiento->created_at->format('Y-m-d'),
+            'cliente'         => $nombreCliente,
+            'detalles'        => $detalles,
+            'cuentas'         => $Movimiento->installments,
+            'vuelto'          => '0.00',
+            'totalPagado'     => $Movimiento->total,
             'linkRevisarFact' => '$linkRevisarFact',
-            'formaPago' => $Movimiento->formaPago ?? '-',
-            'fechaInicio' => $fechaInicio,
-            'guia' => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
-            'placa' => $Movimiento->reception->id ?? '-',
-            'typeSale' => $Movimiento->typeSale ?? '-',
-            'codeDetraction' => $Movimiento->codeDetraction ?? '-',
-            'comentario' => $Movimiento->comment ?? '-',
+            'formaPago'       => $Movimiento->formaPago ?? '-',
+            'fechaInicio'     => $fechaInicio,
+            'guia'            => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'           => $Movimiento->reception->id ?? '-',
+            'typeSale'        => $Movimiento->typeSale ?? '-',
+            'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
+            'comentario'      => $Movimiento->comment ?? '-',
         ];
 
         // Utiliza el método loadView() directamente en la fachada PDF
-        $pdf = PDF::loadView('caja-pdf-ticket', $dataE);
-        $canvas = $pdf->getDomPDF()->get_canvas();
+        $pdf           = PDF::loadView('caja-pdf-ticket', $dataE);
+        $canvas        = $pdf->getDomPDF()->get_canvas();
         $contenidoAlto = $canvas->get_height();
         $pdf->setPaper([15, 5, 172, 439], 'portrait');
 
@@ -2042,7 +2190,7 @@ class PdfController extends Controller
 
         $Movimiento = Moviment::find($idMov);
 
-        if (!$Movimiento) {
+        if (! $Movimiento) {
             abort(404, 'Movimiento No Encontrado');
 
         }
@@ -2073,73 +2221,102 @@ class PdfController extends Controller
         // Inicializar el array de detalles
         $detalles = [];
 
-        $box = $Movimiento->box;
-        $sucursal = $Movimiento->branchOffice;
+        $box        = $Movimiento->box;
+        $sucursal   = $Movimiento->branchOffice;
         $detalles[] = [
-            "descripcion" => 'TRANSFERENCIA DE FONDOS (EGRESOS)' ?? '-',
-            "cantidad" => 1, // Cantidad fija (es un servicio)
+            "descripcion"              => 'TRANSFERENCIA DE FONDOS (EGRESOS)' ?? '-',
+            "cantidad"                 => 1, // Cantidad fija (es un servicio)
             "precioventaunitarioxitem" => $expense_driver?->moviment?->total ?? 0,
         ];
 
         $tipoDocumento = '';
-        $num = $Movimiento->sequentialNumber;
+        $num           = $Movimiento->sequentialNumber;
 
-        $dateTime = Carbon::now()->format('Y-m-d H:i:s');
+        $dateTime       = Carbon::now()->format('Y-m-d H:i:s');
         $personaCliente = Person::withTrashed()->find($Movimiento->person_id);
-        $fechaInicio = $Movimiento->created_at;
-        $rucOdni = $personaCliente->documentNumber;
+        $fechaInicio    = $Movimiento->created_at;
+        $rucOdni        = $personaCliente->documentNumber;
 
         if (strtoupper($personaCliente->typeofDocument) != 'DNI') {
             $nombreCliente = $personaCliente->businessName;
-            $direccion = $personaCliente->fiscalAddress ?? '-';
+            $direccion     = $personaCliente->fiscalAddress ?? '-';
         } else {
             $nombreCliente = $personaCliente->names . ' ' . $personaCliente->fatherSurname . ' ' . $personaCliente->motherSurname;
-            $direccion = $personaCliente->address ?? '-';
+            $direccion     = $personaCliente->address ?? '-';
         }
 
-        $formapago = DB::select('SELECT obtenerFormaPagoPorCaja(:id) AS forma_pago', ['id' => $Movimiento->id]);
+        $formapago   = DB::select('SELECT obtenerFormaPagoPorCaja(:id) AS forma_pago', ['id' => $Movimiento->id]);
         $typePayment = $formapago[0]->forma_pago ?? '-';
 
         $dataE = [
-            'title' => 'TICKET DE MOVIMIENTO DE REGRESO A CAJA',
-            'ruc_dni' => $rucOdni,
-            'direccion' => $direccion,
-            'idMovimiento' => $Movimiento->id,
+            'title'           => 'TICKET DE MOVIMIENTO DE REGRESO A CAJA',
+            'ruc_dni'         => $rucOdni,
+            'direccion'       => $direccion,
+            'idMovimiento'    => $Movimiento->id,
             'tipoElectronica' => $tipoDocumento,
-            'typePayment' => $typePayment,
-            'numeroVenta' => $num,
-            'numeroCaja' => $Movimiento->correlative,
-            'porcentaje' => $Movimiento->percentDetraction,
-            'mov_id' => $Movimiento->mov_id ?? null,
-            'fechaemision' => $Movimiento->created_at->format('Y-m-d H:i:s'),
+            'typePayment'     => $typePayment,
+            'numeroVenta'     => $num,
+            'numeroCaja'      => $Movimiento->correlative,
+            'porcentaje'      => $Movimiento->percentDetraction,
+            'mov_id'          => $Movimiento->mov_id ?? null,
+            'fechaemision'    => $Movimiento->created_at->format('Y-m-d H:i:s'),
 
-            'cliente' => $nombreCliente,
-            'detalles' => $detalles,
-            'cuentas' => $Movimiento->installments,
-            'vuelto' => '0.00',
-            'totalPagado' => $Movimiento->total,
+            'cliente'         => $nombreCliente,
+            'detalles'        => $detalles,
+            'cuentas'         => $Movimiento->installments,
+            'vuelto'          => '0.00',
+            'totalPagado'     => $Movimiento->total,
             'linkRevisarFact' => '$linkRevisarFact',
-            'formaPago' => $Movimiento->formaPago ?? '-',
-            'fechaInicio' => $fechaInicio,
-            'guia' => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
-            'placa' => $Movimiento->reception->id ?? '-',
-            'typeSale' => $Movimiento->typeSale ?? '-',
-            'codeDetraction' => $Movimiento->codeDetraction ?? '-',
-            'comentario' => $Movimiento->comment ?? '-',
-            'usuario' => ($this->namePerson($Movimiento->user->worker->person) ?? ''),
-            'programacion' => $expense_driver->programming ?? '-',
-            'conductor' => ($this->namePerson($driver->person) ?? ''),
-            'caja' => $box->name ?? '',
-            'sucursal' => $sucursal->name ?? '',
+            'formaPago'       => $Movimiento->formaPago ?? '-',
+            'fechaInicio'     => $fechaInicio,
+            'guia'            => $Movimiento->reception?->firstCarrierGuide?->numero ?? '-',
+            'placa'           => $Movimiento->reception->id ?? '-',
+            'typeSale'        => $Movimiento->typeSale ?? '-',
+            'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
+            'comentario'      => $Movimiento->comment ?? '-',
+            'usuario'         => ($this->namePerson($Movimiento->user->worker->person) ?? ''),
+            'programacion'    => $expense_driver->programming ?? '-',
+            'conductor'       => ($this->namePerson($driver->person) ?? ''),
+            'caja'            => $box->name ?? '',
+            'sucursal'        => $sucursal->name ?? '',
         ];
 
         // Utiliza el método loadView() directamente en la fachada PDF
-        $pdf = PDF::loadView('back_caja-ticket', $dataE);
-        $canvas = $pdf->getDomPDF()->get_canvas();
+        $pdf           = PDF::loadView('back_caja-ticket', $dataE);
+        $canvas        = $pdf->getDomPDF()->get_canvas();
         $contenidoAlto = $canvas->get_height();
         $pdf->setPaper([15, 5, 172, 450], 'portrait');
 
         $fileName = 'DOCUMENTO DE PAGO- ' . $dateTime . '.pdf';
+        $fileName = str_replace(' ', '_', $fileName);
+
+        return $pdf->stream($fileName);
+    }
+    public function ticketrecepcion(Request $request, $idMov = 10)
+    {
+
+        $reception = Reception::find($idMov);
+
+        if (! $reception) {
+            abort(404, 'Reception No Encontrado');
+
+        }
+
+        $data = [
+            "reception" => $reception,
+            "branchoffice" => $reception->branchOffice,
+            "sale" => $reception->moviment,
+            "totalDetalle"=>$reception->paymentAmount,
+            "detalles"=>[]
+        ];
+
+        // Utiliza el método loadView() directamente en la fachada PDF
+        $pdf           = PDF::loadView('recepcion-venta-ticket', $data);
+        // $canvas        = $pdf->getDomPDF()->get_canvas();
+        // $contenidoAlto = $canvas->get_height();
+        $pdf->setPaper([15, 5, 172, 550], 'portrait');
+
+        $fileName = 'Ticket-recepcion-' . $reception->codeReception . '.pdf';
         $fileName = str_replace(' ', '_', $fileName);
 
         return $pdf->stream($fileName);
