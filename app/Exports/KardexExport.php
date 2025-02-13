@@ -31,119 +31,55 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function collection()
     {
-
-        $products = $this->product_id != []
-        ? $products = $this->product_id
-        : CargaDocument::pluck('product_id')->unique();
-
+        $products = !empty($this->product_id) ? $this->product_id : CargaDocument::pluck('product_id')->unique();
         $finalCollection = new Collection();
-
+    
         foreach ($products as $product_id) {
-            $queryCarga = CargaDocument::query()->whereNull('deleted_at');
-            $queryRecep = DetailReception::query()->whereNull('deleted_at');
-
-            if ($this->product_id) {
-                $queryCarga->where('product_id', $this->product_id);
-                $queryRecep->where('product_id', $this->product_id);
-            } else {
-                $queryRecep->whereNotNull('product_id');
-            }
-
+            $queryCarga = CargaDocument::whereNull('deleted_at')->where('product_id', $product_id);
+            $queryRecep = DetailReception::whereNull('deleted_at')->where('product_id', $product_id);
+    
             if ($this->from) {
                 $toDate = $this->to ?? now();
                 $queryCarga->whereBetween('movement_date', [$this->from, $toDate]);
-                $queryRecep->whereHas('reception.firstCarrierGuide', function ($query) use ($toDate) {
-                    $query->whereBetween('transferStartDate', [$this->from, $toDate]);
-                });
+                $queryRecep->whereHas('reception.firstCarrierGuide', fn($q) => $q->whereBetween('transferStartDate', [$this->from, $toDate]));
             }
+    
             $saldoInicial = $this->getStockBefore($product_id);
-
-            // Encabezado de producto
-            $finalCollection->push([
-                'is_header'     => true,
-                'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE',
-                'type'          => '',
-                'concept'       => '',
-                'document'      => '',
-                'quantity'      => '',
-                'saldo'         => '',
-                'comment'       => '',
+            $finalCollection->push(
+                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '', 'quantity' => '', 'saldo' => '', 'comment' => ''],
+                ['is_header' => true, 'movement_date' => 'Fecha Movimiento', 'type' => 'Tipo Movimiento', 'concept' => 'Concepto', 'document' => 'Documento', 'quantity' => 'Cantidad', 'saldo' => 'Saldo', 'comment' => 'Comentario'],
+                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL', 'concept' => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'), 'document' => '0000-0000000', 'quantity' => 0, 'saldo' => $saldoInicial, 'comment' => '-']
+            );
+    
+            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->get()->map(fn($doc) => [
+                'movement_date' => $doc->movement_date, 'type' => $doc->movement_type, 'concept' => 'DOCUMENTO DE CARGA',
+                'document' => 'D' . str_pad($doc->product_id, 3, '0', STR_PAD_LEFT) . '-' . str_pad($doc->id, 8, '0', STR_PAD_LEFT),
+                'quantity' => $doc->quantity, 'saldo' => null, 'comment' => $doc->comment ?? "-",
             ]);
-
-            // Encabezado de la tabla
-            $finalCollection->push([
-                'is_header'     => true,
-                'movement_date' => 'Fecha Movimiento',
-                'type'          => 'Tipo Movimiento',
-                'concept'       => 'Concepto',
-                'document'      => 'Documento',
-                'quantity'      => 'Cantidad',
-                'saldo'         => 'Saldo',
-                'comment'       => 'Comentario',
+    
+            $detailReceptions = $queryRecep->get()->map(fn($detail) => [
+                'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(), 'type' => 'SALIDA',
+                'concept' => 'GUIA TRANSPORTE', 'document' => $detail->reception->firstCarrierGuide->numero ?? 'N/A',
+                'quantity' => $detail->cant, 'saldo' => null, 'comment' => '-',
             ]);
-
-            // Registro del saldo inicial
-            $finalCollection->push([
-                'movement_date' => $this->from ?? now(),
-                'type'          => 'SALDO INICIAL',
-                'concept'       => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'),
-                'document'      => '0000-0000000',
-                'quantity'      => (string) 0,
-                'saldo'         => (string) $saldoInicial,
-                'comment'       => '-',
-            ]);
-            // Obtener registros de movimientos
-            $cargaDocuments = $queryCarga->where('product_id', $product_id)->orderBy('movement_date', 'asc')->get()->map(function ($doc) {
-                return [
-                    'movement_date' => $doc->movement_date,
-                    'type'          => $doc->movement_type,
-                    'concept'       => 'DOCUMENTO DE CARGA',
-                    'document'      => 'D' . str_pad($doc->product_id, 3, '0', STR_PAD_LEFT) . '-' . str_pad($doc->id, 8, '0', STR_PAD_LEFT),
-                    'quantity'      => $doc->quantity,
-                    'saldo'         => null,
-                    'comment'       => $doc->comment ?? "-",
-                ];
-            });
-
-            $detailReceptions = $queryRecep->where('product_id', $product_id)->get()->map(function ($detail) {
-                return [
-                    'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(),
-                    'type'          => 'SALIDA',
-                    'concept'       => 'GUIA TRANSPORTE',
-                    'document'      => $detail->reception->firstCarrierGuide->numero ?? 'N/A',
-                    'quantity'      => $detail->cant,
-                    'saldo'         => null,
-                    'comment'       => '-',
-                ];
-            })->sortBy('movement_date')->values();
-
-            // Calcular saldo acumulado correctamente
-            $saldo   = $saldoInicial;
-            $records = (new Collection(array_merge($cargaDocuments->toArray(), $detailReceptions->toArray())))
-                ->sortBy('movement_date')
+    
+            $saldo = $saldoInicial;
+            $records = collect(array_merge($cargaDocuments->toArray(), $detailReceptions->toArray()))
+                ->sortByDesc('movement_date')  // Ordenar de más reciente a más antiguo
+                ->take(300)  // Tomar los últimos 300 registros
+                ->reverse()  // Revertir el orden para que queden en orden cronológico
                 ->map(function ($row) use (&$saldo) {
-                    $cantidad     = $row['quantity'];
-                    $saldo        = ($row['type'] === 'ENTRADA') ? $saldo + $cantidad : $saldo - $cantidad;
-                    $row['saldo'] = $saldo;
-                    return $row;
+                    $row['saldo'] = ($row['type'] === 'ENTRADA') ? $saldo += $row['quantity'] : $saldo -= $row['quantity'];
+                    return $row + ['movement_date' => '', 'type' => '', 'concept' => '', 'document' => '', 'quantity' => '', 'saldo' => '', 'comment' => ''];
                 });
-
-            $emptyRows = collect([
-                ['movement_date' => '',
-                    'type'           => '',
-                    'concept'        => '',
-                    'document'       => '',
-                    'quantity'       => '',
-                    'saldo'          => '',
-                    'comment'        => ''],
-            ]);
-
-            // Agregar los registros a la colección final
-            $finalCollection = $finalCollection->merge($records)->merge($emptyRows);
+    
+            $finalCollection = $finalCollection->merge($records)->push(['movement_date' => '', 'type' => '', 'concept' => '', 'document' => '', 'quantity' => '', 'saldo' => '', 'comment' => '']);
         }
-
+    
         return $finalCollection;
     }
+    
+    
 
     public function headings(): array
     {
