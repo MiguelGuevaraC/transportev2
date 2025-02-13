@@ -1418,7 +1418,7 @@ class PdfController extends Controller
         $totalDebtSum = $query->sum('totalDebt');
 
         // Obtener los registros filtrados con paginación
-        $data = $query->orderBy('id', 'desc')->get();
+        $data = $query->orderBy('id', 'desc')->take(200)->get();
 
         // Inicializar las variables de totales
         $total           = 0;
@@ -1557,6 +1557,7 @@ class PdfController extends Controller
         $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
         $numberVenta        = $request->input('numberVenta');
+        $numberGuia        = $request->input('numberGuia');
 
         $origenOrDestino = $request->input('origenOrDestino');
         $isCargos        = $request->input('isCargos');
@@ -1641,6 +1642,16 @@ class PdfController extends Controller
             });
         }
 
+        if (!empty($numberGuia)) {
+            // Filtro por número de guía dentro de la relación firstCarrierGuide
+            $receptions->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
+                $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
+            });
+            // $receptionsQuery->join('carrier_guides as cg', 'receptions.id', '=', 'cg.reception_id');
+            // $receptionsQuery->where('cg.numero', 'LIKE', '%' . $numberGuia . '%');
+        }
+
+
         if (! empty($numberVenta)) {
             $receptions->where(function ($query) use ($numberVenta) {
                 // Filtrar primero por el campo nro_sale
@@ -1682,7 +1693,7 @@ class PdfController extends Controller
             });
         }
 
-        $receptions = $receptions->orderBy('id', 'desc')->get();
+        $receptions = $receptions->orderBy('id', 'desc')->take(200)->get();
 
         // Inicializar las variables de totales
         $flete = 0;
@@ -1825,7 +1836,7 @@ class PdfController extends Controller
                 'reception.details', 'person', 'user.worker.person', 'installments', 'installments.payInstallments',
             ])
             ->orderBy('id', 'desc')
-            ->get();
+            ->take(200)->get();
 
         // Obtener datos que SÍ tienen nota de crédito
         $ventasConNotaCredito = Moviment::where('branchOffice_id', $branch_office_id)
@@ -1857,7 +1868,7 @@ class PdfController extends Controller
                 'reception.details', 'person', 'user.worker.person', 'installments', 'installments.payInstallments',
             ])
             ->orderBy('id', 'desc')
-            ->get();
+            ->take(200)->get();
 
         // Procesar los datos para la exportación
         $totalAfecto     = 0;

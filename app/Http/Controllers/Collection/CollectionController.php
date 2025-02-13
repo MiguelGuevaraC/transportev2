@@ -19,7 +19,7 @@ class CollectionController extends Controller
 {
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/dataCollection",
+ *     path="/transporte/public/api/dataCollection",
  *     summary="Get all data",
  *     tags={"CollectionData"},
  *     description="Retrieve all data collections",
@@ -154,6 +154,8 @@ public function applyNameFilter($query, $searchTermUpper)
             $receptionsQuery->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
                 $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
             });
+            // $receptionsQuery->join('carrier_guides as cg', 'receptions.id', '=', 'cg.reception_id');
+            // $receptionsQuery->where('cg.numero', 'LIKE', '%' . $numberGuia . '%');
         }
 
         // Filtro por número de venta dentro de la relación moviment
@@ -371,12 +373,10 @@ public function applyNameFilter($query, $searchTermUpper)
             $clients_per_page = 10; // Default value if NaN or non-positive
         }
 
-        $clients = Person::with(['tarifas.unity','products.unity'])
-        ->where('branchOffice_id', $branch_office_id)
+        $clients = Person::where('branchOffice_id', $branch_office_id)
             ->where("type", 'Cliente')
 
-            ->orderBy('id', 'desc')
-            ->paginate($clients_per_page, ['*'], 'clients_page', $clients_page);
+            ->orderBy('id', 'desc')->paginate($clients_per_page, ['*'], 'clients_page', $clients_page);
 
         // Subcontracts pagination
         $subcontracts_page = $request->input('subcontracts_page', 1);

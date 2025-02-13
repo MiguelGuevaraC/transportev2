@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 @php
+
     function namePerson($person)
     {
         if ($person == null) {
@@ -59,7 +60,7 @@
                     $pngFile .
                     '" alt="Imagen PNG">';
             } else {
-                echo '-';
+                echo '';
             }
         } else {
             echo 'Error en la solicitud.';

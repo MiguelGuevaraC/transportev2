@@ -783,7 +783,7 @@ class DriverExpenseController extends Controller
             'igv' => $request->input('igv'),
             'gravado' => $request->input('gravado'),
             'exonerado' => $request->input('exonerado'),
-            'selectTypePay' => $request->input('selectTypePay'),
+            'selectTypePay' => $request->input('selectTypePay')?? $expense->selectTypePay,
 
         ];
 

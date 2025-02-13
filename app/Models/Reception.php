@@ -381,8 +381,8 @@ class Reception extends Model
     public function firstCarrierGuide()
     {
         return $this->hasOne(CarrierGuide::class)
-        ->where('status_facturado', '!=', 'Anulada')
-            ->latest('id')
+            ->where('status_facturado', '!=', 'Anulada')
+            ->latestOfMany()
             ->with(['districtStart.province.department',
                 'districtEnd.province.department',
                 'motive', 'sender', 'recipient', 'payResponsible',

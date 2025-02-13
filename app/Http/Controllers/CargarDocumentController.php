@@ -216,7 +216,7 @@ class CargarDocumentController extends Controller
     public function exportKardex(KardexRequest $request)
     {
         $validatedData = $request->validated();
-        $idproducto    = $request->product_id ?? null;
+        $idproducto = is_array($request->product_id) ? $request->product_id : ($request->product_id!="null" ? [$request->product_id] : []);
         $from          = $request->from ?? null;
         $to            = $request->to ?? null;
 

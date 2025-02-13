@@ -2580,6 +2580,7 @@ class VentaController extends Controller
         $personId         = $request->input('person_id');
         $start            = $request->input('start');            // Fecha de inicio
         $end              = $request->input('end');              // Fecha de fin
+        $end              = Carbon::parse($end)->addDay()->format('Y-m-d');
         $sequentialNumber = $request->input('sequentialNumber'); // Número secuencial (opcional)
 
                                                     // Obtener per_page y page de los parámetros de la solicitud

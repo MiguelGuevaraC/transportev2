@@ -21,18 +21,19 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
     protected $from;
     protected $to;
 
-    public function __construct($product_id = null, $from = null, $to = null)
+    public function __construct($product_id = [], $from = null, $to = null)
     {
-        $this->product_id = $product_id == "null" ? null : $product_id;
+        $this->product_id = is_array($product_id) ? $product_id : ($product_id == "null" ? [] : [$product_id]);
         $this->from       = $from;
         $this->to         = $to;
     }
+    
 
     public function collection()
     {
 
-        $products = $this->product_id != null
-        ? CargaDocument::where('product_id', $this->product_id)->pluck('product_id')->unique()
+        $products = $this->product_id != []
+        ? $products = $this->product_id
         : CargaDocument::pluck('product_id')->unique();
 
         $finalCollection = new Collection();

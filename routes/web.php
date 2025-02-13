@@ -31,5 +31,13 @@ Route::get('pruebaFacturador', [PdfController::class, 'pruebaFacturador'])->name
 Route::get('reporteReception/{id}', [PdfController::class, 'reporteReception'])->name('reporteReception');
 Route::get('ticketmov/{id}', [PdfController::class, 'ticketbox'])->name('ticketbox');
 Route::get('ticketbackbox/{id}', [PdfController::class, 'ticketbackbox'])->name('ticketbackbox');
-Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
 
+
+    Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
+
+Route::get('/', function () {
+    return response()->json(['message' => 'Unauthenticated'], 401);
+});
+Route::get('/login', function () {
+    return response()->json(['message' => 'Unauthenticated'], 401);
+})->name('login');
