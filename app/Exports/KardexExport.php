@@ -4,6 +4,7 @@ namespace App\Exports;
 use App\Models\CargaDocument;
 use App\Models\DetailReception;
 use App\Models\Product;
+use Hamcrest\Type\IsArray;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -23,7 +24,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function __construct($product_id = [], $from = null, $to = null)
     {
-        $this->product_id = is_array($product_id) ? $product_id : ($product_id == "null" ? [] : [$product_id]);
+        $this->product_id = is_array($product_id) ? $product_id : ($product_id == "null" ? "null" : [$product_id]);
         $this->from       = $from;
         $this->to         = $to;
     }
@@ -31,7 +32,10 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function collection()
     {
-        $products = !empty($this->product_id) ? $this->product_id : CargaDocument::pluck('product_id')->unique();
+        $products = is_array($this->product_id) 
+        ? $this->product_id 
+        : ($this->product_id !== "null" ? [$this->product_id] : CargaDocument::latest()->pluck('product_id')->unique()->take(10));
+    
         $finalCollection = new Collection();
     
         foreach ($products as $product_id) {
@@ -51,13 +55,13 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL', 'concept' => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'), 'document' => '0000-0000000', 'quantity' => 0, 'saldo' => $saldoInicial, 'comment' => '-']
             );
     
-            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->get()->map(fn($doc) => [
+            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->take(100) ->get()->map(fn($doc) => [
                 'movement_date' => $doc->movement_date, 'type' => $doc->movement_type, 'concept' => 'DOCUMENTO DE CARGA',
                 'document' => 'D' . str_pad($doc->product_id, 3, '0', STR_PAD_LEFT) . '-' . str_pad($doc->id, 8, '0', STR_PAD_LEFT),
                 'quantity' => $doc->quantity, 'saldo' => null, 'comment' => $doc->comment ?? "-",
             ]);
     
-            $detailReceptions = $queryRecep->get()->map(fn($detail) => [
+            $detailReceptions = $queryRecep->take(100) ->get()->map(fn($detail) => [
                 'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(), 'type' => 'SALIDA',
                 'concept' => 'GUIA TRANSPORTE', 'document' => $detail->reception->firstCarrierGuide->numero ?? 'N/A',
                 'quantity' => $detail->cant, 'saldo' => null, 'comment' => '-',
@@ -66,7 +70,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $saldo = $saldoInicial;
             $records = collect(array_merge($cargaDocuments->toArray(), $detailReceptions->toArray()))
                 ->sortByDesc('movement_date')  // Ordenar de más reciente a más antiguo
-                ->take(300)  // Tomar los últimos 300 registros
+                 // Tomar los últimos 300 registros
                 ->reverse()  // Revertir el orden para que queden en orden cronológico
                 ->map(function ($row) use (&$saldo) {
                     $row['saldo'] = ($row['type'] === 'ENTRADA') ? $saldo += $row['quantity'] : $saldo -= $row['quantity'];
