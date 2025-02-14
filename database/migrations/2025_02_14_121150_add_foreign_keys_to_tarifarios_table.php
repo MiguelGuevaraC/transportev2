@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::table('tarifarios', function (Blueprint $table) {
             $table->foreignId('destination_id')->nullable()->constrained('places');
             $table->foreignId('origin_id')->nullable()->constrained('places');
-            $table->decimal('limitweight')->nullable();
+            $table->decimal('limitweight_min')->nullable();
+            $table->decimal('limitweight_max')->nullable();
             $table->decimal('tarifa_camp')->nullable();
         });
     }
