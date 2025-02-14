@@ -23,14 +23,18 @@ class IndexTarifarioRequest extends IndexRequest
     public function rules(): array
     {
         return [
-            'id'              => 'nullable|integer',
-            'tarifa'   => 'nullable|string',
-            'quantity'        => 'nullable|string',
-            'description'      => 'nullable|string',
-            'unity'      => 'nullable|string',
-            'person_id'          => 'nullable|string',
-            'unity_id'          => 'nullable|string',
+            'id'             => 'nullable|integer',
+            'tarifa'         => 'nullable|string',
+            'quantity'       => 'nullable|string',
+            'description'    => 'nullable|string',
+            'unity'          => 'nullable|string',
+            'person_id'      => 'nullable|string',
+            'unity_id'       => 'nullable|string',
+            'tarifa_camp'    => 'nullable|string',
+            'limitweight'    => 'nullable|string',
+            'destination_id' => 'nullable|string',
+            'origin_id'      => 'nullable|string',
         ];
     }
-    
+
 }

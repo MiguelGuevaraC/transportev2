@@ -23,17 +23,22 @@ class TarifarioResource extends JsonResource
  * )
  */
 
-
     public function toArray($request): array
     {
         return [
             'id'          => $this->id ?? null,
             'tarifa'      => $this->tarifa ?? null,
             'description' => $this->description ?? null,
+            'tarifa_camp'=> $this->tarifa_camp ?? null,
+            'limitweight'=> $this->limitweight ?? null,
+            'destination_id'=> $this->destination_id ?? null,
+            'destination'=> $this->destination ?? null,
+            'origin_id'=> $this->origin_id ?? null,
+            'origin'=> $this->origin ?? null,
             'unity_id'    => $this->unity_id ?? null,
-            'unity'    => $this->unity ?? null,
+            'unity'       => $this->unity ?? null,
             'person_id'   => $this->person_id ?? null,
-            'person'       => $this->person? $this->person : null,
+            'person'      => $this->person ? $this->person : null,
             'created_at'  => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }
