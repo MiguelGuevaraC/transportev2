@@ -12,9 +12,17 @@ class TarifarioResource extends JsonResource
  *     title="Tarifario",
  *     description="Model representing a Tariff",
  *     required={"id", "tarifa", "unity_id"},
+ *     
  *     @OA\Property(property="id", type="integer", description="Tariff ID"),
  *     @OA\Property(property="tarifa", type="number", format="float", description="Rate or tariff value"),
+ *     @OA\Property(property="tarifa_camp", type="number", format="float", nullable=true, description="Campaign tariff value"),
  *     @OA\Property(property="description", type="string", nullable=true, description="Description of the tariff"),
+ *     @OA\Property(property="limitweight_min", type="number", format="float", description="Minimum weight limit"),
+ *     @OA\Property(property="limitweight_max", type="number", format="float", description="Maximum weight limit"),
+ *     @OA\Property(property="destination_id", type="integer", description="ID of the destination place"),
+ *     @OA\Property(property="destination", ref="#/components/schemas/Place", description="Destination place object"),
+ *     @OA\Property(property="origin_id", type="integer", description="ID of the origin place"),
+ *     @OA\Property(property="origin", ref="#/components/schemas/Place", description="Origin place object"),
  *     @OA\Property(property="unity_id", type="integer", description="ID of the associated unity"),
  *     @OA\Property(property="unity", ref="#/components/schemas/Unity", description="Associated Unity object"),
  *     @OA\Property(property="person_id", type="integer", nullable=true, description="ID of the associated person"),
@@ -22,6 +30,7 @@ class TarifarioResource extends JsonResource
  *     @OA\Property(property="created_at", type="string", format="date-time", description="Creation date of the tariff")
  * )
  */
+
 
     public function toArray($request): array
     {

@@ -16,7 +16,8 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(property="description", type="string", nullable=true, description="Description of the Tarifario"),
  *     @OA\Property(property="person_id", type="integer", nullable=false, description="ID of the person associated with the Tarifario"),
  *     @OA\Property(property="tarifa_camp", type="number", format="float", nullable=true, description="Tarifa camp amount"),
- *     @OA\Property(property="limitweight", type="number", format="float", nullable=true, description="Weight limit for the Tarifario"),
+ *     @OA\Property(property="limitweight_min", type="number", format="float", nullable=true, description="Weight limit min for the Tarifario"),
+ *     @OA\Property(property="limitweight_max", type="number", format="float", nullable=true, description="Weight limit max for the Tarifario"),
  *     @OA\Property(property="destination_id", type="integer", nullable=false, description="ID of the destination place"),
  *     @OA\Property(property="origin_id", type="integer", nullable=false, description="ID of the origin place"),
  *     @OA\Property(property="unity_id", type="integer", nullable=false, description="ID of the unity associated with the Tarifario")

@@ -19,12 +19,13 @@ class ProductService
         return Product::find($id);
     }
 
-    public function createProduct(array $data): Product
+    public function createProduct(array $data): Product 
     {
         $proyect = Product::create($data);
+        $proyect->codeproduct = strtoupper($proyect->id . '-' . substr(md5($data['description'] . uniqid()), 0, 8));
+        $proyect->save();
         return $proyect;
     }
-
     public function updateProduct(Product $proyect, array $data): Product
     {
         $proyect->update($data);

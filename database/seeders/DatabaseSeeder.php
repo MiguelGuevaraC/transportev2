@@ -642,7 +642,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ConeptPaySeeder::class);
         $this->call(BankSeeder::class);
         $this->call(RouteSeeder::class);
-
+        $this->call(UnitiesSeeder::class);
+        $this->call(AddresbyBranchOfficeSeeder::class);
+        
         DB::unprepared('
         DROP FUNCTION IF EXISTS obtenerFormaPagoPorCaja;
     ');

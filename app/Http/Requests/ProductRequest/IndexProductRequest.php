@@ -31,6 +31,8 @@ class IndexProductRequest extends IndexRequest
             'unity' => 'nullable|string',
             'unity_id' => 'nullable|string',
             'person_id' => 'nullable|string',
+            'codeproduct'=> 'nullable|string',
+            'addressproduct'=> 'nullable|string',
         ];
     }
     

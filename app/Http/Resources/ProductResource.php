@@ -17,6 +17,9 @@ class ProductResource extends JsonResource
  *     @OA\Property(property="stock", type="integer", description="Product stock"),
  *     @OA\Property(property="weight", type="number", format="float", description="Product weight"),
  *     @OA\Property(property="category", type="string", nullable=true, description="Product category"),
+ *     @OA\Property(property="addressproduct", type="string", nullable=true, description="Product address"),
+ *     @OA\Property(property="codeproduct", type="string", nullable=true, description="Product code"),
+ * 
  *     @OA\Property(property="unity_id", type="integer", description="Unit of measurement ID"),
  *     @OA\Property(property="unity", ref="#/components/schemas/Unity"),
  *     @OA\Property(property="person_id", type="integer", description="Person ID associated with the product"),
@@ -28,16 +31,19 @@ class ProductResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'          => $this->id ?? null,
-            'description' => $this->description ?? null,
-            'stock'       => $this->stock ?? null,
-            'weight'      => $this->weight ?? null,
-            'category'    => $this->category ?? null,
-            'unity_id'    => $this->unity_id ?? null,
-            'unity'       => $this->unity ? new UnityResource($this->unity) : null,
-            'person_id'   => $this->person_id ?? null,
+            'id'             => $this->id ?? null,
+            'description'    => $this->description ?? null,
+            'stock'          => $this->stock ?? null,
+            'weight'         => $this->weight ?? null,
+            'category'       => $this->category ?? null,
+            'addressproduct' => $this->addressproduct ?? null,
+            'codeproduct'    => $this->codeproduct ?? null,
 
-            'created_at'  => $this->created_at->format('Y-m-d H:i:s'),
+            'unity_id'       => $this->unity_id ?? null,
+            'unity'          => $this->unity ? new UnityResource($this->unity) : null,
+            'person_id'      => $this->person_id ?? null,
+
+            'created_at'     => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

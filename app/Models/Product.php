@@ -15,6 +15,8 @@ class Product extends Model
         'stock',
         'weight',
         'category',
+        'codeproduct',
+        'addressproduct',
         'unity_id',
         'person_id',
         'created_at',
@@ -32,6 +34,8 @@ class Product extends Model
         'unity' => 'like',
         'category_id' => '=',
         'unity_id' => '=',
+        'codeproduct'=> 'like',
+        'addressproduct'=> 'like',
     ];
 
     /**
