@@ -30,22 +30,22 @@ class CargaDocumentService
             $product      = Product::findOrFail($data['product_id']);
             $productStock = ProductStockByBranch::firstOrCreate(
                 [
-                    'product_id' => $data['product_id'],
-                    'branchOffice_id' => $data['branchOffice_id']
+                    'product_id'      => $data['product_id'],
+                    'branchOffice_id' => $data['branchOffice_id'],
                 ],
-                ['stock' => 0] // Si no existe, inicia con stock 0
+                ['stock' => 0]// Si no existe, inicia con stock 0
             );
 
-            $cargaDocument=CargaDocument::create(array_intersect_key($data
-            , array_flip((new CargaDocument())->getFillable())));
+            $cargaDocument = CargaDocument::create(array_intersect_key($data
+                , array_flip((new CargaDocument())->getFillable())));
 
-            $tipo         = 'C' . str_pad($cargaDocument->branchOffice_id, 3, '0', STR_PAD_LEFT);
-            $tipo         = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
-            $siguienteNum = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(code_doc, LOCATE("-", code_doc) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM carga_documents WHERE SUBSTRING(code_doc, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+            $tipo                    = 'C' . str_pad($cargaDocument->branchOffice_id, 3, '0', STR_PAD_LEFT);
+            $tipo                    = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
+            $siguienteNum            = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(code_doc, LOCATE("-", code_doc) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM carga_documents WHERE SUBSTRING(code_doc, 1, 4) = ?', [$tipo])[0]->siguienteNum;
             $cargaDocument->code_doc = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
             $cargaDocument->save();
 
-            $afterStock = $this->updateProductStock($data['product_id'],$cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
+            $afterStock = $this->updateProductStock($data['product_id'], $cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
             $cargaDocument->update([
                 'stock_balance_after' => 0,
             ]);
@@ -58,27 +58,24 @@ class CargaDocumentService
         return DB::transaction(function () use ($cargaDocument, $data) {
             // Revertir el stock anterior
             $this->updateProductStock($cargaDocument->product_id, $cargaDocument->quantity, $cargaDocument->movement_type, true);
-
+            $branch_old = $cargaDocument->branchOffice_id;
             // Obtener el stock actual del producto
             $product      = Product::findOrFail($data['product_id']);
             $currentStock = $product->stock;
 
             // Actualizar los datos del documento, incluyendo el stock actual
-            $cargaDocument->update([
-                'movement_date'        => isset($data['movement_date']) ? $data['movement_date'] : null,
-                'quantity'             => isset($data['quantity']) ? $data['quantity'] : null,
-                'unit_price'           => isset($data['unit_price']) ? $data['unit_price'] : null,
-                'total_cost'           => isset($data['total_cost']) ? $data['total_cost'] : null,
-                'weight'               => isset($data['weight']) ? $data['weight'] : null,
-                'movement_type'        => isset($data['movement_type']) ? $data['movement_type'] : null,
-                'comment'              => isset($data['comment']) ? $data['comment'] : null,
-                'product_id'           => isset($data['product_id']) ? $data['product_id'] : null,
-                'person_id'            => isset($data['person_id']) ? $data['person_id'] : null,
-                'stock_balance_before' => $currentStock ?? 0, // Asegura que currentStock no sea null
-            ]);
+            $cargaDocument->update(
+                array_intersect_key($data, array_flip($cargaDocument->getFillable())) + [
+                    'stock_balance_before' => 0, // Asegura que no sea null
+                ]
+            );
+            
 
             // Aplicar el nuevo stock
-            $afterStock = $this->updateProductStock($data['product_id'],$cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
+            if ($branch_old != $cargaDocument->branchOffice_id) {
+                $afterStock = $this->updateProductStock($data['product_id'], $branch_old, $data['quantity'], $data['movement_type']);
+            }
+            $afterStock = $this->updateProductStock($data['product_id'], $cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
 
             $cargaDocument->update([
                 'stock_balance_after' => $afterStock,
@@ -103,10 +100,10 @@ class CargaDocumentService
         });
     }
 
-    private function updateProductStock(int $productId,int $id_branch, float $quantity, string $movementType, bool $isReversal = false): Int
+    private function updateProductStock(int $productId, int $id_branch, float $quantity, string $movementType, bool $isReversal = false): Int
     {
         $product = Product::findOrFail($productId);
-        $this->productService->updatestock($product,$id_branch);
+        $this->productService->updatestock($product, $id_branch);
         return $product->stock;
     }
 }

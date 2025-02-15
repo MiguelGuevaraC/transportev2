@@ -46,23 +46,23 @@ class ProductService
     private function calculateStock(int $productId, ?int $branchOfficeId = null)
     {
         return CargaDocument::where('product_id', $productId)
-        ->where('branchOffice_id', $branchOfficeId)
-        ->whereNull('deleted_at')
-        ->selectRaw("
+            ->where('branchOffice_id', $branchOfficeId)
+            ->whereNull('deleted_at')
+            ->selectRaw("
             COALESCE(SUM(CASE WHEN movement_type = 'ENTRADA' THEN quantity ELSE 0 END), 0) -
             COALESCE(SUM(CASE WHEN movement_type = 'SALIDA' THEN quantity ELSE 0 END), 0)
         AS stock_calculado")
-        ->value('stock_calculado') ?? 0;
+            ->value('stock_calculado') ?? 0;
     }
 
     private function calculateReception(int $productId, ?int $branchOfficeId = null)
     {
         return DetailReception::where('product_id', $productId)
-        ->whereHas('reception', function ($query) use 
-        ( $branchOfficeId) {
-            $query->where('branchOffice_id', $branchOfficeId);
-        })
-        ->whereNull('deleted_at')->sum('cant') ?? 0;
+            ->whereHas('reception', function ($query) use
+                ($branchOfficeId) {
+                    $query->where('branchOffice_id', $branchOfficeId);
+                })
+            ->whereNull('deleted_at')->sum('cant') ?? 0;
     }
 
     private function updateBranchStock(int $productId, int $branchOfficeId)
