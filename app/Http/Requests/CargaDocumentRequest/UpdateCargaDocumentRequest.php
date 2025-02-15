@@ -39,8 +39,7 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'lote_doc'=>'nullable|string',
             'date_expiration'=>'nullable|date',
             'num_anexo'=>'nullable|string',
-
-            'branch_office_id'=> 'required|exists:branch_offices,id,deleted_at,NULL',
+            'branchOffice_id'=> 'required|exists:branch_offices,id,deleted_at,NULL',
         ];
     }
 
