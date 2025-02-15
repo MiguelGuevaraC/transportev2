@@ -654,7 +654,7 @@ class ReceptionController extends Controller
                             'reception_id'  => $id ?? null,
                             'cant'          => $detailData['cant'] ?? 1,
                             'unit'          => $detailData['unit'] ?? 'NIU',
-                            'product_id'        => isset($detail['product_id']) ? $detail['product_id'] : null,
+                            'product_id'        => isset($detailData['product_id']) ? $detailData['product_id'] : null,
                         ];
                         $detail->update($data);
                     }

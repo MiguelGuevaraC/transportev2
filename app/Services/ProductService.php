@@ -78,6 +78,7 @@ class ProductService
 
     private function updateTotalStock(int $productId)
     {
+
         $stockTotal = ProductStockByBranch::where('product_id', $productId)->sum('stock');
         Product::where('id', $productId)->update(['stock' => $stockTotal]);
     }

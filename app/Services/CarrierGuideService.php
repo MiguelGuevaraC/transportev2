@@ -58,7 +58,7 @@ class CarrierGuideService
     public function updatestockProduct($carrier_id)
     {
         $carrier = CarrierGuide::findOrFail($carrier_id);
-         $id_branch = Auth::user()->worker->branchOffice_id;
+         $id_branch = $carrier->reception->branchOffice_id;
         $carrier->reception->details->each(function ($detail) use ($id_branch) {
             if (isset($detail->product_id)) {
                 $product = Product::find($detail->product_id);

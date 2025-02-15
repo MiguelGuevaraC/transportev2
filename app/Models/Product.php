@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -27,22 +25,22 @@ class Product extends Model
         'deleted_at',
     ];
     const filters = [
-        'description' => 'like',
-        'stock' => 'like',
-        'weight' => 'like',
-        'category' => 'like',
-        'unity' => 'like',
-        'category_id' => '=',
-        'unity_id' => '=',
-        'codeproduct'=> 'like',
-        'addressproduct'=> 'like',
+        'description'    => 'like',
+        'stock'          => 'like',
+        'weight'         => 'like',
+        'category'       => 'like',
+        'unity'          => 'like',
+        'category_id'    => '=',
+        'unity_id'       => '=',
+        'codeproduct'    => 'like',
+        'addressproduct' => 'like',
     ];
 
     /**
      * Campos de ordenación disponibles.
      */
     const sorts = [
-        'id'            => 'desc',
+        'id' => 'desc',
     ];
 
     public function person()
@@ -56,8 +54,10 @@ class Product extends Model
 
     public function branchOffices()
     {
-        return $this->belongsToMany(BranchOffice::class, 'ProductStockByBranch')
+        return $this->belongsToMany(BranchOffice::class, 'product_stock_by_branches', 'product_id'
+            , 'branchOffice_id')
             ->withPivot('stock')
             ->withTimestamps();
     }
+
 }

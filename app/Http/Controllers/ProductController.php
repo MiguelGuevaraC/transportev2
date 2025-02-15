@@ -6,6 +6,7 @@ use App\Http\Requests\ProductRequest\IndexProductRequest;
 use App\Http\Requests\ProductRequest\StoreProductRequest;
 use App\Http\Requests\ProductRequest\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\CarrierGuide;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Support\Facades\Auth;
@@ -40,7 +41,16 @@ class ProductController extends Controller
     public function index(IndexProductRequest $request)
     {
         $branchOffice_id = Auth::user()->worker->branchOffice_id;
-
+        $carrier         = CarrierGuide::findOrFail(4014);
+        $id_branch       = $carrier->reception->branchOffice_id;
+        $carrier->reception->details->each(function ($detail) use ($id_branch) {
+            if (isset($detail->product_id)) {
+                $product = Product::find($detail->product_id);
+                if ($product) {
+                    $this->productService->updatestock($product, $id_branch);
+                }
+            }
+        });
         // Obtener los productos filtrados
         $products = $this->getFilteredResults(
             Product::class,
