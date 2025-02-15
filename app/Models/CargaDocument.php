@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CargaDocument extends Model
 {
+
     use SoftDeletes;
     protected $fillable = [
         'id',
@@ -14,11 +15,19 @@ class CargaDocument extends Model
         'unit_price',
         'total_cost',
         'weight',
+
+        'lote_doc',
+        'code_doc',
+        'date_expiration',
+        'num_anexo',
+        'branchOffice_id',
+
         'movement_type',
         'stock_balance_before',
         'stock_balance_after',
         'comment',
         'product_id',
+
         'person_id',
         'created_at',
     ];
@@ -28,17 +37,22 @@ class CargaDocument extends Model
         'deleted_at',
     ];
     const filters = [
-        'description'   => 'like',
-        'movement_date' => 'between',
-        'quantity'      => 'like',
-        'unit_price'    => 'like',
-        'total_cost'    => 'like',
-        'weight'        => 'like',
-        'movement_type' => 'like',
-        'stock_balance' => 'like',
-        'comment'       => 'like',
-        'product_id'    => '=',
-        'person_id'     => '=',
+        'description'     => 'like',
+        'movement_date'   => 'between',
+        'quantity'        => 'like',
+        'unit_price'      => 'like',
+        'total_cost'      => 'like',
+        'weight'          => 'like',
+        'movement_type'   => 'like',
+        'stock_balance'   => 'like',
+        'comment'         => 'like',
+        'product_id'      => '=',
+        'person_id'       => '=',
+        'lote_doc'        => '=',
+        'code_doc'        => '=',
+        'date_expiration' => '=',
+        'num_anexo'       => '=',
+        'branchOffice_id' => '=',
     ];
 
     /**
@@ -56,5 +70,9 @@ class CargaDocument extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    public function branchOffice()
+    {
+        return $this->belongsTo(BranchOffice::class, 'branchOffice_id');
     }
 }

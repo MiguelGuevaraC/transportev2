@@ -8,6 +8,7 @@ use App\Http\Requests\ProductRequest\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -38,6 +39,8 @@ class ProductController extends Controller
 
     public function index(IndexProductRequest $request)
     {
+        $branchOffice_id = Auth::user()->worker->branchOffice_id;
+
         // Obtener los productos filtrados
         $products = $this->getFilteredResults(
             Product::class,
@@ -46,13 +49,15 @@ class ProductController extends Controller
             Product::sorts,
             ProductResource::class
         );
-
-        // Mapeo para actualizar el stock de cada producto
-        $products->map(function ($product) {
-            $this->productService->updatestock(Product::find($product->id));
-            return $product; // Es importante devolver el producto actualizado
+        $items = $products instanceof \Illuminate\Pagination\AbstractPaginator  ? $products->items() : $products;
+        collect($items)->each(function ($product) use ($branchOffice_id) {
+            if (isset($product->id)) {
+                $productModel = Product::find($product->id);
+                if ($productModel) {
+                    $this->productService->updatestock($productModel, $branchOffice_id);
+                }
+            }
         });
-
         return $products;
     }
 
@@ -73,14 +78,12 @@ class ProductController extends Controller
 
         $producto = $this->productService->getProductById($id);
 
-
         if (! $producto) {
             return response()->json([
                 'error' => 'Producto No Encontrado',
             ], 404);
         }
-        $this->productService->updatestock(Product::find($producto->id));
-        
+
         return new ProductResource($producto);
     }
 

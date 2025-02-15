@@ -53,4 +53,11 @@ class Product extends Model
     {
         return $this->belongsTo(Unity::class, 'unity_id');
     }
+
+    public function branchOffices()
+    {
+        return $this->belongsToMany(BranchOffice::class, 'ProductStockByBranch')
+            ->withPivot('stock')
+            ->withTimestamps();
+    }
 }

@@ -28,6 +28,7 @@ class CarrierGuideController extends Controller
     {
         $this->carrierGuideService = $CarrierGuideService;
     }
+    
     /**
      * @OA\Get(
      *     path="/transportev2/public/api/carrierGuide",
@@ -500,6 +501,7 @@ class CarrierGuideController extends Controller
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
             $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
         }
+        $this->carrierGuideService->updatestockProduct($object->id);
 
         $object = CarrierGuide::with([
             'tract',
@@ -830,6 +832,7 @@ class CarrierGuideController extends Controller
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
             $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
         }
+        $this->carrierGuideService->updatestockProduct($object->id);
         
         $object = CarrierGuide::with('tract', 'platform', 'motive',
             'origin', 'destination',

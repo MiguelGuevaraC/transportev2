@@ -11,7 +11,7 @@ class CargaResource extends JsonResource
  *     title="CargaDocument",
  *     description="Carga model",
  *     required={"id", "movement_date", "quantity", "unit_price", "total_cost", "movement_type", "stock_balance", "product_id", "person_id"},
- *     
+ *
  *     @OA\Property(property="id", type="integer", description="Carga ID"),
  *     @OA\Property(property="movement_date", type="string", format="date", description="Date of movement"),
  *     @OA\Property(property="quantity", type="integer", description="Quantity of product moved"),
@@ -33,21 +33,28 @@ class CargaResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'            => $this->id ?? null,
-            'movement_date' => $this->movement_date ?? null,
-            'quantity'      => $this->quantity ?? null,
-            'unit_price'    => $this->unit_price ?? null,
-            'total_cost'    => $this->total_cost ?? null,
-            'weight'        => $this->weight ?? null,
-            'movement_type' => $this->movement_type ?? null,
+            'id'                   => $this->id ?? null,
+            'movement_date'        => $this->movement_date ?? null,
+            'quantity'             => $this->quantity ?? null,
+            'unit_price'           => $this->unit_price ?? null,
+            'total_cost'           => $this->total_cost ?? null,
+            'weight'               => $this->weight ?? null,
+
+            'lote_doc'             => $this->lote_doc ?? null,
+            'code_doc'             => $this->code_doc ?? null,
+            'date_expiration'      => $this->date_expiration ?? null,
+            'num_anexo'            => $this->num_anexo ?? null,
+
+            'movement_type'        => $this->movement_type ?? null,
             'stock_balance_before' => $this->stock_balance_before ?? null,
-            'stock_balance_after' => $this->stock_balance_after ?? null,
-            'comment'       => $this->comment ?? null,
-            'product_id'    => $this->product_id ?? null,
-            'product'       => $this->product? New ProductResource($this->product) : null,
-            'person_id'     => $this->person_id ?? null,
-            'person'       => $this->person? New PersonaResource($this->person) : null,
-            'created_at'    => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
+            'stock_balance_after'  => $this->stock_balance_after ?? null,
+            'comment'              => $this->comment ?? null,
+            'product_id'           => $this->product_id ?? null,
+            'branchOffice_id'           => $this->branchOffice_id ?? null,
+            'product'              => $this->product ? new ProductResource($this->product) : null,
+            'person_id'            => $this->person_id ?? null,
+            'person'               => $this->person ? new PersonaResource($this->person) : null,
+            'created_at'           => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }
 

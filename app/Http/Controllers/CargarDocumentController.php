@@ -223,7 +223,7 @@ class CargarDocumentController extends Controller
 
         $from          = $request->from ?? null;
         $to            = $request->to ?? null;
-
+        $branch_id= $request->branchOffice_id ?? null;
         $name = "Productos";
         // Buscar el producto
         $product = Product::find($idproducto);
@@ -235,7 +235,7 @@ class CargarDocumentController extends Controller
         $fileName = "Kardex_{$name}_" . now()->format('Ymd') . ".xlsx";
 
         // Retornar la exportación
-        return Excel::download(new KardexExport($idproducto, $from, $to), $fileName);
+        return Excel::download(new KardexExport($idproducto, $from, $to, $branch_id), $fileName);
     }
 
 }

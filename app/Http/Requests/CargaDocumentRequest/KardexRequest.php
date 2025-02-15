@@ -37,6 +37,7 @@ class KardexRequest extends StoreRequest
             ],
             'from'       => 'required|date',
             'to'         => 'nullable|date',
+            'branchOffice_id'=> 'required|exists:branch_offices,id,deleted_at,NULL',
         ];
     }
 
@@ -47,6 +48,9 @@ class KardexRequest extends StoreRequest
             'from.date'     => 'El campo "from" debe ser una fecha válida.',
             'to.nullable'   => 'El campo "to" es opcional.',
             'to.date'       => 'El campo "to" debe ser una fecha válida si se proporciona.',
+
+            'branchOffice_id.required'    => 'La Sucursal es obligatorio.',
+            'branchOffice_id.exists'      => 'La Sucursal seleccionado no es válido o ha sido eliminado.',
         ];
     }
 

@@ -16,6 +16,11 @@ use Illuminate\Validation\Rule;
  *     @OA\Property(property="unit_price", type="number", format="float", description="Unit price of the product"),
  *     @OA\Property(property="total_cost", type="number", format="float", description="Total cost of the product in the movement"),
  *     @OA\Property(property="weight", type="number", format="float", description="Weight of the product in the movement"),
+ 
+ *     @OA\Property(property="lote_doc", type="number", format="string", description="Lote de documento"),
+ *     @OA\Property(property="date_expiration", type="number", format="string", description="Fecha de expiración"),
+ *     @OA\Property(property="num_anexo", type="number", format="string", description="Número de GRE"),
+ * 
  *     @OA\Property(property="movement_type", type="string", description="Type of movement (e.g., entry, exit, etc.)"),
  *     @OA\Property(property="comment", type="string", nullable=true, description="Optional comment about the movement"),
  *     @OA\Property(property="product_id", type="integer", description="ID of the product being moved"),
@@ -52,6 +57,11 @@ class StoreCargaDocumentRequest extends StoreRequest
             'comment'       => 'nullable|string|max:500',
             'product_id'    => 'required|exists:products,id,deleted_at,NULL',
             'person_id'     => 'required|exists:people,id,deleted_at,NULL',
+
+            'lote_doc'=>'nullable|string',
+            'date_expiration'=>'nullable|date',
+            'num_anexo'=>'nullable|string',
+            'branchOffice_id'=> 'required|exists:branch_offices,id,deleted_at,NULL',
         ];
     }
 
@@ -92,8 +102,16 @@ class StoreCargaDocumentRequest extends StoreRequest
             'product_id.required'    => 'El producto es obligatorio.',
             'product_id.exists'      => 'El producto seleccionado no es válido o ha sido eliminado.',
 
+            'branchOffice_id.required'    => 'La Sucursal es obligatorio.',
+            'branchOffice_id.exists'      => 'La Sucursal seleccionado no es válido o ha sido eliminado.',
+
+
             'person_id.required'     => 'La persona es obligatoria.',
             'person_id.exists'       => 'La persona seleccionada no es válida o ha sido eliminada.',
+
+            'lote_doc.string' => 'El campo Lote de Documento debe ser una cadena de texto.',
+            'date_expiration.date' => 'El campo Fecha de Expiración debe ser una fecha válida.',
+            'num_anexo.string' => 'El campo Número de Anexo debe ser una cadena de texto.',
         ];
     }
 
