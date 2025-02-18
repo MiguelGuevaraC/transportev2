@@ -996,7 +996,7 @@ class VentaController extends Controller
                     if (DB::table('receptions')->where('id', $value)
                         ->whereNotNull('moviment_id')->exists()) {
                         $reception = Reception::find($value);
-                        $fail("La recepción con ID {$reception->codeReception} ya tiene una venta anidada.");
+                        $fail("La recepción con codigo {$reception->codeReception} ya tiene una venta anidada.");
                     }
                 },
             ],
@@ -1010,17 +1010,35 @@ class VentaController extends Controller
             'data.*.description'  => 'nullable|string',
 
         ])->after(function ($validator) use ($request) {
-            $totalDetails = collect($request->input('data', []))->sum('precio');
-            $totalPayments = 
-                ($request->input('cash', 0) ?: 0) + 
-                ($request->input('yape', 0) ?: 0) + 
-                ($request->input('plin', 0) ?: 0) + 
-                ($request->input('card', 0) ?: 0) + 
-                ($request->input('deposit', 0) ?: 0);
-            if ($totalDetails != $totalPayments) {
-                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            // Sumar los paymentAmount de cada Reception asociada
+            $totalReceptionPayments = collect($request->input('data', []))->sum(function ($item) {
+                $reception = Reception::find($item['reception_id'] ?? null);
+                return $reception?->paymentAmount ?? 0;
+            });
+        
+            // Verificar el tipo de pago
+            $typePayment = $request->input('typePayment');
+        
+            if ($typePayment === 'Créditos') {
+                // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
+                $totalPayments = collect($request->input('installments', []))->sum('importe');
+            } else {
+                // Si no es crédito, sumamos los métodos de pago normalmente
+                $totalPayments = 
+                    ($request->input('cash', 0) ?: 0) + 
+                    ($request->input('yape', 0) ?: 0) + 
+                    ($request->input('plin', 0) ?: 0) + 
+                    ($request->input('card', 0) ?: 0) + 
+                    ($request->input('deposit', 0) ?: 0);
+            }
+        
+            // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+            if ($totalReceptionPayments != $totalPayments) {
+                $difference = $totalReceptionPayments - $totalPayments;
+                $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
             }
         });
+        
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -1379,18 +1397,7 @@ class VentaController extends Controller
             'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description'  => 'nullable|string',
-        ])->after(function ($validator) use ($request) {
-            $totalDetails = collect($request->input('details', []))->sum('precio');
-            $totalPayments = 
-                ($request->input('cash', 0) ?: 0) + 
-                ($request->input('yape', 0) ?: 0) + 
-                ($request->input('plin', 0) ?: 0) + 
-                ($request->input('card', 0) ?: 0) + 
-                ($request->input('deposit', 0) ?: 0);
-            if ($totalDetails != $totalPayments) {
-                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
-            }
-        });
+        ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -1672,18 +1679,7 @@ class VentaController extends Controller
             'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description'  => 'nullable|string',
-        ])->after(function ($validator) use ($request) {
-            $totalDetails = collect($request->input('details', []))->sum('precio');
-            $totalPayments = 
-                ($request->input('cash', 0) ?: 0) + 
-                ($request->input('yape', 0) ?: 0) + 
-                ($request->input('plin', 0) ?: 0) + 
-                ($request->input('card', 0) ?: 0) + 
-                ($request->input('deposit', 0) ?: 0);
-            if ($totalDetails != $totalPayments) {
-                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
-            }
-        });
+        ]);
 
         $object = Moviment::find($id);
         if (! $object) {
@@ -2064,15 +2060,32 @@ class VentaController extends Controller
             'data.*.reception_id' => 'nullable|exists:receptions,id',
             'data.*.description'  => 'nullable|string',
         ])->after(function ($validator) use ($request) {
-            $totalDetails = collect($request->input('data', []))->sum('precio');
-            $totalPayments = 
-                ($request->input('cash', 0) ?: 0) + 
-                ($request->input('yape', 0) ?: 0) + 
-                ($request->input('plin', 0) ?: 0) + 
-                ($request->input('card', 0) ?: 0) + 
-                ($request->input('deposit', 0) ?: 0);
-            if ($totalDetails != $totalPayments) {
-                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            // Sumar los paymentAmount de cada Reception asociada
+            $totalReceptionPayments = collect($request->input('data', []))->sum(function ($item) {
+                $reception = Reception::find($item['reception_id'] ?? null);
+                return $reception?->paymentAmount ?? 0;
+            });
+        
+            // Verificar el tipo de pago
+            $typePayment = $request->input('typePayment');
+        
+            if ($typePayment === 'Créditos') {
+                // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
+                $totalPayments = collect($request->input('installments', []))->sum('importe');
+            } else {
+                // Si no es crédito, sumamos los métodos de pago normalmente
+                $totalPayments = 
+                    ($request->input('cash', 0) ?: 0) + 
+                    ($request->input('yape', 0) ?: 0) + 
+                    ($request->input('plin', 0) ?: 0) + 
+                    ($request->input('card', 0) ?: 0) + 
+                    ($request->input('deposit', 0) ?: 0);
+            }
+        
+            // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+            if ($totalReceptionPayments != $totalPayments) {
+                $difference = $totalReceptionPayments - $totalPayments;
+                $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
             }
         });
 
