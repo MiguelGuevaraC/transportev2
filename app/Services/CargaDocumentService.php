@@ -57,8 +57,7 @@ class CargaDocumentService
     {
         return DB::transaction(function () use ($cargaDocument, $data) {
             // Revertir el stock anterior
-            $this->updateProductStock($cargaDocument->product_id, $cargaDocument->quantity, $cargaDocument->movement_type, true);
-            $branch_old = $cargaDocument->branchOffice_id;
+           $branch_old = $cargaDocument->branchOffice_id;
             // Obtener el stock actual del producto
             $product      = Product::findOrFail($data['product_id']);
             $currentStock = $product->stock;

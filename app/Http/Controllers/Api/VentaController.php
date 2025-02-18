@@ -1009,7 +1009,18 @@ class VentaController extends Controller
             'data.*.reception_id' => 'nullable|exists:receptions,id',
             'data.*.description'  => 'nullable|string',
 
-        ]);
+        ])->after(function ($validator) use ($request) {
+            $totalDetails = collect($request->input('data', []))->sum('precio');
+            $totalPayments = 
+                ($request->input('cash', 0) ?: 0) + 
+                ($request->input('yape', 0) ?: 0) + 
+                ($request->input('plin', 0) ?: 0) + 
+                ($request->input('card', 0) ?: 0) + 
+                ($request->input('deposit', 0) ?: 0);
+            if ($totalDetails != $totalPayments) {
+                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -1368,7 +1379,18 @@ class VentaController extends Controller
             'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description'  => 'nullable|string',
-        ]);
+        ])->after(function ($validator) use ($request) {
+            $totalDetails = collect($request->input('details', []))->sum('precio');
+            $totalPayments = 
+                ($request->input('cash', 0) ?: 0) + 
+                ($request->input('yape', 0) ?: 0) + 
+                ($request->input('plin', 0) ?: 0) + 
+                ($request->input('card', 0) ?: 0) + 
+                ($request->input('deposit', 0) ?: 0);
+            if ($totalDetails != $totalPayments) {
+                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            }
+        });
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -1650,7 +1672,18 @@ class VentaController extends Controller
             'details'                => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description'  => 'nullable|string',
-        ]);
+        ])->after(function ($validator) use ($request) {
+            $totalDetails = collect($request->input('details', []))->sum('precio');
+            $totalPayments = 
+                ($request->input('cash', 0) ?: 0) + 
+                ($request->input('yape', 0) ?: 0) + 
+                ($request->input('plin', 0) ?: 0) + 
+                ($request->input('card', 0) ?: 0) + 
+                ($request->input('deposit', 0) ?: 0);
+            if ($totalDetails != $totalPayments) {
+                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            }
+        });
 
         $object = Moviment::find($id);
         if (! $object) {
@@ -2030,7 +2063,18 @@ class VentaController extends Controller
             'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
             'data.*.description'  => 'nullable|string',
-        ]);
+        ])->after(function ($validator) use ($request) {
+            $totalDetails = collect($request->input('data', []))->sum('precio');
+            $totalPayments = 
+                ($request->input('cash', 0) ?: 0) + 
+                ($request->input('yape', 0) ?: 0) + 
+                ($request->input('plin', 0) ?: 0) + 
+                ($request->input('card', 0) ?: 0) + 
+                ($request->input('deposit', 0) ?: 0);
+            if ($totalDetails != $totalPayments) {
+                $validator->errors()->add('payment_mismatch', 'La suma de los precios de los detalles no coincide con la suma de los métodos de pago.');
+            }
+        });
 
         $object = Moviment::find($id);
         if (! $object) {

@@ -1558,7 +1558,7 @@ class PdfController extends Controller
         $nombreDestinatario = $request->input('nombreDestinatario');
         $numberVenta        = $request->input('numberVenta');
         $numberGuia        = $request->input('numberGuia');
-
+        
         $origenOrDestino = $request->input('origenOrDestino');
         $isCargos        = $request->input('isCargos');
         $statusReception = $request->input('statusReception');
@@ -1588,6 +1588,15 @@ class PdfController extends Controller
 
         if (! empty($dateEnd)) {
             $receptions->whereDate('created_at', '<=', $dateEnd);
+        }
+
+        if (!empty($numberGuia)) {
+            // Filtro por número de guía dentro de la relación firstCarrierGuide
+            $receptions->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
+                $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
+            });
+            // $receptionsQuery->join('carrier_guides as cg', 'receptions.id', '=', 'cg.reception_id');
+            // $receptionsQuery->where('cg.numero', 'LIKE', '%' . $numberGuia . '%');
         }
 
         // Filtro por nombre del cliente que paga
@@ -1693,7 +1702,7 @@ class PdfController extends Controller
             });
         }
 
-        $receptions = $receptions->orderBy('id', 'desc')->take(200)->get();
+        $receptions = $receptions->orderBy('id', 'desc')->take(800)->get();
 
         // Inicializar las variables de totales
         $flete = 0;
@@ -1836,7 +1845,7 @@ class PdfController extends Controller
                 'reception.details', 'person', 'user.worker.person', 'installments', 'installments.payInstallments',
             ])
             ->orderBy('id', 'desc')
-            ->take(200)->get();
+            ->take(400)->get();
 
         // Obtener datos que SÍ tienen nota de crédito
         $ventasConNotaCredito = Moviment::where('branchOffice_id', $branch_office_id)
@@ -1868,7 +1877,7 @@ class PdfController extends Controller
                 'reception.details', 'person', 'user.worker.person', 'installments', 'installments.payInstallments',
             ])
             ->orderBy('id', 'desc')
-            ->take(200)->get();
+            ->take(400)->get();
 
         // Procesar los datos para la exportación
         $totalAfecto     = 0;
