@@ -23,7 +23,7 @@ class GuidesExport implements FromCollection, WithStyles
     }
     public function collection()
     {
-        // Agregar los encabezados después del título (segunda fila)
+        // Encabezados
         array_unshift($this->data, [
             'N°',
             'CARGA MATERIAL',
@@ -40,39 +40,47 @@ class GuidesExport implements FromCollection, WithStyles
             'SALDO',
             'COND. PAGO',
             'ESTADO ENTREGA',
+            'CONDUCTOR 1',
+            'LICENCIA 1',
+            'CONDUCTOR 2',
+            'LICENCIA 2',
+            'PLACA 1',
+            'PLACA 2',
+            'MTC 1',
+            'MTC 2',
         ]);
-
-        // Retornar la colección con los datos
+    
         return collect($this->data);
     }
+    
     public function styles(Worksheet $sheet)
     {
         $sheetTitle = "{$this->fechaInicio}_AL_{$this->fechaFin}";
-
-        // Ajustar el título de la hoja con las fechas
         $sheet->setTitle($sheetTitle);
-
-        // Definir el rango de celdas (primera fila de encabezados)
+    
+        // Última fila de datos
         $lastRow = $sheet->getHighestRow();
-
-        // Establecer ajuste automático para todas las columnas
-        $desiredWidth = 20;
-
-        // Recorre las columnas desde 'A' hasta 'O'
-        foreach (range('A', 'O') as $column) {
-            $sheet->getColumnDimension($column)->setWidth($desiredWidth);
+    
+        // Definir el rango de columnas dinámicamente (hasta 'W')
+        $columnRange = 'A:W';
+    
+        // Ajuste de ancho automático
+        foreach (range('A', 'W') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
         }
-
-        // Negrita y centrado para los encabezados
-        $sheet->getStyle('A1:O1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        // Color de fondo para los encabezados
-        $sheet->getStyle('A1:O1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A1:O1')->getFill()->getStartColor()->setARGB('FFCCCCCC'); // Gris claro
-
-        // Estilo de bordes para la tabla
-        $sheet->getStyle('A1:O' . $lastRow)->applyFromArray([
+    
+        // Estilo para los encabezados
+        $sheet->getStyle('A1:W1')->applyFromArray([
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFCCCCCC'], // Gris claro
+            ],
+        ]);
+    
+        // Estilo de bordes para toda la tabla
+        $sheet->getStyle("A1:W{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -80,11 +88,10 @@ class GuidesExport implements FromCollection, WithStyles
                 ],
             ],
         ]);
-
-        // Ajuste del texto a la izquierda para los datos (excepto encabezados)
-        $sheet->getStyle('A2:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
-
-        // Centrar el contenido de la columna de enlaces "DOCUMENTO"
-        $sheet->getStyle('O2:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+    
+        // Alineación de datos (izquierda para contenido, centrado para números)
+        $sheet->getStyle("A2:W{$lastRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle("J2:J{$lastRow}")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER); // GUÍA GRT centrado
     }
+    
 }

@@ -363,7 +363,16 @@ class ExcelController extends Controller
             'SALDO' => $sumaSaldo,
             'COND. PAGO' => '',
             'ESTADO ENTREGA' => '',
+            'CONDUCTOR 1' => '',
+            'LICENCIA 1' => '',
+            'CONDUCTOR 2' => '',
+            'LICENCIA 2' => '',
+            'PLACA 1' => '',
+            'PLACA 2' => '',
+            'MTC 1' => '',
+            'MTC 2' => '',
         ];
+        
         return Excel::download(new GuidesExport($exportData, $startDate, $endDate), 'reporte_guias.xlsx');
 
     }
