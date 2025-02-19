@@ -102,6 +102,11 @@ class DetailReception extends Model
      *         description="Product ID"
      *     ),
      *     @OA\Property(
+     *         property="tarifa_id",
+     *         type="integer",
+     *         description="Tarifa ID"
+     *     ),
+     *     @OA\Property(
      *         property="created_at",
      *         type="string",
      *         format="date-time",
@@ -152,6 +157,7 @@ class DetailReception extends Model
         'reception_id',
         'programming_id',
         'product_id',
+        'tarifa_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -168,5 +174,9 @@ class DetailReception extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    public function tarifa()
+    {
+        return $this->belongsTo(Tarifario::class, 'tarifa_id');
     }
 }

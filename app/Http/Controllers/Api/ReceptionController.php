@@ -338,7 +338,7 @@ class ReceptionController extends Controller
                     'comissionAgent_id' => $detail['comissionAgent_id'] ?? null,
                     'reception_id'      => $object->id,
                     'product_id'        => isset($detail['product_id']) ? $detail['product_id'] : null,
-
+                    'tarifa_id'         => isset($detail['tarifa_id']) ? $detail['tarifa_id'] : null,
                 ];
                 $idDetalles[] = DetailReception::create($objectData)->id;
 
@@ -654,7 +654,8 @@ class ReceptionController extends Controller
                             'reception_id'  => $id ?? null,
                             'cant'          => $detailData['cant'] ?? 1,
                             'unit'          => $detailData['unit'] ?? 'NIU',
-                            'product_id'        => isset($detailData['product_id']) ? $detailData['product_id'] : null,
+                            'product_id'    => isset($detailData['product_id']) ? $detailData['product_id'] : null,
+                            'tarifa_id'    => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
                         ];
                         $detail->update($data);
                     }
@@ -679,6 +680,7 @@ class ReceptionController extends Controller
                         'comissionAgent_id' => $detailData['comissionAgent_id'] ?? null,
                         'reception_id'      => $object->id ?? null,
                         'product_id'        => isset($detailData['product_id']) ? $detailData['product_id'] : null,
+                        'tarifa_id'        => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
                     ];
 
                     $newDetail      = $object->details()->create($data);

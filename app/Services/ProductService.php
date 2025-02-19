@@ -5,6 +5,7 @@ use App\Models\CargaDocument;
 use App\Models\DetailReception;
 use App\Models\Product;
 use App\Models\ProductStockByBranch;
+use Illuminate\Support\Facades\DB;
 
 class ProductService
 {
@@ -22,8 +23,11 @@ class ProductService
 
     public function createProduct(array $data): Product
     {
-        $proyect              = Product::create($data);
-        $proyect->codeproduct = strtoupper($proyect->id . '-' . substr(md5($data['description'] . uniqid()), 0, 8));
+        $proyect    = Product::create($data);
+        $lastNumber = $proyect::where('codeproduct', 'LIKE', 'PROD-%')
+            ->max(DB::raw("CAST(SUBSTRING(codeproduct, 6, 8) AS UNSIGNED)")) ?? 0;
+        $proyect->codeproduct = 'PROD-' . str_pad($lastNumber + 1, 8, '0', STR_PAD_LEFT);
+
         $proyect->save();
         return $proyect;
     }

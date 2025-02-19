@@ -3,6 +3,7 @@ namespace App\Http\Requests\TarifarioRequest;
 
 use App\Http\Requests\StoreRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -44,28 +45,40 @@ class StoreTarifarioRequest extends StoreRequest
             'tarifa_camp'     => 'nullable|numeric|min:0.01',
             'limitweight_min' => 'required|numeric|gt:0',
             'limitweight_max' => 'required|numeric|gt:0|gte:limitweight_min',
-            'destination_id'  => [
-                'required',
-                'exists:places,id,deleted_at,NULL',
-            ],
+            'destination_id'  => 'required|exists:places,id,deleted_at,NULL',
             'origin_id'       => 'required|exists:places,id,deleted_at,NULL',
-            'unity_id'        => [
-                'required',
-                'exists:unities,id,deleted_at,NULL',
-            ],
-            // Validar que la persona no tenga la misma combinación de origen y destino
+            'unity_id'        => 'required|exists:unities,id,deleted_at,NULL',
             'tarifa'          => [
                 'nullable',
                 'numeric',
                 'min:0.01',
-                Rule::unique('tarifarios')
-                    ->where('person_id', $this->person_id)
-                    ->where('origin_id', $this->origin_id)
-                    ->where('destination_id', $this->destination_id)
-                    ->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('tarifarios')
+                        ->where('person_id', request('person_id'))
+                        ->where('origin_id', request('origin_id'))
+                        ->where('destination_id', request('destination_id'))
+                        ->where(function ($query) {
+                            $query->whereBetween('limitweight_min', [request('limitweight_min'), request('limitweight_max')])
+                                ->orWhereBetween('limitweight_max', [request('limitweight_min'), request('limitweight_max')])
+                                ->orWhere(function ($subQuery) {
+                                    $subQuery->where('limitweight_min', '<=', request('limitweight_min'))
+                                        ->where('limitweight_max', '>=', request('limitweight_max'));
+                                });
+                        })
+                        ->whereNull('deleted_at')
+                        ->when(request()->route('id'), function ($query, $id) {
+                            return $query->where('id', '!=', $id); // Ignorar la tarifa actual en la validación
+                        })
+                        ->exists();
+    
+                    if ($exists) {
+                        $fail('Ya existe una tarifa dentro de este rango de peso.');
+                    }
+                },
             ],
         ];
     }
+    
 
     public function messages()
     {

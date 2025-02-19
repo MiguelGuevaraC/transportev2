@@ -89,7 +89,24 @@ class ExcelController extends Controller
         $query->where(DB::raw("UPPER(CONCAT_WS(' ', names, fatherSurname, motherSurname, businessName))"), 'LIKE', '%' . $searchTermUpper . '%')
             ->orWhere(DB::raw('UPPER(documentNumber)'), 'LIKE', '%' . $searchTermUpper . '%');
     }
+    public function personNames($person)
+    {
+        if ($person == null) {
+            return '-'; // Si $person es nulo, retornamos un valor predeterminado
+        }
 
+        $typeD  = $person->typeofDocument ?? 'dni';
+        $cadena = '';
+
+        if (strtolower($typeD) === 'ruc') {
+            $cadena = $person->businessName;
+        } else {
+            $cadena = $person->names . ' ' . $person->fatherSurname . ' ' . $person->motherSurname;
+        }
+
+        // Corregido el operador ternario y la concatenación
+        return $cadena;
+    }
     public function guidesExcel(Request $request)
     {
 
@@ -256,8 +273,8 @@ class ExcelController extends Controller
         }
 
         // Ordenar y paginar
-        $carrierGuides = $carrierGuides->orderBy(DB::raw('CAST(SUBSTRING(numero, 6) AS UNSIGNED)'), 'desc')
-            ->get();
+        $carrierGuides = $carrierGuides->orderBy('id', 'desc')
+            ->take(800)->get();
 
         $sumFlete = 0;
         $sumaSaldo = 0;
@@ -267,18 +284,39 @@ class ExcelController extends Controller
             $reception = $carrier->reception ?? null;
             $details = $reception ? $reception->details()->pluck('description')->toArray() : [];
             $flete = 0;
-
+        
             if ($reception) {
                 // Calcular flete
                 $flete = $reception->conditionPay == 'Credito'
-                ? $reception->creditAmount ?? 0
-                : $reception->paymentAmount ?? 0;
-
+                    ? $reception->creditAmount ?? 0
+                    : $reception->paymentAmount ?? 0;
+        
                 $sumFlete += $flete;
                 $sumaSaldo += $reception->debtAmount ?? 0;
                 $sumaPeso += $reception->netWeight ?? 0;
             }
-
+        
+            // Datos del conductor y vehículos
+            $conductor1name = $this->personNames($carrier->driver?->person ?? '');
+            $conductor2name = $this->personNames($carrier->copilot?->person ?? '');
+            $licencia1 = $carrier->driver?->licencia ?? '';
+            $licencia2 = $carrier->copilot?->licencia ?? '';
+            $placa1 = $carrier->tract?->currentPlate ?? '';
+            $placa2 = $carrier->platform?->currentPlate ?? '';
+            $mtc1 = $carrier->tract?->numberMtc ?? '';
+            $mtc2 = $carrier->platform?->numberMtc ?? '';
+        
+            if ($carrier->subcontract_id !== null) {
+                $data = json_decode($carrier->datasubcontract, true);
+                $conductor1name = $data['namedriver'] . ' ' . ($data['lastnamedriver'] ?? '');
+                $conductor2name = '';
+                $licencia1 = $data['licenciadriver'] ?? '';
+                $placa1 = $data['placa1'] ?? '';
+                $placa2 = $data['placa2'] ?? '';
+                $mtc1 = $data['mtc1'] ?? '';
+                $mtc2 = $data['mtc2'] ?? '';
+            }
+        
             // Añadir los datos de la guía a la exportación
             $exportData[] = [
                 'N°' => $index++,
@@ -296,8 +334,17 @@ class ExcelController extends Controller
                 'SALDO' => $reception?->debtAmount ?? 0,
                 'COND. PAGO' => $reception?->conditionPay ?? '-',
                 'ESTADO ENTREGA' => $carrier?->status ?? '-',
+                'CONDUCTOR 1' => $conductor1name,
+                'LICENCIA 1' => $licencia1,
+                'CONDUCTOR 2' => $conductor2name,
+                'LICENCIA 2' => $licencia2,
+                'PLACA 1' => $placa1,
+                'PLACA 2' => $placa2,
+                'MTC 1' => $mtc1,
+                'MTC 2' => $mtc2,
             ];
         }
+        
 
         // Agregar fila de totales al final de la segunda tabla
         $exportData[] = [

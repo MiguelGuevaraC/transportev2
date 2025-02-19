@@ -1557,8 +1557,8 @@ class PdfController extends Controller
         $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
         $numberVenta        = $request->input('numberVenta');
-        $numberGuia        = $request->input('numberGuia');
-        
+        $numberGuia         = $request->input('numberGuia');
+
         $origenOrDestino = $request->input('origenOrDestino');
         $isCargos        = $request->input('isCargos');
         $statusReception = $request->input('statusReception');
@@ -1590,7 +1590,7 @@ class PdfController extends Controller
             $receptions->whereDate('created_at', '<=', $dateEnd);
         }
 
-        if (!empty($numberGuia)) {
+        if (! empty($numberGuia)) {
             // Filtro por número de guía dentro de la relación firstCarrierGuide
             $receptions->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
                 $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
@@ -1651,7 +1651,7 @@ class PdfController extends Controller
             });
         }
 
-        if (!empty($numberGuia)) {
+        if (! empty($numberGuia)) {
             // Filtro por número de guía dentro de la relación firstCarrierGuide
             $receptions->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
                 $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
@@ -1659,7 +1659,6 @@ class PdfController extends Controller
             // $receptionsQuery->join('carrier_guides as cg', 'receptions.id', '=', 'cg.reception_id');
             // $receptionsQuery->where('cg.numero', 'LIKE', '%' . $numberGuia . '%');
         }
-
 
         if (! empty($numberVenta)) {
             $receptions->where(function ($query) use ($numberVenta) {
@@ -2323,15 +2322,15 @@ class PdfController extends Controller
         }
 
         $data = [
-            "reception" => $reception,
+            "reception"    => $reception,
             "branchoffice" => $reception->branchOffice,
-            "sale" => $reception->moviment,
-            "totalDetalle"=>$reception->paymentAmount,
-            "detalles"=>[]
+            "sale"         => $reception->moviment,
+            "totalDetalle" => $reception->paymentAmount,
+            "detalles"     => [],
         ];
 
         // Utiliza el método loadView() directamente en la fachada PDF
-        $pdf           = PDF::loadView('recepcion-venta-ticket', $data);
+        $pdf = PDF::loadView('recepcion-venta-ticket', $data);
         // $canvas        = $pdf->getDomPDF()->get_canvas();
         // $contenidoAlto = $canvas->get_height();
         $pdf->setPaper([15, 5, 172, 550], 'portrait');
