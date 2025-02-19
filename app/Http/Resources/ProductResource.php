@@ -42,11 +42,12 @@ class ProductResource extends JsonResource
             'unity_id'        => $this->unity_id ?? null,
             'unity'           => $this->unity ? new UnityResource($this->unity) : null,
             'person_id'       => $this->person_id ?? null,
+            'person'          => $this->person ?? null,
             'stock_by_branch' => $this->branchOffices->map(function ($branch) {
                 return [
                     'branch_office_id' => $branch->id,
-                    'branch_name' => $branch->name,
-                    'stock' => $branch->pivot->stock,
+                    'branch_name'      => $branch->name,
+                    'stock'            => $branch->pivot->stock,
                 ];
             }),
             'created_at'      => $this->created_at->format('Y-m-d H:i:s'),
