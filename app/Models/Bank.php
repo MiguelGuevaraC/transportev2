@@ -37,5 +37,14 @@ class Bank extends Model
         'updated_at',
         'deleted_at',
     ];
+    const filters = [
+        'name' => 'like',
+    ];
 
+    /**
+     * Campos de ordenación disponibles.
+     */
+    const sorts = [
+        'id'            => 'desc',
+    ];
 }

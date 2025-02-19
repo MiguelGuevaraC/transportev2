@@ -196,6 +196,7 @@ class CarrierGuide extends Model
         'numero',
         'observation',
         'type',
+        'modalidad',
         'number',
         'serie',
         'motivo',

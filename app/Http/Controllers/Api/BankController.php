@@ -1,14 +1,23 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BankRequest\IndexBankRequest;
+use App\Http\Requests\BankRequest\StoreBankRequest;
+use App\Http\Requests\BankRequest\UpdateBankRequest;
+use App\Http\Resources\BankResource;
 use App\Models\Bank;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Services\BankService;
 
 class BankController extends Controller
 {
+    protected $bankService;
+
+    public function __construct(BankService $BankService)
+    {
+        $this->bankService = $BankService;
+    }
+
     /**
      * Get all banks with pagination
      * @OA\Get (
@@ -44,227 +53,183 @@ class BankController extends Controller
         return response()->json(Bank::simplePaginate(15));
     }
 
-    /**
-     * Store a newly created bank in storage.
-     * @OA\Post (
-     *      path="/transportev2/public/api/bank",
-     *      tags={"Bank"},
-     *      security={{"bearerAuth":{}}},
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/BankRequest")
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Bank created successfully",
-     *          @OA\JsonContent(ref="#/components/schemas/Bank")
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Invalid data",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="error", type="string", example="The name has already been taken.")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Unauthenticated")
-     *          )
-     *      )
-     * )
-     */
-    public function store(Request $request)
-    {
-        $validator = validator()->make($request->all(), [
-            'name' => [
-                'required',
-                'string',
-                Rule::unique('banks', 'name')->whereNull('deleted_at'),
-            ],
-        ]);
+/**
+ * @OA\Get(
+ *     path="/transportev2/public/api/bank-list",
+ *     summary="Obtener información de Banks con filtros y ordenamiento",
+ *     tags={"Bank"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="id", in="query", description="Filtrar por ID", required=false, @OA\Schema(type="integer")),
+ *     @OA\Parameter(name="name", in="query", description="Filtrar por name", required=false, @OA\Schema(type="string")),
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
+ *     @OA\Response(response=200, description="Lista de Banks", @OA\JsonContent(ref="#/components/schemas/Bank")),
+ *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
+ * )
+ */
+
+    public function list(IndexBankRequest $request)
+    {
+
+        return $this->getFilteredResults(
+            Bank::class,
+            $request,
+            Bank::filters,
+            Bank::sorts,
+            BankResource::class
+        );
+    }
+/**
+ * @OA\Get(
+ *     path="/transportev2/public/api/bank/{id}",
+ *     summary="Obtener detalles de un Bank por ID",
+ *     tags={"Bank"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="id", in="path", description="ID del Bank", required=true, @OA\Schema(type="integer", example=1)),
+ *     @OA\Response(response=200, description="Bank encontrado", @OA\JsonContent(ref="#/components/schemas/Bank")),
+ *     @OA\Response(response=404, description="Banco no encontrada", @OA\JsonContent(type="object", @OA\Property(property="error", type="string", example="Banco no encontrada")))
+ * )
+ */
+
+    public function show($id)
+    {
+
+        $bank = $this->bankService->getBankById($id);
+
+        if (! $bank) {
+            return response()->json([
+                'error' => 'Banco No Encontrada',
+            ], 404);
         }
 
-        $data = [
-            'name' => $request->input('name'),
-        ];
-
-        $bank = Bank::create($data);
-        $bank = Bank::find($bank->id);
-
-        return response()->json($bank);
+        return new BankResource($bank);
     }
 
-    /**
-     * Display the specified bank.
-     * @OA\Get (
-     *      path="/transportev2/public/api/bank/{id}",
-     *      tags={"Bank"},
-     *      security={{"bearerAuth":{}}},
-     *      @OA\Parameter(
-     *          name="id",
-     *          in="path",
-     *          required=true,
-     *          description="Bank ID",
-     *          @OA\Schema(type="integer")
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Bank found",
-     *          @OA\JsonContent(ref="#/components/schemas/Bank")
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Bank not found",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Bank not found")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Unauthenticated")
-     *          )
-     *      )
-     * )
-     */
-    public function show(int $id)
+/**
+ * @OA\Post(
+ *     path="/transportev2/public/api/bank",
+ *     summary="Crear Bank",
+ *     tags={"Bank"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(ref="#/components/schemas/BankRequest")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Bank creada exitosamente",
+ *         @OA\JsonContent(ref="#/components/schemas/Bank")
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error de validación",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error de validación")
+ *         )
+ *     )
+ * )
+ */
+
+    public function store(StoreBankRequest $request)
     {
-        $bank = Bank::find($id);
-
-        if ($bank === null) {
-            return response()->json(['message' => 'Bank not found'], 404);
-        }
-
-        return response()->json($bank);
+        $bank = $this->bankService->createBank($request->validated());
+        return new BankResource($bank);
     }
 
-    /**
-     * Update the specified bank in storage.
-     * @OA\Put (
-     *      path="/transportev2/public/api/bank/{id}",
-     *      tags={"Bank"},
-     *      security={{"bearerAuth":{}}},
-     *      @OA\Parameter(
-     *          name="id",
-     *          in="path",
-     *          required=true,
-     *          description="Bank ID",
-     *          @OA\Schema(type="integer")
-     *      ),
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/BankRequest")
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Bank updated successfully",
-     *          @OA\JsonContent(ref="#/components/schemas/Bank")
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Bank not found",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Bank not found")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Invalid data",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="error", type="string", example="The name has already been taken.")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Unauthenticated")
-     *          )
-     *      )
-     * )
-     */
-    public function update(Request $request, int $id)
+/**
+ * @OA\Put(
+ *     path="/transportev2/public/api/bank/{id}",
+ *     summary="Actualizar un Bank",
+ *     tags={"Bank"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(ref="#/components/schemas/BankRequest")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Bank actualizada exitosamente",
+ *         @OA\JsonContent(ref="#/components/schemas/Bank")
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error de validación",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error de validación")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Banco no encontrada",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Banco no encontrada")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Error interno",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Error interno del servidor")
+ *         )
+ *     )
+ * )
+ */
+
+    public function update(UpdateBankRequest $request, $id)
     {
-        $bank = Bank::find($id);
 
-        if ($bank === null) {
-            return response()->json(['message' => 'Bank not found'], 404);
+        $validatedData = $request->validated();
+
+        $bank = $this->bankService->getBankById($id);
+        if (! $bank) {
+            return response()->json([
+                'error' => 'Banco No Encontrado',
+            ], 404);
         }
 
-        $validator = validator()->make($request->all(), [
-            'name' => [
-                'required',
-                'string',
-                Rule::unique('banks', 'name')->whereNull('deleted_at')->ignore($bank->id),
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
-        }
-
-        $data = [
-            'name' => $request->input('name'),
-        ];
-
-        $bank->update($data);
-        $bank = Bank::find($bank->id);
-
-        return response()->json($bank);
+        $updatedcarga = $this->bankService->updateBank($bank, $validatedData);
+        return new BankResource($updatedcarga);
     }
 
-    /**
-     * Remove the specified bank from storage.
-     * @OA\Delete (
-     *      path="/transportev2/public/api/bank/{id}",
-     *      tags={"Bank"},
-     *      security={{"bearerAuth":{}}},
-     *      @OA\Parameter(
-     *          name="id",
-     *          in="path",
-     *          required=true,
-     *          description="Bank ID",
-     *          @OA\Schema(type="integer")
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Bank deleted",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Bank deleted")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Bank not found",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Bank not found")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Unauthenticated")
-     *          )
-     *      )
-     * )
-     */
-    public function destroy(int $id)
+/**
+ * @OA\Delete(
+ *     path="/transportev2/public/api/bank/{id}",
+ *     summary="Eliminar un Bankpor ID",
+ *     tags={"Bank"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+ *     @OA\Response(response=200, description="Bank eliminado", @OA\JsonContent(@OA\Property(property="message", type="string", example="Bank eliminado exitosamente"))),
+ *     @OA\Response(response=404, description="No encontrado", @OA\JsonContent(@OA\Property(property="error", type="string", example="Banco no encontrada"))),
+
+ * )
+ */
+
+    public function destroy($id)
     {
-        $bank = Bank::find($id);
 
-        if ($bank === null) {
-            return response()->json(['message' => 'Bank not found'], 404);
+        $bank = $this->bankService->getBankById($id);
+
+        if (! $bank) {
+            return response()->json([
+                'error' => 'Banco No Encontrada.',
+            ], 404);
         }
+        $bank = $this->bankService->destroyById($id);
 
-        $bank->delete();
-
-        return response()->json(['message' => 'Bank deleted']);
+        return response()->json([
+            'message' => 'Banco eliminado exitosamente',
+        ], 200);
     }
+
 }

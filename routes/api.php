@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\AccessController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\areaController;
-use App\Http\Controllers\Api\BankController;
+
 use App\Http\Controllers\Api\BoxController;
 use App\Http\Controllers\Api\BranchOfficeController;
 use App\Http\Controllers\Api\CargoController;
@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\VentaController;
 use App\Http\Controllers\Api\WorkerController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\Collection\CollectionController;
 use App\Models\CreditNote;
 use App\Models\PayInstallment;
@@ -363,13 +364,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('expensesConcept/{id}', [ExpensesConceptController::class, 'destroy']);
     Route::put('expensesConcept/{id}', [ExpensesConceptController::class, 'update']);
 
-    // EXPENSES BANK
-    Route::get('bank', [BankController::class, 'index']);
-    Route::get('bank/{id}', [BankController::class, 'show']);
-    Route::post('bank', [BankController::class, 'store']);
-    Route::delete('bank/{id}', [BankController::class, 'destroy']);
-    Route::put('bank/{id}', [BankController::class, 'update']);
-
     // /ROUTES PLACE
     Route::get('routes', [RouteController::class, 'index']);
     Route::get('routesFather', [RouteController::class, 'indexRoutesFather']);
@@ -429,4 +423,5 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/TarifarioApi.php';        //TARIFARIO 
     require __DIR__ . '/Api/UnityApi.php';        //UNIDAD
     require __DIR__ . '/Api/ProductApi.php';        //PRODUCT
+    require __DIR__ . '/Api/BankApi.php';        //BANK
 });

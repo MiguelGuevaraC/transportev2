@@ -450,6 +450,7 @@ class CarrierGuideController extends Controller
             'districtStart_id'      => $request->input('districtStart_id') ?? null,
             'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
 
+            'modalidad'                => '01',//PUBLICO
             'motivo'                => $motivoNombre,
             'codemotivo'            => $motivoCode,
             'placa'                 => $vehicle->currentPlate ?? '-',
@@ -786,7 +787,7 @@ class CarrierGuideController extends Controller
 
             'districtStart_id'      => $request->input('districtStart_id') ?? null,
             'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
-
+            'modalidad'                => '01',//PUBLICO
             'motivo'                => $motivoNombre ?? null,
             'codemotivo'            => $motivoCode ?? null,
             'placa'                 => $vehicle->currentPlate ?? '-' ?? null,

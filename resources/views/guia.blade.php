@@ -627,7 +627,7 @@
                     Modalidad:
                 </th>
                 <td class="w20">
-                    Transporte Privado
+                    {{ $object->modalidad=="02" ? 'Transporte Privado':'Transporte Público' }}
                 </td>
                 <th class="w20 blue">
                     Motivo:
