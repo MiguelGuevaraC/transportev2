@@ -308,7 +308,8 @@ class CarrierGuideController extends Controller
             'addressEnd'        => 'required',
             'motive_id'         => 'required|exists:motives,id',
         
-            'tract_id'          => 'required_without:subcontract_id|exists:vehicles,id',
+            'tract_id' => 'nullable|sometimes|exists:vehicles,id|required_without:subcontract_id',
+
             'platform_id'       => 'nullable|exists:vehicles,id',
         
             'origin_id'         => 'required|exists:places,id',
@@ -321,7 +322,7 @@ class CarrierGuideController extends Controller
             'reception_id'      => 'required|exists:receptions,id',
             'branch_office_id'  => 'nullable|exists:branch_offices,id',
         
-            'driver_id'         => 'required_without:subcontract_id|exists:workers,id',
+            'driver_id'         => 'nullable|sometimes|required_without:subcontract_id|exists:workers,id',
             'copilot_id'        => 'nullable|exists:workers,id',
         
             'subcontract_id'    => 'nullable|exists:subcontracts,id',
@@ -497,7 +498,8 @@ class CarrierGuideController extends Controller
 
         if ($object->subcontract_id != null) {
             $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
-            if ($validator->fails()) {return response()->json(['errors' => $validator->errors()->first()], 422);}
+            if ($validator->fails()) 
+            {return response()->json(['errors' => $validator->errors()->first()], 422);}
             $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
             $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);

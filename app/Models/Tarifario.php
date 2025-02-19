@@ -34,8 +34,8 @@ class Tarifario extends Model
         'unity.name'      => 'like',
         'person_id'       => '=',
         'tarifa_camp'     => '=',
-        'limitweight_min' => '=',
-        'limitweight_max' => '=',
+        'limitweight_min' => 'like',
+        'limitweight_max' => 'like',
         'destination_id'  => '=',
         'origin_id'       => '=',
     ];
