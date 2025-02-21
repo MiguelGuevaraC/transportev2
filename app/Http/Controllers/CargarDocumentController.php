@@ -11,6 +11,7 @@ use App\Http\Resources\CargaResource;
 use App\Models\CargaDocument;
 use App\Models\Product;
 use App\Services\CargaDocumentService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -215,7 +216,25 @@ class CargarDocumentController extends Controller
             'message' => 'Documento de Cargaeliminado exitosamente',
         ], 200);
     }
-
+/**
+ * @OA\Get(
+ *     path="/transportev2/public/api/export-kardex",
+ *     summary="Exportar Kardex",
+ *     tags={"CargaDocument"},
+  *     security={{"bearerAuth": {}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Archivo exportado correctamente",
+ *         @OA\Header(
+ *             header="Content-Disposition",
+ *             @OA\Schema(type="string", example="attachment; filename=kardex.xlsx")
+ *         ),
+ *         @OA\MediaType(
+ *             mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ *         )
+ *     )
+ * )
+ */
     public function exportKardex(KardexRequest $request)
     {
         $validatedData = $request->validated();
@@ -238,6 +257,54 @@ class CargarDocumentController extends Controller
 
         // Retornar la exportación
         return Excel::download(new KardexExport($idproducto, $from, $to, $branch_id), $fileName);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/transportev2/public/api/ticket-carga/{id}",
+     *     summary="Generar ticket de carga",
+     *     tags={"CargaDocument"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del documento de carga",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ticket de carga generado correctamente",
+     *         @OA\Header(
+     *             header="Content-Disposition",
+     *             @OA\Schema(type="string", example="attachment; filename=ticket.pdf")
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/pdf"
+     *         )
+     *     )
+     * )
+     */
+
+    public function ticketcarga(Request $request, $idMov = 10)
+    {
+        $doc_carga = CargaDocument::find($idMov);
+
+        if (! $doc_carga) {
+            abort(404, 'Documento Carga No Encontrado');
+        }
+
+        $data = [
+            "doc_carga"    => $doc_carga,
+            "branchoffice" => $doc_carga->branchOffice,
+        ];
+
+        $pdf = Pdf::loadView('carga-almacen-ticket', $data);
+        $pdf->setPaper([15, 5, 172, 400], 'portrait');
+
+        $fileName = 'Ticket-carga-' . str_replace(' ', '_', $doc_carga->code_doc) . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
 }

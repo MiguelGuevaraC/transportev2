@@ -17319,7 +17319,7 @@
                     {
                         "name": "movement_type",
                         "in": "query",
-                        "description": "Filtrar por tipo de movimiento (IN, OUT)",
+                        "description": "Filtrar por tipo de movimiento (ENTRADA, SALIDA)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -17684,6 +17684,78 @@
                 ]
             }
         },
+        "/transportev2/public/api/export-kardex": {
+            "get": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Exportar Kardex",
+                "operationId": "f4758cd76c22a7e1f7061ad522aa795a",
+                "responses": {
+                    "200": {
+                        "description": "Archivo exportado correctamente",
+                        "headers": {
+                            "Content-Disposition": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "attachment; filename=kardex.xlsx"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/ticket-carga/{id}": {
+            "get": {
+                "tags": [
+                    "CargaDocument"
+                ],
+                "summary": "Generar ticket de carga",
+                "operationId": "1e715ce8f8299af99dbab348bcb218d6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del documento de carga",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket de carga generado correctamente",
+                        "headers": {
+                            "Content-Disposition": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "attachment; filename=ticket.pdf"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transporte/public/api/dataCollection": {
             "get": {
                 "tags": [
@@ -17826,6 +17898,330 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Venta No Encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/bank-account": {
+            "get": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Obtener información de BankAccounts con filtros y ordenamiento",
+                "operationId": "b42dd0cd6ca4910b62083d2ebfdd3a0a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filtrar por tipo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de BankAccounts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankAccount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Crear BankAccount",
+                "operationId": "9267e3adffca688fb058e855a93a28f4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BankAccountRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "BankAccount creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankAccount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/bank-account/{id}": {
+            "get": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Obtener detalles de un BankAccount por ID",
+                "operationId": "22a16ce75923a6e2cb894418f92a18a8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del BankAccount",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BankAccount encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankAccount"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta Bancaria no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Cuenta Bancaria no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Actualizar un BankAccount",
+                "operationId": "ef1afe4ba751f8065ec10315b39a72e6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BankAccountRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "BankAccount actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankAccount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cuenta Bancaria no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Cuenta Bancaria no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Eliminar un BankAccount por ID",
+                "operationId": "a7cb90dd21ef2fdfe66df43eca30eb30",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BankAccount eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "BankAccount eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Cuenta Bancaria no encontrada"
                                         }
                                     },
                                     "type": "object"
@@ -19231,6 +19627,84 @@
     },
     "components": {
         "schemas": {
+            "BankAccountRequest": {
+                "title": "BankAccountRequest",
+                "description": "Request model for Bank Account information with filters and sorting",
+                "required": [
+                    "bank_id",
+                    "account_number",
+                    "account_type",
+                    "currency",
+                    "holder_id",
+                    "status"
+                ],
+                "properties": {
+                    "bank_id": {
+                        "description": "ID del banco asociado",
+                        "type": "integer",
+                        "nullable": false
+                    },
+                    "account_number": {
+                        "description": "Número de cuenta bancaria",
+                        "type": "string",
+                        "nullable": false
+                    },
+                    "account_type": {
+                        "description": "Tipo de cuenta bancaria (ahorros, corriente, crédito)",
+                        "type": "string",
+                        "enum": [
+                            "ahorros",
+                            "corriente",
+                            "credito"
+                        ],
+                        "nullable": false
+                    },
+                    "currency": {
+                        "description": "Código de la moneda (Ej: USD, EUR, PEN)",
+                        "type": "string",
+                        "nullable": false
+                    },
+                    "balance": {
+                        "description": "Saldo de la cuenta bancaria",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "holder_name": {
+                        "description": "Nombre del titular de la cuenta",
+                        "type": "string",
+                        "nullable": false
+                    },
+                    "holder_id": {
+                        "description": "ID del titular de la cuenta (referencia a tabla People)",
+                        "type": "integer",
+                        "nullable": false
+                    },
+                    "status": {
+                        "description": "Estado de la cuenta bancaria",
+                        "type": "string",
+                        "enum": [
+                            "activa",
+                            "inactiva",
+                            "cerrada"
+                        ],
+                        "nullable": false
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "description": "Última actualización",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "BankRequest": {
                 "title": "BankRequest",
                 "description": "Request model for Bank information with filters and sorting",
@@ -19473,6 +19947,71 @@
                         "description": "Codigo Unidad",
                         "type": "string",
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "BankAccount": {
+                "title": "Bank Account",
+                "description": "Model representing a Bank Account",
+                "required": [
+                    "id",
+                    "bank_id",
+                    "account_number",
+                    "account_type",
+                    "currency",
+                    "balance",
+                    "holder_name",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Bank Account ID",
+                        "type": "integer"
+                    },
+                    "bank_id": {
+                        "description": "ID of the bank",
+                        "type": "integer"
+                    },
+                    "account_number": {
+                        "description": "Unique account number",
+                        "type": "string"
+                    },
+                    "account_type": {
+                        "description": "Type of account (e.g., savings, checking)",
+                        "type": "string"
+                    },
+                    "currency": {
+                        "description": "Currency of the account (e.g., USD, EUR)",
+                        "type": "string"
+                    },
+                    "balance": {
+                        "description": "Current balance in the account",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "holder_name": {
+                        "description": "Name of the account holder",
+                        "type": "string"
+                    },
+                    "holder_id": {
+                        "description": "ID of the account holder (if applicable)",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Account status (e.g., active, inactive)",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Timestamp when the account was created",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Timestamp when the account was last updated",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -22447,6 +22986,10 @@
         {
             "name": "CollectionData",
             "description": "CollectionData"
+        },
+        {
+            "name": "BankAccount",
+            "description": "BankAccount"
         },
         {
             "name": "TransactionConcept",
