@@ -23,20 +23,21 @@ class ProductController extends Controller
 /**
  * @OA\Get(
  *     path="/transportev2/public/api/product",
- *     summary="Obtener información de Products con filtros y ordenamiento",
+ *     summary="Obtener información de Productos con filtros y ordenamiento",
  *     tags={"Product"},
- *     security={{"bearerAuth": {}}},
+ *     security={{"bearerAuth": {}}}, 
+ *     @OA\Parameter(name="codeproduct", in="query", description="Filtrar por código del producto", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="description", in="query", description="Filtrar por descripción", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="stock", in="query", description="Filtrar por stock", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="weight", in="query", description="Filtrar por peso", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="category", in="query", description="Filtrar por categoría", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="unity", in="query", description="Filtrar por unidad de medida", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="unity_id", in="query", description="Filtrar por ID de unidad", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="person_id", in="query", description="Filtrar por ID de persona", required=false, @OA\Schema(type="string")),
- *     @OA\Response(response=200, description="Lista de Products", @OA\JsonContent(ref="#/components/schemas/Product")),
+ *     @OA\Parameter(name="addressproduct", in="query", description="Filtrar por dirección del producto", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="category", in="query", description="Filtrar por categoría", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="unity_id", in="query", description="Filtrar por ID de unidad de medida", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="weight", in="query", description="Filtrar por peso", required=false, @OA\Schema(type="string")),
+ *     @OA\Response(response=200, description="Lista de Productos", @OA\JsonContent(ref="#/components/schemas/Product")),
  *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
  * )
  */
+
 
     public function index(IndexProductRequest $request)
     {

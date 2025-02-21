@@ -574,12 +574,12 @@
                 "tags": [
                     "Bank"
                 ],
-                "summary": "Store a newly created bank in storage.",
+                "summary": "Crear Bank",
                 "operationId": "c753e6e5e5e241e0e7709de9fb36556f",
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "$ref": "#/components/schemas/BankRequest"
                             }
@@ -588,7 +588,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Bank created successfully",
+                        "description": "Bank creada exitosamente",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -598,30 +598,75 @@
                         }
                     },
                     "422": {
-                        "description": "Invalid data",
+                        "description": "Error de validación",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "The name has already been taken."
+                                            "example": "Error de validación"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/bank-list": {
+            "get": {
+                "tags": [
+                    "Bank"
+                ],
+                "summary": "Obtener información de Banks con filtros y ordenamiento",
+                "operationId": "a009dccbf4a5e93ac577b6805a40eb2b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de Banks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Bank"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
+                                        "error": {
+                                            "type": "string"
                                         }
                                     },
                                     "type": "object"
@@ -642,22 +687,23 @@
                 "tags": [
                     "Bank"
                 ],
-                "summary": "Display the specified bank.",
+                "summary": "Obtener detalles de un Bank por ID",
                 "operationId": "1494d838cd29950c3203f87a7fc4a821",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Bank ID",
+                        "description": "ID del Bank",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Bank found",
+                        "description": "Bank encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -667,30 +713,14 @@
                         }
                     },
                     "404": {
-                        "description": "Bank not found",
+                        "description": "Banco no encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Bank not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
+                                            "example": "Banco no encontrada"
                                         }
                                     },
                                     "type": "object"
@@ -709,23 +739,23 @@
                 "tags": [
                     "Bank"
                 ],
-                "summary": "Update the specified bank in storage.",
+                "summary": "Actualizar un Bank",
                 "operationId": "dd6b3e8a97fb8f65985085b604e4cab3",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Bank ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "$ref": "#/components/schemas/BankRequest"
                             }
@@ -734,7 +764,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Bank updated successfully",
+                        "description": "Bank actualizada exitosamente",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -743,31 +773,15 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Bank not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Bank not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
                     "422": {
-                        "description": "Invalid data",
+                        "description": "Error de validación",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "The name has already been taken."
+                                            "example": "Error de validación"
                                         }
                                     },
                                     "type": "object"
@@ -775,15 +789,31 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Banco no encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Unauthenticated"
+                                            "example": "Banco no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
                                         }
                                     },
                                     "type": "object"
@@ -802,29 +832,29 @@
                 "tags": [
                     "Bank"
                 ],
-                "summary": "Remove the specified bank from storage.",
+                "summary": "Eliminar un Bankpor ID",
                 "operationId": "7059edc9e92bdae29bdab1fbb18c8e19",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Bank ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Bank deleted",
+                        "description": "Bank eliminado",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Bank deleted"
+                                            "example": "Bank eliminado exitosamente"
                                         }
                                     },
                                     "type": "object"
@@ -833,30 +863,14 @@
                         }
                     },
                     "404": {
-                        "description": "Bank not found",
+                        "description": "No encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
+                                        "error": {
                                             "type": "string",
-                                            "example": "Bank not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
+                                            "example": "Banco no encontrada"
                                         }
                                     },
                                     "type": "object"
@@ -16102,14 +16116,14 @@
                 ]
             }
         },
-        "/transportev2/public/api/paymasivesalebyinstallmentdebt": {
+        "/transportev2/public/api/paymasive": {
             "post": {
                 "tags": [
                     "Sale"
                 ],
                 "summary": "Realiza un pago masivo por cuotas pendientes",
                 "description": "Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
-                "operationId": "6c325c2a0978e2d004ca9be9e99cf3af",
+                "operationId": "521d9e0bc8ce5221cee0ebddd666f4c5",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -17258,42 +17272,48 @@
                 "operationId": "17578472768412ab43b902100c242d46",
                 "parameters": [
                     {
+                        "name": "code_doc",
+                        "in": "query",
+                        "description": "Filtrar por código del documento",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "person_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de la persona responsable",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "query",
+                        "description": "Filtrar por ID del producto relacionado",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "branchOffice_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de la sucursal",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "quantity",
                         "in": "query",
                         "description": "Filtrar por cantidad de producto movido",
                         "required": false,
                         "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "unit_price",
-                        "in": "query",
-                        "description": "Filtrar por precio unitario del producto",
-                        "required": false,
-                        "schema": {
-                            "type": "number",
-                            "format": "float"
-                        }
-                    },
-                    {
-                        "name": "total_cost",
-                        "in": "query",
-                        "description": "Filtrar por costo total del movimiento",
-                        "required": false,
-                        "schema": {
-                            "type": "number",
-                            "format": "float"
-                        }
-                    },
-                    {
-                        "name": "weight",
-                        "in": "query",
-                        "description": "Filtrar por peso del producto",
-                        "required": false,
-                        "schema": {
-                            "type": "number",
-                            "format": "float"
+                            "type": "string"
                         }
                     },
                     {
@@ -17306,12 +17326,12 @@
                         }
                     },
                     {
-                        "name": "stock_balance",
+                        "name": "num_anexo",
                         "in": "query",
-                        "description": "Filtrar por saldo de stock después del movimiento",
+                        "description": "Filtrar por número de anexo",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     },
                     {
@@ -17324,21 +17344,50 @@
                         }
                     },
                     {
-                        "name": "product_id",
+                        "name": "description",
                         "in": "query",
-                        "description": "Filtrar por ID del producto relacionado",
+                        "description": "Filtrar por descripción",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     },
                     {
-                        "name": "person_id",
+                        "name": "movement_date",
                         "in": "query",
-                        "description": "Filtrar por ID de la persona responsable",
+                        "description": "Filtrar por fecha de movimiento",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "description": "Filtrar por peso del producto",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lote_doc",
+                        "in": "query",
+                        "description": "Filtrar por lote del documento",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_expiration",
+                        "in": "query",
+                        "description": "Filtrar por fecha de vencimiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
                         }
                     }
                 ],
@@ -17635,14 +17684,14 @@
                 ]
             }
         },
-        "/transportev2/public/api/dataCollection": {
+        "/transporte/public/api/dataCollection": {
             "get": {
                 "tags": [
                     "CollectionData"
                 ],
                 "summary": "Get all data",
                 "description": "Retrieve all data collections",
-                "operationId": "648983d517ac6e997c03e0d7b0153a6c",
+                "operationId": "fab5024e2b711abb5d5647cacc71abeb",
                 "responses": {
                     "200": {
                         "description": "List of all data collections"
@@ -17792,14 +17841,347 @@
                 ]
             }
         },
+        "/transportev2/public/api/transcationConcept": {
+            "get": {
+                "tags": [
+                    "TransactionConcept"
+                ],
+                "summary": "Obtener información de TransactionConcepts con filtros y ordenamiento",
+                "operationId": "31a4510aaca4c888812c9a2d940d4372",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filtrar por name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filtrar por tipo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de TransactionConcepts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionConcept"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "TransactionConcept"
+                ],
+                "summary": "Crear TransactionConcept",
+                "operationId": "e9a195869ed8046f6dbcc9e6dafd156f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TransactionConceptRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "TransactionConcept creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionConcept"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transportev2/public/api/transcationConcept/{id}": {
+            "get": {
+                "tags": [
+                    "TransactionConcept"
+                ],
+                "summary": "Obtener detalles de un TransactionConcept por ID",
+                "operationId": "e90e74df1574ce502badd4728d9e1fa9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del TransactionConcept",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TransactionConcept encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionConcept"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Concepto no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Concepto no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "TransactionConcept"
+                ],
+                "summary": "Actualizar un TransactionConcept",
+                "operationId": "31abb720bc4170b4b456c4532013f6dc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TransactionConceptRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "TransactionConcept actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionConcept"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Concepto no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Concepto no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "TransactionConcept"
+                ],
+                "summary": "Eliminar un TransactionConceptpor ID",
+                "operationId": "517afee8d2ac831fd44e9328e8f7a5ee",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TransactionConcept eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "TransactionConcept eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Concepto no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transportev2/public/api/product": {
             "get": {
                 "tags": [
                     "Product"
                 ],
-                "summary": "Obtener información de Products con filtros y ordenamiento",
+                "summary": "Obtener información de Productos con filtros y ordenamiento",
                 "operationId": "6da5a452b087c443f2e25276b004d0b8",
                 "parameters": [
+                    {
+                        "name": "codeproduct",
+                        "in": "query",
+                        "description": "Filtrar por código del producto",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "description",
                         "in": "query",
@@ -17810,18 +18192,18 @@
                         }
                     },
                     {
-                        "name": "stock",
+                        "name": "person_id",
                         "in": "query",
-                        "description": "Filtrar por stock",
+                        "description": "Filtrar por ID de persona",
                         "required": false,
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
-                        "name": "weight",
+                        "name": "addressproduct",
                         "in": "query",
-                        "description": "Filtrar por peso",
+                        "description": "Filtrar por dirección del producto",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -17837,27 +18219,18 @@
                         }
                     },
                     {
-                        "name": "unity",
-                        "in": "query",
-                        "description": "Filtrar por unidad de medida",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
                         "name": "unity_id",
                         "in": "query",
-                        "description": "Filtrar por ID de unidad",
+                        "description": "Filtrar por ID de unidad de medida",
                         "required": false,
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
-                        "name": "person_id",
+                        "name": "weight",
                         "in": "query",
-                        "description": "Filtrar por ID de persona",
+                        "description": "Filtrar por peso",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -17866,7 +18239,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de Products",
+                        "description": "Lista de Productos",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -18161,27 +18534,9 @@
                 "operationId": "18e12ed5d6f092e49275e4e470e5f040",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "query",
-                        "description": "Filtrar por ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
                         "name": "tarifa",
                         "in": "query",
                         "description": "Filtrar por tarifa",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "quantity",
-                        "in": "query",
-                        "description": "Filtrar por cantidad",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -18197,9 +18552,18 @@
                         }
                     },
                     {
-                        "name": "unity",
+                        "name": "origin_id",
                         "in": "query",
-                        "description": "Filtrar por unidad de medida",
+                        "description": "Filtrar por ID de origen",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de destino",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -18212,6 +18576,43 @@
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "unity_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de unidad de medida",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limitweight_min",
+                        "in": "query",
+                        "description": "Filtrar por peso mínimo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limitweight_max",
+                        "in": "query",
+                        "description": "Filtrar por peso máximo",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "description": "Filtrar por fecha de creación",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
                         }
                     }
                 ],
@@ -18830,6 +19231,22 @@
     },
     "components": {
         "schemas": {
+            "BankRequest": {
+                "title": "BankRequest",
+                "description": "Request model for Bank information with filters and sorting",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nombre Banco",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "CargaDocumentRequest": {
                 "title": "CargaDocumentRequest",
                 "description": "Request model for loading a document with product details",
@@ -18869,6 +19286,21 @@
                         "type": "number",
                         "format": "float"
                     },
+                    "lote_doc": {
+                        "description": "Lote de documento",
+                        "type": "number",
+                        "format": "string"
+                    },
+                    "date_expiration": {
+                        "description": "Fecha de expiración",
+                        "type": "number",
+                        "format": "string"
+                    },
+                    "num_anexo": {
+                        "description": "Número de GRE",
+                        "type": "number",
+                        "format": "string"
+                    },
                     "movement_type": {
                         "description": "Type of movement (e.g., entry, exit, etc.)",
                         "type": "string"
@@ -18885,6 +19317,28 @@
                     "person_id": {
                         "description": "ID of the person associated with the movement",
                         "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "TransactionConceptRequest": {
+                "title": "TransactionConceptRequest",
+                "description": "Request model for Bank information with filters and sorting",
+                "required": [
+                    "id",
+                    "name",
+                    "type"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "PAGO DE MES",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "description": "INGRESO",
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -18937,8 +19391,11 @@
                 "description": "Request model for Tarifario information with filters and sorting",
                 "required": [
                     "id",
-                    "quantity",
-                    "person_id"
+                    "tarifa",
+                    "person_id",
+                    "destination_id",
+                    "origin_id",
+                    "unity_id"
                 ],
                 "properties": {
                     "id": {
@@ -18947,13 +19404,9 @@
                         "nullable": true
                     },
                     "tarifa": {
-                        "description": "Tarifa description",
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "quantity": {
-                        "description": "Quantity of the item",
-                        "type": "string",
+                        "description": "Tarifa amount",
+                        "type": "number",
+                        "format": "float",
                         "nullable": true
                     },
                     "description": {
@@ -18961,15 +19414,43 @@
                         "type": "string",
                         "nullable": true
                     },
-                    "unity_id": {
-                        "description": "ID of the unity associated with the Tarifario",
-                        "type": "string",
-                        "nullable": true
-                    },
                     "person_id": {
                         "description": "ID of the person associated with the Tarifario",
-                        "type": "string",
+                        "type": "integer",
+                        "nullable": false
+                    },
+                    "tarifa_camp": {
+                        "description": "Tarifa camp amount",
+                        "type": "number",
+                        "format": "float",
                         "nullable": true
+                    },
+                    "limitweight_min": {
+                        "description": "Weight limit min for the Tarifario",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "limitweight_max": {
+                        "description": "Weight limit max for the Tarifario",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "destination_id": {
+                        "description": "ID of the destination place",
+                        "type": "integer",
+                        "nullable": false
+                    },
+                    "origin_id": {
+                        "description": "ID of the origin place",
+                        "type": "integer",
+                        "nullable": false
+                    },
+                    "unity_id": {
+                        "description": "ID of the unity associated with the Tarifario",
+                        "type": "integer",
+                        "nullable": false
                     }
                 },
                 "type": "object"
@@ -18992,6 +19473,30 @@
                         "description": "Codigo Unidad",
                         "type": "string",
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Bank": {
+                "title": "Bank",
+                "description": "Model representing a Bank",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Bank ID",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Name of the unity",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation date of the unity",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -19044,7 +19549,11 @@
                         "description": "Type of movement (e.g., IN, OUT)",
                         "type": "string"
                     },
-                    "stock_balance": {
+                    "stock_balance_before": {
+                        "description": "Stock balance before movement",
+                        "type": "integer"
+                    },
+                    "stock_balance_after": {
                         "description": "Stock balance after movement",
                         "type": "integer"
                     },
@@ -19108,6 +19617,16 @@
                         "type": "string",
                         "nullable": true
                     },
+                    "addressproduct": {
+                        "description": "Product address",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "codeproduct": {
+                        "description": "Product code",
+                        "type": "string",
+                        "nullable": true
+                    },
                     "unity_id": {
                         "description": "Unit of measurement ID",
                         "type": "integer"
@@ -19118,9 +19637,6 @@
                     "person_id": {
                         "description": "Person ID associated with the product",
                         "type": "integer"
-                    },
-                    "person": {
-                        "$ref": "#/components/schemas/Person"
                     },
                     "created_at": {
                         "description": "Creation date in YYYY-MM-DD HH:MM:SS format",
@@ -19148,10 +19664,40 @@
                         "type": "number",
                         "format": "float"
                     },
+                    "tarifa_camp": {
+                        "description": "Campaign tariff value",
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
                     "description": {
                         "description": "Description of the tariff",
                         "type": "string",
                         "nullable": true
+                    },
+                    "limitweight_min": {
+                        "description": "Minimum weight limit",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "limitweight_max": {
+                        "description": "Maximum weight limit",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "destination_id": {
+                        "description": "ID of the destination place",
+                        "type": "integer"
+                    },
+                    "destination": {
+                        "$ref": "#/components/schemas/Place"
+                    },
+                    "origin_id": {
+                        "description": "ID of the origin place",
+                        "type": "integer"
+                    },
+                    "origin": {
+                        "$ref": "#/components/schemas/Place"
                     },
                     "unity_id": {
                         "description": "ID of the associated unity",
@@ -19170,6 +19716,34 @@
                     },
                     "created_at": {
                         "description": "Creation date of the tariff",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "TransactionConcept": {
+                "title": "TransactionConcept",
+                "description": "Model representing a TransactionConcept",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "TransactionConcept ID",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Name of the Concept",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type of the Concept",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation date of the unity",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -19291,41 +19865,6 @@
                         "description": "Fecha de eliminación del área",
                         "type": "string",
                         "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
-            "Bank": {
-                "title": "Bank",
-                "required": [
-                    "name"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": "1"
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Bank 1"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-05-22 00:41:38"
-                    }
-                },
-                "type": "object"
-            },
-            "BankRequest": {
-                "title": "BankRequest",
-                "required": [
-                    "name"
-                ],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "example": "Bank 1"
                     }
                 },
                 "type": "object"
@@ -19906,6 +20445,14 @@
                     },
                     "reception_id": {
                         "description": "Reception ID",
+                        "type": "integer"
+                    },
+                    "product_id": {
+                        "description": "Product ID",
+                        "type": "integer"
+                    },
+                    "tarifa_id": {
+                        "description": "Tarifa ID",
                         "type": "integer"
                     },
                     "created_at": {
@@ -21900,6 +22447,10 @@
         {
             "name": "CollectionData",
             "description": "CollectionData"
+        },
+        {
+            "name": "TransactionConcept",
+            "description": "TransactionConcept"
         },
         {
             "name": "Product",

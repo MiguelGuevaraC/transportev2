@@ -25,17 +25,21 @@ class TarifarioController extends Controller
  *     path="/transportev2/public/api/tarifario",
  *     summary="Obtener información de Tarifarios con filtros y ordenamiento",
  *     tags={"Tarifario"},
- *     security={{"bearerAuth": {}}},
- *     @OA\Parameter(name="id", in="query", description="Filtrar por ID", required=false, @OA\Schema(type="integer")),
+ *     security={{"bearerAuth": {}}}, 
  *     @OA\Parameter(name="tarifa", in="query", description="Filtrar por tarifa", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="quantity", in="query", description="Filtrar por cantidad", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="description", in="query", description="Filtrar por descripción", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="unity", in="query", description="Filtrar por unidad de medida", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="origin_id", in="query", description="Filtrar por ID de origen", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="destination_id", in="query", description="Filtrar por ID de destino", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="person_id", in="query", description="Filtrar por ID de persona", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="unity_id", in="query", description="Filtrar por ID de unidad de medida", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="limitweight_min", in="query", description="Filtrar por peso mínimo", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="limitweight_max", in="query", description="Filtrar por peso máximo", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="created_at", in="query", description="Filtrar por fecha de creación", required=false, @OA\Schema(type="string", format="date-time")),
  *     @OA\Response(response=200, description="Lista de Tarifarios", @OA\JsonContent(ref="#/components/schemas/Tarifario")),
  *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
  * )
  */
+
 
 
  public function index(IndexTarifarioRequest $request)

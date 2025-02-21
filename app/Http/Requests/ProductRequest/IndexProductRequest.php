@@ -23,17 +23,14 @@ class IndexProductRequest extends IndexRequest
     public function rules(): array
     {
         return [
- 
-            'description' => 'nullable|string',
-            'stock' => 'nullable|string',
-            'weight' => 'nullable|string',
-            'category' => 'nullable|string',
-            'unity' => 'nullable|string',
-            'unity_id' => 'nullable|string',
-            'person_id' => 'nullable|string',
-            'codeproduct'=> 'nullable|string',
-            'addressproduct'=> 'nullable|string',
+            'codeproduct' => 'nullable|string',
+            'description' => 'nullable|string', 
+            'person_id' => 'nullable|string', 
+            'addressproduct' => 'nullable|string',
+            'category'    => 'nullable|string',
+            'unity_id'    => 'nullable|string',
+            'weight'      => 'nullable|string',
         ];
     }
-    
+
 }

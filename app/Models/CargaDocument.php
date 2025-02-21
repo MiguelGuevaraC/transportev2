@@ -37,22 +37,24 @@ class CargaDocument extends Model
         'deleted_at',
     ];
     const filters = [
-        'description'     => 'like',
-        'movement_date'   => 'between',
+        'code_doc'        => '=',
+        'person_id'       => '=',
+        'product_id'      => '=',
+        'branchOffice_id' => '=',
         'quantity'        => 'like',
+        'movement_type'   => 'like',
+        'num_anexo'       => '=',
+        'comment'         => 'like',
+
+        'description'     => 'like',
+        'movement_date'   => 'date',
+        'weight'          => 'like',
+        'lote_doc'        => '=',
+        'date_expiration' => 'date',
+
         'unit_price'      => 'like',
         'total_cost'      => 'like',
-        'weight'          => 'like',
-        'movement_type'   => 'like',
         'stock_balance'   => 'like',
-        'comment'         => 'like',
-        'product_id'      => '=',
-        'person_id'       => '=',
-        'lote_doc'        => '=',
-        'code_doc'        => '=',
-        'date_expiration' => '=',
-        'num_anexo'       => '=',
-        'branchOffice_id' => '=',
     ];
 
     /**

@@ -23,19 +23,22 @@ class IndexCargaDocumentRequest extends IndexRequest
     public function rules(): array
     {
         return [
-            'id'              => 'nullable|integer',
-            'movement_date'   => 'nullable|date',
+
+            'code_doc'        => 'nullable|string',
+            'person_id'       => 'nullable|string',
+            'product_id'      => 'nullable|string',
+            'branchOffice_id' => 'nullable|string',
             'quantity'        => 'nullable|string',
-            'unit_price'      => 'nullable|string',
-            'total_cost'      => 'nullable|string',
-            'weight'          => 'nullable|string',
             'movement_type'   => 'nullable|string',
-            'stock_balance'   => 'nullable|string',
+            'num_anexo'       => 'nullable|string',
             'comment'         => 'nullable|string',
-            'product_id'      => 'nullable|integer',
-            'person_id'       => 'nullable|integer',
+            'description'     => 'nullable|string',
+            'movement_date'   => 'nullable|string',
+            'weight'          => 'nullable|string',
+            'lote_doc'        => 'nullable|string',
+            'date_expiration' => 'nullable|string',
 
         ];
     }
-    
+
 }

@@ -28,16 +28,20 @@ class CargarDocumentController extends Controller
  *     summary="Obtener información de CargaDocuments con filtros y ordenamiento",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
- *
- *     @OA\Parameter(name="quantity", in="query", description="Filtrar por cantidad de producto movido", required=false, @OA\Schema(type="integer")),
- *     @OA\Parameter(name="unit_price", in="query", description="Filtrar por precio unitario del producto", required=false, @OA\Schema(type="number", format="float")),
- *     @OA\Parameter(name="total_cost", in="query", description="Filtrar por costo total del movimiento", required=false, @OA\Schema(type="number", format="float")),
- *     @OA\Parameter(name="weight", in="query", description="Filtrar por peso del producto", required=false, @OA\Schema(type="number", format="float")),
- *     @OA\Parameter(name="movement_type", in="query", description="Filtrar por tipo de movimiento (IN, OUT)", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="stock_balance", in="query", description="Filtrar por saldo de stock después del movimiento", required=false, @OA\Schema(type="integer")),
+
+ *     @OA\Parameter(name="code_doc", in="query", description="Filtrar por código del documento", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="person_id", in="query", description="Filtrar por ID de la persona responsable", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="product_id", in="query", description="Filtrar por ID del producto relacionado", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="branchOffice_id", in="query", description="Filtrar por ID de la sucursal", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="quantity", in="query", description="Filtrar por cantidad de producto movido", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="movement_type", in="query", description="Filtrar por tipo de movimiento (ENTRADA, SALIDA)", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="num_anexo", in="query", description="Filtrar por número de anexo", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="comment", in="query", description="Filtrar por comentario adicional", required=false, @OA\Schema(type="string")),
- *     @OA\Parameter(name="product_id", in="query", description="Filtrar por ID del producto relacionado", required=false, @OA\Schema(type="integer")),
- *     @OA\Parameter(name="person_id", in="query", description="Filtrar por ID de la persona responsable", required=false, @OA\Schema(type="integer")),
+ *     @OA\Parameter(name="description", in="query", description="Filtrar por descripción", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="movement_date", in="query", description="Filtrar por fecha de movimiento", required=false, @OA\Schema(type="string", format="date")),
+ *     @OA\Parameter(name="weight", in="query", description="Filtrar por peso del producto", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="lote_doc", in="query", description="Filtrar por lote del documento", required=false, @OA\Schema(type="string")),
+ *     @OA\Parameter(name="date_expiration", in="query", description="Filtrar por fecha de vencimiento", required=false, @OA\Schema(type="string", format="date")),
 
  *     @OA\Response(response=200, description="Lista de CargaDocuments",
  *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/CargaDocument"))
@@ -47,7 +51,6 @@ class CargarDocumentController extends Controller
  *     )
  * )
  */
-
     public function index(IndexCargaDocumentRequest $request)
     {
 
@@ -216,15 +219,14 @@ class CargarDocumentController extends Controller
     public function exportKardex(KardexRequest $request)
     {
         $validatedData = $request->validated();
-        $idproducto = is_array($request->product_id) 
-        ? $request->product_id 
+        $idproducto    = is_array($request->product_id)
+        ? $request->product_id
         : ($request->product_id == "null" ? "null" : [$request->product_id]);
-    
 
-        $from          = $request->from ?? null;
-        $to            = $request->to ?? null;
-        $branch_id= $request->branchOffice_id ?? null;
-        $name = "Productos";
+        $from      = $request->from ?? null;
+        $to        = $request->to ?? null;
+        $branch_id = $request->branchOffice_id ?? null;
+        $name      = "Productos";
         // Buscar el producto
         $product = Product::find($idproducto);
 

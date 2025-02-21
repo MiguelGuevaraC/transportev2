@@ -25,14 +25,13 @@ class Product extends Model
         'deleted_at',
     ];
     const filters = [
-        'description'    => 'like',
-        'stock'          => 'like',
-        'weight'         => 'like',
-        'category'       => 'like',
-        'person_id'    => '=',
-        'unity_id'       => '=',
         'codeproduct'    => 'like',
+        'description'    => 'like',
+        'person_id'    => '=',
         'addressproduct' => 'like',
+        'category'       => 'like',
+        'unity_id'       => '=',
+        'weight'         => 'like',
     ];
 
     /**

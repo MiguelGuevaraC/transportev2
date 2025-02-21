@@ -28,16 +28,15 @@ class Tarifario extends Model
         'deleted_at',
     ];
     const filters = [
-        'description'     => 'like',
-        'tarifa'          => '=',
-        'unity_id'        => '=',
-        'unity.name'      => 'like',
-        'person_id'       => '=',
-        'tarifa_camp'     => '=',
+        'tarifa' => 'like',
+        'description' => 'like',
+        'origin_id' => '=',
+        'destination_id' => '=',
+        'person_id' => '=',
+        'unity_id' => '=',
         'limitweight_min' => 'like',
         'limitweight_max' => 'like',
-        'destination_id'  => '=',
-        'origin_id'       => '=',
+        'created_at' => 'date',
     ];
 
     /**
