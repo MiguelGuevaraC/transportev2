@@ -197,7 +197,7 @@ class UnityController extends Controller
      $proyect = $this->unityService->destroyById($id);
 
      return response()->json([
-         'message' => 'Unityeliminado exitosamente',
+         'message' => 'Unidad eliminado exitosamente',
      ], 200);
  }
 

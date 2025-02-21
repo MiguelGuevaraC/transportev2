@@ -424,4 +424,5 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/UnityApi.php';        //UNIDAD
     require __DIR__ . '/Api/ProductApi.php';        //PRODUCT
     require __DIR__ . '/Api/BankApi.php';        //BANK
+    require __DIR__ . '/Api/TransactionConceptApi.php';        //TransactionConcept
 });

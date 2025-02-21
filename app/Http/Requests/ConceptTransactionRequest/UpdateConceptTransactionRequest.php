@@ -1,11 +1,11 @@
 <?php
-namespace App\Http\Requests\BankRequest;
+namespace App\Http\Requests\ConceptTransactionRequest;
 
 use App\Http\Requests\UpdateRequest;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 
-class UpdateBankRequest extends UpdateRequest
+class UpdateConceptTransactionRequest extends UpdateRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,16 +31,19 @@ class UpdateBankRequest extends UpdateRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique('banks', 'name')->whereNull('deleted_at')->ignore($unitId),
+                Rule::unique('transaction_concepts', 'name')->whereNull('deleted_at')->ignore($unitId),
             ],
+            'type' => ['required', Rule::in(['INGRESO', 'EGRESO'])], // Mejora la validación con Rule::in
         ];
     }
 
     public function messages()
     {
         return [
-            'name.required' => 'Nombre de la unidad es obligatorio.',
-            'name.unique'   => 'El nombre de la unidad ya está en uso.',
+            'name.required' => 'Nombre del concepto es obligatorio.',
+            'name.unique'   => 'El nombre del concepto ya está en uso.',
+            'type.required' => 'El tipo del concepto es obligatorio.',
+            'type.in'       => 'El tipo debe ser INGRESO o EGRESO.',
         ];
     }
 

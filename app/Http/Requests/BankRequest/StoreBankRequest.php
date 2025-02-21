@@ -40,7 +40,7 @@ class StoreBankRequest extends StoreRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique('unities', 'name')->whereNull('deleted_at'),
+                Rule::unique('banks', 'name')->whereNull('deleted_at'),
             ],
         ];
     }
