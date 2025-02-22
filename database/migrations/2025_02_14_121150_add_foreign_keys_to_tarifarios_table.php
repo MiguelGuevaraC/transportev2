@@ -34,7 +34,8 @@ return new class extends Migration
             $table->dropColumn('destination_id');
             $table->dropForeign(['origin_id']);
             $table->dropColumn('origin_id');
-            $table->dropColumn('limitweight');
+            $table->dropColumn('limitweight_min');
+            $table->dropColumn('limitweight_max');
             $table->dropColumn('tarifa_camp');
         });
     }
