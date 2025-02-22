@@ -32,7 +32,7 @@ class PersonController extends Controller
  * @return \Illuminate\Http\Response
  *
  * @OA\Get(
- *     path="/transportev2/public/api/clients",
+ *     path="/transporte/public/api/clients",
  *     summary="Get all clients",
  *     tags={"Clients"},
  *     description="Show all clients",
@@ -221,7 +221,7 @@ class PersonController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/naturalPerson",
+ *     path="/transporte/public/api/naturalPerson",
  *     summary="Get all Natural People",
  *     tags={"Clients"},
  *     description="Show all Natural People",
@@ -253,7 +253,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/legalEntity",
+     *     path="/transporte/public/api/legalEntity",
      *     summary="Get all Legal Entities",
      *     tags={"Clients"},
      *     description="Show all Legal Entities",
@@ -294,7 +294,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/clients",
+     *     path="/transporte/public/api/clients",
      *     summary="Store a new client",
      *     tags={"Clients"},
      *     description="Create a new client",
@@ -427,7 +427,7 @@ class PersonController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/clients/{id}",
+     *     path="/transporte/public/api/clients/{id}",
      *     summary="Get a client by ID",
      *     tags={"Clients"},
      *     description="Retrieve a client by its ID",
@@ -478,7 +478,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/clients/{id}",
+     *     path="/transporte/public/api/clients/{id}",
      *     summary="Update an existing client",
      *     tags={"Clients"},
      *     description="Update an existing client",
@@ -609,7 +609,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/clients/{id}",
+     *     path="/transporte/public/api/clients/{id}",
      *     summary="Delete a client",
      *     tags={"Clients"},
      *     description="Delete a client by ID",
@@ -655,7 +655,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/clients/{id}/changeState",
+     *     path="/transporte/public/api/clients/{id}/changeState",
      *     summary="Change the state of a client",
      *     tags={"Clients"},
      *     description="Change the state (active/inactive) of a client by its ID",
@@ -712,7 +712,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/personsWithDebt",
+     *     path="/transporte/public/api/personsWithDebt",
      *     summary="Get Persons with Debt",
      *     tags={"Clients"},
      *     description="Retrieve all Persons who have receptions with debt amounts greater than 0, optionally filtered by 'conditionPay'. Includes the related receptions.",

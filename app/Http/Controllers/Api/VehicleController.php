@@ -24,7 +24,7 @@ class VehicleController extends Controller
      * @return \Illuminate\Http\Response
      *
      * @OA\Get(
-     *     path="/transportev2/public/api/vehicleAll",
+     *     path="/transporte/public/api/vehicleAll",
      *     summary="Get all Vehicle",
      *     tags={"Vehicle"},
      *     description="Show all Vehicle",
@@ -71,7 +71,7 @@ class VehicleController extends Controller
  * @return \Illuminate\Http\Response
  *
  * @OA\Get(
- *     path="/transportev2/public/api/vehicle",
+ *     path="/transporte/public/api/vehicle",
  *     summary="Get all Vehicles",
  *     tags={"Vehicle"},
  *     description="Retrieve a paginated list of vehicles, optionally filtered by branch office or type of vehicle (e.g., Tracto, Carreta).",
@@ -209,7 +209,7 @@ class VehicleController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportev2/public/api/vehicle",
+ *     path="/transporte/public/api/vehicle",
  *     summary="Create a new vehicle",
  *     tags={"Vehicle"},
  *     description="Create a new vehicle and upload associated photos.",
@@ -418,7 +418,7 @@ class VehicleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/vehicle/{id}",
+     *     path="/transporte/public/api/vehicle/{id}",
      *     summary="Get a vehicle by ID",
      *     tags={"Vehicle"},
      *     description="Retrieve a vehicle by its ID",
@@ -466,7 +466,7 @@ class VehicleController extends Controller
     }
 /**
  * @OA\Post(
- *     path="/transportev2/public/api/vehicle/{id}",
+ *     path="/transporte/public/api/vehicle/{id}",
  *     summary="Create or update a vehicle",
  *     tags={"Vehicle"},
  *     description="Create a new vehicle or update an existing one and optionally upload associated photos.",
@@ -635,7 +635,7 @@ class VehicleController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/vehicle/{id}",
+     *     path="/transporte/public/api/vehicle/{id}",
      *     summary="Delete a vehicle",
      *     tags={"Vehicle"},
      *     description="Delete a vehicle by ID",

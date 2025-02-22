@@ -11,7 +11,7 @@ class BranchOfficeController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/branchOffice",
+     *     path="/transporte/public/api/branchOffice",
      *     summary="Get all branchOffice",
      *     tags={"BranchOffice"},
      *     description="Show all branchOffice",
@@ -41,7 +41,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/branchOffice",
+     *     path="/transporte/public/api/branchOffice",
      *     summary="Store a new branchOffice",
      *     tags={"BranchOffice"},
      *     description="Create a new branchOffice",
@@ -107,7 +107,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Get a branchOffice by ID",
      *     tags={"BranchOffice"},
      *     description="Retrieve a branchOffice by its ID",
@@ -157,7 +157,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Update an existing BranchOffice",
      *     tags={"BranchOffice"},
      *     description="Update an existing BranchOffice",
@@ -242,7 +242,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Delete a BranchOffice",
      *     tags={"BranchOffice"},
      *     description="Delete a BranchOffice by ID",

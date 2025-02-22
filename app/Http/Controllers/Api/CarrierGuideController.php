@@ -31,7 +31,7 @@ class CarrierGuideController extends Controller
     
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/carrierGuide",
+     *     path="/transporte/public/api/carrierGuide",
      *     summary="Get all carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Show all carrierGuide",
@@ -243,7 +243,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/carrierGuide",
+     *     path="/transporte/public/api/carrierGuide",
      *     summary="Create a new carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Create a new carrierGuide",
@@ -558,7 +558,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Get a carrierGuide by ID",
      *     tags={"CarrierGuide"},
      *     description="Retrieve a carrierGuide by its ID",
@@ -610,7 +610,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Update an existing carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Update an existing carrierGuide",
@@ -860,7 +860,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Delete a CarrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Delete a CarrierGuide by ID",
@@ -912,7 +912,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/carrierGuide/{id}/status",
+     *     path="/transporte/public/api/carrierGuide/{id}/status",
      *     summary="Update CarrierGuide status",
      *     tags={"CarrierGuide"},
      *     description="Update the status of a CarrierGuide to either 'Pendiente' or Entregado or 'En Transito'",

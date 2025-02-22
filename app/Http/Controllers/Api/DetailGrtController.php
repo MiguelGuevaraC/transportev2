@@ -11,7 +11,7 @@ class DetailGrtController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/detailGrt",
+     *     path="/transporte/public/api/detailGrt",
      *     summary="Get all detailGrt",
      *     tags={"DetailGrt"},
      *     description="Show all detailGrt",
@@ -37,7 +37,7 @@ class DetailGrtController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/detailGrt",
+     *     path="/transporte/public/api/detailGrt",
      *     summary="Create a new detailGrt",
      *     tags={"DetailGrt"},
      *     description="Create a new detailGrt",
@@ -101,7 +101,7 @@ class DetailGrtController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/detailGrt/{id}",
+     *     path="/transporte/public/api/detailGrt/{id}",
      *     summary="Get a detailGrt by ID",
      *     tags={"DetailGrt"},
      *     description="Retrieve a detailGrt by its ID",
@@ -151,7 +151,7 @@ class DetailGrtController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/detailGrt/{id}",
+     *     path="/transporte/public/api/detailGrt/{id}",
      *     summary="Update an existing detailGrt",
      *     tags={"DetailGrt"},
      *     description="Update an existing detailGrt",
@@ -231,7 +231,7 @@ class DetailGrtController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/detailGrt/{id}",
+     *     path="/transporte/public/api/detailGrt/{id}",
      *     summary="Delete a DetailGrt",
      *     tags={"DetailGrt"},
      *     description="Delete a DetailGrt by ID",

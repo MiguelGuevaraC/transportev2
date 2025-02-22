@@ -17,7 +17,7 @@ class InstallmentController extends Controller
  * Get all Installments
  *
  * @OA\Get (
- *     path="/transportev2/public/api/installment",
+ *     path="/transporte/public/api/installment",
  *     summary="Get all Installments",
  *     tags={"Installment"},
  *     description="Retrieve all installments with optional filters for 'status' and 'person_id'. Includes related 'moviment' and 'payInstallments' information. Results are paginated.",
@@ -45,10 +45,10 @@ class InstallmentController extends Controller
  *         @OA\JsonContent(
  *             @OA\Property(property="current_page", type="integer", example=1),
  *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Installment")),
- *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/installment?page=1"),
+ *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/installment?page=1"),
  *             @OA\Property(property="from", type="integer", example=1),
- *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/installment?page=2"),
- *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportev2/public/api/installment"),
+ *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/installment?page=2"),
+ *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/installment"),
  *             @OA\Property(property="per_page", type="integer", example=15),
  *             @OA\Property(property="prev_page_url", type="string", example="null"),
  *             @OA\Property(property="to", type="integer", example=15)

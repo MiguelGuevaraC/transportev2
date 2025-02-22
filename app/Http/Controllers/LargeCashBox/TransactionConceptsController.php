@@ -21,7 +21,7 @@ class TransactionConceptsController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/transcationConcept",
+ *     path="/transporte/public/api/transcationConcept",
  *     summary="Obtener información de TransactionConcepts con filtros y ordenamiento",
  *     tags={"TransactionConcept"},
  *     security={{"bearerAuth": {}}},
@@ -47,7 +47,7 @@ class TransactionConceptsController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/transcationConcept/{id}",
+ *     path="/transporte/public/api/transcationConcept/{id}",
  *     summary="Obtener detalles de un TransactionConcept por ID",
  *     tags={"TransactionConcept"},
  *     security={{"bearerAuth": {}}},
@@ -73,7 +73,7 @@ class TransactionConceptsController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportev2/public/api/transcationConcept",
+ *     path="/transporte/public/api/transcationConcept",
  *     summary="Crear TransactionConcept",
  *     tags={"TransactionConcept"},
  *     security={{"bearerAuth": {}}},
@@ -107,7 +107,7 @@ class TransactionConceptsController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportev2/public/api/transcationConcept/{id}",
+ *     path="/transporte/public/api/transcationConcept/{id}",
  *     summary="Actualizar un TransactionConcept",
  *     tags={"TransactionConcept"},
  *     security={{"bearerAuth": {}}},
@@ -171,7 +171,7 @@ class TransactionConceptsController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportev2/public/api/transcationConcept/{id}",
+ *     path="/transporte/public/api/transcationConcept/{id}",
  *     summary="Eliminar un TransactionConceptpor ID",
  *     tags={"TransactionConcept"},
  *     security={{"bearerAuth": {}}},

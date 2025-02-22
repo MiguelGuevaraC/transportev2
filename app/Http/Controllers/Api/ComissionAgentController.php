@@ -14,7 +14,7 @@ class ComissionAgentController extends Controller
  * @return \Illuminate\Http\Response
  *
  * @OA\Get(
- *     path="/transportev2/public/api/comissionAgent",
+ *     path="/transporte/public/api/comissionAgent",
  *     summary="Get all comission",
  *     tags={"ComissionAgent"},
  *     description="Show all comission",
@@ -55,7 +55,7 @@ class ComissionAgentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/comissionAgent",
+     *     path="/transporte/public/api/comissionAgent",
      *     summary="Store a new comissionAgent",
      *     tags={"ComissionAgent"},
      *     description="Create a new comissionAgent",
@@ -124,7 +124,7 @@ class ComissionAgentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/comissionAgent/{id}",
+     *     path="/transporte/public/api/comissionAgent/{id}",
      *     summary="Get a comissionAgent by ID",
      *     tags={"ComissionAgent"},
      *     description="Retrieve a comissionAgent by its ID",
@@ -175,7 +175,7 @@ class ComissionAgentController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/comissionAgent/{id}",
+     *     path="/transporte/public/api/comissionAgent/{id}",
      *     summary="Update an existing comissionAgent",
      *     tags={"ComissionAgent"},
      *     description="Update an existing comissionAgent",
@@ -256,7 +256,7 @@ class ComissionAgentController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/comissionAgent/{id}",
+     *     path="/transporte/public/api/comissionAgent/{id}",
      *     summary="Delete a comissionAgent",
      *     tags={"ComissionAgent"},
      *     description="Delete a comissionAgent by ID",

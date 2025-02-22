@@ -12,7 +12,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/detailWorker",
+     *     path="/transporte/public/api/detailWorker",
      *     summary="Get all detailWorker",
      *     tags={"DetailWorker"},
      *     description="Show all detailWorker",
@@ -42,7 +42,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/detailWorker",
+     *     path="/transporte/public/api/detailWorker",
      *     summary="Create a new detailWorker",
      *     tags={"DetailWorker"},
      *     description="Create a new detailWorker",
@@ -108,7 +108,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/detailWorker/{id}",
+     *     path="/transporte/public/api/detailWorker/{id}",
      *     summary="Update an existing detailWorker",
      *     tags={"DetailWorker"},
      *     description="Update an existing detailWorker",
@@ -189,7 +189,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/detailWorker/{id}",
+     *     path="/transporte/public/api/detailWorker/{id}",
      *     summary="Get a detailWorker by ID",
      *     tags={"DetailWorker"},
      *     description="Retrieve a detailWorker by its ID",
@@ -239,7 +239,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/detailWorkerForProgramming/{id}",
+     *     path="/transporte/public/api/detailWorkerForProgramming/{id}",
      *     summary="Get a detailWorker by ID",
      *     tags={"DetailWorker"},
      *     description="Retrieve a detailWorker by its ID Programming",
@@ -289,7 +289,7 @@ class DetailWorkerController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/detailWorker/{id}",
+     *     path="/transporte/public/api/detailWorker/{id}",
      *     summary="Delete a DetailWorker",
      *     tags={"DetailWorker"},
      *     description="Delete a DetailWorker by ID",

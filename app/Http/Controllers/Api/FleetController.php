@@ -12,7 +12,7 @@ class FleetController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/fleet",
+     *     path="/transporte/public/api/fleet",
      *     summary="Get all fleet",
      *     tags={"Fleet"},
      *     description="Show all fleet",
@@ -42,7 +42,7 @@ class FleetController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/fleet",
+     *     path="/transporte/public/api/fleet",
      *     summary="Store a new fleet",
      *     tags={"Fleet"},
      *     description="Create a new fleet",
@@ -115,7 +115,7 @@ class FleetController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/fleet/{id}",
+     *     path="/transporte/public/api/fleet/{id}",
      *     summary="Get a fleet by ID",
      *     tags={"Fleet"},
      *     description="Retrieve a fleet by its ID",
@@ -165,7 +165,7 @@ class FleetController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/fleet/{id}",
+     *     path="/transporte/public/api/fleet/{id}",
      *     summary="Update an existing Fleet",
      *     tags={"Fleet"},
      *     description="Update an existing Fleet",
@@ -261,7 +261,7 @@ class FleetController extends Controller
     // }
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/fleet/{id}",
+     *     path="/transporte/public/api/fleet/{id}",
      *     summary="Delete a Fleet",
      *     tags={"Fleet"},
      *     description="Delete a Fleet by ID",

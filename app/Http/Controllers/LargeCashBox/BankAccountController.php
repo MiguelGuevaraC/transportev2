@@ -21,7 +21,7 @@ class BankAccountController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/bank-account",
+ *     path="/transporte/public/api/bank-account",
  *     summary="Obtener información de BankAccounts con filtros y ordenamiento",
  *     tags={"BankAccount"},
  *     security={{"bearerAuth": {}}},
@@ -47,7 +47,7 @@ class BankAccountController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/bank-account/{id}",
+ *     path="/transporte/public/api/bank-account/{id}",
  *     summary="Obtener detalles de un BankAccount por ID",
  *     tags={"BankAccount"},
  *     security={{"bearerAuth": {}}},
@@ -73,7 +73,7 @@ class BankAccountController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportev2/public/api/bank-account",
+ *     path="/transporte/public/api/bank-account",
  *     summary="Crear BankAccount",
  *     tags={"BankAccount"},
  *     security={{"bearerAuth": {}}},
@@ -107,7 +107,7 @@ class BankAccountController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportev2/public/api/bank-account/{id}",
+ *     path="/transporte/public/api/bank-account/{id}",
  *     summary="Actualizar un BankAccount",
  *     tags={"BankAccount"},
  *     security={{"bearerAuth": {}}},
@@ -171,7 +171,7 @@ class BankAccountController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportev2/public/api/bank-account/{id}",
+ *     path="/transporte/public/api/bank-account/{id}",
  *     summary="Eliminar un BankAccount por ID",
  *     tags={"BankAccount"},
  *     security={{"bearerAuth": {}}},

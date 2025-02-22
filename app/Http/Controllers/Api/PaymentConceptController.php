@@ -12,7 +12,7 @@ class PaymentConceptController extends Controller
     /**
      * Get all PaymentConcepts
      * @OA\Get (
-     *     path="/transportev2/public/api/paymentConcept",
+     *     path="/transporte/public/api/paymentConcept",
      *     tags={"PaymentConcept"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -32,10 +32,10 @@ class PaymentConceptController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PaymentConcept")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/paymentConcept?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/paymentConcept?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/paymentConcept?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportev2/public/api/paymentConcept"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/paymentConcept?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/paymentConcept"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -73,7 +73,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportev2/public/api/paymentConcept",
+     *     path="/transporte/public/api/paymentConcept",
      *     summary="Store a new paymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Create a new paymentConcept",
@@ -140,7 +140,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportev2/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Get a paymentConcept by ID",
      *     tags={"PaymentConcept"},
      *     description="Retrieve a paymentConcept by its ID",
@@ -189,7 +189,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportev2/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Update an existing PaymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Update an existing PaymentConcept",
@@ -276,7 +276,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportev2/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Delete a PaymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Delete a PaymentConcept by ID",

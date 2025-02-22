@@ -21,7 +21,7 @@ class BankController extends Controller
     /**
      * Get all banks with pagination
      * @OA\Get (
-     *      path="/transportev2/public/api/bank",
+     *      path="/transporte/public/api/bank",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Response(
@@ -30,10 +30,10 @@ class BankController extends Controller
      *          @OA\JsonContent(
      *              @OA\Property(property="current_page", type="integer", example=1),
      *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Bank")),
-     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank?page=1"),
+     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank?page=1"),
      *              @OA\Property(property="from", type="integer", example=1),
-     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank?page=2"),
-     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportev2/public/api/bank"),
+     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank?page=2"),
+     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/bank"),
      *              @OA\Property(property="per_page", type="integer", example=15),
      *              @OA\Property(property="prev_page_url", type="string", example="null"),
      *              @OA\Property(property="to", type="integer", example=15)
@@ -55,7 +55,7 @@ class BankController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/bank-list",
+ *     path="/transporte/public/api/bank-list",
  *     summary="Obtener información de Banks con filtros y ordenamiento",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -80,7 +80,7 @@ class BankController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportev2/public/api/bank/{id}",
+ *     path="/transporte/public/api/bank/{id}",
  *     summary="Obtener detalles de un Bank por ID",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -106,7 +106,7 @@ class BankController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportev2/public/api/bank",
+ *     path="/transporte/public/api/bank",
  *     summary="Crear Bank",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -140,7 +140,7 @@ class BankController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportev2/public/api/bank/{id}",
+ *     path="/transporte/public/api/bank/{id}",
  *     summary="Actualizar un Bank",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -204,7 +204,7 @@ class BankController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportev2/public/api/bank/{id}",
+ *     path="/transporte/public/api/bank/{id}",
  *     summary="Eliminar un Bankpor ID",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
