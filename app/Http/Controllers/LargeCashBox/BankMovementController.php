@@ -52,7 +52,6 @@ class BankMovementController extends Controller
 
     public function index(IndexBankMovementRequest $request)
     {
-        $request['all'] = "true";
         return $this->getFilteredResults(
             BankMovement::class,
             $request,

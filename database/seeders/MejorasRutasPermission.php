@@ -81,6 +81,14 @@ class MejorasRutasPermission extends Seeder
                 'guard_name'   => 'web',
                 'groupMenu_id' => 6,
             ],
+            [
+                'id'           => 38,
+                'name'         => 'Caja Bancos',
+                'route'        => 'cajabancos',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 6,
+            ],
         ];
 
         foreach ($permissions as $permission) {
