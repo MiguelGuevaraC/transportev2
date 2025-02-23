@@ -12,7 +12,7 @@
                     "Access"
                 ],
                 "summary": "Get all Access",
-                "operationId": "c2ab42a236f336fb7f307007bf5f0639",
+                "operationId": "95972c8da7dd9ef562fa536e17e1dce6",
                 "responses": {
                     "200": {
                         "description": "List of active access",
@@ -95,7 +95,7 @@
                 ],
                 "summary": "Get all Address",
                 "description": "Show all Address",
-                "operationId": "e66f1f767fffd02b8e1ccea99211e91d",
+                "operationId": "c7234364e8d163a9ddba28657188c603",
                 "responses": {
                     "200": {
                         "description": "List of Address"
@@ -129,7 +129,7 @@
                 ],
                 "summary": "Store a new address",
                 "description": "Create a new address",
-                "operationId": "1b37544a100ac5aed612106863e66352",
+                "operationId": "a3b63165a492d8d14c46fde90e4329b7",
                 "requestBody": {
                     "description": "Address data",
                     "required": true,
@@ -219,7 +219,7 @@
                 ],
                 "summary": "Get Address for Person",
                 "description": "Show all Address",
-                "operationId": "11fcb71432238b3b797532a35a51d4cb",
+                "operationId": "916bf8e9d8037d5649d88d1e4c09d5a6",
                 "parameters": [
                     {
                         "name": "idPersona",
@@ -266,7 +266,7 @@
                 ],
                 "summary": "Get a address by ID",
                 "description": "Retrieve a address by its ID",
-                "operationId": "72d04c4a9fa0463091a05d49b0e4abee",
+                "operationId": "c76b54b6d51c85a12526c50f47f93c53",
                 "parameters": [
                     {
                         "name": "id",
@@ -334,7 +334,7 @@
                 ],
                 "summary": "Update an existing address",
                 "description": "Update an existing address",
-                "operationId": "206d2b60dd765107ec82c5a0f771c7b4",
+                "operationId": "34b6f56a166266b997cf2a20633bbcf2",
                 "parameters": [
                     {
                         "name": "id",
@@ -433,7 +433,7 @@
                 ],
                 "summary": "Delete a address",
                 "description": "Delete a address by ID",
-                "operationId": "5139648280e077db26ffe37ff36d6ba6",
+                "operationId": "f6af033af3147413bf79cecc6f9197fe",
                 "parameters": [
                     {
                         "name": "id",
@@ -495,7 +495,7 @@
                     "Bank"
                 ],
                 "summary": "Get all banks with pagination",
-                "operationId": "56304df503452fc245c60c3da0401d5f",
+                "operationId": "64b304bbec19db07df7b93076900edf8",
                 "responses": {
                     "200": {
                         "description": "List of active banks",
@@ -575,7 +575,7 @@
                     "Bank"
                 ],
                 "summary": "Crear Bank",
-                "operationId": "c753e6e5e5e241e0e7709de9fb36556f",
+                "operationId": "038f0cbd5b731c3e344ba8420e79ee03",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -627,7 +627,7 @@
                     "Bank"
                 ],
                 "summary": "Obtener información de Banks con filtros y ordenamiento",
-                "operationId": "a009dccbf4a5e93ac577b6805a40eb2b",
+                "operationId": "3985de22232ae9bde9b98f334b23e5e0",
                 "parameters": [
                     {
                         "name": "id",
@@ -688,7 +688,7 @@
                     "Bank"
                 ],
                 "summary": "Obtener detalles de un Bank por ID",
-                "operationId": "1494d838cd29950c3203f87a7fc4a821",
+                "operationId": "169911955a2179e2bbc3b31aa1e6ba5e",
                 "parameters": [
                     {
                         "name": "id",
@@ -740,7 +740,7 @@
                     "Bank"
                 ],
                 "summary": "Actualizar un Bank",
-                "operationId": "dd6b3e8a97fb8f65985085b604e4cab3",
+                "operationId": "685c05577556ea1711f2fa8b4a4c272d",
                 "parameters": [
                     {
                         "name": "id",
@@ -833,7 +833,7 @@
                     "Bank"
                 ],
                 "summary": "Eliminar un Bankpor ID",
-                "operationId": "7059edc9e92bdae29bdab1fbb18c8e19",
+                "operationId": "1404578937a48dcd6a1331c580f5f503",
                 "parameters": [
                     {
                         "name": "id",
@@ -892,7 +892,7 @@
                     "Box"
                 ],
                 "summary": "Get all Boxes",
-                "operationId": "3ac079b2c7ff5a353baa620b686f7089",
+                "operationId": "78f3d84a7c3097dfbb6927861f70d3ce",
                 "responses": {
                     "200": {
                         "description": "Lista de cajas sin asignarse a algun usuario",
@@ -973,7 +973,7 @@
                 ],
                 "summary": "Store a new box",
                 "description": "Create a new box",
-                "operationId": "4760ee990f4130a82f43b3732312349d",
+                "operationId": "7c849c5bc7a909098164f2ee558984f0",
                 "requestBody": {
                     "description": "Box data",
                     "required": true,
@@ -1057,7 +1057,7 @@
                     "Box"
                 ],
                 "summary": "Get all Boxes",
-                "operationId": "6ed54429b7316550c89b9e8e9620b49a",
+                "operationId": "5338ad26b6e64b4d5221da8ac0089a58",
                 "responses": {
                     "200": {
                         "description": "List of active Boxes",
@@ -1140,7 +1140,7 @@
                 ],
                 "summary": "Get all box by Branch Office",
                 "description": "Show all box by Branch Office",
-                "operationId": "0d6b24253b92f98bd217e8eff3fe5e64",
+                "operationId": "1d4204b1359f240b3e8dd8165f74758c",
                 "parameters": [
                     {
                         "name": "id",
@@ -1197,7 +1197,7 @@
                 ],
                 "summary": "Get a box by ID",
                 "description": "Retrieve a box by its ID",
-                "operationId": "53cb357300c832e67c65dd96acb2a785",
+                "operationId": "ffb16e6be10adeb46a781e139ac04429",
                 "parameters": [
                     {
                         "name": "id",
@@ -1265,7 +1265,7 @@
                 ],
                 "summary": "Update an existing Box",
                 "description": "Update an existing Box",
-                "operationId": "ed314a897a3a07df918acbfb01139161",
+                "operationId": "d89d16ea024c14c9e38d3cabd006bd4f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1359,7 +1359,7 @@
                 ],
                 "summary": "Delete a Box",
                 "description": "Delete a Box by ID",
-                "operationId": "0e88c115d8e01df8654ab1f7f8e7ef44",
+                "operationId": "4f477487649926ef0bd78e4b38ea638f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1422,7 +1422,7 @@
                 ],
                 "summary": "Get all branchOffice",
                 "description": "Show all branchOffice",
-                "operationId": "ccec1ea9612e5df3ed0892fd124dad96",
+                "operationId": "2437d70d04e69c420608cc3403d230e6",
                 "responses": {
                     "200": {
                         "description": "List of branchOffice",
@@ -1466,7 +1466,7 @@
                 ],
                 "summary": "Store a new branchOffice",
                 "description": "Create a new branchOffice",
-                "operationId": "dca8dd760fc0c6488ee4e69b0fa55586",
+                "operationId": "09723683f7cdc1f87c46ea8a171e0b3d",
                 "requestBody": {
                     "description": "BranchOffice data",
                     "required": true,
@@ -1556,7 +1556,7 @@
                 ],
                 "summary": "Get a branchOffice by ID",
                 "description": "Retrieve a branchOffice by its ID",
-                "operationId": "8d99c9a2669b2e8a5745de19a5758ef7",
+                "operationId": "f9dd980190f3834b26ae00bc7219a925",
                 "parameters": [
                     {
                         "name": "id",
@@ -1624,7 +1624,7 @@
                 ],
                 "summary": "Update an existing BranchOffice",
                 "description": "Update an existing BranchOffice",
-                "operationId": "8eb43b1129bb760ac20dac64ba730fd0",
+                "operationId": "2964c4c7525876fc9a73bd89e1d07ebb",
                 "parameters": [
                     {
                         "name": "id",
@@ -1723,7 +1723,7 @@
                 ],
                 "summary": "Delete a BranchOffice",
                 "description": "Delete a BranchOffice by ID",
-                "operationId": "8b5bd0310ff2d45fc14336e72ffa1dcc",
+                "operationId": "b3bab9916cfe076f36a2d8a60be577be",
                 "parameters": [
                     {
                         "name": "id",
@@ -1786,7 +1786,7 @@
                 ],
                 "summary": "Get all carrierGuide",
                 "description": "Show all carrierGuide",
-                "operationId": "e3461d6839c12e092a35597a0341cfb8",
+                "operationId": "17a41f82fc61e17dfc7f5b318edfbaa2",
                 "responses": {
                     "200": {
                         "description": "List of carrierGuide"
@@ -1820,7 +1820,7 @@
                 ],
                 "summary": "Create a new carrierGuide",
                 "description": "Create a new carrierGuide",
-                "operationId": "c1f3f1df45610f45c2c458c3f81843f3",
+                "operationId": "c53922364e4eb21ea798d2881fa09668",
                 "requestBody": {
                     "description": "Reception data",
                     "required": true,
@@ -1975,7 +1975,7 @@
                 ],
                 "summary": "Get a carrierGuide by ID",
                 "description": "Retrieve a carrierGuide by its ID",
-                "operationId": "359324010da005ca72361ac3ff416ba3",
+                "operationId": "e32f5d4ee4e735cf49897eb9491d3326",
                 "parameters": [
                     {
                         "name": "id",
@@ -2036,7 +2036,7 @@
                 ],
                 "summary": "Update an existing carrierGuide",
                 "description": "Update an existing carrierGuide",
-                "operationId": "5523d323532c5aca2877e76e95c3a2e6",
+                "operationId": "30800940c6be880eb8864372e1368017",
                 "parameters": [
                     {
                         "name": "id",
@@ -2187,7 +2187,7 @@
                 ],
                 "summary": "Delete a CarrierGuide",
                 "description": "Delete a CarrierGuide by ID",
-                "operationId": "dbdc752c688acf1cf28e62807c10b2f1",
+                "operationId": "59041592c48497cf1c3611e2262eaa6c",
                 "parameters": [
                     {
                         "name": "id",
@@ -2250,7 +2250,7 @@
                 ],
                 "summary": "Update CarrierGuide status",
                 "description": "Update the status of a CarrierGuide to either 'Pendiente' or Entregado or 'En Transito'",
-                "operationId": "3de124c913534dd1f4be2da191ec2b4a",
+                "operationId": "be867d84c978569a4cee78d50028c09b",
                 "parameters": [
                     {
                         "name": "id",
@@ -2326,7 +2326,7 @@
                 ],
                 "summary": "Get all comission",
                 "description": "Show all comission",
-                "operationId": "a3a9994ea9067cc0ee589f1217f73524",
+                "operationId": "b4b3449468662fccda581598f1461385",
                 "responses": {
                     "200": {
                         "description": "List of comission",
@@ -2370,7 +2370,7 @@
                 ],
                 "summary": "Store a new comissionAgent",
                 "description": "Create a new comissionAgent",
-                "operationId": "129b249998266a0f1a2cbc052ea7959a",
+                "operationId": "163a4b34f46d1a53be3ec19a83eb09a5",
                 "requestBody": {
                     "description": "Comission_Agent data",
                     "required": true,
@@ -2455,7 +2455,7 @@
                 ],
                 "summary": "Get a comissionAgent by ID",
                 "description": "Retrieve a comissionAgent by its ID",
-                "operationId": "6b67af333ee726f9e7d037421b20b7da",
+                "operationId": "1bb93c16007ec24500e3e3d6918034e5",
                 "parameters": [
                     {
                         "name": "id",
@@ -2523,7 +2523,7 @@
                 ],
                 "summary": "Update an existing comissionAgent",
                 "description": "Update an existing comissionAgent",
-                "operationId": "bb622e5b765b9d1565338bf0b9a51f58",
+                "operationId": "8323126b703c48f9c41f90d254a322d7",
                 "parameters": [
                     {
                         "name": "id",
@@ -2617,7 +2617,7 @@
                 ],
                 "summary": "Delete a comissionAgent",
                 "description": "Delete a comissionAgent by ID",
-                "operationId": "5c422969de90eaf1a56851c6406cca69",
+                "operationId": "c626805e54d23611a9977f1c41e8918e",
                 "parameters": [
                     {
                         "name": "id",
@@ -2680,7 +2680,7 @@
                 ],
                 "summary": "Get all Contact Info",
                 "description": "Show all Contact Info",
-                "operationId": "7127bdcc1e897e7db702e9473b255b55",
+                "operationId": "221869b3b14a0548313ab04bb97a1a64",
                 "responses": {
                     "200": {
                         "description": "List of Contact Info"
@@ -2714,7 +2714,7 @@
                 ],
                 "summary": "Store a new contactInfo",
                 "description": "Create a new contactInfo",
-                "operationId": "5d3f4c3733bdff6f4563c8a0662e5beb",
+                "operationId": "d3d5753e2c1303f253ed4f7a3649bf83",
                 "requestBody": {
                     "description": "Worker data",
                     "required": true,
@@ -2834,7 +2834,7 @@
                 ],
                 "summary": "Get a contactInfo by ID",
                 "description": "Retrieve a contactInfo by its ID",
-                "operationId": "7cd0697e777180769559f2ab55860a01",
+                "operationId": "77c7c732fc32b31f7e2aafe775bf3e3e",
                 "parameters": [
                     {
                         "name": "id",
@@ -2902,7 +2902,7 @@
                 ],
                 "summary": "Update an existing contactInfo",
                 "description": "Update an existing contactInfo",
-                "operationId": "988e0a915aee4d8234dc5304b5f4c7f0",
+                "operationId": "8a9f424f2a23426a164f2be14e7b70e9",
                 "parameters": [
                     {
                         "name": "id",
@@ -3031,7 +3031,7 @@
                 ],
                 "summary": "Delete a contactInfo",
                 "description": "Delete a contactInfo by ID",
-                "operationId": "61007ee6acf82d5fddfe03e748f0070e",
+                "operationId": "2889a61d6b463197b9fd0056061ab35b",
                 "parameters": [
                     {
                         "name": "id",
@@ -3094,7 +3094,7 @@
                 ],
                 "summary": "Get Contacts for Person",
                 "description": "Show all Contacts",
-                "operationId": "dfb5f8a1e98459d3853eac36eff0691e",
+                "operationId": "69011587f4f00fd5e3cfde4cd4fb9df7",
                 "parameters": [
                     {
                         "name": "idPersona",
@@ -3140,7 +3140,7 @@
                     "CreditNote"
                 ],
                 "summary": "Get all Moviments",
-                "operationId": "663fade58ff1dcfaedbadb4a9895b9eb",
+                "operationId": "ebabb80d37db835252cc4c7db97093dc",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -3248,7 +3248,7 @@
                 ],
                 "summary": "Store a new credit note",
                 "description": "Create a new credit note",
-                "operationId": "df2b226f2a2ca0ee354b72f488c67928",
+                "operationId": "d3512bf12a8680278211062e4fa846d6",
                 "requestBody": {
                     "description": "Credit Note data",
                     "required": true,
@@ -3353,7 +3353,7 @@
                 ],
                 "summary": "Get all detailGrt",
                 "description": "Show all detailGrt",
-                "operationId": "52044f982e7410d1c189ba3bbdb3160f",
+                "operationId": "eb0dbcc9a1f2af7ded2c7e4972fe7f1e",
                 "responses": {
                     "200": {
                         "description": "List of detailGrt"
@@ -3387,7 +3387,7 @@
                 ],
                 "summary": "Create a new detailGrt",
                 "description": "Create a new detailGrt",
-                "operationId": "f29c5df0b2e39067a43273271b234327",
+                "operationId": "489cec737d206cc9a7c47ade7c9d14bf",
                 "requestBody": {
                     "description": "Detail GRT data",
                     "required": true,
@@ -3473,7 +3473,7 @@
                 ],
                 "summary": "Get a detailGrt by ID",
                 "description": "Retrieve a detailGrt by its ID",
-                "operationId": "629a505deefdd2dfd48183663d80d455",
+                "operationId": "669fe350cf4514d4f3ba41c9ac4306ed",
                 "parameters": [
                     {
                         "name": "id",
@@ -3541,7 +3541,7 @@
                 ],
                 "summary": "Update an existing detailGrt",
                 "description": "Update an existing detailGrt",
-                "operationId": "7ff21c3e0057153c23c6f4bfeea9c845",
+                "operationId": "06c3aa3a658dd8f8465212e8d44ba429",
                 "parameters": [
                     {
                         "name": "id",
@@ -3623,7 +3623,7 @@
                 ],
                 "summary": "Delete a DetailGrt",
                 "description": "Delete a DetailGrt by ID",
-                "operationId": "f428249d1dc57d20bc5ddba2ad53f094",
+                "operationId": "0bfffbe0dd37fb8e3c25c31a378137ba",
                 "parameters": [
                     {
                         "name": "id",
@@ -3686,7 +3686,7 @@
                 ],
                 "summary": "Get all detailReception",
                 "description": "Show all detailReception",
-                "operationId": "8096592703bfe3d4d7283684f895aa75",
+                "operationId": "e8239763975bc8555cb152d3e0bdb748",
                 "responses": {
                     "200": {
                         "description": "List of detailReception"
@@ -3720,7 +3720,7 @@
                 ],
                 "summary": "Create a new detailReception",
                 "description": "Create a new detailReception",
-                "operationId": "f875db4ba5efc569c133460e9faf10fd",
+                "operationId": "dacbfaae11e2ae41e6b1997f9dbc898e",
                 "requestBody": {
                     "description": "Detail Reception data",
                     "required": true,
@@ -3825,7 +3825,7 @@
                 ],
                 "summary": "Get a detailReception by ID",
                 "description": "Retrieve a detailReception by its ID",
-                "operationId": "904634b43ae61e2ed8000afb15952e13",
+                "operationId": "88e7668293c2fb9212658964d65220f9",
                 "parameters": [
                     {
                         "name": "id",
@@ -3886,7 +3886,7 @@
                 ],
                 "summary": "Update an existing detailReception",
                 "description": "Update an existing detailReception",
-                "operationId": "b9132be6439a1cc6950addd94d328a39",
+                "operationId": "6b4bef70524acd23ad0f9b3265d0dadc",
                 "parameters": [
                     {
                         "name": "id",
@@ -3987,7 +3987,7 @@
                 ],
                 "summary": "Delete a detailReception",
                 "description": "Delete a detailReception by ID",
-                "operationId": "fce82fff70b48b92be2a4fbad0ebec69",
+                "operationId": "7b0086c39004899749e0395d024554bc",
                 "parameters": [
                     {
                         "name": "id",
@@ -4050,7 +4050,7 @@
                 ],
                 "summary": "Get a detailReception by ID",
                 "description": "Retrieve a detailReception by its ID Reception",
-                "operationId": "38b75823ffe285fd21e0af499ec28d78",
+                "operationId": "466c79a45dc61c7b1edf28a0f53fd108",
                 "parameters": [
                     {
                         "name": "id",
@@ -4113,7 +4113,7 @@
                 ],
                 "summary": "Get all detailReception Without Programming",
                 "description": "Show all detailReception Without Programming",
-                "operationId": "a442a7420e6c0923567295093c6f842d",
+                "operationId": "61c13621967adac9e7d84b43e5af9dca",
                 "parameters": [
                     {
                         "name": "programming_id",
@@ -4160,7 +4160,7 @@
                 ],
                 "summary": "Get all detailWorker",
                 "description": "Show all detailWorker",
-                "operationId": "b41a333c687f09ceb4f193b15e3a81c5",
+                "operationId": "e22275f0ecd8835ed92b8dcd638edeaa",
                 "responses": {
                     "200": {
                         "description": "List of detailWorker",
@@ -4204,7 +4204,7 @@
                 ],
                 "summary": "Create a new detailWorker",
                 "description": "Create a new detailWorker",
-                "operationId": "5e320f8b0defb9fd215b8c50425c69d6",
+                "operationId": "e63dc5036220d295ff09cadbfa845818",
                 "requestBody": {
                     "description": "Detail Worker data",
                     "required": true,
@@ -4294,7 +4294,7 @@
                 ],
                 "summary": "Get a detailWorker by ID",
                 "description": "Retrieve a detailWorker by its ID",
-                "operationId": "2e2288dc1dd5941032cfef70f2c5443f",
+                "operationId": "504dcedc388e5d171065897d754ca215",
                 "parameters": [
                     {
                         "name": "id",
@@ -4362,7 +4362,7 @@
                 ],
                 "summary": "Update an existing detailWorker",
                 "description": "Update an existing detailWorker",
-                "operationId": "9952c60e718a027dd33aafc236f37b30",
+                "operationId": "a0903c77d7830d0607f9a29a2cf3cd7c",
                 "parameters": [
                     {
                         "name": "id",
@@ -4448,7 +4448,7 @@
                 ],
                 "summary": "Delete a DetailWorker",
                 "description": "Delete a DetailWorker by ID",
-                "operationId": "f9b1bc06c9f12a986ba1539e2ac39a1c",
+                "operationId": "a159989fedfaa385636b736103c0a584",
                 "parameters": [
                     {
                         "name": "id",
@@ -4511,7 +4511,7 @@
                 ],
                 "summary": "Get a detailWorker by ID",
                 "description": "Retrieve a detailWorker by its ID Programming",
-                "operationId": "6731252658a290907084df1dc268ab5a",
+                "operationId": "9288b442c5b970a6c90d53876ca68769",
                 "parameters": [
                     {
                         "name": "id",
@@ -4581,7 +4581,7 @@
                 ],
                 "summary": "Retrieve all Documents",
                 "description": "Fetches a list of all available Documents in the system.",
-                "operationId": "4246adffc5851ccb5699eedb656252e6",
+                "operationId": "a97d19cb7f91a88a9b43b64cdbe45f92",
                 "responses": {
                     "200": {
                         "description": "Successful retrieval of the list of Documents.",
@@ -4625,7 +4625,7 @@
                 ],
                 "summary": "Create a new Document",
                 "description": "Stores a new Document in the database.",
-                "operationId": "4963e5443e717506a5077a43714bdc37",
+                "operationId": "5ce90d645d6f71d50dcdf5d6a5f88599",
                 "requestBody": {
                     "description": "Data for creating a Document",
                     "required": true,
@@ -4732,7 +4732,7 @@
                 ],
                 "summary": "Get a Document by ID",
                 "description": "Retrieve a Document by its ID",
-                "operationId": "2e2d5f6bb585ce50d3861191c0e6b173",
+                "operationId": "ace139fadcd29bb20874874a8fa70223",
                 "parameters": [
                     {
                         "name": "id",
@@ -4800,7 +4800,7 @@
                 ],
                 "summary": "Update an existing Document",
                 "description": "Update an existing Document",
-                "operationId": "2c3e7b916746b885aa1f8cbbfd3ddee1",
+                "operationId": "7aa57ae3c4c832b0f8ad9fd6f93d5eef",
                 "parameters": [
                     {
                         "name": "id",
@@ -4933,7 +4933,7 @@
                 ],
                 "summary": "Create or Update a Document",
                 "description": "Stores a new Document in the database or updates an existing one if the ID is provided.",
-                "operationId": "410df8620bee0bff777eb58b28b851fd",
+                "operationId": "f05137f49cb5b24d26d1e51fd1b36f04",
                 "parameters": [
                     {
                         "name": "id",
@@ -5049,7 +5049,7 @@
                 ],
                 "summary": "Delete a Document",
                 "description": "Mark a Document as deleted by setting its state to inactive",
-                "operationId": "ccead03f1cd6051827522a38a6d454ac",
+                "operationId": "16dff907b7bf5eadce18e345dbe30ecd",
                 "parameters": [
                     {
                         "name": "id",
@@ -5124,7 +5124,7 @@
                     "DriverExpense"
                 ],
                 "summary": "Get all DriverExpenses",
-                "operationId": "842cb7dcab66ab12d5706e1e7ae01b4b",
+                "operationId": "463464941de1af2c46b21bc140919bc8",
                 "parameters": [
                     {
                         "name": "programming_id",
@@ -5216,7 +5216,7 @@
                 ],
                 "summary": "Store a new driverExpense",
                 "description": "Create a new driverExpense",
-                "operationId": "daf8d9d08d211b67d60c3e2c4f4cdb1d",
+                "operationId": "2be5408df4d34f5596f1c5b02c46dfb8",
                 "requestBody": {
                     "description": "DriverExpense data",
                     "required": true,
@@ -5334,7 +5334,7 @@
                 ],
                 "summary": "Return an amount to the cash box",
                 "description": "Store a new driverExpense and create a related movement",
-                "operationId": "18e20f094b218e8aed79095d4994de8c",
+                "operationId": "fb9271aa19bd89819685151d580f7086",
                 "requestBody": {
                     "description": "DriverExpense and movement data",
                     "required": true,
@@ -5505,7 +5505,7 @@
                 ],
                 "summary": "Get a driverExpense by ID",
                 "description": "Retrieve a driverExpense by its ID",
-                "operationId": "66e1b060cf732c3e728f56bbb4b7a46f",
+                "operationId": "a8f90a0be4a61f147081470927f7b7ca",
                 "parameters": [
                     {
                         "name": "id",
@@ -5573,7 +5573,7 @@
                 ],
                 "summary": "Update an existing driverExpense",
                 "description": "Update the details of an existing driverExpense",
-                "operationId": "d69505acda4d2a31309a760c8e0b90b0",
+                "operationId": "658d393d9c18a77afd509cd68bb4df74",
                 "parameters": [
                     {
                         "name": "id",
@@ -5700,7 +5700,7 @@
                 ],
                 "summary": "Delete a DriverExpense",
                 "description": "Delete a DriverExpense by ID",
-                "operationId": "6c790ecbf74e8ae3ee04409b864c93c3",
+                "operationId": "b795cd9b83031845bc80498c7a42c307",
                 "parameters": [
                     {
                         "name": "id",
@@ -5762,7 +5762,7 @@
                     "ExpensesConcept"
                 ],
                 "summary": "Get all Expneses Concept",
-                "operationId": "343244c3cdeb76ca10ead35910c7d99e",
+                "operationId": "0bd50699a1b3da463a913281f4060943",
                 "responses": {
                     "200": {
                         "description": "List of active Expneses Concept",
@@ -5843,7 +5843,7 @@
                 ],
                 "summary": "Store a new expenses Concept",
                 "description": "Create a new expenses Concept",
-                "operationId": "639fd65e34b49dd525755b9355a4b99e",
+                "operationId": "4d4ddfefaffccd362cccd37c2b818b7f",
                 "requestBody": {
                     "description": "ExpensesConcept data",
                     "required": true,
@@ -5933,7 +5933,7 @@
                 ],
                 "summary": "Get a expenses Concept by ID",
                 "description": "Retrieve a expenses Concept by its ID",
-                "operationId": "59a1ef9d1f7b0390bd43692d8e8b4e8b",
+                "operationId": "2445108292380f0a5cac39368d240d00",
                 "parameters": [
                     {
                         "name": "id",
@@ -6001,7 +6001,7 @@
                 ],
                 "summary": "Update an existing ExpensesConcept",
                 "description": "Update an existing ExpensesConcept",
-                "operationId": "a1d37bf4c1e0b72abd1ba6c036034355",
+                "operationId": "408e189111e16e7a2c6a9cb0bc11ec2c",
                 "parameters": [
                     {
                         "name": "id",
@@ -6100,7 +6100,7 @@
                 ],
                 "summary": "Delete a ExpensesConcept",
                 "description": "Delete a ExpensesConcept by ID",
-                "operationId": "b001d546ae8650d2a4a7d85db2a6b0e4",
+                "operationId": "6be56062994261ac264367fa078ae955",
                 "parameters": [
                     {
                         "name": "id",
@@ -6163,7 +6163,7 @@
                 ],
                 "summary": "Get all Installments",
                 "description": "Retrieve all installments with optional filters for 'status' and 'person_id'. Includes related 'moviment' and 'payInstallments' information. Results are paginated.",
-                "operationId": "31ac15fd242b2538c0f4fca41686cd5a",
+                "operationId": "78940a69a5b8ea14874639cd77074f7d",
                 "parameters": [
                     {
                         "name": "status",
@@ -6472,7 +6472,7 @@
                 ],
                 "summary": "Get all modelFunctional",
                 "description": "Show all modelFunctional",
-                "operationId": "6fce7078857898e8434eaa6e24f75929",
+                "operationId": "0f22eb884bed9e2afdd07aeafe770d09",
                 "responses": {
                     "200": {
                         "description": "List of modelFunctional",
@@ -6516,7 +6516,7 @@
                 ],
                 "summary": "Store a new modelFunctional",
                 "description": "Create a new modelFunctional",
-                "operationId": "20d70d8d2772ba04c6e15aebe799a80b",
+                "operationId": "8958d07fc7574b045eba36e5887bfeb6",
                 "requestBody": {
                     "description": "ModelFunctional data",
                     "required": true,
@@ -6606,7 +6606,7 @@
                 ],
                 "summary": "Get a modelFunctional by ID",
                 "description": "Retrieve a modelFunctional by its ID",
-                "operationId": "b2857097755b1024bf2a97077bd0fde9",
+                "operationId": "07276d843a62022f2f94120be3adb560",
                 "parameters": [
                     {
                         "name": "id",
@@ -6674,7 +6674,7 @@
                 ],
                 "summary": "Update an existing Model_functional",
                 "description": "Update an existing Model_functional",
-                "operationId": "3246eaa082f0a88e486e5545fbf918ba",
+                "operationId": "5dd2a73abd67b29ca5a4c3ffe6090547",
                 "parameters": [
                     {
                         "name": "id",
@@ -6773,7 +6773,7 @@
                 ],
                 "summary": "Delete a ModelFunctional",
                 "description": "Delete a ModelFunctional by ID",
-                "operationId": "f044b9b59b23b73ca347caeadfe3bf53",
+                "operationId": "d05f8ba86ad97f0953442698c0a7bebf",
                 "parameters": [
                     {
                         "name": "id",
@@ -6835,7 +6835,7 @@
                     "Motive"
                 ],
                 "summary": "Get all motives with pagination",
-                "operationId": "875bca3b565370547676c29e31bac8c5",
+                "operationId": "1dfc5804121f335eaed629e0127318ee",
                 "responses": {
                     "200": {
                         "description": "List of active motives",
@@ -6917,7 +6917,7 @@
                     "Motive"
                 ],
                 "summary": "Display the specified motive.",
-                "operationId": "5aa198fadb1e87d9cb3187a5bb68952d",
+                "operationId": "94b0e7e4f22bb664ff57fd62c9811825",
                 "parameters": [
                     {
                         "name": "id",
@@ -6986,7 +6986,7 @@
                     "Moviment"
                 ],
                 "summary": "Get all Movimentes",
-                "operationId": "716cbcd8940abc3add9580602ce1669b",
+                "operationId": "ce4ceca426d079afcded88d1320d1598",
                 "parameters": [
                     {
                         "name": "box_id",
@@ -7147,7 +7147,7 @@
                 ],
                 "summary": "Store a new moviment",
                 "description": "Create a new moviment",
-                "operationId": "de74d596f4765873a95776628984cfdc",
+                "operationId": "e495908edb9cd6eb369607cfd353bfa9",
                 "requestBody": {
                     "description": "Moviment data",
                     "required": true,
@@ -7338,7 +7338,7 @@
                 ],
                 "summary": "Get a moviment by ID",
                 "description": "Retrieve a moviment by its ID",
-                "operationId": "53c78e0f59aff13de9242b7b52a78db0",
+                "operationId": "e6bd613122498e7b7c1236c4ac6da88b",
                 "parameters": [
                     {
                         "name": "id",
@@ -7406,7 +7406,7 @@
                 ],
                 "summary": "Delete a moviment",
                 "description": "Delete a moviment by ID",
-                "operationId": "9fb073df99c43294d6920055ed30092b",
+                "operationId": "0bc5adbc53f9384ae14b3709dccc5d8a",
                 "parameters": [
                     {
                         "name": "id",
@@ -7469,7 +7469,7 @@
                 ],
                 "summary": "Get the last moviment with paymentConcept_id = 2",
                 "description": "Retrieve the last moviment with paymentConcept_id = 2 for a specific box",
-                "operationId": "debfb910fdf7f0ec0f08d180209e90bc",
+                "operationId": "360043b66791c6b656a103f5e292de5e",
                 "parameters": [
                     {
                         "name": "idBox",
@@ -7539,7 +7539,7 @@
                 ],
                 "summary": "Store a new moviment",
                 "description": "Create a new moviment Apertura/Cierre",
-                "operationId": "74fb9411cf7ea456b650be9030069f7d",
+                "operationId": "c4cfe9ea438b00c02aab9d98844bbc25",
                 "requestBody": {
                     "description": "Moviment data",
                     "required": true,
@@ -7683,7 +7683,7 @@
                 ],
                 "summary": "Get a Moviment",
                 "description": "Get a Moviment by ID",
-                "operationId": "9ba46741acbf869f24647df445bac55f",
+                "operationId": "d75771e857ce8936d756d3ec2d8d0281",
                 "parameters": [
                     {
                         "name": "id",
@@ -7775,7 +7775,7 @@
                 ],
                 "summary": "Listado de Aperturas",
                 "description": "Por cada apertura, muestra su reporte con un filtro opcional por fechas basado en el campo created_at.",
-                "operationId": "3b5818d400b005516f264e6533a0d1f9",
+                "operationId": "0136cf92a9c85e11587ae58b675c45ed",
                 "parameters": [
                     {
                         "name": "start_date",
@@ -7863,7 +7863,7 @@
                     "PaymentConcept"
                 ],
                 "summary": "Get all PaymentConcepts",
-                "operationId": "a8aeec51baa1a90f19e6053b616549d6",
+                "operationId": "80243d382be9e9e99f1e79fd992faadf",
                 "parameters": [
                     {
                         "name": "type",
@@ -7960,7 +7960,7 @@
                 ],
                 "summary": "Store a new paymentConcept",
                 "description": "Create a new paymentConcept",
-                "operationId": "ec2e8a83c80e0fed2b3ccd94fe60dc40",
+                "operationId": "f30b14e1f36e1f6e98341d2117489b5b",
                 "requestBody": {
                     "description": "PaymentConcept data",
                     "required": true,
@@ -8045,7 +8045,7 @@
                 ],
                 "summary": "Get a paymentConcept by ID",
                 "description": "Retrieve a paymentConcept by its ID",
-                "operationId": "c3307432657f58c6dae97a9be7f351f9",
+                "operationId": "cee026a0b3b2729bed8942fcefbd6272",
                 "parameters": [
                     {
                         "name": "id",
@@ -8113,7 +8113,7 @@
                 ],
                 "summary": "Update an existing PaymentConcept",
                 "description": "Update an existing PaymentConcept",
-                "operationId": "ce839a621f7addfd544997cb78f2ff77",
+                "operationId": "7f87fe34baec7273687ad6980a342e3b",
                 "parameters": [
                     {
                         "name": "id",
@@ -8207,7 +8207,7 @@
                 ],
                 "summary": "Delete a PaymentConcept",
                 "description": "Delete a PaymentConcept by ID",
-                "operationId": "ab5624510570cecf53b420cfcd37f0d5",
+                "operationId": "fb08c18baf6b75a3a6444d531ffb14a4",
                 "parameters": [
                     {
                         "name": "id",
@@ -8270,7 +8270,7 @@
                 ],
                 "summary": "Exportar Guía Transportista",
                 "description": "Genera y descarga una Guía Transportista en formato PDF",
-                "operationId": "89f32ab316bb5a702d54c63141caf4d5",
+                "operationId": "39bdcb9ab65b45e01d5866ac242e2dae",
                 "parameters": [
                     {
                         "name": "id",
@@ -8325,7 +8325,7 @@
                 ],
                 "summary": "Exportar Manifiesto",
                 "description": "Genera y descarga una Manifiesto en formato PDF",
-                "operationId": "bc42d94abcac3b290a1e885e41edbc5a",
+                "operationId": "b83a0bb56d97bfcb24993d51163245dd",
                 "parameters": [
                     {
                         "name": "id",
@@ -8380,7 +8380,7 @@
                 ],
                 "summary": "Exportar Reporte Caja",
                 "description": "Genera y descarga una Reporte Caja Aperturada en formato PDF",
-                "operationId": "8c7321f3c19d0321bfd560fe7d4281b9",
+                "operationId": "0cf51306cc7e7094a467baa42785905d",
                 "responses": {
                     "200": {
                         "description": "Reporte Caja en formato PDF",
@@ -8424,7 +8424,7 @@
                 ],
                 "summary": "Exportar Reporte Caja a Excel",
                 "description": "Genera y descarga un Reporte de Caja Aperturada en formato EXCEL",
-                "operationId": "267081941bb869abe20e3292ba030eed",
+                "operationId": "b301171b253ed655a16694197e93a10a",
                 "responses": {
                     "200": {
                         "description": "Reporte de Caja en formato EXCEL",
@@ -8484,7 +8484,7 @@
                 ],
                 "summary": "Get all clients",
                 "description": "Show all clients",
-                "operationId": "05cd167347eee9b8a8f0f77d432e4e3a",
+                "operationId": "c2d8212ce4a8e27c6c2a2bc831ab8af5",
                 "responses": {
                     "200": {
                         "description": "List of clients",
@@ -8528,7 +8528,7 @@
                 ],
                 "summary": "Store a new client",
                 "description": "Create a new client",
-                "operationId": "0a204cfe733a7a68b28fd2a9933539f5",
+                "operationId": "7a2529d1cd4e1a2e4560361c2a815798",
                 "requestBody": {
                     "description": "Client data",
                     "required": true,
@@ -8680,7 +8680,7 @@
                 ],
                 "summary": "Get all Natural People",
                 "description": "Show all Natural People",
-                "operationId": "e64be8405af7a65999c7fd3bc739c165",
+                "operationId": "fddcd66b9e3036668a45d8eca6b2c2d8",
                 "responses": {
                     "200": {
                         "description": "List of Natural People",
@@ -8726,7 +8726,7 @@
                 ],
                 "summary": "Get all Legal Entities",
                 "description": "Show all Legal Entities",
-                "operationId": "30649a28a93e3c2631f7f895b2cf7828",
+                "operationId": "899b109318a16e14ad7257ec754d9f82",
                 "responses": {
                     "200": {
                         "description": "List of Legal Entities",
@@ -8772,7 +8772,7 @@
                 ],
                 "summary": "Get a client by ID",
                 "description": "Retrieve a client by its ID",
-                "operationId": "b1d9a1e60e7c3b204f76de227c4e00e4",
+                "operationId": "3baa5b1b602c631d0eae797940d0f64e",
                 "parameters": [
                     {
                         "name": "id",
@@ -8840,7 +8840,7 @@
                 ],
                 "summary": "Update an existing client",
                 "description": "Update an existing client",
-                "operationId": "3321f928bf159bf5b0d79ab7c093680b",
+                "operationId": "0e0116dbdd7e26bbc8bbe0c5c4d8e93d",
                 "parameters": [
                     {
                         "name": "id",
@@ -9001,7 +9001,7 @@
                 ],
                 "summary": "Delete a client",
                 "description": "Delete a client by ID",
-                "operationId": "38cbc0a8bc3e8177c785365bb0a4b8d7",
+                "operationId": "42c821230f121e4ad6a862c0ccb14463",
                 "parameters": [
                     {
                         "name": "id",
@@ -9064,7 +9064,7 @@
                 ],
                 "summary": "Change the state of a client",
                 "description": "Change the state (active/inactive) of a client by its ID",
-                "operationId": "5e7ea0fbe3e918ec5597bc1ac161c795",
+                "operationId": "60caa5751a0c001450b8ffa01d551437",
                 "parameters": [
                     {
                         "name": "id",
@@ -9136,7 +9136,7 @@
                 ],
                 "summary": "Get Persons with Debt",
                 "description": "Retrieve all Persons who have receptions with debt amounts greater than 0, optionally filtered by 'conditionPay'. Includes the related receptions.",
-                "operationId": "837e3b695f6626e845f4276ab77a365f",
+                "operationId": "3a03aff14393f7c93e8901730a9bdc71",
                 "parameters": [
                     {
                         "name": "conditionPay",
@@ -9226,7 +9226,7 @@
                 ],
                 "summary": "Get all Place",
                 "description": "Show all Place",
-                "operationId": "bf569bd461cbf2b64140369d365caed2",
+                "operationId": "88388f13e7c53e56b9486e924c67288d",
                 "responses": {
                     "200": {
                         "description": "List of Place"
@@ -9260,7 +9260,7 @@
                 ],
                 "summary": "Store a new place",
                 "description": "Create a new place",
-                "operationId": "735b1d56c5941386bd2ef9f7fcb3e77c",
+                "operationId": "c7adb8922b8d11b21024f47920fae131",
                 "requestBody": {
                     "description": "Place data",
                     "required": true,
@@ -9347,7 +9347,7 @@
                 ],
                 "summary": "Get a place by ID",
                 "description": "Retrieve a place by its ID",
-                "operationId": "019570fc693ea8c4748aa25e72c36085",
+                "operationId": "1383d70a3c5ba8f02d11aadd63494ead",
                 "parameters": [
                     {
                         "name": "id",
@@ -9415,7 +9415,7 @@
                 ],
                 "summary": "Update an existing place",
                 "description": "Update an existing place",
-                "operationId": "62c68468fd349545ca6fbbc7868f5884",
+                "operationId": "27fec76b557fe89813d052c2744971f9",
                 "parameters": [
                     {
                         "name": "id",
@@ -9527,7 +9527,7 @@
                 ],
                 "summary": "Delete a place",
                 "description": "Delete a place by ID",
-                "operationId": "0e553a48537a39ef8ee970ddb8e7deb0",
+                "operationId": "77faca0cefb3565db52ad57e43af2d36",
                 "parameters": [
                     {
                         "name": "id",
@@ -9590,7 +9590,7 @@
                 ],
                 "summary": "Get all programming",
                 "description": "Show all programming",
-                "operationId": "59d9af008b5227945de979e712e703bc",
+                "operationId": "cceaaba5a85a9520d9bde0aa3a72e33a",
                 "responses": {
                     "200": {
                         "description": "List of programming"
@@ -9624,7 +9624,7 @@
                 ],
                 "summary": "Create a new programming",
                 "description": "Create a new programming",
-                "operationId": "18812a1bacf047e1a4b0cfcf64998860",
+                "operationId": "20a6e090af5c275fbcf4f3637043fa70",
                 "requestBody": {
                     "description": "Pogramming data",
                     "required": true,
@@ -9785,7 +9785,7 @@
                 ],
                 "summary": "Get a programming by ID",
                 "description": "Retrieve a programming by its ID",
-                "operationId": "2df3786ce248d90775179115629ec653",
+                "operationId": "8894e00e01130dd5979e6742dabba8d3",
                 "parameters": [
                     {
                         "name": "id",
@@ -9846,7 +9846,7 @@
                 ],
                 "summary": "Update an existing programming",
                 "description": "Update an existing programming",
-                "operationId": "06662721da938702553620f607cd2e5c",
+                "operationId": "4bed169cc6f40518cde979e843cff1f6",
                 "parameters": [
                     {
                         "name": "id",
@@ -10003,7 +10003,7 @@
                 ],
                 "summary": "Delete a Programming",
                 "description": "Delete a Programming by ID",
-                "operationId": "f5bf4836bcadb9d67835a737233e4634",
+                "operationId": "29355b3cb5027c9b687d4346a85a9a62",
                 "parameters": [
                     {
                         "name": "id",
@@ -10066,7 +10066,7 @@
                 ],
                 "summary": "reprogram an existing programming",
                 "description": "reprogram an existing programming",
-                "operationId": "1c10c37d5fbc252f26df8797a53d9011",
+                "operationId": "3aeac32e73fa5e950829081baf7e1e77",
                 "parameters": [
                     {
                         "name": "id",
@@ -10158,7 +10158,7 @@
                 ],
                 "summary": "Get a programming by ID",
                 "description": "Retrieve a programming by its ID and mark it as finished",
-                "operationId": "1c4b6bdb8d587f7c5166cce3462f54e0",
+                "operationId": "19145b1565c9dbe611cd3fd4d165ede4",
                 "parameters": [
                     {
                         "name": "id",
@@ -10237,7 +10237,7 @@
                 ],
                 "summary": "Get all reception",
                 "description": "Show all reception",
-                "operationId": "fdcf4b86743a4bc6d51fee352365f8cd",
+                "operationId": "bafac463c7271ed45d571554a7ef7bfd",
                 "parameters": [
                     {
                         "name": "startPlace_id",
@@ -10303,7 +10303,7 @@
                 ],
                 "summary": "Create a new reception",
                 "description": "Create a new reception",
-                "operationId": "f975c08f2e0aa0d6ce220e37cdcfdd52",
+                "operationId": "e288294c053bd6bc1b14739eac0c5ec5",
                 "requestBody": {
                     "description": "Reception data",
                     "required": true,
@@ -10529,7 +10529,7 @@
                 ],
                 "summary": "Get a reception by ID",
                 "description": "Retrieve a reception by its ID",
-                "operationId": "0b96fe94a50d4aa6c816638ee2851a48",
+                "operationId": "2978a0e0ab1cdd02f5cbb78b4a649173",
                 "parameters": [
                     {
                         "name": "id",
@@ -10590,7 +10590,7 @@
                 ],
                 "summary": "Update an existing reception",
                 "description": "Update an existing reception",
-                "operationId": "597eac3c7be834e2002ee7e41209f7b6",
+                "operationId": "900d27aa1f92324a760e31df8343d379",
                 "parameters": [
                     {
                         "name": "id",
@@ -10816,7 +10816,7 @@
                 ],
                 "summary": "Delete a reception",
                 "description": "Delete a reception by ID",
-                "operationId": "7f203350897a691337331d2bc42b14f2",
+                "operationId": "03c58fece0a20850d08215201967e5f7",
                 "parameters": [
                     {
                         "name": "id",
@@ -10879,7 +10879,7 @@
                 ],
                 "summary": "Get all routes",
                 "description": "Show all routes",
-                "operationId": "65ce6f590d5a5b2bca40eb4e12a0eeb5",
+                "operationId": "b7abc709887a89db0f583841dd87c653",
                 "responses": {
                     "200": {
                         "description": "List of routes",
@@ -10923,7 +10923,7 @@
                 ],
                 "summary": "Create a new route",
                 "description": "Store a new route in the system and assign a parent route to specified routes.",
-                "operationId": "5431f25a213cd400e876b9be2c2aba2c",
+                "operationId": "24934d7814d1b88c5de2164d7ffe76e2",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -11017,7 +11017,7 @@
                 ],
                 "summary": "Get all parent routes",
                 "description": "MUESTRA LOS QUE TIENEN GRUPO",
-                "operationId": "41c41a8e98df96e812fc7592a44a9ff5",
+                "operationId": "203abb92868a8877a04edc8cbca32cad",
                 "responses": {
                     "200": {
                         "description": "List of parent routes",
@@ -11063,7 +11063,7 @@
                 ],
                 "summary": "Get a specific route by ID",
                 "description": "Show details of a specific route",
-                "operationId": "90a341d1e0a3ca0022e91a84ef99cae8",
+                "operationId": "7c40280246623e28d240559fb35a241d",
                 "parameters": [
                     {
                         "name": "id",
@@ -11131,7 +11131,7 @@
                 ],
                 "summary": "Update an existing route",
                 "description": "Update an existing route in the system and assign a parent route to specified routes.",
-                "operationId": "3c48e442a2a52df2799f5b31c7cb2e77",
+                "operationId": "4969ef3c80159eb2e55c5e47495d3845",
                 "parameters": [
                     {
                         "name": "id",
@@ -11253,7 +11253,7 @@
                 ],
                 "summary": "Delete a specific route by ID",
                 "description": "Delete a specific route",
-                "operationId": "42c4985a5b5785dd06e418558d6d0bf7",
+                "operationId": "becc977567e516424bcd0433657d97c4",
                 "parameters": [
                     {
                         "name": "id",
@@ -11329,7 +11329,7 @@
                 ],
                 "summary": "Create a new route",
                 "description": "Store a new route in the system, specifying the starting and ending places.",
-                "operationId": "7f2320f920d95e54a5abab323f503cd6",
+                "operationId": "e54f5d48cff26fd2b711e68c8d356815",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -11454,7 +11454,7 @@
                 ],
                 "summary": "Search for an existing route",
                 "description": "Search for a route in the system based on the starting and ending places.",
-                "operationId": "24e0b33acc1bb4cd734620ed162960cc",
+                "operationId": "b5ff7b7ac1c0362b277f5b34b401c1f4",
                 "parameters": [
                     {
                         "name": "placeStart_id",
@@ -11569,7 +11569,7 @@
                 ],
                 "summary": "Store a new subroute with a parent route",
                 "description": "Creates a new subroute and associates it with a specified parent route. If the subroute already exists, it updates its association with the parent route.",
-                "operationId": "dd6ffcf012eae6386da693cfdebda2c5",
+                "operationId": "eb0f57e931afb55a22a9008937c48b24",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -11670,7 +11670,7 @@
                 ],
                 "summary": "Assign a parent route to multiple routes",
                 "description": "Assign an existing route as a parent to multiple routes.",
-                "operationId": "2f3ea53fc382889cf4a2d531b1f9ec17",
+                "operationId": "0d7ac49e25895c25a5d8ca6fb24879ab",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -11790,7 +11790,7 @@
                 ],
                 "summary": "Get all subcontract",
                 "description": "Show all subcontract",
-                "operationId": "6dd5b4a04dba45230b10e8dbfc31d55a",
+                "operationId": "0e94f54c9947fcd4a541002856ba7afd",
                 "responses": {
                     "200": {
                         "description": "List of subcontract",
@@ -11918,7 +11918,7 @@
                 ],
                 "summary": "Get a subcontract by ID",
                 "description": "Retrieve a subcontract by its ID",
-                "operationId": "8f7405f3cfaf83153836979ff99ea0bc",
+                "operationId": "72a14608ce92857f624bb978a2fbb07e",
                 "parameters": [
                     {
                         "name": "id",
@@ -11986,7 +11986,7 @@
                 ],
                 "summary": "Delete a Subcontract",
                 "description": "Delete a Subcontract by ID",
-                "operationId": "2a2b384f2292a3ec879027c243f428f4",
+                "operationId": "20734e6a25179b99aa8117768ceb1290",
                 "parameters": [
                     {
                         "name": "id",
@@ -12142,7 +12142,7 @@
                 ],
                 "summary": "Retrieve all Type Carrocerias",
                 "description": "Fetches a list of all available Type Carrocerias in the system.",
-                "operationId": "a3f27fa42bbf7a93e270384928350aa0",
+                "operationId": "83a2442fb7aa3ab67cba4f4da43a15f8",
                 "responses": {
                     "200": {
                         "description": "Successful retrieval of the list of Type Carrocerias.",
@@ -12186,7 +12186,7 @@
                 ],
                 "summary": "Create a new Type Carroceria",
                 "description": "Stores a new Type Carroceria in the database.",
-                "operationId": "de081d45e2ff8ae3a5352d4afd95486a",
+                "operationId": "a9392befce28a4f6816c275092db182b",
                 "requestBody": {
                     "description": "Data for creating a Type Carroceria",
                     "required": true,
@@ -12273,7 +12273,7 @@
                 ],
                 "summary": "Get a Type Carroceria by ID",
                 "description": "Retrieve a Type Carroceria by its ID",
-                "operationId": "1c5e7d0ab41019619a483eebf1b115f7",
+                "operationId": "557cf6c0e8f61494d2b95161cd2a8ac4",
                 "parameters": [
                     {
                         "name": "id",
@@ -12341,7 +12341,7 @@
                 ],
                 "summary": "Update an existing Type Carroceria",
                 "description": "Update an existing Type Carroceria",
-                "operationId": "d884ed5e48163b58a8a3443843f419b6",
+                "operationId": "11b791768024795d70c7bcf7bc6553d2",
                 "parameters": [
                     {
                         "name": "id",
@@ -12448,7 +12448,7 @@
                 ],
                 "summary": "Delete a Type Carroceria",
                 "description": "Delete a Type Carroceria by ID",
-                "operationId": "4e71953361c7b2be69a3ad51ef92ed7a",
+                "operationId": "8b2da0d55b186bf1a3cbeb7b743f8ea9",
                 "parameters": [
                     {
                         "name": "id",
@@ -12524,7 +12524,7 @@
                 ],
                 "summary": "Retrieve all Type Companies",
                 "description": "Fetches a list of all available Type Companies in the system.",
-                "operationId": "59951bfd26e79071857b69738c36106d",
+                "operationId": "8ee1dae4aace799272a5602a48acdb22",
                 "responses": {
                     "200": {
                         "description": "Successful retrieval of the list of Type Companies.",
@@ -12568,7 +12568,7 @@
                 ],
                 "summary": "Create a new Type Company",
                 "description": "Stores a new Type Company in the database.",
-                "operationId": "d3194701096c3a0f8094551683f8fb06",
+                "operationId": "cae8ab06d0f4afdbc74acfac72947936",
                 "requestBody": {
                     "description": "Data for creating a Type Company",
                     "required": true,
@@ -12649,7 +12649,7 @@
                 ],
                 "summary": "Get a Type Company by ID",
                 "description": "Retrieve a Type Company by its ID",
-                "operationId": "aabbf849895d7e555878c6a6ca92d6fd",
+                "operationId": "4c0b2711522cf4043788a5b8c1b0a142",
                 "parameters": [
                     {
                         "name": "id",
@@ -12717,7 +12717,7 @@
                 ],
                 "summary": "Update an existing Type Company",
                 "description": "Update an existing Type Company",
-                "operationId": "4922a40f068c5b22f6bbb9fc58282b84",
+                "operationId": "138e97ef411577f4ff9a9fbab2c23586",
                 "parameters": [
                     {
                         "name": "id",
@@ -12819,7 +12819,7 @@
                 ],
                 "summary": "Delete a Type Company",
                 "description": "Delete a Type Company by ID",
-                "operationId": "85f01009025cfaeabc9527adbe1b5885",
+                "operationId": "afa51144cf178462eb311f0b34789f33",
                 "parameters": [
                     {
                         "name": "id",
@@ -12895,7 +12895,7 @@
                 ],
                 "summary": "Get all typeofUser",
                 "description": "Show all typeofUser",
-                "operationId": "047b5550641cbe7713e1eaf1bef5a262",
+                "operationId": "489342d4469b07b067a7fefb2ffb5b35",
                 "responses": {
                     "200": {
                         "description": "List of typeofUser",
@@ -12939,7 +12939,7 @@
                 ],
                 "summary": "Store a new typeofUser",
                 "description": "Create a new typeofUser",
-                "operationId": "0e0d2fbfba029abd412e207c805072a0",
+                "operationId": "890ad9e1f8bb617ee7e41ee4c4517c39",
                 "requestBody": {
                     "description": "TypeOf_User data",
                     "required": true,
@@ -13019,7 +13019,7 @@
                 ],
                 "summary": "Get a typeofUser by ID",
                 "description": "Retrieve a typeofUser by its ID",
-                "operationId": "883fdb326cebb8dfa0c130a853bf01e3",
+                "operationId": "0a8bc522e9739f991f6f83c1e4d71367",
                 "parameters": [
                     {
                         "name": "id",
@@ -13087,7 +13087,7 @@
                 ],
                 "summary": "Update an existing type of User",
                 "description": "Update an existing type of User",
-                "operationId": "45176328644dfc10a4e9ef9dbca04938",
+                "operationId": "6422992517fd9717be826f16340a0092",
                 "parameters": [
                     {
                         "name": "id",
@@ -13176,7 +13176,7 @@
                 ],
                 "summary": "Delete a TypeofUser",
                 "description": "Delete a TypeofUser by ID",
-                "operationId": "74c1eb32c24ca2bd104d867485c99605",
+                "operationId": "9a373bdfb6099440b6df5fc7e5a82b51",
                 "parameters": [
                     {
                         "name": "id",
@@ -13239,7 +13239,7 @@
                 ],
                 "summary": "Set access to type of User",
                 "description": "Set access permissions for a specific type of user.",
-                "operationId": "1af0762c22679009e4a606fe6f36e562",
+                "operationId": "89863d4ca6700dd6971dc5182494ca04",
                 "parameters": [
                     {
                         "name": "typeUserId",
@@ -13348,7 +13348,7 @@
                 ],
                 "summary": "Get access to type of User",
                 "description": "Get access to a specific user.",
-                "operationId": "d89e0036689ebd7923fde1f412f6a7d7",
+                "operationId": "d7f579b8dc75b4048902b7da87a85733",
                 "parameters": [
                     {
                         "name": "typeUserId",
@@ -13427,7 +13427,7 @@
                 ],
                 "summary": "Get all departments",
                 "description": "Show all departments",
-                "operationId": "99875a3e52dfa2fbb15e7af0a4e81be7",
+                "operationId": "290e1d738654cf4af73503eae0e01340",
                 "responses": {
                     "200": {
                         "description": "List of departments",
@@ -13487,7 +13487,7 @@
                 ],
                 "summary": "Get provinces by department ID",
                 "description": "Show all provinces for a given department ID",
-                "operationId": "5f2c94d24f23cecc7b1e50cf6a772284",
+                "operationId": "da95ccf69e3cd415d5b003b3909fdcab",
                 "parameters": [
                     {
                         "name": "departmentId",
@@ -13562,7 +13562,7 @@
                 ],
                 "summary": "Get districts by province ID",
                 "description": "Show all districts for a given province ID",
-                "operationId": "f9c78fb1e4855be9a0b710f727eaa4f0",
+                "operationId": "b4ae881ca04a641582219fb2f3304fab",
                 "parameters": [
                     {
                         "name": "provinceId",
@@ -13637,7 +13637,7 @@
                 ],
                 "summary": "Get ubigeo information",
                 "description": "Show a specific ubigeo by combining the ID, province, and department.",
-                "operationId": "4841587f4d4aba69f1c29fba66d22926",
+                "operationId": "a101775a3120826614a7037e841d67ab",
                 "responses": {
                     "200": {
                         "description": "Ubigeo details",
@@ -13697,7 +13697,7 @@
                     "User"
                 ],
                 "summary": "Get all Users",
-                "operationId": "1dae47387df7fcc2e128dc573efbc089",
+                "operationId": "51a4c272b40f702b7153851b4238dda1",
                 "responses": {
                     "200": {
                         "description": "List of active Useres",
@@ -13778,7 +13778,7 @@
                 ],
                 "summary": "Store a new user",
                 "description": "Create a new user",
-                "operationId": "a3478f25d89ed35b14a32b93924d827a",
+                "operationId": "ea642e8c0fa825ecf3c47aeb10908bc3",
                 "requestBody": {
                     "description": "User data",
                     "required": true,
@@ -13897,7 +13897,7 @@
                 ],
                 "summary": "Login user",
                 "description": "Authenticate user and generate access token",
-                "operationId": "d9b09f4ac893a0787b6ece5265253b0c",
+                "operationId": "3924f831ea547b44870b42eecf533a7a",
                 "requestBody": {
                     "description": "User credentials",
                     "required": true,
@@ -14003,7 +14003,7 @@
                     "User"
                 ],
                 "summary": "Show the specified Users",
-                "operationId": "3e179d9bdf9dc886ef1979f700278f07",
+                "operationId": "df61d0489dc4529f2e1b31098b5dc70f",
                 "parameters": [
                     {
                         "name": "id",
@@ -14064,7 +14064,7 @@
                 ],
                 "summary": "Update an existing user",
                 "description": "Update an existing user",
-                "operationId": "49e380183c01b3e7ff48398645f90dbc",
+                "operationId": "98d3ba8ed4befdd5858ae3d0d8fb1de4",
                 "parameters": [
                     {
                         "name": "id",
@@ -14172,7 +14172,7 @@
                     "User"
                 ],
                 "summary": "Remove the specified User",
-                "operationId": "94ed57554bf41ed6e2c1c6b1320b6623",
+                "operationId": "8b0f83fd788f94e7e9f515f1ee3d00e1",
                 "parameters": [
                     {
                         "name": "id",
@@ -14248,7 +14248,7 @@
                 ],
                 "summary": "Get Profile user",
                 "description": "Get user",
-                "operationId": "606d2109330397c07058ac453538d3d0",
+                "operationId": "621e09709aef0c29c7ee1bea45bd9f11",
                 "responses": {
                     "200": {
                         "description": "User authenticated successfully",
@@ -14319,7 +14319,7 @@
                 ],
                 "summary": "Logout",
                 "description": "Log out user.",
-                "operationId": "647cf483fd19564ce39560971df8957b",
+                "operationId": "565a57d96636c16bf7c3d15e4e174e9c",
                 "responses": {
                     "200": {
                         "description": "Successful logout"
@@ -14371,7 +14371,7 @@
                 ],
                 "summary": "Search information by DNI",
                 "description": "Search information about a person by their DNI number.",
-                "operationId": "f639744c32039efd16862a9c6d543134",
+                "operationId": "f7920e1ab0c87768f2864d766bc17b11",
                 "parameters": [
                     {
                         "name": "dni",
@@ -14477,7 +14477,7 @@
                 ],
                 "summary": "Search information by RUC",
                 "description": "Search information about a person by their RUC number.",
-                "operationId": "058f9d654c40efc4c4d2718b5db3e733",
+                "operationId": "555ce21cdcdb10fdedf260abfb593d05",
                 "parameters": [
                     {
                         "name": "ruc",
@@ -14574,7 +14574,7 @@
                 ],
                 "summary": "Get all Vehicle",
                 "description": "Show all Vehicle",
-                "operationId": "8eb90441d2350edc535ce9571cfc53c5",
+                "operationId": "f298249ce950a2e2b53eb6136edb1e40",
                 "responses": {
                     "200": {
                         "description": "List of Vehicle"
@@ -14610,7 +14610,7 @@
                 ],
                 "summary": "Get all Vehicles",
                 "description": "Retrieve a paginated list of vehicles, optionally filtered by branch office or type of vehicle (e.g., Tracto, Carreta).",
-                "operationId": "7a8a041a217ec94fcf871f866ea8e3ad",
+                "operationId": "384398fe2267e2fd876a0c0336a72ebe",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -14696,7 +14696,7 @@
                 ],
                 "summary": "Create a new vehicle",
                 "description": "Create a new vehicle and upload associated photos.",
-                "operationId": "9ccc1d4c7b369091da322ab2500d1886",
+                "operationId": "aa027bbf9bc078c4840b3acd54a0da8c",
                 "requestBody": {
                     "description": "Vehicle data",
                     "required": true,
@@ -14899,7 +14899,7 @@
                 ],
                 "summary": "Get a vehicle by ID",
                 "description": "Retrieve a vehicle by its ID",
-                "operationId": "b586ed1b1ec38b633697e8e083663bad",
+                "operationId": "415e1c86c986ba38516a051d002b41c5",
                 "parameters": [
                     {
                         "name": "id",
@@ -14960,7 +14960,7 @@
                 ],
                 "summary": "Create or update a vehicle",
                 "description": "Create a new vehicle or update an existing one and optionally upload associated photos.",
-                "operationId": "6a44b1dd0870ce1e264b4e2268eca5b4",
+                "operationId": "548776840d5db8e39170cf59c9f54143",
                 "parameters": [
                     {
                         "name": "id",
@@ -15173,7 +15173,7 @@
                 ],
                 "summary": "Delete a vehicle",
                 "description": "Delete a vehicle by ID",
-                "operationId": "32052714b93d6237361e86fb694e91d0",
+                "operationId": "28f6d7b3136fff264c2e763bb5ab6dea",
                 "parameters": [
                     {
                         "name": "id",
@@ -15235,7 +15235,7 @@
                     "Sale"
                 ],
                 "summary": "Get all Moviments",
-                "operationId": "baa89d693cfe44088b4356d08a9ea505",
+                "operationId": "751e5f9bb1270f75586377aefbe8452f",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -15352,7 +15352,7 @@
                 ],
                 "summary": "Store a new sale",
                 "description": "Create a new sale",
-                "operationId": "2e242d5f298433582490f0f1630ba999",
+                "operationId": "8d1315adde17ece13e82ce72b7e549f4",
                 "requestBody": {
                     "description": "Sale data",
                     "required": true,
@@ -15581,7 +15581,7 @@
                 ],
                 "summary": "Store a new sale",
                 "description": "Create a new sale",
-                "operationId": "88637d6735bcdab70a4ec67828e0fcf8",
+                "operationId": "edd6067cb346ecd5eb579af62b0ae721",
                 "requestBody": {
                     "description": "Sale data",
                     "required": true,
@@ -15808,7 +15808,7 @@
                 ],
                 "summary": "Get Sales Moviments without Credit Notes",
                 "description": "Retrieve a list of sales movements that do not have an associated credit note. You can filter the results by branch office, document type, and sequential number.",
-                "operationId": "3ac6777c61052e766c862fe91730d105",
+                "operationId": "a7f90679bc836f110f6b171f4d1c6340",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -15914,7 +15914,7 @@
                     "Sale"
                 ],
                 "summary": "Get all Moviments",
-                "operationId": "f3e8afa582ee7f73a00aa2b211080566",
+                "operationId": "6194f4f36050b9420bd5c095283a6e53",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -16005,7 +16005,7 @@
                     "Sale"
                 ],
                 "summary": "Get all Receptions without a Sale",
-                "operationId": "14124eb692ddf74d811b2ca08a0ff1bf",
+                "operationId": "8ebc95ffb9931cebf0ff1d65b1602d86",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -16068,7 +16068,7 @@
                 ],
                 "summary": "Obtener cuotas pendientes de pago por cliente",
                 "description": "Obtiene las cuotas pendientes de pago de un cliente específico, filtrando por el nombre del cliente. Verifica el token de autorización antes de proceder.",
-                "operationId": "3ca6ffff9110e1a7810800e5aa5fb9ec",
+                "operationId": "ab868c7d979d9efcf99c3cbb227c9667",
                 "parameters": [
                     {
                         "name": "namesCadena",
@@ -16123,7 +16123,7 @@
                 ],
                 "summary": "Realiza un pago masivo por cuotas pendientes",
                 "description": "Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
-                "operationId": "521d9e0bc8ce5221cee0ebddd666f4c5",
+                "operationId": "6d335498c3cd4c6eac79ff99a8dc5e8e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -16224,7 +16224,7 @@
                 ],
                 "summary": "Get all Worker",
                 "description": "Show all Worker",
-                "operationId": "e5d56d9dd43d9c1705b0191db3bb3fb8",
+                "operationId": "01cbb17209bd682a56f2fcb63193e500",
                 "parameters": [
                     {
                         "name": "branch_office_id",
@@ -16303,7 +16303,7 @@
                 ],
                 "summary": "Store a new worker",
                 "description": "Create a new worker",
-                "operationId": "6edc036fd68991455e06a3e762d78674",
+                "operationId": "abef13c5f9fef7cde1bbc82386166abf",
                 "requestBody": {
                     "description": "Worker data",
                     "required": true,
@@ -16433,7 +16433,7 @@
                 ],
                 "summary": "Get a worker by ID",
                 "description": "Retrieve a worker by its ID",
-                "operationId": "7bc70805f33702e5706adb7afe1ecbae",
+                "operationId": "6dd530662bb4032dbb7fad01cab11fe9",
                 "parameters": [
                     {
                         "name": "id",
@@ -16501,7 +16501,7 @@
                 ],
                 "summary": "Update an existing worker",
                 "description": "Update an existing worker",
-                "operationId": "2e21306d34a4eabb547caa95b8e2c9e1",
+                "operationId": "7742d581afb929103d1ada845fe4b179",
                 "parameters": [
                     {
                         "name": "id",
@@ -16640,7 +16640,7 @@
                 ],
                 "summary": "Create or update a worker",
                 "description": "Create a new worker or update an existing one",
-                "operationId": "4218aef51a30c0304176d3635bcccbbf",
+                "operationId": "a8a1eb6249aae73fd266511afce5c545",
                 "parameters": [
                     {
                         "name": "id",
@@ -16760,7 +16760,7 @@
                 ],
                 "summary": "Delete a worker",
                 "description": "Delete a worker by ID",
-                "operationId": "0e6d77dc4b937567bb6ea3101c64208e",
+                "operationId": "a387f36a5d68724aa30d2be14006f529",
                 "parameters": [
                     {
                         "name": "id",
@@ -16823,7 +16823,7 @@
                 ],
                 "summary": "Get a worker's history by ID",
                 "description": "Retrieve the programming history of a worker by their ID",
-                "operationId": "68b1d1f68ea34113d7d34df53fc0970a",
+                "operationId": "c54f6de0a57926d6640f07ca268ccdc2",
                 "parameters": [
                     {
                         "name": "id",
@@ -16912,7 +16912,7 @@
                 ],
                 "summary": "Get all area",
                 "description": "Show all area",
-                "operationId": "b8acdd42cfa25a4b6f7c157be89a7cff",
+                "operationId": "ffffd2689aa09d090da65e4fe0446ab8",
                 "responses": {
                     "200": {
                         "description": "List of area",
@@ -16956,7 +16956,7 @@
                 ],
                 "summary": "Create a new area",
                 "description": "Create a new area",
-                "operationId": "9fe6a1b7168d621400c2c9dfc173b3fa",
+                "operationId": "ba6d5a2cc95fa4f67b32a38ceafca84a",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -17035,7 +17035,7 @@
                 ],
                 "summary": "Get a area by ID",
                 "description": "Retrieve a area by its ID",
-                "operationId": "12ea690345b37c34f916dd5b823214d9",
+                "operationId": "4f52afa0991ebfb7c56707a53774a12f",
                 "parameters": [
                     {
                         "name": "id",
@@ -17103,7 +17103,7 @@
                 ],
                 "summary": "Update an existing area",
                 "description": "Update an existing area",
-                "operationId": "dd32d8756fb50d4d0f3472f62187c669",
+                "operationId": "c0606a0b6ac861d647844cb06edc4688",
                 "parameters": [
                     {
                         "name": "id",
@@ -17207,7 +17207,7 @@
                 ],
                 "summary": "Delete a Area",
                 "description": "Delete a Area by ID",
-                "operationId": "da8feb564dae56591e78dcf38ed827e8",
+                "operationId": "33a2e06f496fa563f73cfdb555c6c3e5",
                 "parameters": [
                     {
                         "name": "id",
@@ -17269,7 +17269,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Obtener información de CargaDocuments con filtros y ordenamiento",
-                "operationId": "17578472768412ab43b902100c242d46",
+                "operationId": "ffc19e48a5330af1289925bb18da8df1",
                 "parameters": [
                     {
                         "name": "code_doc",
@@ -17432,7 +17432,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Crear CargaDocument",
-                "operationId": "5e9b91a7a7eaabd84c3c79f68929e31c",
+                "operationId": "f3e68b8524f5140c5b7c6f633a2eec87",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -17484,7 +17484,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Obtener detalles de un Documento de Carga por ID",
-                "operationId": "dcf5b7d21e8fc92a14dfb8fe22605997",
+                "operationId": "33db8f6b18a7ca3ec212223a80a8301f",
                 "parameters": [
                     {
                         "name": "id",
@@ -17536,7 +17536,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Actualizar un CargaDocument",
-                "operationId": "09552fa04d0c7bf72409e3bd50148897",
+                "operationId": "7c5ab95ee6207fb8b4bb96a2674c1ff8",
                 "parameters": [
                     {
                         "name": "id",
@@ -17631,7 +17631,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Eliminar un Documento de Cargapor ID",
-                "operationId": "3749fe00456a3ec473d3c253c2436226",
+                "operationId": "6eb796527228837150972da5f84ab7c2",
                 "parameters": [
                     {
                         "name": "id",
@@ -17690,7 +17690,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Exportar Kardex",
-                "operationId": "f4758cd76c22a7e1f7061ad522aa795a",
+                "operationId": "ad5c0394c5ed1f8039993678df34559e",
                 "responses": {
                     "200": {
                         "description": "Archivo exportado correctamente",
@@ -17720,7 +17720,7 @@
                     "CargaDocument"
                 ],
                 "summary": "Generar ticket de carga",
-                "operationId": "1e715ce8f8299af99dbab348bcb218d6",
+                "operationId": "6db0b9bffa49e74c1233e363d8ef89c5",
                 "parameters": [
                     {
                         "name": "id",
@@ -17798,7 +17798,7 @@
                     "Sale"
                 ],
                 "summary": "Enviar código de verificación por correo",
-                "operationId": "ffd646a1a5949a4ba7dba273364054f1",
+                "operationId": "025216b66fc84cf9543e9034b2e3095e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -17847,7 +17847,7 @@
                 ],
                 "summary": "Desvincular guía de venta",
                 "description": "Desvincula una guía de una venta específica si cumple con las condiciones. Verifica el token y el estado de la venta antes de proceder.",
-                "operationId": "55c6fa8eba61ad909e656b0ab8cb2a97",
+                "operationId": "2bea5acba3ed2d2d7581da999f781944",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -17919,7 +17919,7 @@
                     "BankAccount"
                 ],
                 "summary": "Obtener información de BankAccounts con filtros y ordenamiento",
-                "operationId": "b42dd0cd6ca4910b62083d2ebfdd3a0a",
+                "operationId": "af0103e17c2a8f3b48953d39a67e5b5e",
                 "parameters": [
                     {
                         "name": "id",
@@ -17987,7 +17987,7 @@
                     "BankAccount"
                 ],
                 "summary": "Crear BankAccount",
-                "operationId": "9267e3adffca688fb058e855a93a28f4",
+                "operationId": "937950211820313d91c1c69b61a3c4ee",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -18033,13 +18033,64 @@
                 ]
             }
         },
+        "/transporte/public/api/bank-account-export-excel": {
+            "get": {
+                "tags": [
+                    "BankAccount"
+                ],
+                "summary": "Exportar BankAccounts con filtros y ordenamiento",
+                "operationId": "8a571bfe280aaaa57c0605dd2fd2e560",
+                "parameters": [
+                    {
+                        "name": "filters",
+                        "in": "query",
+                        "description": "Filtros aplicables",
+                        "schema": {
+                            "$ref": "#/components/schemas/BankAccountFilters"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de BankAccounts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankAccount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transporte/public/api/bank-account/{id}": {
             "get": {
                 "tags": [
                     "BankAccount"
                 ],
                 "summary": "Obtener detalles de un BankAccount por ID",
-                "operationId": "22a16ce75923a6e2cb894418f92a18a8",
+                "operationId": "2854e825ea0a73d8cd6cbb5c871db92a",
                 "parameters": [
                     {
                         "name": "id",
@@ -18091,7 +18142,7 @@
                     "BankAccount"
                 ],
                 "summary": "Actualizar un BankAccount",
-                "operationId": "ef1afe4ba751f8065ec10315b39a72e6",
+                "operationId": "02606b4ad392db1c069be2c084d20e66",
                 "parameters": [
                     {
                         "name": "id",
@@ -18184,7 +18235,7 @@
                     "BankAccount"
                 ],
                 "summary": "Eliminar un BankAccount por ID",
-                "operationId": "a7cb90dd21ef2fdfe66df43eca30eb30",
+                "operationId": "b9e230c3acf1b5801c879d56c9118465",
                 "parameters": [
                     {
                         "name": "id",
@@ -18237,13 +18288,452 @@
                 ]
             }
         },
+        "/transporte/public/api/bank-movement": {
+            "get": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Obtener información de BankMovements con filtros y ordenamiento",
+                "operationId": "1d021b8bf011b1f41bc4cd9f30418556",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Filtrar por ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_moviment",
+                        "in": "query",
+                        "description": "Filtrar por tipo de movimiento (ENTRADA/SALIDA)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ENTRADA",
+                                "SALIDA"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "date_moviment",
+                        "in": "query",
+                        "description": "Filtrar por fecha del movimiento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "total_moviment",
+                        "in": "query",
+                        "description": "Filtrar por total del movimiento",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "currency",
+                        "in": "query",
+                        "description": "Filtrar por tipo de moneda",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 3
+                        }
+                    },
+                    {
+                        "name": "bank_id",
+                        "in": "query",
+                        "description": "Filtrar por ID del banco",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bank_account_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de la cuenta bancaria",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "transaction_concept_id",
+                        "in": "query",
+                        "description": "Filtrar por ID del concepto de transacción",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "person_id",
+                        "in": "query",
+                        "description": "Filtrar por ID de la persona asociada",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de BankMovements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BankMovement"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Crear BankMovement",
+                "operationId": "18327347194c6d026681dd7a0de6ac0d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BankMovementRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "BankMovement creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankMovement"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transporte/public/api/bank-movement-export-excel": {
+            "get": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Exportar BankMovements con filtros y ordenamiento",
+                "operationId": "c87071de00d6d76f8038505a239b618d",
+                "parameters": [
+                    {
+                        "name": "filters",
+                        "in": "query",
+                        "description": "Filtros aplicables",
+                        "schema": {
+                            "$ref": "#/components/schemas/BankMovementFilters"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de BankMovements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankMovement"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/transporte/public/api/bank-movement/{id}": {
+            "get": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Obtener detalles de un BankMovement por ID",
+                "operationId": "9ef89865d0de58c7fbe1bb584236daac",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del Movimiento de Banco",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movimiento de Banco encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankMovement"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Movimiento de Banco no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Movimiento de Banco no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Actualizar un BankMovement",
+                "operationId": "91eee4a391b227df191ab8590d7708af",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BankMovementRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "BankMovement actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankMovement"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Movimiento de Banco no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Movimiento de Banco no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "BankMovement"
+                ],
+                "summary": "Eliminar un BankMovementpor ID",
+                "operationId": "e4181249a228e3da32a5cabd252cfad1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "BankMovement eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "BankMovement eliminado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Movimiento de Banco no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transporte/public/api/transcationConcept": {
             "get": {
                 "tags": [
                     "TransactionConcept"
                 ],
                 "summary": "Obtener información de TransactionConcepts con filtros y ordenamiento",
-                "operationId": "31a4510aaca4c888812c9a2d940d4372",
+                "operationId": "4931f971bfaf73145006825e3ec61798",
                 "parameters": [
                     {
                         "name": "id",
@@ -18311,7 +18801,7 @@
                     "TransactionConcept"
                 ],
                 "summary": "Crear TransactionConcept",
-                "operationId": "e9a195869ed8046f6dbcc9e6dafd156f",
+                "operationId": "dd0193d199bb69e87476a50d31e5992b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -18363,7 +18853,7 @@
                     "TransactionConcept"
                 ],
                 "summary": "Obtener detalles de un TransactionConcept por ID",
-                "operationId": "e90e74df1574ce502badd4728d9e1fa9",
+                "operationId": "e040b37cd4a6828e0f5bab9bff6e367f",
                 "parameters": [
                     {
                         "name": "id",
@@ -18415,7 +18905,7 @@
                     "TransactionConcept"
                 ],
                 "summary": "Actualizar un TransactionConcept",
-                "operationId": "31abb720bc4170b4b456c4532013f6dc",
+                "operationId": "93f874b089e793e4e66240e3904b9b55",
                 "parameters": [
                     {
                         "name": "id",
@@ -18508,7 +18998,7 @@
                     "TransactionConcept"
                 ],
                 "summary": "Eliminar un TransactionConceptpor ID",
-                "operationId": "517afee8d2ac831fd44e9328e8f7a5ee",
+                "operationId": "6b44a5ccc3ef0f1764975c1d6d04465c",
                 "parameters": [
                     {
                         "name": "id",
@@ -18567,7 +19057,7 @@
                     "Product"
                 ],
                 "summary": "Obtener información de Productos con filtros y ordenamiento",
-                "operationId": "6da5a452b087c443f2e25276b004d0b8",
+                "operationId": "e4445b2c2140f5b542082dd1fb1ab4e5",
                 "parameters": [
                     {
                         "name": "codeproduct",
@@ -18671,7 +19161,7 @@
                     "Product"
                 ],
                 "summary": "Crear Product",
-                "operationId": "7b1c71085ea45db265cdf77bfe7ae70c",
+                "operationId": "974881839b716de1b3d75af886e65ca9",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -18723,7 +19213,7 @@
                     "Product"
                 ],
                 "summary": "Obtener detalles de un Product por ID",
-                "operationId": "65ad9d40f7e945bbd9a90e72333d28b8",
+                "operationId": "3b597e9a505d4ea08760085d968b4285",
                 "parameters": [
                     {
                         "name": "id",
@@ -18775,7 +19265,7 @@
                     "Product"
                 ],
                 "summary": "Actualizar un Product",
-                "operationId": "1b506485bdbdc82adc87d12e0233e76a",
+                "operationId": "0325a33024e5f4851ef19b1c1c6e7254",
                 "parameters": [
                     {
                         "name": "id",
@@ -18868,7 +19358,7 @@
                     "Product"
                 ],
                 "summary": "Eliminar un Productpor ID",
-                "operationId": "6fbaff8f4b686e77d337cec19989b037",
+                "operationId": "bb141d6fdde12b89ce495d6c723bdcc4",
                 "parameters": [
                     {
                         "name": "id",
@@ -18927,7 +19417,7 @@
                     "Tarifario"
                 ],
                 "summary": "Obtener información de Tarifarios con filtros y ordenamiento",
-                "operationId": "18e12ed5d6f092e49275e4e470e5f040",
+                "operationId": "2ccf6d1eab8805fe0aa31901dd98d452",
                 "parameters": [
                     {
                         "name": "tarifa",
@@ -19050,7 +19540,7 @@
                     "Tarifario"
                 ],
                 "summary": "Crear Tarifario",
-                "operationId": "cef0137e7acb00113c77884b9c1cb435",
+                "operationId": "beb0332a48b32f793af02ea3b2d3463c",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -19102,7 +19592,7 @@
                     "Tarifario"
                 ],
                 "summary": "Obtener detalles de un Tarifario por ID",
-                "operationId": "ce617efad87251135a53832c316a67d4",
+                "operationId": "492423e6661902ee519cf375e89d8e0b",
                 "parameters": [
                     {
                         "name": "id",
@@ -19154,7 +19644,7 @@
                     "Tarifario"
                 ],
                 "summary": "Actualizar un Tarifario",
-                "operationId": "80e7e510a48aa45abc9b78fe0d0ffdf8",
+                "operationId": "b24c9d3b4d7ef9b7e686d574423cdf93",
                 "parameters": [
                     {
                         "name": "id",
@@ -19247,7 +19737,7 @@
                     "Tarifario"
                 ],
                 "summary": "Eliminar un Tarifariopor ID",
-                "operationId": "d88779799b3979347b6064225eb699dc",
+                "operationId": "079d4222073693bd6e90b34fec313811",
                 "parameters": [
                     {
                         "name": "id",
@@ -19306,7 +19796,7 @@
                     "Unity"
                 ],
                 "summary": "Obtener información de Unitys con filtros y ordenamiento",
-                "operationId": "c981bb7d6ee88f4ae33a9c21bf1ac2de",
+                "operationId": "b9653fb3d43ee1c57964c6e77e1c71b2",
                 "parameters": [
                     {
                         "name": "id",
@@ -19374,7 +19864,7 @@
                     "Unity"
                 ],
                 "summary": "Crear Unity",
-                "operationId": "316695d69251e3497d7ff2a5b98d6948",
+                "operationId": "b9e426de1001905fce8c6fddcb463875",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -19426,7 +19916,7 @@
                     "Unity"
                 ],
                 "summary": "Obtener detalles de un Unity por ID",
-                "operationId": "044af217dbfb18da0684764d605a3853",
+                "operationId": "e8cc35593140ef9e9a36b5544b90cf75",
                 "parameters": [
                     {
                         "name": "id",
@@ -19478,7 +19968,7 @@
                     "Unity"
                 ],
                 "summary": "Actualizar un Unity",
-                "operationId": "993c3477a7d8c4305946c3814d773706",
+                "operationId": "b4c7affa84014beff6c91efc66f1a5e6",
                 "parameters": [
                     {
                         "name": "id",
@@ -19571,7 +20061,7 @@
                     "Unity"
                 ],
                 "summary": "Eliminar un Unitypor ID",
-                "operationId": "0fdf02c9529ed5b50a51a1c1f5440bfc",
+                "operationId": "75404d10d754d42a0b8926a10a591af2",
                 "parameters": [
                     {
                         "name": "id",
@@ -19627,6 +20117,53 @@
     },
     "components": {
         "schemas": {
+            "BankAccountFilters": {
+                "title": "Bank Account Filters",
+                "description": "Parámetros de filtro para obtener cuentas bancarias",
+                "properties": {
+                    "bank_id": {
+                        "description": "ID del banco asociado",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "account_number": {
+                        "description": "Número de cuenta bancaria",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "account_type": {
+                        "description": "Tipo de cuenta bancaria",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "currency": {
+                        "description": "Moneda de la cuenta",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "balance": {
+                        "description": "Saldo de la cuenta",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "holder_name": {
+                        "description": "Nombre del titular de la cuenta",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "holder_id": {
+                        "description": "ID del titular de la cuenta",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Estado de la cuenta bancaria",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "BankAccountRequest": {
                 "title": "BankAccountRequest",
                 "description": "Request model for Bank Account information with filters and sorting",
@@ -19701,6 +20238,137 @@
                         "type": "string",
                         "format": "date-time",
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "BankMovementFilters": {
+                "title": "Bank Movement Filters",
+                "description": "Parámetros de filtro para obtener movimientos bancarios",
+                "properties": {
+                    "type_moviment": {
+                        "description": "Tipo de movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "from": {
+                        "description": "Fecha de inicio para el filtro de movimiento",
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "to": {
+                        "description": "Fecha de fin para el filtro de movimiento",
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "total_moviment": {
+                        "description": "Monto total del movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "currency": {
+                        "description": "Moneda del movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "comment": {
+                        "description": "Comentario del movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "user_created_id": {
+                        "description": "ID del usuario que creó el movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bank_id": {
+                        "description": "ID del banco asociado al movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bank_account_id": {
+                        "description": "ID de la cuenta bancaria asociada",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "transaction_concept_id": {
+                        "description": "ID del concepto de transacción",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "person_id": {
+                        "description": "ID de la persona asociada al movimiento",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación del movimiento",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "BankMovementRequest": {
+                "title": "BankMovementRequest",
+                "description": "Request model for Bank Movement creation",
+                "required": [
+                    "type_moviment",
+                    "date_moviment",
+                    "total_moviment",
+                    "currency",
+                    "bank_id",
+                    "bank_account_id",
+                    "transaction_concept_id",
+                    "person_id"
+                ],
+                "properties": {
+                    "type_moviment": {
+                        "description": "Type of movement",
+                        "type": "string",
+                        "enum": [
+                            "ENTRADA",
+                            "SALIDA"
+                        ]
+                    },
+                    "date_moviment": {
+                        "description": "Date of the movement",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_moviment": {
+                        "description": "Total amount of the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "currency": {
+                        "description": "Currency type (e.g., USD, EUR)",
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "comment": {
+                        "description": "Additional comment about the movement",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bank_id": {
+                        "description": "ID of the associated bank",
+                        "type": "integer"
+                    },
+                    "bank_account_id": {
+                        "description": "ID of the associated bank account",
+                        "type": "integer"
+                    },
+                    "transaction_concept_id": {
+                        "description": "ID of the transaction concept",
+                        "type": "integer"
+                    },
+                    "person_id": {
+                        "description": "ID of the associated person",
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -20010,6 +20678,117 @@
                     },
                     "updated_at": {
                         "description": "Timestamp when the account was last updated",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "BankMovement": {
+                "title": "Bank Movement",
+                "description": "Model representing a Bank Movement",
+                "required": [
+                    "id",
+                    "type_moviment",
+                    "date_moviment",
+                    "total_moviment",
+                    "currency",
+                    "bank_id",
+                    "bank_account_id",
+                    "transaction_concept_id"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the bank movement",
+                        "type": "integer"
+                    },
+                    "type_moviment": {
+                        "description": "Type of movement: Ingreso (income) or Salida (expense)",
+                        "type": "string",
+                        "enum": [
+                            "Ingreso",
+                            "Salida"
+                        ]
+                    },
+                    "date_moviment": {
+                        "description": "Date when the movement was registered",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_moviment": {
+                        "description": "Total amount of the movement",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "currency": {
+                        "description": "Currency of the transaction",
+                        "type": "string"
+                    },
+                    "user_created_id": {
+                        "description": "ID of the user who registered the movement",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "bank_id": {
+                        "description": "ID of the bank involved in the movement",
+                        "type": "integer"
+                    },
+                    "bank": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Bank"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Bank details"
+                    },
+                    "bank_account_id": {
+                        "description": "ID of the associated bank account",
+                        "type": "integer"
+                    },
+                    "bank_account": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BankAccount"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Bank account details"
+                    },
+                    "transaction_concept_id": {
+                        "description": "ID of the transaction concept",
+                        "type": "integer"
+                    },
+                    "transaction_concept": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TransactionConcept"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Transaction concept details"
+                    },
+                    "person_id": {
+                        "description": "ID of the person associated with the movement, if applicable",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "person": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Person"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Person details"
+                    },
+                    "created_at": {
+                        "description": "Timestamp when the movement was created",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Timestamp when the movement was last updated",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -22990,6 +23769,10 @@
         {
             "name": "BankAccount",
             "description": "BankAccount"
+        },
+        {
+            "name": "BankMovement",
+            "description": "BankMovement"
         },
         {
             "name": "TransactionConcept",

@@ -468,7 +468,8 @@ class UserController extends Controller
 
     public function obtenerMenu()
     {
-        $Grupos = GroupMenu::whereNull('groupMenu_id')->orderBy('created_at', 'asc')->get();
+        $Grupos = GroupMenu::whereNull('groupMenu_id')->orderBy('created_at', 'asc')
+        ->where('state',1)->get();
 
         $User = User::find(Auth::id());
         $typeOfUser = Role::find($User->typeofUser_id);

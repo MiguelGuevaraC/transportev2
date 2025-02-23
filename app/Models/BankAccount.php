@@ -1,13 +1,15 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class BankAccount extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'id',
         'bank_id',
@@ -24,17 +26,25 @@ class BankAccount extends Model
         'deleted_at',
     ];
     const filters = [
-        'bank_id'=> '=',
-        'account_number'=> 'like',
-        'account_type'=> 'like',
-        'currency'=> 'like',
-        'balance'=> 'like',
-        'holder_name'=> 'like',
-        'holder_id'=> '=',
-        'status'=> 'like',
+        'bank_id'        => '=',
+        'account_number' => 'like',
+        'account_type'   => 'like',
+        'currency'       => 'like',
+        'balance'        => 'like',
+        'holder_name'    => 'like',
+        'holder_id'      => '=',
+        'status'         => 'like',
     ];
-    const sorts = [
-        'id'            => 'desc',
+
+    const fields_export = [
+        'Número de Cuenta'   => 'account_number',
+        'Banco'              => 'bank.name',
+        'Moneda'             => 'currency',
+        'Monto'              => 'balance',
+        'Estado'             => 'status',
+        'Nombre Propietario' => 'holder_name',
+    ];    const sorts = [
+        'id' => 'desc',
     ];
 
     public function bank()
@@ -44,6 +54,16 @@ class BankAccount extends Model
     public function holder()
     {
         return $this->belongsTo(Person::class, 'holder_id');
+    }
+
+    public function updateBalance()
+    {
+        $balance = DB::table('bank_movements')
+            ->where('bank_account_id', $this->id)
+            ->whereIn('type_moviment', ['ENTRADA', 'SALIDA'])
+            ->sum(DB::raw("IF(type_moviment = 'ENTRADA', total_moviment, -total_moviment)"));
+
+        $this->update(['balance' => $balance ?? 0]);
     }
 
 }

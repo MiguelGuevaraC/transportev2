@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\LargeCashBox;
 
+use App\Exports\ExcelExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BankAccountRequest\IndexBankAccountRequest;
 use App\Http\Requests\BankAccountRequest\StoreBankAccountRequest;
@@ -9,6 +10,7 @@ use App\Http\Resources\BankAccountResource;
 use App\Models\BankAccount;
 use App\Services\BankAccountService;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BankAccountController extends Controller
 {
@@ -44,6 +46,27 @@ class BankAccountController extends Controller
             BankAccount::sorts,
             BankAccountResource::class
         );
+    }
+
+/**
+ * @OA\Get(
+ *     path="/transporte/public/api/bank-account-export-excel",
+ *     summary="Exportar BankAccounts con filtros y ordenamiento",
+ *     tags={"BankAccount"},
+ *     security={{"bearerAuth": {}}},
+ *     @OA\Parameter(name="filters", in="query", description="Filtros aplicables", @OA\Schema(ref="#/components/schemas/BankAccountFilters")),
+ *     @OA\Response(response=200, description="Lista de BankAccounts", @OA\JsonContent(ref="#/components/schemas/BankAccount")),
+ *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
+ * )
+ */
+
+    public function index_export_excel(IndexBankAccountRequest $request, $sumColumns = [])
+    {
+        $request['all'] = "true";
+        $data           = $this->index($request);
+        $fileName       = 'Caja_Grande_' . now()->timestamp . '.xlsx';
+        $columns        = BankAccount::fields_export;
+        return Excel::download(new ExcelExport($data, $columns, $sumColumns), $fileName);
     }
 /**
  * @OA\Get(
