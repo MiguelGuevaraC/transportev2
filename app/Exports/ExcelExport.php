@@ -30,6 +30,7 @@ class ExcelExport implements FromCollection, WithHeadings, WithMapping, WithStyl
             return collect([]);
         }
 
+
         $dataArray = $this->data->map(fn($row) =>
             collect($this->columns)->mapWithKeys(fn($columnPath, $columnName) => [
                 $columnName => is_array($columnPath)

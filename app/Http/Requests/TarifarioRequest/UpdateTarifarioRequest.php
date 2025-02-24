@@ -30,7 +30,7 @@ class UpdateTarifarioRequest extends UpdateRequest
             return [
                 'description'     => 'nullable|string',
                 'person_id'       => 'required|exists:people,id,deleted_at,NULL', // Asegura que la persona existe
-                'tarifa_camp'     => 'nullable|numeric|min:0.01',
+                'tarifa_camp'     => 'nullable|numeric',
                 'limitweight_min' => 'required|numeric|gt:0',
                 'limitweight_max' => 'required|numeric|gt:0|gte:limitweight_min',
                 'destination_id'  => 'required|exists:places,id,deleted_at,NULL',

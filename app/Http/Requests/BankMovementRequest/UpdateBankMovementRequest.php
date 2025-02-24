@@ -3,6 +3,7 @@ namespace App\Http\Requests\BankMovementRequest;
 
 use App\Http\Requests\UpdateRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class UpdateBankMovementRequest extends UpdateRequest
@@ -27,12 +28,21 @@ class UpdateBankMovementRequest extends UpdateRequest
      {
          return [
              'type_moviment'          => 'required|string|in:ENTRADA,SALIDA',
-             'date_moviment'          => 'required|date',
+             'date_moviment'          => 'required',
              'total_moviment'         => 'required|numeric|min:0',
              'currency'               => 'required|string|max:3',
              'comment'                => 'nullable|string',
              'bank_id'                => 'required|exists:banks,id,deleted_at,NULL',
-             'bank_account_id'        => 'required|exists:bank_accounts,id,deleted_at,NULL',
+             'bank_account_id'        => [
+                'required',
+                Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+                    $status = DB::table('bank_accounts')->where('id', $value)->value('status');
+                    if ($status === 'inactiva') {
+                        $fail('No se pueden realizar movimientos en una cuenta bancaria inactiva.');
+                    }
+                },
+            ],
              'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
              'person_id'              => 'required|exists:people,id,deleted_at,NULL',
          ];

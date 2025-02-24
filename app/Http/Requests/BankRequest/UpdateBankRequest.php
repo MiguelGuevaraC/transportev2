@@ -39,8 +39,8 @@ class UpdateBankRequest extends UpdateRequest
     public function messages()
     {
         return [
-            'name.required' => 'Nombre de la unidad es obligatorio.',
-            'name.unique'   => 'El nombre de la unidad ya está en uso.',
+            'name.required' => 'Nombre del banco es obligatorio.',
+            'name.unique'   => 'El nombre del banco ya está en uso.',
         ];
     }
 

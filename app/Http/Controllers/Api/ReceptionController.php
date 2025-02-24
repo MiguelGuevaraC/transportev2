@@ -634,7 +634,7 @@ class ReceptionController extends Controller
                 }
             } else {
                 return response()->json(['error' => 'Worker not found'], 422);
-            }
+            }  
 
             foreach ($detailsUpdate as $detailData) {
                 $idDetail = isset($detailData['idDetail']) == false ? 'null' : $detailData['idDetail'];
@@ -651,7 +651,7 @@ class ReceptionController extends Controller
                             'description'   => $detailData['description'] ?? '-',
                             'weight'        => $detailData['weight'] ?? 0.00,
                             'paymentAmount' => $detailData['paymentAmount'] ?? 0.00,
-                            'reception_id'  => $id ?? null,
+                            //'reception_id'  => $id ?? null,
                             'cant'          => $detailData['cant'] ?? 1,
                             'unit'          => $detailData['unit'] ?? 'NIU',
                             'product_id'    => isset($detailData['product_id']) ? $detailData['product_id'] : null,

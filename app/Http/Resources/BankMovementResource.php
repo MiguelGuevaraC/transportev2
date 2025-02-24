@@ -37,6 +37,7 @@ class BankMovementResource extends JsonResource
             'id'                     => $this->id ?? null,
             'type_moviment'          => $this->type_moviment ?? null,
             'date_moviment'          => $this->date_moviment ?? null,
+            'comment'                => $this->comment ?? null,
             'total_moviment'         => $this->total_moviment ?? null,
             'currency'               => $this->currency ?? null,
             'user_created_id'        => $this->user_created_id ?? null,

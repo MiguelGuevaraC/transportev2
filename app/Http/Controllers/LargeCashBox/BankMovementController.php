@@ -9,6 +9,7 @@ use App\Http\Requests\BankMovementRequest\UpdateBankMovementRequest;
 use App\Http\Resources\BankMovementResource;
 use App\Models\BankMovement;
 use App\Services\BankMovementService;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
 class BankMovementController extends Controller
@@ -52,15 +53,19 @@ class BankMovementController extends Controller
 
     public function index(IndexBankMovementRequest $request)
     {
+        // Clonar el request para evitar modificar el original directamente
+        $modifiedRequest = $request->merge([
+            'to' => $request->has('to') ? Carbon::parse($request->to)->addDay()->toDateString() : null,
+        ]);
+
         return $this->getFilteredResults(
             BankMovement::class,
-            $request,
+            $modifiedRequest,
             BankMovement::filters,
             BankMovement::sorts,
             BankMovementResource::class
         );
     }
-
     /**
      * @OA\Get(
      *     path="/transporte/public/api/bank-movement-export-excel",
@@ -79,13 +84,14 @@ class BankMovementController extends Controller
         $fileName       = 'Caja_Grande_' . now()->timestamp . '.xlsx';
 
         $columns = [
-            'Tipo'    => 'type_moviment',
-            'Fecha'   => 'date_moviment',
-            'Monto'   => 'total_moviment',
-            'Moneda'  => 'currency',
-            'Banco'   => 'bank.name',
-            'Cuenta'  => 'bank_account.account_number',
-            'Persona' => ['person.names', 'person.fatherSurname', 'person.businessName'],
+            'Tipo'       => 'type_moviment',
+            'Fecha'      => 'date_moviment',
+            'Monto'      => 'total_moviment',
+            'Moneda'     => 'currency',
+            'Banco'      => 'bank.name',
+            'Cuenta'     => 'bank_account.account_number',
+            'Persona'    => ['person.names', 'person.fatherSurname', 'person.businessName'],
+            'Comentario' => 'comment',
         ];
 
         return Excel::download(new ExcelExport($data, $columns, $sumColumns), $fileName);
