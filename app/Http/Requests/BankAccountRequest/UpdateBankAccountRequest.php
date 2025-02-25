@@ -40,7 +40,7 @@ class UpdateBankAccountRequest extends UpdateRequest
             'currency'       => ['required', 'string', 'max:3'],
             // 'holder_name'    => ['required', 'string', 'max:500'],
             // 'holder_id'      => ['required', 'integer', 'exists:people,id,deleted_at,NULL'],
-            'status'         => ['required', 'string', 'in:activa,inactiva,cerrada'],
+            'status'         => ['nullable', 'string', 'in:activa,inactiva,cerrada'],
         ];
     }
 

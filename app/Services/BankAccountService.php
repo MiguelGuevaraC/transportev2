@@ -19,15 +19,21 @@ class BankAccountService
 
     public function createBankAccount(array $data): BankAccount
     {
-        $proyect = BankAccount::create($data);
+        $data['status'] = 'activa';
+        $proyect        = BankAccount::create($data);
         return $proyect;
     }
 
     public function updateBankAccount(BankAccount $proyect, array $data): BankAccount
     {
-        $proyect->update($data);
+        $allowedAttributes = array_keys($proyect->getAttributes());
+        $filteredData = array_intersect_key($data, array_flip($allowedAttributes));
+        if (!empty($filteredData)) {
+            $proyect->update($filteredData);
+        }
         return $proyect;
     }
+    
 
     public function destroyById($id)
     {
