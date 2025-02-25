@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\LargeCashBox;
 
-use App\Exports\ExcelExport;
+use App\Exports\BankMovementExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BankMovementRequest\IndexBankMovementRequest;
 use App\Http\Requests\BankMovementRequest\StoreBankMovementRequest;
@@ -77,24 +77,15 @@ class BankMovementController extends Controller
      *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
      * )
      */
-    public function index_export_excel(IndexBankMovementRequest $request, $sumColumns = ['Monto'])
+    public function index_export_excel(IndexBankMovementRequest $request)
     {
         $request['all'] = "true";
-        $data           = $this->index($request);
         $fileName       = 'Caja_Grande_' . now()->timestamp . '.xlsx';
-
-        $columns = [
-            'Tipo'       => 'type_moviment',
-            'Fecha'      => 'date_moviment',
-            'Monto'      => 'total_moviment',
-            'Moneda'     => 'currency',
-            'Banco'      => 'bank.name',
-            'Cuenta'     => 'bank_account.account_number',
-            'Persona'    => ['person.names', 'person.fatherSurname', 'person.businessName'],
-            'Comentario' => 'comment',
-        ];
-
-        return Excel::download(new ExcelExport($data, $columns, $sumColumns), $fileName);
+        $data           = $this->index($request);
+        if ($data instanceof \Illuminate\Http\JsonResponse) {
+            $data = $data->getData(true); // Convertir a array asociativo
+        }
+        return Excel::download(new BankMovementExport($data,$request['from'],$request['to']),$fileName);
     }
 
 /**

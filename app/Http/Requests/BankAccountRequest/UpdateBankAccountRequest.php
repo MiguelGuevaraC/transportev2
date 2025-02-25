@@ -38,8 +38,8 @@ class UpdateBankAccountRequest extends UpdateRequest
             ],
             'account_type'   => ['required', 'string', 'in:ahorros,corriente,credito'],
             'currency'       => ['required', 'string', 'max:3'],
-            'holder_name'    => ['required', 'string', 'max:500'],
-            'holder_id'      => ['required', 'integer', 'exists:people,id,deleted_at,NULL'],
+            // 'holder_name'    => ['required', 'string', 'max:500'],
+            // 'holder_id'      => ['required', 'integer', 'exists:people,id,deleted_at,NULL'],
             'status'         => ['required', 'string', 'in:activa,inactiva,cerrada'],
         ];
     }
@@ -63,13 +63,13 @@ class UpdateBankAccountRequest extends UpdateRequest
         'currency.string'         => 'La moneda debe ser una cadena de texto.',
         'currency.max'            => 'El código de la moneda no debe exceder los 3 caracteres.',
 
-        'holder_name.required'    => 'El nombre del titular es obligatorio.',
-        'holder_name.string'      => 'El nombre del titular debe ser una cadena de texto.',
-        'holder_name.max'         => 'El nombre del titular no debe exceder los 500 caracteres.',
+        // 'holder_name.required'    => 'El nombre del titular es obligatorio.',
+        // 'holder_name.string'      => 'El nombre del titular debe ser una cadena de texto.',
+        // 'holder_name.max'         => 'El nombre del titular no debe exceder los 500 caracteres.',
 
-        'holder_id.required'      => 'El titular es obligatorio.',
-        'holder_id.integer'       => 'El ID del titular debe ser un número entero.',
-        'holder_id.exists'        => 'El titular seleccionado no es válido o ha sido eliminado.',
+        // 'holder_id.required'      => 'El titular es obligatorio.',
+        // 'holder_id.integer'       => 'El ID del titular debe ser un número entero.',
+        // 'holder_id.exists'        => 'El titular seleccionado no es válido o ha sido eliminado.',
 
         'status.required'         => 'El estado de la cuenta es obligatorio.',
         'status.string'           => 'El estado debe ser una cadena de texto.',

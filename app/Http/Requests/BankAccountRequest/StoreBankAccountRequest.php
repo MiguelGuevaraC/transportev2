@@ -53,9 +53,9 @@ class StoreBankAccountRequest extends StoreRequest
             ],
             'account_type'   => ['required', 'string', 'in:ahorros,corriente,credito'],
             'currency'       => ['required', 'string', 'max:3'],
-            'holder_name'    => ['required', 'string', 'max:500'],
-            'holder_id'      => ['required', 'integer', 'exists:people,id,deleted_at,NULL'],
-            'status'         => ['required', 'string', 'in:activa,inactiva,cerrada'],
+            // 'holder_name'    => ['required', 'string', 'max:500'],
+            // 'holder_id'      => ['required', 'integer', 'exists:people,id,deleted_at,NULL'],
+            'status'         => ['nullable', 'string', 'in:activa,inactiva'],
         ];
     }
 
@@ -78,17 +78,17 @@ class StoreBankAccountRequest extends StoreRequest
             'currency.string'         => 'El código de la moneda debe ser un texto.',
             'currency.max'            => 'El código de la moneda no debe exceder los 3 caracteres.',
 
-            'holder_name.required'    => 'El nombre del titular es obligatorio.',
-            'holder_name.string'      => 'El nombre del titular debe ser un texto.',
-            'holder_name.max'         => 'El nombre del titular no debe exceder los 500 caracteres.',
+            // 'holder_name.required'    => 'El nombre del titular es obligatorio.',
+            // 'holder_name.string'      => 'El nombre del titular debe ser un texto.',
+            // 'holder_name.max'         => 'El nombre del titular no debe exceder los 500 caracteres.',
 
-            'holder_id.required'      => 'El titular es obligatorio.',
-            'holder_id.integer'       => 'El ID del titular debe ser un número entero.',
-            'holder_id.exists'        => 'El titular seleccionado no existe o ha sido eliminado.',
+            // 'holder_id.required'      => 'El titular es obligatorio.',
+            // 'holder_id.integer'       => 'El ID del titular debe ser un número entero.',
+            // 'holder_id.exists'        => 'El titular seleccionado no existe o ha sido eliminado.',
 
             'status.required'         => 'El estado de la cuenta es obligatorio.',
             'status.string'           => 'El estado de la cuenta debe ser un texto.',
-            'status.in'               => 'El estado de la cuenta debe ser "activa", "inactiva" o "cerrada".',
+            'status.in'               => 'El estado de la cuenta debe ser "activa", "inactiva"',
         ];
     }
 

@@ -37,8 +37,8 @@ class BankAccountResource extends JsonResource
             'account_type'   => $this->account_type ?? null,
             'currency'       => $this->currency ?? null,
             'balance'        => $this->balance ?? null,
-            'holder_name'    => $this->holder_name ?? null,
-            'holder_id'      => $this->holder_id ?? null,
+            // 'holder_name'    => $this->holder_name ?? null,
+            // 'holder_id'      => $this->holder_id ?? null,
             'holder'         => $this->holder ? $this->holder : null,
             'status'         => $this->status ?? null,
         ];

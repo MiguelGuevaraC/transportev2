@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Traits;
 
 use App\Utils\Constants;
@@ -11,12 +10,12 @@ trait Filterable
     {
         foreach ($filters as $filter => $operator) {
             $paramName = str_replace('.', '$', $filter);
-            $value = $request->query($paramName);
+            $value     = $request->query($paramName);
 
             // Si el filtro usa 'between', verificamos la existencia de 'from' y 'to'
             if ($operator === 'between') {
                 $from = $request->query('from');
-                $to = $request->query('to');
+                $to   = $request->query('to');
 
                 if ($from || $to) {
                     $this->applyFilterCondition($query, $filter, $operator, compact('from', 'to'));
@@ -98,7 +97,7 @@ trait Filterable
 
     protected function getFilteredResults($modelOrQuery, $request, $filters, $sorts, $resource)
     {
-     
+
         if ($modelOrQuery instanceof Builder) {
             $query = $modelOrQuery;
         } else {
@@ -108,8 +107,8 @@ trait Filterable
         $query = $this->applyFilters($query, $request, $filters);
         $query = $this->applySorting($query, $request, $sorts);
 
-        $all = $request->query('all', false) === 'true';
-        $results = $all ? $query->get() : $query->paginate($request->query('per_page', Constants::DEFAULT_PER_PAGE));
+        $all     = $request->query('all', false) === 'true';
+        $results = $all ? $query->take(1000)->get() : $query->paginate($request->query('per_page', Constants::DEFAULT_PER_PAGE));
 
         return $all ? response()->json($resource::collection($results)) : $resource::collection($results);
     }
