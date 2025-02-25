@@ -61,6 +61,7 @@ class BankAccount extends Model
         $balance = DB::table('bank_movements')
             ->where('bank_account_id', $this->id)
             ->whereIn('type_moviment', ['ENTRADA', 'SALIDA'])
+            ->whereNull('deleted_at')
             ->sum(DB::raw("IF(type_moviment = 'ENTRADA', total_moviment, -total_moviment)"));
 
         $this->update(['balance' => $balance ?? 0]);

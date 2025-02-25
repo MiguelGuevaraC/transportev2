@@ -22,11 +22,11 @@ class BankMovementExport implements WithMultipleSheets
     protected $from;
     protected $to;
 
-    public function __construct($data = [],$from,$to)
+    public function __construct($data = [], $from, $to)
     {
         $this->data = collect($data)->sortBy('date_moviment');
-        $this->from  = $from;
-        $this->to  = $to;
+        $this->from = $from;
+        $this->to   = $to;
     }
 
     public function sheets(): array
@@ -49,16 +49,16 @@ class BankMovementExport implements WithMultipleSheets
 class BankSheetExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected string $bankName;
-    protected  $from;
-    protected  $to;
+    protected $from;
+    protected $to;
     protected Collection $movements;
 
-    public function __construct(string $bankName, Collection $movements,$from, $to)
+    public function __construct(string $bankName, Collection $movements, $from, $to)
     {
         $this->bankName  = $bankName;
         $this->movements = $movements->groupBy(fn($item) => $item['bank_account']['account_number'] ?? 'Desconocida');
-        $this->from  = $from;
-        $this->to  = $to;
+        $this->from      = $from;
+        $this->to        = $to;
     }
 
     public function collection(): Collection
@@ -68,16 +68,17 @@ class BankSheetExport implements FromCollection, WithHeadings, WithMapping, With
         foreach ($this->movements as $accountNumber => $transactions) {
             $data->push(["Número de Cuenta:", $accountNumber, '', '', '', '', '', '', '', '']); // Separador de cuenta
             $saldo = 0;
-    
-            $account= BankAccount::where('account_number',$accountNumber)->first();
+
+            $account = BankAccount::where('account_number', $accountNumber)->first();
             // Convertir la fecha de filtro a Carbon
             $fromDate = Carbon::parse($this->from);
 
             $saldo = DB::table('bank_movements')
-            ->where('bank_account_id', $account->id)
-            ->where('date_moviment', '<', $fromDate)
-            ->selectRaw('SUM(CASE WHEN type_moviment = "ENTRADA" THEN total_moviment ELSE -total_moviment END) as saldo')
-            ->value('saldo');
+                ->where('bank_account_id', $account->id)
+                ->where('date_moviment', '<', $fromDate)
+                ->whereNull('deleted_at')
+                ->selectRaw('SUM(CASE WHEN type_moviment = "ENTRADA" THEN total_moviment ELSE -total_moviment END) as saldo')
+                ->value('saldo');
             // Insertar saldo inicial
             $fechaSaldoInicial = $transactions->first()['date_moviment'] ?? '';
             $data->push([
