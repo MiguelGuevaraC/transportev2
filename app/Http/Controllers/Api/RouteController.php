@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bitacora;
 use App\Models\Place;
 use App\Models\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RouteController extends Controller
 {
@@ -861,6 +863,7 @@ class RouteController extends Controller
             'routes.*' => 'exists:routes,id', // Cada elemento en el array debe ser un ID válido
         ]);
 
+        
         $validator->after(function ($validator) use ($request, $id) {
             $placeStartId = $request->input('placeStart_id');
             $placeEndId = $request->input('placeEnd_id');
@@ -891,6 +894,14 @@ class RouteController extends Controller
         if (!$route) {
             return response()->json(['msg' => 'Route not found.'], 404);
         }
+        
+        // if ($route->routes()->exists()) {
+        //     return response()->json([
+        //         'message' => __('La ruta no puede ser editada porque tiene subrutas.'),
+        //         'status'  => 422,
+        //     ], 422);
+        // }
+
 
         // Actualizar la ruta
         $start = Place::find($request->input('placeStart_id'));
@@ -911,6 +922,16 @@ class RouteController extends Controller
             Route::whereIn('id', $routeIds)->update(['routeFather_id' => $route->id]);
         }
 
+        Bitacora::create([
+            'user_id' => Auth::id(), // ID del usuario que realiza la acción
+            'record_id' => $id, // El ID del usuario afectado
+            'action' => 'Update', // Acción realizada
+            'table_name' => 'routes', // Tabla afectada
+            'data' => json_encode($route),
+            'description' => 'Edita Ruta', // Descripción de la acción
+            'ip_address' => $request->ip(), // Dirección IP del usuario
+            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+        ]);
         $route = Route::with(['routes', 'placeStart', 'placeEnd', 'routeFather'])->find($route->id);
 
         return response()->json($route, 200);

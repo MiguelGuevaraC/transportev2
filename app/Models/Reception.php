@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -369,7 +368,7 @@ class Reception extends Model
     }
     public function storeWeight()
     {
-        $totalWeight = $this->details()->sum('weight');
+        $totalWeight     = $this->details()->sum('weight');
         $this->netWeight = $totalWeight;
         $this->save();
     }
@@ -391,11 +390,18 @@ class Reception extends Model
     }
     public function moviment()
     {
-        //return $this->belongsTo(Moviment::class, 'moviment_id');
         return $this->belongsTo(Moviment::class)
-        ->where('status_facturado', '!=', 'Anulado')
-        ->where('status', '!=', 'Anulada por Nota')
-        ->where('status', '!=', 'Anulada')
+            ->where(function ($query) {
+                // Si tiene Credit Note y el total es diferente, priorizarlo
+                $query->whereHas('creditNote', function ($subquery) {
+                    $subquery->whereColumn('credit_notes.total', '!=', 'moviments.total');
+                })
+                // Si no tiene Credit Note, aplicar los filtros de status
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereNotIn('status', ['Anulada por Nota', 'Anulada'])
+                            ->where('status_facturado', '!=', 'Anulado');
+                    });
+            })
             ->latest('id');
     }
 

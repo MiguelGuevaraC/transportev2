@@ -611,6 +611,9 @@ class DetailReceptionController extends Controller
         // Obtener los resultados con paginación
         $perPage = $request->get('per_page', 15);
         $page = $request->get('page', 1);
+        $rawSql = vsprintf(str_replace(['?'], ['\'%s\''], $query->toSql()), $query->getBindings());
+        //error_log($rawSql);
+        
         $receptions = $query->paginate($perPage, ['*'], 'page', $page);
 
         // Estructura de la respuesta

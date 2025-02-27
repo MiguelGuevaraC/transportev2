@@ -1015,30 +1015,29 @@ class VentaController extends Controller
                 $reception = Reception::find($item['reception_id'] ?? null);
                 return $reception?->paymentAmount ?? 0;
             });
-        
+
             // Verificar el tipo de pago
             $typePayment = $request->input('typePayment');
-        
+
             if ($typePayment === 'Créditos') {
                 // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
                 $totalPayments = collect($request->input('installments', []))->sum('importe');
             } else {
                 // Si no es crédito, sumamos los métodos de pago normalmente
-                $totalPayments = 
-                    ($request->input('cash', 0) ?: 0) + 
-                    ($request->input('yape', 0) ?: 0) + 
-                    ($request->input('plin', 0) ?: 0) + 
-                    ($request->input('card', 0) ?: 0) + 
+                $totalPayments =
+                    ($request->input('cash', 0) ?: 0) +
+                    ($request->input('yape', 0) ?: 0) +
+                    ($request->input('plin', 0) ?: 0) +
+                    ($request->input('card', 0) ?: 0) +
                     ($request->input('deposit', 0) ?: 0);
             }
-        
+
             // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
             if ($totalReceptionPayments != $totalPayments) {
                 $difference = $totalReceptionPayments - $totalPayments;
                 $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
             }
         });
-        
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -2065,23 +2064,23 @@ class VentaController extends Controller
                 $reception = Reception::find($item['reception_id'] ?? null);
                 return $reception?->paymentAmount ?? 0;
             });
-        
+
             // Verificar el tipo de pago
             $typePayment = $request->input('typePayment');
-        
+
             if ($typePayment === 'Créditos') {
                 // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
                 $totalPayments = collect($request->input('installments', []))->sum('importe');
             } else {
                 // Si no es crédito, sumamos los métodos de pago normalmente
-                $totalPayments = 
-                    ($request->input('cash', 0) ?: 0) + 
-                    ($request->input('yape', 0) ?: 0) + 
-                    ($request->input('plin', 0) ?: 0) + 
-                    ($request->input('card', 0) ?: 0) + 
+                $totalPayments =
+                    ($request->input('cash', 0) ?: 0) +
+                    ($request->input('yape', 0) ?: 0) +
+                    ($request->input('plin', 0) ?: 0) +
+                    ($request->input('card', 0) ?: 0) +
                     ($request->input('deposit', 0) ?: 0);
             }
-        
+
             // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
             if ($totalReceptionPayments != $totalPayments) {
                 $difference = $totalReceptionPayments - $totalPayments;
@@ -2635,8 +2634,8 @@ class VentaController extends Controller
         $typeDocument     = $request->input('typeDocument');
         $status           = $request->input('status');
         $personId         = $request->input('person_id');
-        $start            = $request->input('start');            // Fecha de inicio
-        $end              = $request->input('end');              // Fecha de fin
+        $start            = $request->input('start'); // Fecha de inicio
+        $end              = $request->input('end');   // Fecha de fin
         $end              = Carbon::parse($end)->addDay()->format('Y-m-d');
         $sequentialNumber = $request->input('sequentialNumber'); // Número secuencial (opcional)
 
@@ -2661,11 +2660,11 @@ class VentaController extends Controller
                 $ventaTotal = $item->total; // Total de la venta
                 if ($item->creditNote) {
                     $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
-                    $item->total = max($ventaTotal - $notaCreditoTotal, 0);
-                    $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
+                    $item->total      = max($ventaTotal - $notaCreditoTotal, 0);
+                    $item->saldo      = max($item->saldo - $notaCreditoTotal, 0);
 
-                }else{
-                    if($item->status == "Anulada"){
+                } else {
+                    if ($item->status == "Anulada") {
                         $item->total = 0;
                         $item->saldo = 0;
                     }
@@ -2704,11 +2703,12 @@ class VentaController extends Controller
             if ($item->creditNote || $item->status == "Anulada") {
                 $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
 
-                // Calculamos el nuevo total, asegurándonos de que no sea negativo
+// Calculamos el nuevo total, asegurándonos de que no sea negativo
                 $item->total = max($ventaTotal - $notaCreditoTotal, 0);
 
-                // Calculamos el saldo, asegurándonos de que no sea negativo
-                $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
+// Calculamos el saldo, asegurándonos de que no sea negativo
+// $item->saldo = max($item->saldo - $notaCreditoTotal, 0);
+                $item->saldo = max($item->saldo, 0);
 
                 if ($ventaTotal == $notaCreditoTotal) {
                     $item->status = 'Anulada por Nota: ' . $item->creditNote->number; // Total igual al monto de la nota de crédito
@@ -2719,10 +2719,10 @@ class VentaController extends Controller
                         $item->status = 'Pendiente';
                     }
                 }
-                if ($item->creditNote ) {
-                    if ($item->creditNote->reason !="13") {
-                        $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
-                    }
+                if ($item->creditNote) {
+// if ($item->creditNote->reason !="13") {
+//     $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
+// }
                 }
                 if ($item->status_facturado == "Anulada") {
                     $item->status = 'Anulada';
@@ -3074,10 +3074,10 @@ class VentaController extends Controller
 
     public function getArchivosDocument($idventa, $typeDocument)
     {
-                                                                                                // Habilitar CORS para un origen específico
+                                                                                             // Habilitar CORS para un origen específico
         header("Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app"); // Permitir solo este origen
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                             // Permitir métodos HTTP específicos
-        header("Access-Control-Allow-Headers: Content-Type, Authorization");                    // Permitir tipos de encabezados específicos
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                          // Permitir métodos HTTP específicos
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");                 // Permitir tipos de encabezados específicos
 
         // Si es una solicitud OPTIONS (preflight), responde sin ejecutar más lógica
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {

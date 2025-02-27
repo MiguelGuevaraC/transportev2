@@ -42,7 +42,6 @@ class BankAccount extends Model
         'Moneda'             => 'currency',
         'Monto'              => 'balance',
         'Estado'             => 'status',
-        'Nombre Propietario' => 'holder_name',
     ];    const sorts = [
         'id' => 'desc',
     ];
