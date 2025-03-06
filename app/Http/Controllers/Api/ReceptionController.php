@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ReceptionsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
@@ -8,13 +9,22 @@ use App\Models\DetailReception;
 use App\Models\Reception;
 use App\Models\Route;
 use App\Models\Worker;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Excel;
 
 class ReceptionController extends Controller
 {
+
+    private $excel;
+
+public function __construct(Excel $excel)
+{
+    $this->excel = $excel;
+}
 
     /**
      * @OA\Get(
@@ -634,7 +644,7 @@ class ReceptionController extends Controller
                 }
             } else {
                 return response()->json(['error' => 'Worker not found'], 422);
-            }  
+            }
 
             foreach ($detailsUpdate as $detailData) {
                 $idDetail = isset($detailData['idDetail']) == false ? 'null' : $detailData['idDetail'];
@@ -785,5 +795,327 @@ class ReceptionController extends Controller
 
         return response()->json(['message' => 'Recepción eliminada con éxito']);
     }
+
+   
+    public function reporteRecepcionesExcel(Request $request)
+    {
+        // 1. Extraer y preparar filtros
+        $filters = $this->extractReceptionFilters($request);
+        
+        // Validar branch_office_id si se proporciona
+        if (!empty($filters['branch_office_id'])) {
+            $branchOffice = BranchOffice::find($filters['branch_office_id']);
+            if (!$branchOffice) {
+                return response()->json([
+                    "message" => "Branch Office Not Found",
+                ], 404);
+            }
+        }
+        
+        // 2. Construir query base con solo las relaciones necesarias
+        $query = Reception::with([
+            'user:id,username', 
+            'origin:id,name', 
+            'sender', 
+            'destination:id,name',
+            'recipient', 
+            'payResponsible', 
+            'firstCarrierGuide' => function($query) {
+                $query->select(
+                    'carrier_guides.id', 
+                    'carrier_guides.reception_id', 
+                    'carrier_guides.numero', 
+                    'carrier_guides.programming_id'
+                );
+            },
+            'moviment:id,reception_id,sequentialNumber'
+        ]);
+        
+        // 3. Aplicar filtros
+        $this->applyReceptionFilters($query, $filters);
+        
+        // 4. Obtener datos (limitado a 2000 para rendimiento)
+        $receptions = $query->orderBy('id', 'desc')->take(3000)->get();
+        
+        // 5. Precarga de detalles para evitar N+1
+        $detailsMap = $this->getReceptionDetails($receptions->pluck('id')->toArray());
+        
+        // 6. Procesar y formatear datos
+        $result = $this->processReceptionData($receptions, $detailsMap);
+        
+        // 7. Exportar a Excel usando la fachada correctamente
+        return $this->excel->download(
+            new ReceptionsExport($result['data'], $filters['dateStart'], $filters['dateEnd']), 
+            'reporte_recepciones.xlsx'
+        );
+    }
+
+    /**
+     * Extrae y prepara los filtros desde el request
+     */
+    protected function extractReceptionFilters(Request $request)
+    {
+        return [
+            'branch_office_id'    => $request->input('branch_office_id'),
+            'codeReception'       => $request->input('codeReception'),
+            'dateStart'           => $request->input('dateStart'),
+            'dateEnd'             => $request->input('dateEnd'),
+            'nombreClientePaga'   => $request->input('nombreClientePaga') ? strtoupper($request->input('nombreClientePaga')) : null,
+            'nombreRemitente'     => $request->input('nombreRemitente') ? strtoupper($request->input('nombreRemitente')) : null,
+            'nombreDestinatario'  => $request->input('nombreDestinatario') ? strtoupper($request->input('nombreDestinatario')) : null,
+            'numberVenta'         => $request->input('numberVenta'),
+            'numberGuia'          => $request->input('numberGuia'),
+            'origenOrDestino'     => $request->input('origenOrDestino') ? strtoupper($request->input('origenOrDestino')) : null,
+            'isCargos'            => $request->input('isCargos'),
+            'statusReception'     => $request->input('statusReception'),
+        ];
+    }
+
+    /**
+     * Aplica los filtros al query builder
+     */
+    protected function applyReceptionFilters($query, $filters)
+    {
+        // Filtro por sucursal
+        if (!empty($filters['branch_office_id'])) {
+            $query->where('branchOffice_id', $filters['branch_office_id']);
+        }
+        
+        // Filtro por código recepción
+        if (!empty($filters['codeReception'])) {
+            $query->where('codeReception', 'LIKE', '%' . $filters['codeReception'] . '%');
+        }
+        
+        // Filtros por fechas
+        if (!empty($filters['dateStart'])) {
+            $query->whereDate('created_at', '>=', $filters['dateStart']);
+        }
+        
+        if (!empty($filters['dateEnd'])) {
+            $query->whereDate('created_at', '<=', $filters['dateEnd']);
+        }
+        
+        // Filtro por guía
+        if (!empty($filters['numberGuia'])) {
+            $query->whereHas('firstCarrierGuide', function ($q) use ($filters) {
+                $q->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
+            });
+        }
+        
+        // Filtros por nombres (remitente, destinatario, cliente que paga)
+        $this->applyNameFiltersToQuery($query, $filters);
+        
+        // Filtro por origen o destino
+        if (!empty($filters['origenOrDestino'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->whereHas('origin', function ($subq) use ($filters) {
+                    $subq->where(DB::raw('UPPER(name)'), 'LIKE', '%' . $filters['origenOrDestino'] . '%');
+                })->orWhereHas('destination', function ($subq) use ($filters) {
+                    $subq->where(DB::raw('UPPER(name)'), 'LIKE', '%' . $filters['origenOrDestino'] . '%');
+                });
+            });
+        }
+        
+        // Filtro por número de venta
+        if (!empty($filters['numberVenta'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('nro_sale', $filters['numberVenta'])
+                  ->orWhere(function ($sq) use ($filters) {
+                      $sq->whereNull('nro_sale')
+                         ->whereHas('moviment', function ($mq) use ($filters) {
+                             $mq->where('sequentialNumber', 'LIKE', '%' . $filters['numberVenta'] . '%');
+                         });
+                  });
+            });
+        }
+        
+        // Filtro por cargos
+        if (!empty($filters['isCargos'])) {
+            if ($filters['isCargos'] == "true") {
+                $query->whereHas('cargos');
+            } else {
+                $query->whereDoesntHave('cargos');
+            }
+        }
+        
+        // Filtro por estado
+        if (!empty($filters['statusReception'])) {
+            $query->where(function ($q) use ($filters) {
+                if ($filters['statusReception'] === 'Sin Guia') {
+                    $q->whereDoesntHave('firstCarrierGuide');
+                } elseif ($filters['statusReception'] === 'Sin Programar') {
+                    $q->whereHas('firstCarrierGuide', function ($sq) {
+                        $sq->whereNull('carrier_guides.programming_id');
+                    });
+                } else {
+                    $q->whereHas('firstCarrierGuide', function ($sq) {
+                        $sq->whereNotNull('carrier_guides.programming_id');
+                    });
+                }
+            });
+        }
+    }
+
+    /**
+     * Aplica filtros de nombre a remitente, destinatario y responsable de pago
+     */
+    protected function applyNameFiltersToQuery($query, $filters)
+    {
+        // Filtro por remitente
+        if (!empty($filters['nombreRemitente'])) {
+            $query->whereHas('sender', function ($q) use ($filters) {
+                $this->applyNameFilter($q, $filters['nombreRemitente']);
+            });
+        }
+        
+        // Filtro por destinatario
+        if (!empty($filters['nombreDestinatario'])) {
+            $query->whereHas('recipient', function ($q) use ($filters) {
+                $this->applyNameFilter($q, $filters['nombreDestinatario']);
+            });
+        }
+        
+        // Filtro por cliente que paga
+        if (!empty($filters['nombreClientePaga'])) {
+            $query->whereHas('payResponsible', function ($q) use ($filters) {
+                $this->applyNameFilter($q, $filters['nombreClientePaga']);
+            });
+        }
+    }
+
+    /**
+     * Aplica filtro en campos de nombre, razón social, etc.
+     * Se asume que este método ya existe en la clase Controller
+     */
+    protected function applyNameFilter($query, $name)
+    {
+        return $query->where(function ($q) use ($name) {
+            $q->where(DB::raw('UPPER(name)'), 'LIKE', '%' . $name . '%')
+              ->orWhere(DB::raw('UPPER(business_name)'), 'LIKE', '%' . $name . '%')
+              ->orWhere(DB::raw('UPPER(last_name)'), 'LIKE', '%' . $name . '%');
+        });
+    }
+
+    /**
+     * Obtiene el nombre para mostrar de una persona
+     * Se asume que este método ya existe en el controlador
+     */
+    public function namePerson($person)
+    {
+        if ($person == null) {
+            return '-'; // Si $person es nulo, retornamos un valor predeterminado
+        }
+
+        $typeD  = $person->typeofDocument ?? 'dni';
+        $cadena = '';
+
+        if (strtolower($typeD) === 'ruc') {
+            $cadena = $person->businessName;
+        } else {
+            $cadena = $person->names . ' ' . $person->fatherSurname . ' ' . $person->motherSurname;
+        }
+
+        // return $cadena . ' ' . ($person->documentNumber == null ? '?' : $typeD . ' ' . $person->documentNumber);
+
+        return $cadena;
+    }
+
+    /**
+     * Obtiene los detalles de recepción para un conjunto de IDs
+     */
+    protected function getReceptionDetails(array $receptionIds)
+    {
+        if (empty($receptionIds)) {
+            return collect();
+        }
+        
+        return DB::table('detail_receptions')
+            ->whereIn('reception_id', $receptionIds)
+            ->select('reception_id', 'description')
+            ->get()
+            ->groupBy('reception_id');
+    }
+
+    /**
+     * Procesa las recepciones y prepara los datos para exportación
+     */
+    protected function processReceptionData($receptions, $detailsMap)
+    {
+        $exportData = [];
+        $totals = ['flete' => 0, 'deuda' => 0, 'peso' => 0];
+        
+        foreach ($receptions as $reception) {
+            // Determinar estado
+            $status = 'No asignado';
+            if (!$reception->firstCarrierGuide) {
+                $status = 'Sin Guia';
+            } elseif ($reception->firstCarrierGuide && empty($reception->firstCarrierGuide->programming_id)) {
+                $status = 'Sin Programar';
+            } else {
+                $status = 'Programado';
+            }
+            
+            // Obtener descripción de carga
+            $carga = isset($detailsMap[$reception->id]) 
+                ? $detailsMap[$reception->id]->pluck('description')->implode(', ') 
+                : '-';
+            
+            // Preparar datos para exportación
+            $exportData[] = [
+                'COD RECEPCION'     => (string) ($reception->codeReception ?? ''),
+                'FECHA SOLIC.'      => $reception->receptionDate
+                    ? Carbon::parse($reception->receptionDate)->format('Y-m-d')
+                    : '',
+                'REMITENTE'         => (string) ($this->namePerson($reception->sender) ?? ''),
+                'DESTINATARIO.'     => (string) $this->namePerson($reception->recipient),
+                'ORIGEN'            => (string) ($reception->origin->name ?? ''),
+                'DESTINO'           => (string) ($reception->destination->name ?? ''),
+                'CLIENTE PAGA'      => (string) $this->namePerson($reception->payResponsible),
+                'DOCUMENTOS ANEXOS' => (string) ($reception->comment ?? ''),
+                'FLETE'             => (string) ($reception->paymentAmount ?? 0),
+                'DEUDA'             => (string) ($reception->debtAmount ?? 0),
+                'CARGA'             => (string) $carga,
+                'PESO'              => (string) ($reception->netWeight ?? 0),
+                'GUIA'              => (string) ($reception->firstCarrierGuide->numero ?? 'Sin Guia'),
+                'DOC. VENTA'        => (string) ($reception->nro_sale ?? 
+                                        ($reception->moviment->sequentialNumber ?? 'Sin Venta')),
+                'ESTADO RECEPCIÓN'  => $status,
+                'USUARIO'           => (string) ($reception->user->username ?? 'No asignado'),
+            ];
+            
+            // Acumular totales
+            $totals['flete'] += (float) ($reception->paymentAmount ?? 0);
+            $totals['deuda'] += (float) ($reception->debtAmount ?? 0);
+            $totals['peso'] += (float) ($reception->netWeight ?? 0);
+        }
+        
+        // Añadir fila de totales
+        $exportData[] = [
+            'COD RECEPCION'     => '',
+            'FECHA SOLIC.'      => '',
+            'REMITENTE'         => '',
+            'DESTINATARIO.'     => '',
+            'ORIGEN'            => '',
+            'DESTINO'           => '',
+            'CLIENTE PAGA'      => '',
+            'DOCUMENTOS ANEXOS' => 'TOTAL',
+            'FLETE'             => (string) $totals['flete'],
+            'DEUDA'             => (string) $totals['deuda'],
+            'CARGA'             => '',
+            'PESO'              => (string) $totals['peso'],
+            'GUIA'              => '',
+            'DOC. VENTA'        => '',
+            'ESTADO RECEPCIÓN'  => '',
+            'USUARIO'           => '',
+        ];
+        
+        return [
+            'data' => $exportData,
+            'totals' => $totals
+        ];
+    }
+
+    
+
 
 }

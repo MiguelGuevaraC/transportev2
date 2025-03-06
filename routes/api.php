@@ -304,7 +304,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     Route::get('reporteCuentasPorCobrarExcel', [PdfController::class, 'reporteCuentasPorCobrarExcel'])->name('reportCajaExcel');
     Route::get('salesExcel', [ExcelController::class, 'reporteVentasExcel'])->name('reportVentasExcel');
-    Route::get('reporteRecepcionesExcel', [PdfController::class, 'reporteRecepcionesExcel'])->name('reporteRecepcionesExcel');
+    Route::get('reporteRecepcionesExcel', [ReceptionController::class, 'reporteRecepcionesExcel'])->name('reporteRecepcionesExcel');
     
     Route::get('reporteDocumentsExcel', [ExcelController::class, 'reporteDocumentsExcel'])->name('reporteDocumentsExcel');
     Route::get('reporteManifiestoExcel/{id}', [ExcelController::class, 'reporteManifiestoExcel'])->name('reporteManifiestoExcel');

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -44,10 +43,10 @@ class DocumentController extends Controller
 
         Document::where(function ($query) use ($hoy) {
             $query->where('status', 'Vigente')->whereDate('dueDate', '<', $hoy)
-                  ->orWhere(function ($subquery) use ($hoy) {
-                      $subquery->where('status', 'Vencido')->whereDate('dueDate', $hoy);
-                  });
-        })->update(['status' => DB::raw("CASE 
+                ->orWhere(function ($subquery) use ($hoy) {
+                    $subquery->where('status', 'Vencido')->whereDate('dueDate', $hoy);
+                });
+        })->update(['status' => DB::raw("CASE
             WHEN dueDate < '$hoy' THEN 'Vencido'
             WHEN dueDate = '$hoy' THEN 'Vigente'
         END")]);
@@ -57,37 +56,37 @@ class DocumentController extends Controller
     {
         $this->actualizarEstadoDocumentos();
 
-        // Parámetros de paginación
-        $page = $request->input('page', 1); // Página por defecto es 1
+                                                     // Parámetros de paginación
+        $page     = $request->input('page', 1);      // Página por defecto es 1
         $per_page = $request->input('per_page', 10); // 10 elementos por defecto
 
-        // Parámetros de filtro
-        $number = $request->input('number'); // Número de documento
+                                                     // Parámetros de filtro
+        $number     = $request->input('number');     // Número de documento
         $vehicle_id = $request->input('vehicle_id'); // ID de vehículo
-        $startDate = $request->input('startDate'); // Fecha de inicio (created_at >=)
-        $endDate = $request->input('endDate'); // Fecha de fin (created_at <=)
-        $status = $request->input('status');
+        $startDate  = $request->input('startDate');  // Fecha de inicio (created_at >=)
+        $endDate    = $request->input('endDate');    // Fecha de fin (created_at <=)
+        $status     = $request->input('status');
         // Construir la consulta con filtros condicionales
         $query = Document::with(['vehicle'])->where('state', 1);
 
         // Filtrar por número de documento si está presente
-        if (!empty($number)) {
+        if (! empty($number)) {
             $query->where('number', 'LIKE', "%$number%");
         }
-        if (!empty($status)) {
+        if (! empty($status)) {
             $query->where('status', 'LIKE', "%$status%");
         }
         // Filtrar por ID de vehículo si está presente
-        if (!empty($vehicle_id)) {
+        if (! empty($vehicle_id)) {
             $query->where('vehicle_id', $vehicle_id);
         }
 
         // Filtrar por fechas de creación (rangos)
-        if (!empty($startDate)) {
+        if (! empty($startDate)) {
             $query->where('created_at', '>=', $startDate);
         }
 
-        if (!empty($endDate)) {
+        if (! empty($endDate)) {
             $query->where('created_at', '<=', $endDate);
         }
 
@@ -97,18 +96,18 @@ class DocumentController extends Controller
 
         // Estructura de la respuesta con información de paginación
         return response()->json([
-            'total' => $documents->total(),
-            'data' => $documents->items(),
-            'current_page' => $documents->currentPage(),
-            'last_page' => $documents->lastPage(),
-            'per_page' => $documents->perPage(),
-            'pagination' => $per_page,
+            'total'          => $documents->total(),
+            'data'           => $documents->items(),
+            'current_page'   => $documents->currentPage(),
+            'last_page'      => $documents->lastPage(),
+            'per_page'       => $documents->perPage(),
+            'pagination'     => $per_page,
             'first_page_url' => $documents->url(1),
-            'from' => $documents->firstItem(),
-            'next_page_url' => $documents->nextPageUrl(),
-            'path' => $documents->path(),
-            'prev_page_url' => $documents->previousPageUrl(),
-            'to' => $documents->lastItem(),
+            'from'           => $documents->firstItem(),
+            'next_page_url'  => $documents->nextPageUrl(),
+            'path'           => $documents->path(),
+            'prev_page_url'  => $documents->previousPageUrl(),
+            'to'             => $documents->lastItem(),
         ], 200);
     }
 
@@ -126,7 +125,7 @@ class DocumentController extends Controller
             // Calcular la diferencia en días entre hoy y la fecha de vencimiento
             $daysUntilDue = now()->diffInDays($document->dueDate, false);
 
-            // Determinar la prioridad según los días restantes
+                               // Determinar la prioridad según los días restantes
             $priority = 'low'; // Por defecto, bajo
             if ($daysUntilDue == 1) {
                 $priority = 'medium'; // Prioridad media si queda 1 día
@@ -140,18 +139,18 @@ class DocumentController extends Controller
                 ->whereDate('created_at', now()) // Verificar si se creó hoy
                 ->exists();
 
-            if (!$notificationExists) {
+            if (! $notificationExists) {
 
                 // Crear una nueva notificación si no existe
                 Notification::create([
-                    'record_id' => $document->id,
-                    'title' => "Vencimiento próximo del documento",
-                    'message' => "El documento con número {$document->number} vencerá en {$daysUntilDue} días.",
-                    'type' => 'warning',
-                    'table' => 'documents',
-                    'priority' => $priority,
+                    'record_id'  => $document->id,
+                    'title'      => "Vencimiento próximo del documento",
+                    'message'    => "El documento con número {$document->number} vencerá en {$daysUntilDue} días.",
+                    'type'       => 'warning',
+                    'table'      => 'documents',
+                    'priority'   => $priority,
                     'vehicle_id' => $document->vehicle_id,
-                    'dueDate' => $document->dueDate,
+                    'dueDate'    => $document->dueDate,
                     'created_at' => now(),
                 ]);
             }
@@ -250,10 +249,10 @@ class DocumentController extends Controller
         $validator = validator()->make($request->all(), [
 
             'description' => 'required|string|max:255',
-            'number' => 'nullable|string',
-            'type' => 'nullable|string',
-            'dueDate' => 'nullable|date',
-            'vehicle_id' => 'required|integer|exists:vehicles,id',
+            'number'      => 'nullable|string',
+            'type'        => 'nullable|string',
+            'dueDate'     => 'nullable|date',
+            'vehicle_id'  => 'required|integer|exists:vehicles,id',
         ]);
 
         if ($validator->fails()) {
@@ -272,7 +271,7 @@ class DocumentController extends Controller
 
         $expiredDocument = Document::where('type', $object->type)
             ->where('vehicle_id', $object->vehicle_id)
-        // ->where('status', 'Vencido') // Asegurarse de que esté marcado como vencido
+                                           // ->where('status', 'Vencido') // Asegurarse de que esté marcado como vencido
             ->whereDate('dueDate', '<', now()) // Asegurarse de que la fecha de vencimiento sea anterior a la fecha actual
             ->first();
 
@@ -333,9 +332,11 @@ class DocumentController extends Controller
     public function show($id)
     {
         $document = Document::with(['vehicle'])->find($id);
-        if (!$document) {
+
+        if (! $document) {
             return response()->json(['message' => 'Document not found'], 404);
         }
+        $this->actualizarEstadoDocumentos();
         return response()->json($document, 200);
     }
 
@@ -401,18 +402,18 @@ class DocumentController extends Controller
     public function update(Request $request, $id)
     {
         $document = Document::with(['vehicle'])->find($id);
-        if (!$document) {
+        if (! $document) {
             return response()->json(['message' => 'Document not found'], 404);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
             'description' => 'required|string|max:255',
-            'vehicle_id' => 'required|integer|exists:vehicles,id',
-            'type' => 'required',
-            'pathFile' => 'nullable|string|max:255',
-            'number' => 'nullable|string',
-            'dueDate' => 'nullable|date',
+            'vehicle_id'  => 'required|integer|exists:vehicles,id',
+            'type'        => 'required',
+            'pathFile'    => 'nullable|string|max:255',
+            'number'      => 'nullable|string',
+            'dueDate'     => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -429,6 +430,8 @@ class DocumentController extends Controller
         ]);
 
         $document->update($data);
+
+        $this->actualizarEstadoDocumentos();
 
         $document = Document::with(['vehicle'])->find($document->id);
 
@@ -492,10 +495,10 @@ class DocumentController extends Controller
     {
         $validator = validator()->make($request->all(), [
             'description' => 'required|string|max:255',
-            'number' => 'required|string',
-            'dueDate' => 'required|date',
-            'vehicle_id' => 'required|integer|exists:vehicles,id',
-            'pathFile' => 'nullable|file', // Validación de archivo
+            'number'      => 'required|string',
+            'dueDate'     => 'required|date',
+            'vehicle_id'  => 'required|integer|exists:vehicles,id',
+            'pathFile'    => 'nullable|file', // Validación de archivo
         ]);
 
         if ($validator->fails()) {
@@ -505,7 +508,7 @@ class DocumentController extends Controller
         // Buscar o crear una instancia de Document
         $document = $id != 'null' ? Document::find($id) : new Document();
 
-        if (!$document) {
+        if (! $document) {
             return response()->json(['error' => 'Document not found.'], 404);
         }
 
@@ -518,7 +521,7 @@ class DocumentController extends Controller
             $photoFile = $request->file('pathFile');
 
             $vehicleDirectory = 'public/document/' . $request->input('vehicle_id');
-            $filePath = $photoFile->store($vehicleDirectory); // Guardar la foto en el directorio
+            $filePath         = $photoFile->store($vehicleDirectory); // Guardar la foto en el directorio
 
             $photoUrl = Storage::url($filePath);
 
@@ -526,14 +529,14 @@ class DocumentController extends Controller
         }
         // Asigna los demás datos
         $document->description = $request->input('description');
-        $document->number = $request->input('number');
-        $document->dueDate = $request->input('dueDate');
-        $document->type = $request->input('type');
-        $document->vehicle_id = $request->input('vehicle_id');
+        $document->number      = $request->input('number');
+        $document->dueDate     = $request->input('dueDate');
+        $document->type        = $request->input('type');
+        $document->vehicle_id  = $request->input('vehicle_id');
 
         // Guarda el documento
         $currentDate = now();
-        $dueDate = $request->input('dueDate');
+        $dueDate     = $request->input('dueDate');
 
         if ($dueDate < $currentDate) {
             $document->status = 'Vencido';
@@ -542,7 +545,7 @@ class DocumentController extends Controller
 
             $expiredDocument = Document::where('type', $document->type)
                 ->where('vehicle_id', $document->vehicle_id)
-            // ->where('status', 'Vencido') // Asegurarse de que esté marcado como vencido
+                                               // ->where('status', 'Vencido') // Asegurarse de que esté marcado como vencido
                 ->whereDate('dueDate', '<', now()) // Asegurarse de que la fecha de vencimiento sea anterior a la fecha actual
                 ->first();
 
@@ -559,7 +562,7 @@ class DocumentController extends Controller
 
         // Guarda el documento
         $document->save();
-
+        $this->actualizarEstadoDocumentos();
         // Cargar relaciones y devolver el documento
         $document = Document::with(['vehicle'])->find($document->id);
 
@@ -609,12 +612,13 @@ class DocumentController extends Controller
     public function destroy($id)
     {
         $document = Document::with(['vehicle'])->find($id);
-        if (!$document) {
+        if (! $document) {
             return response()->json(['message' => 'Document not found'], 404);
         }
 
         $document->state = 0; // Marcar el documento como eliminado al establecer el estado a 0 (inactivo)
         $document->save();
+        $this->actualizarEstadoDocumentos();
 
         return response()->json(['message' => 'Document deleted successfully'], 200);
     }
