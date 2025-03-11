@@ -215,7 +215,7 @@ class ProgrammingController extends Controller
                 ->count() + 1; // +1 para el número de programación
 
             // Formatear el número de programación con el año, ID del vehículo y el contador
-            $programming->numero = 'P' . str_pad($branchOfficeId, 3, '0', STR_PAD_LEFT) . '-' . $year . '-' . str_pad($vehicleId, 2, '0', STR_PAD_LEFT) . '-' . $ultimo6Caracteres = substr($programming->numero, -6);;
+            $programming->numero = 'P' . str_pad($branchOfficeId, 3, '0', STR_PAD_LEFT) . '-' . $year . '-' . str_pad($vehicleId, 2, '0', STR_PAD_LEFT) . '-' . $ultimo6Caracteres = substr($programming->numero, -8);;
 
         });
 

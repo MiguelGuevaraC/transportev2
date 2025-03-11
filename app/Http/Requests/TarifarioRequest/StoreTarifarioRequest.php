@@ -5,7 +5,7 @@ use App\Http\Requests\StoreRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Validation\Validator;
 /**
  * @OA\Schema(
  *     schema="TarifarioRequest",
@@ -56,6 +56,7 @@ class StoreTarifarioRequest extends StoreRequest
                     $exists = DB::table('tarifarios')
                         ->where('person_id', request('person_id'))
                         ->where('origin_id', request('origin_id'))
+                        ->where('unity_id', request('unity_id'))
                         ->where('destination_id', request('destination_id'))
                         ->where(function ($query) {
                             $query->whereBetween('limitweight_min', [request('limitweight_min'), request('limitweight_max')])
@@ -111,6 +112,25 @@ class StoreTarifarioRequest extends StoreRequest
         ];
     }
 
+
+    public function withValidator(Validator $validator)
+    {
+        $validator->after(function ($validator) {
+            $data = $this->only([
+                'person_id', 'origin_id', 'unity_id', 'destination_id', 'limitweight_min', 'limitweight_max'
+            ]);
+
+            // Consulta directa para verificar si ya existe un registro con estos valores
+            $exists = DB::table('tarifarios')
+                ->where($data)
+                ->whereNull('deleted_at') // Ignorar los eliminados
+                ->exists();
+
+            if ($exists) {
+                $validator->errors()->add('tarifario_existente', 'Ya existe un tarifario con estos datos.');
+            }
+        });
+    }
     /**
      * Get custom attributes for validator errors.
      *

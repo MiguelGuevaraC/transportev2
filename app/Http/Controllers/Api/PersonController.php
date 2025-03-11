@@ -97,7 +97,7 @@ class PersonController extends Controller
         $telephone    = $request->input('telephone', '');
 
         // Construir la consulta
-        $query = Person::query()
+        $query = Person::query()->with(['tarifas'])
         //  ->where('branchOffice_id', $branch_office_id)
         ;
         // Aplicar filtros por tipo de persona

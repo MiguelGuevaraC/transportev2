@@ -35,11 +35,22 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function collection()
     {
-        $products = is_array($this->product_id) 
-            ? $this->product_id 
-            : ($this->product_id !== "null" 
-                ? [$this->product_id] 
-                : CargaDocument::latest()->pluck('product_id')->unique()->take(10));
+        $products = is_array($this->product_id)
+        ? array_filter($this->product_id) // Filtra valores nulos
+        : ($this->product_id !== "null" && $this->product_id !== null
+            ? [$this->product_id]
+            : CargaDocument::whereHas('product', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+                ->latest()
+                ->pluck('product_id')
+                ->unique()
+                ->take(10)
+                ->filter()    // Filtra valores nulos
+                ->toArray()); // Asegura que sea un array
+
+        // Si sigue siendo null, lo convertimos en un array vacío
+        $products = empty($products) ? [] : $products;
     
         $finalCollection = new Collection();
     

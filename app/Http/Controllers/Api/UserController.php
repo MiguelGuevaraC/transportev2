@@ -493,7 +493,7 @@ class UserController extends Controller
 
             // Obtener subgrupos del grupo padre y ordenar por fecha de creación
             $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
-                ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
+                ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
                 ->get();
 
             foreach ($subgrupos as $subgrupo) {

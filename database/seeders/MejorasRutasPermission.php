@@ -17,7 +17,8 @@ class MejorasRutasPermission extends Seeder
 
         $grupos = [
             ['id' => '6', 'name' => 'Caja Grande', 'icon' => 'user_circle'],
-
+            ['id' => '7', 'name' => 'Almacén', 'icon' => 'user_circle'],
+            ['id' => '8', 'name' => 'Taller', 'icon' => 'user_circle'],
         ];
 
         foreach ($grupos as $grupo) {
@@ -31,7 +32,7 @@ class MejorasRutasPermission extends Seeder
                 'route'        => 'unidades',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
-                'groupMenu_id' => 2,
+                'groupMenu_id' => 7,
             ],
             [
                 'id'           => 32,
@@ -39,7 +40,7 @@ class MejorasRutasPermission extends Seeder
                 'route'        => 'tarifas',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
-                'groupMenu_id' => 2,
+                'groupMenu_id' => 7,
             ],
             [
                 'id'           => 33,
@@ -47,7 +48,7 @@ class MejorasRutasPermission extends Seeder
                 'route'        => 'productos',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
-                'groupMenu_id' => 2,
+                'groupMenu_id' => 7,
             ],
             [
                 'id'           => 34,
@@ -55,7 +56,7 @@ class MejorasRutasPermission extends Seeder
                 'route'        => 'almacencargas',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
-                'groupMenu_id' => 2,
+                'groupMenu_id' => 7,
             ],
             [
                 'id'           => 35,

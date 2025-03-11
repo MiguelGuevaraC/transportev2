@@ -128,7 +128,7 @@ public function applyNameFilter($query, $searchTermUpper)
             'user', 'origin', 'sender', 'destination',
             'recipient', 'pickupResponsible', 'payResponsible',
             'seller', 'pointDestination', 'pointSender', 'branchOffice',
-            'details', 'firstCarrierGuide', 'moviment', 'cargos',
+            'details', 'firstCarrierGuide','firstCarrierGuide.programming', 'moviment', 'cargos',
         ]);
 
         if (!empty($branch_office_id)) {
