@@ -114,6 +114,7 @@ class InstallmentController extends Controller
         // Iniciar la consulta base
         $query = Installment::with([
             'moviment',
+            'moviment.creditNote',
             'moviment.person',
             'payInstallments',
             'payInstallments.bank'

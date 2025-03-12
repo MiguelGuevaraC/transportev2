@@ -20,7 +20,7 @@ class MovimentService
             ->whereHas('movimentsVenta', function ($query) {
                 $query->whereHas('installmentPendientes'); // Asegura que los movimientos tengan cuotas pendientes
             })
-            ->with(['movimentsVenta' => function ($query) {
+            ->with(['movimentsVenta.creditNote','movimentsVenta' => function ($query) {
                 $query->whereHas('installmentPendientes') // Solo obtener movimientos con cuotas pendientes
                     ->with(['installmentPendientes']);        // Cargar las cuotas pendientes
             }]);
