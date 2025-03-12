@@ -1,22 +1,31 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankAccount;
 use App\Models\Box;
 use App\Models\DriverExpense;
 use App\Models\Moviment;
 use App\Models\Programming;
 use App\Models\User;
 use App\Models\Worker;
+use App\Services\BankMovementService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class DriverExpenseController extends Controller
 {
+
+    protected $bankmovementService;
+
+    public function __construct(BankMovementService $BankMovementService)
+    {
+        $this->bankmovementService = $BankMovementService;
+    }
 
     /**
      * Get all DriverExpenses
@@ -75,27 +84,27 @@ class DriverExpenseController extends Controller
     {
         // Obtener parámetros de la solicitud, con valores predeterminados vacíos
         $programming_id = $request->input('programming_id', '');
-        $per_page = $request->input('per_page', 50); // Tamaño de página con valor predeterminado
-        $page = $request->input('page', 1); // Página que se quiere mostrar, valor por defecto es 1
-        $nameConcept = $request->input('nameConcept');
-        $typeConcept = $request->input('typeConcept'); // Filtrar dentro de expensesConcept
-        $typePay = $request->input('typePay');
-        $drivers = $request->input('driver'); // Nombre del conductor
+        $per_page       = $request->input('per_page', 50); // Tamaño de página con valor predeterminado
+        $page           = $request->input('page', 1);      // Página que se quiere mostrar, valor por defecto es 1
+        $nameConcept    = $request->input('nameConcept');
+        $typeConcept    = $request->input('typeConcept'); // Filtrar dentro de expensesConcept
+        $typePay        = $request->input('typePay');
+        $drivers        = $request->input('driver'); // Nombre del conductor
 
         // Construir la consulta base con los filtros
         $query = DriverExpense::query()
-            ->when(!empty($programming_id), function ($query) use ($programming_id) {
+            ->when(! empty($programming_id), function ($query) use ($programming_id) {
                 return $query->where('programming_id', $programming_id);
             })
-            ->when(!empty($typePay), function ($query) use ($typePay) {
+            ->when(! empty($typePay), function ($query) use ($typePay) {
                 return $query->where('selectTypePay', $typePay);
             })
-            ->when(!empty($nameConcept), function ($query) use ($nameConcept) {
+            ->when(! empty($nameConcept), function ($query) use ($nameConcept) {
                 return $query->whereHas('expensesConcept', function ($q) use ($nameConcept) {
                     $q->where('name', 'like', '%' . $nameConcept . '%');
                 });
             })
-            ->when(!empty($typeConcept), function ($query) use ($typeConcept) {
+            ->when(! empty($typeConcept), function ($query) use ($typeConcept) {
                 return $query->whereHas('expensesConcept', function ($q) use ($typeConcept) {
                     $q->where('typeConcept', $typeConcept);
                 });
@@ -103,7 +112,7 @@ class DriverExpenseController extends Controller
             ->whereHas('programming.detailsWorkers', function ($query) {
                 $query->where('function', 'driver');
             })
-            ->when(!empty($drivers), function ($query) use ($drivers) {
+            ->when(! empty($drivers), function ($query) use ($drivers) {
                 return $query->whereHas('programming.detailsWorkers.worker.person', function ($q) use ($drivers) {
                     $q->whereRaw('LOWER(CONCAT(names, " ", fatherSurname, " ", motherSurname)) LIKE ?', ['%' . strtolower($drivers) . '%']);
                 });
@@ -136,23 +145,23 @@ class DriverExpenseController extends Controller
 
         // Estructurar la respuesta con la paginación y los totales
         $response = [
-            'total' => $list->total(),
-            'data' => $list->items(),
-            'current_page' => $list->currentPage(),
-            'last_page' => $list->lastPage(),
-            'per_page' => $list->perPage(),
-            'pagination' => $per_page,
-            'first_page_url' => $list->url(1),
-            'from' => $list->firstItem(),
-            'next_page_url' => $list->nextPageUrl(),
-            'path' => $list->path(),
-            'prev_page_url' => $list->previousPageUrl(),
-            'to' => $list->lastItem(),
+            'total'             => $list->total(),
+            'data'              => $list->items(),
+            'current_page'      => $list->currentPage(),
+            'last_page'         => $list->lastPage(),
+            'per_page'          => $list->perPage(),
+            'pagination'        => $per_page,
+            'first_page_url'    => $list->url(1),
+            'from'              => $list->firstItem(),
+            'next_page_url'     => $list->nextPageUrl(),
+            'path'              => $list->path(),
+            'prev_page_url'     => $list->previousPageUrl(),
+            'to'                => $list->lastItem(),
             'current_page_size' => count($list->items()),
             // Agregar totales de ingreso, egreso y saldo
-            'total_ingreso' => number_format($totalIngreso, 2, '.', ''),
-            'total_egreso' => number_format($totalEgreso, 2, '.', ''),
-            'saldo' => number_format((float) $saldo, 2, '.', ''),
+            'total_ingreso'     => number_format($totalIngreso, 2, '.', ''),
+            'total_egreso'      => number_format($totalEgreso, 2, '.', ''),
+            'saldo'             => number_format((float) $saldo, 2, '.', ''),
 
         ];
 
@@ -236,13 +245,17 @@ class DriverExpenseController extends Controller
     public function store(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'programming_id' => 'required|exists:programmings,id',
+            'programming_id'     => 'required|exists:programmings,id',
             'expensesConcept_id' => 'required|exists:expenses_concepts,id',
-            'worker_id' => 'required|exists:workers,id',
-            'amount' => 'required',
+            'worker_id'          => 'required|exists:workers,id',
+            'amount'             => 'required',
             // 'quantity' => 'required',
-            'bank_id' => 'nullable|exists:banks,id',
-            'proveedor_id' => 'nullable|exists:people,id',
+            'bank_id'            => 'nullable|exists:banks,id',
+            'proveedor_id'       => 'nullable|exists:people,id',
+            'bank_account_id'    => [
+                'nullable',
+                Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -259,16 +272,24 @@ class DriverExpenseController extends Controller
         $worker = Worker::find($request->input('worker_id'));
 
         $personWorker = $worker->person;
-        if (!$personWorker) {
+        if (! $personWorker) {
             return response()->json(['error' => 'No esta registrado en Personas el conductor'], 422);
         }
+
+        $efectivo = $total;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
+        $deposito = $request->input('deposit') ?? 0;
+
+        $totalAcum = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         $user = User::find(Auth()->id());
 
         // if ($user->typeofUser_id != 4) { //DEBE SER CAJERO
         //     return response()->json(['error' => 'El usuario debe ser del tipo Cajero'], 422);
         // }
-        if (!$user->box) {
+        if (! $user->box) {
             return response()->json(['error' => 'El usuario no tiene una caja'], 422);
         }
 
@@ -280,39 +301,58 @@ class DriverExpenseController extends Controller
         $tipopago = $request->input('selectTypePay');
 
         $data = [
-            'programming_id' => $request->input('programming_id'),
-            'worker_id' => $worker->id,
+            'programming_id'     => $request->input('programming_id'),
+            'worker_id'          => $worker->id,
             'expensesConcept_id' => $request->input('expensesConcept_id'),
-            'igv' => $request->input('igv'),
-            'gravado' => $request->input('gravado'),
-            'exonerado' => $request->input('exonerado'),
-            'date_expense' => $request->input('date_expense'),
-            'selectTypePay' => $tipopago,
+            'igv'                => $request->input('igv'),
+            'gravado'            => $request->input('gravado'),
+            'exonerado'          => $request->input('exonerado'),
+            'date_expense'       => $request->input('date_expense'),
+            'selectTypePay'      => $tipopago,
 
-            'total' => $total,
-            'amount' => $request->input('amount'),
-            'quantity' => $request->input('quantity') ?? 1,
-            'place' => $request->input('place'),
-            'km' => $request->input('km'),
-            'operationNumber' => $request->input('operationNumber'),
-            'bank_id' => $request->input('bank_id'),
-            'proveedor_id' => $request->input('proveedor_id'),
-            'routeFact' => 'ruta.jpg',
-            'gallons' => $request->input('gallons'),
-            'comment' => $request->input('comment'),
-            'isMovimentCaja' => $request->input('isMovimentCaja'),
+            'total'              => $total,
+            'amount'             => $request->input('amount'),
+            'bank_account_id'    => $request->input('bank_account_id'),
+            'quantity'           => $request->input('quantity') ?? 1,
+            'place'              => $request->input('place'),
+            'km'                 => $request->input('km'),
+            'operationNumber'    => $request->input('operationNumber'),
+            'bank_id'            => $request->input('bank_id'),
+            'proveedor_id'       => $request->input('proveedor_id'),
+            'routeFact'          => 'ruta.jpg',
+            'gallons'            => $request->input('gallons'),
+            'comment'            => $request->input('comment'),
+            'isMovimentCaja'     => $request->input('isMovimentCaja'),
         ];
 
         $objectExpense = DriverExpense::create($data);
+        $bank_account  = BankAccount::find($request->input(key: 'bank_account_id'));
+        if ($bank_account != null) {
+            $data_movement_bank = [
+                'driver_expense_id'      => $objectExpense->id,
+                'bank_id'                => $request->input('bank_id'),
+                'bank_account_id'        => $bank_account->id,
+                'currency'               => $bank_account->currency,
+                'date_moviment'          => $request->input('date_expense'),
+                'total_moviment'         => $totalAcum,
+                'comment'                => $request->input('comment'),
+                'user_created_id'        => $user->id,
+                'transaction_concept_id' => $request->input('transaction_concept_id'),
+                'person_id'              => $objectExpense->worker_id,
+                'type_moviment'          => 'SALIDA',
+            ];
+            $this->bankmovementService->createBankMovement($data_movement_bank);
+        }
+
         $programming = Programming::find($request->input('programming_id'));
 
         $image = $request->file('image');
 
         if ($image) {
             Log::info('Imagen recibida: ' . $image->getClientOriginalName());
-            $file = $image;
+            $file        = $image;
             $currentTime = now();
-            $filename = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
+            $filename    = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
 
             $path = $file->storeAs('public/photosDrivers', $filename);
 
@@ -327,46 +367,40 @@ class DriverExpenseController extends Controller
 
         $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
 
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(sequentialNumber, LOCATE("-", sequentialNumber) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM moviments WHERE SUBSTRING(sequentialNumber, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(sequentialNumber, LOCATE("-", sequentialNumber) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM moviments WHERE SUBSTRING(sequentialNumber, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
-        $efectivo = $total;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
-        $deposito = $request->input('deposit') ?? 0;
 
-        $totalAcum = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         if ($request->input('expensesConcept_id') == 1) { //GENERA MOVIMEITNO EGRESO DE CAJA
 
             if ($request->input('isMovimentCaja') == 1) {
                 $data = [
 
-                    'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                    'paymentDate' => $request->input('date_expense') ?? Carbon::now(),
-                    'total' => $totalAcum ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $request->input('deposit') ?? 0,
-                    'cash' => $efectivo ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
+                    'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                    'paymentDate'       => $request->input('date_expense') ?? Carbon::now(),
+                    'total'             => $totalAcum ?? 0,
+                    'yape'              => $request->input('yape') ?? 0,
+                    'deposit'           => $request->input('deposit') ?? 0,
+                    'cash'              => $efectivo ?? 0,
+                    'card'              => $request->input('card') ?? 0,
+                    'plin'              => $request->input('plin') ?? 0,
 
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Egreso',
+                    'comment'           => $request->input('comment') ?? '-',
+                    'typeDocument'      => 'Egreso',
 
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'status' => 'Generada',
-                    'programming_id' => $programming->id,
+                    'typePayment'       => $request->input('typePayment') ?? null,
+                    'typeSale'          => $request->input('typeSale') ?? '-',
+                    'status'            => 'Generada',
+                    'programming_id'    => $programming->id,
                     'paymentConcept_id' => 4, //EGRESO MONTO DE VIAJE
-                    'branchOffice_id' => $programming->branchOffice_id,
-                    'reception_id' => $request->input('reception_id'),
-                    'bank_id' => $request->input('bank_id'),
-                    'person_id' => $personWorker->id,
-                    'user_id' => auth()->id(),
-                    'box_id' => $user->box->id,
-                    'driverExpense_id' => $objectExpense->id,
+                    'branchOffice_id'   => $programming->branchOffice_id,
+                    'reception_id'      => $request->input('reception_id'),
+                    'bank_id'           => $request->input('bank_id'),
+                    'person_id'         => $personWorker->id,
+                    'user_id'           => auth()->id(),
+                    'box_id'            => $user->box->id,
+                    'driverExpense_id'  => $objectExpense->id,
                 ];
 
                 $object = Moviment::create($data);
@@ -381,30 +415,30 @@ class DriverExpenseController extends Controller
             if ($request->input('isMovimentCaja') == 1) {
                 $data = [
 
-                    'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                    'paymentDate' => $request->input('date_expense') ?? Carbon::now(),
-                    'total' => $totalAcum ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $request->input('deposit') ?? 0,
-                    'cash' => $efectivo ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
+                    'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                    'paymentDate'       => $request->input('date_expense') ?? Carbon::now(),
+                    'total'             => $totalAcum ?? 0,
+                    'yape'              => $request->input('yape') ?? 0,
+                    'deposit'           => $request->input('deposit') ?? 0,
+                    'cash'              => $efectivo ?? 0,
+                    'card'              => $request->input('card') ?? 0,
+                    'plin'              => $request->input('plin') ?? 0,
 
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Egreso',
+                    'comment'           => $request->input('comment') ?? '-',
+                    'typeDocument'      => 'Egreso',
 
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'status' => 'Generada',
-                    'programming_id' => $programming->id,
+                    'typePayment'       => $request->input('typePayment') ?? null,
+                    'typeSale'          => $request->input('typeSale') ?? '-',
+                    'status'            => 'Generada',
+                    'programming_id'    => $programming->id,
                     'paymentConcept_id' => 4, //EGRESO MONTO DE VIAJE
-                    'branchOffice_id' => $programming->branchOffice_id,
-                    'reception_id' => $request->input('reception_id'),
-                    'bank_id' => $request->input('bank_id'),
-                    'person_id' => $personWorker->id,
-                    'user_id' => auth()->id(),
-                    'box_id' => $user->box->id,
-                    'driverExpense_id' => $objectExpense->id,
+                    'branchOffice_id'   => $programming->branchOffice_id,
+                    'reception_id'      => $request->input('reception_id'),
+                    'bank_id'           => $request->input('bank_id'),
+                    'person_id'         => $personWorker->id,
+                    'user_id'           => auth()->id(),
+                    'box_id'            => $user->box->id,
+                    'driverExpense_id'  => $objectExpense->id,
                 ];
 
                 $object = Moviment::create($data);
@@ -417,17 +451,17 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            // ->orWhere('selectTypePay', 'Descuento_sueldo')
+            // ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            // ->orWhere('selectTypePay', 'Descuento_sueldo')
+            // ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
@@ -438,9 +472,9 @@ class DriverExpenseController extends Controller
         DriverExpense::with(['programming', 'expensesConcept', 'worker.person', 'bank'])->find($objectExpense->id);
 
         return response()->json(['data' => $object,
-            'total_ingreso' => number_format($totalIngreso, 2, '.', ''),
-            'total_egreso' => number_format($totalEgreso, 2, '.', ''),
-            'saldo' => number_format((float) $saldo, 2, '.', ''),
+            'total_ingreso'                 => number_format($totalIngreso, 2, '.', ''),
+            'total_egreso'                  => number_format($totalEgreso, 2, '.', ''),
+            'saldo'                         => number_format((float) $saldo, 2, '.', ''),
         ], 200);
     }
 /**
@@ -501,15 +535,15 @@ class DriverExpenseController extends Controller
     {
         $validator = validator()->make($request->all(), [
             'programming_id' => 'required|exists:programmings,id',
-            'worker_id' => 'required|exists:workers,id',
+            'worker_id'      => 'required|exists:workers,id',
 
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'bank_id' => 'nullable|exists:banks,id',
-            'proveedor_id' => 'nullable|exists:people,id',
+            'yape'           => 'nullable|numeric',
+            'deposit'        => 'nullable|numeric',
+            'cash'           => 'nullable|numeric',
+            'plin'           => 'nullable|numeric',
+            'card'           => 'nullable|numeric',
+            'bank_id'        => 'nullable|exists:banks,id',
+            'proveedor_id'   => 'nullable|exists:people,id',
         ]);
 
         if ($validator->fails()) {
@@ -519,20 +553,20 @@ class DriverExpenseController extends Controller
         $worker = Worker::find($request->input('worker_id'));
 
         $personWorker = $worker->person;
-        if (!$personWorker) {
+        if (! $personWorker) {
             return response()->json(['error' => 'No esta registrado en Personas el conductor'], 422);
         }
 
         $user = User::find(Auth()->id());
 
-        if (!$user->box) {
+        if (! $user->box) {
             return response()->json(['error' => 'El usuario no tiene una caja'], 422);
         }
 
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
@@ -543,40 +577,41 @@ class DriverExpenseController extends Controller
         }
 
         $data = [
-            'programming_id' => $request->input('programming_id'),
-            'worker_id' => $worker->id,
+            'programming_id'     => $request->input('programming_id'),
+            'worker_id'          => $worker->id,
             'expensesConcept_id' => 21, // DEVUELTO A CAJA
-            'igv' => $request->input('igv'),
-            'gravado' => $request->input('gravado'),
-            'exonerado' => $request->input('exonerado'),
-            'selectTypePay' => $request->input('selectTypePay') ?? "Efectivo",
-            'date_expense' => $request->input('date_expense') ?? Carbon::now(),
+            'igv'                => $request->input('igv'),
+            'gravado'            => $request->input('gravado'),
+            'exonerado'          => $request->input('exonerado'),
+            'selectTypePay'      => $request->input('selectTypePay') ?? "Efectivo",
+            'date_expense'       => $request->input('date_expense') ?? Carbon::now(),
 
-            'total' => $total,
-            'amount' => $request->input('amount') ?? 0,
-            'quantity' => $request->input('quantity') ?? 1,
-            'place' => $request->input('place'),
-            'km' => $request->input('km'),
-            'operationNumber' => $request->input('operationNumber'),
-            'bank_id' => $request->input('bank_id'),
-            'proveedor_id' => $request->input('proveedor_id'),
+            'total'              => $total,
+            'amount'             => $request->input('amount') ?? 0,
+            'quantity'           => $request->input('quantity') ?? 1,
+            'place'              => $request->input('place'),
+            'km'                 => $request->input('km'),
+            'operationNumber'    => $request->input('operationNumber'),
+            'bank_id'            => $request->input('bank_id'),
+            'proveedor_id'       => $request->input('proveedor_id'),
+            'bank_account_id'    => $request->input('bank_account_id'),
 
-            'routeFact' => 'ruta.jpg',
-            'gallons' => $request->input('gallons'),
-            'comment' => $request->input('comment'),
-            'isMovimentCaja' => $request->input('isMovimentCaja') ?? 1,
+            'routeFact'          => 'ruta.jpg',
+            'gallons'            => $request->input('gallons'),
+            'comment'            => $request->input('comment'),
+            'isMovimentCaja'     => $request->input('isMovimentCaja') ?? 1,
         ];
 
         $objectExpense = DriverExpense::create($data);
-        $programming = Programming::find($request->input('programming_id'));
+        $programming   = Programming::find($request->input('programming_id'));
 
         $image = $request->file('image');
 
         if ($image) {
             Log::info('Imagen recibida: ' . $image->getClientOriginalName());
-            $file = $image;
+            $file        = $image;
             $currentTime = now();
-            $filename = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
+            $filename    = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
 
             $path = $file->storeAs('public/photosDrivers', $filename);
 
@@ -591,43 +626,43 @@ class DriverExpenseController extends Controller
 
         $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
 
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(sequentialNumber, LOCATE("-", sequentialNumber) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM moviments WHERE SUBSTRING(sequentialNumber, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(sequentialNumber, LOCATE("-", sequentialNumber) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM moviments WHERE SUBSTRING(sequentialNumber, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $efectivo = $total;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
         $totalAcum = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         $data = [
 
-            'sequentialNumber' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate') ?? Carbon::now(),
-            'total' => $totalAcum ?? 0,
-            'yape' => $request->input('yape') ?? 0,
-            'deposit' => $request->input('deposit') ?? 0,
-            'cash' => $efectivo ?? 0,
-            'card' => $request->input('card') ?? 0,
-            'plin' => $request->input('plin') ?? 0,
+            'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'       => $request->input('paymentDate') ?? Carbon::now(),
+            'total'             => $totalAcum ?? 0,
+            'yape'              => $request->input('yape') ?? 0,
+            'deposit'           => $request->input('deposit') ?? 0,
+            'cash'              => $efectivo ?? 0,
+            'card'              => $request->input('card') ?? 0,
+            'plin'              => $request->input('plin') ?? 0,
 
-            'comment' => $request->input('comment') ?? '-',
-            'typeDocument' => 'Ingreso',
+            'comment'           => $request->input('comment') ?? '-',
+            'typeDocument'      => 'Ingreso',
 
-            'typePayment' => $request->input('typePayment') ?? null,
-            'typeSale' => $request->input('typeSale') ?? '-',
-            'status' => 'Generada',
-            'programming_id' => $programming->id,
+            'typePayment'       => $request->input('typePayment') ?? null,
+            'typeSale'          => $request->input('typeSale') ?? '-',
+            'status'            => 'Generada',
+            'programming_id'    => $programming->id,
             'paymentConcept_id' => 11, //EGRESO MONTO DE VIAJE
-            'branchOffice_id' => $programming->branchOffice_id,
-            'reception_id' => $request->input('reception_id'),
-            'bank_id' => $request->input('bank_id'),
-            'person_id' => $personWorker->id,
-            'user_id' => auth()->id(),
-            'box_id' => $user->box->id,
-            'driverExpense_id' => $objectExpense->id,
+            'branchOffice_id'   => $programming->branchOffice_id,
+            'reception_id'      => $request->input('reception_id'),
+            'bank_id'           => $request->input('bank_id'),
+            'person_id'         => $personWorker->id,
+            'user_id'           => auth()->id(),
+            'box_id'            => $user->box->id,
+            'driverExpense_id'  => $objectExpense->id,
         ];
 
         $object = Moviment::create($data);
@@ -657,9 +692,9 @@ class DriverExpenseController extends Controller
         DriverExpense::with(['programming', 'moviment', 'expensesConcept', 'worker.person', 'bank'])->find($objectExpense->id);
 
         return response()->json(['data' => $object,
-            'total_ingreso' => number_format($totalIngreso, 2, '.', ''),
-            'total_egreso' => number_format($totalEgreso, 2, '.', ''),
-            'saldo' => number_format((float) $saldo, 2, '.', ''),
+            'total_ingreso'                 => number_format($totalIngreso, 2, '.', ''),
+            'total_egreso'                  => number_format($totalEgreso, 2, '.', ''),
+            'saldo'                         => number_format((float) $saldo, 2, '.', ''),
         ], 200);
     }
 
@@ -720,19 +755,19 @@ class DriverExpenseController extends Controller
 
         //en duda el actualizar porque genera mov caja
         $validator = validator()->make($request->all(), [
-            'programming_id' => 'required|exists:programmings,id',
+            'programming_id'     => 'required|exists:programmings,id',
             'expensesConcept_id' => 'required|exists:expenses_concepts,id',
-            'worker_id' => 'required|exists:workers,id',
-            'proveedor_id' => 'nullable|exists:people,id',
-            'amount' => 'required',
+            'worker_id'          => 'required|exists:workers,id',
+            'proveedor_id'       => 'nullable|exists:people,id',
+            'amount'             => 'required',
             // 'quantity' => 'required',
-            'bank_id' => 'nullable|exists:banks,id',
+            'bank_id'            => 'nullable|exists:banks,id',
 
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
+            'yape'               => 'nullable|numeric',
+            'deposit'            => 'nullable|numeric',
+            'cash'               => 'nullable|numeric',
+            'plin'               => 'nullable|numeric',
+            'card'               => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -740,15 +775,15 @@ class DriverExpenseController extends Controller
         }
 
         $expense = DriverExpense::find($id);
-        if (!$expense) {
+        if (! $expense) {
             return response()->json(['error' => 'DriverExpense not found'], 404);
         }
 
-        $total = ($request->input('amount') ?? 0) * ($request->input('quantity') ?? 0);
+        $total  = ($request->input('amount') ?? 0) * ($request->input('quantity') ?? 0);
         $worker = Worker::find($request->input('worker_id'));
 
         $personWorker = Worker::find($request->input('worker_id'))->person;
-        if (!$personWorker) {
+        if (! $personWorker) {
             return response()->json(['error' => 'No esta registrado en Personas el conductor'], 422);
         }
 
@@ -756,7 +791,7 @@ class DriverExpenseController extends Controller
         // if ($user->typeofUser_id != 4) { //DEBE SER CAJERO
         //     return response()->json(['error' => 'El usuario debe ser del tipo Cajero'], 422);
         // }
-        if (!$user->box) {
+        if (! $user->box) {
             return response()->json(['error' => 'El usuario no tiene una caja'], 422);
         }
 
@@ -766,24 +801,24 @@ class DriverExpenseController extends Controller
         }
 
         $data = [
-            'programming_id' => $request->input('programming_id'),
+            'programming_id'     => $request->input('programming_id'),
             'expensesConcept_id' => $request->input('expensesConcept_id'),
-            'worker_id' => $worker->id,
-            'total' => $total,
-            'amount' => $request->input('amount'),
-            'quantity' => $request->input('quantity') ?? 1,
-            'place' => $request->input('place'),
-            'km' => $request->input('km'),
-            'gallons' => $request->input('gallons'),
-            'comment' => $request->input('comment'),
-            'operationNumber' => $request->input('operationNumber'),
-            'bank_id' => $request->input('bank_id'),
-            'date_expense' => $request->input('date_expense'),
+            'worker_id'          => $worker->id,
+            'total'              => $total,
+            'amount'             => $request->input('amount'),
+            'quantity'           => $request->input('quantity') ?? 1,
+            'place'              => $request->input('place'),
+            'km'                 => $request->input('km'),
+            'gallons'            => $request->input('gallons'),
+            'comment'            => $request->input('comment'),
+            'operationNumber'    => $request->input('operationNumber'),
+            'bank_id'            => $request->input('bank_id'),
+            'date_expense'       => $request->input('date_expense'),
 
-            'igv' => $request->input('igv'),
-            'gravado' => $request->input('gravado'),
-            'exonerado' => $request->input('exonerado'),
-            'selectTypePay' => $request->input('selectTypePay')?? $expense->selectTypePay,
+            'igv'                => $request->input('igv'),
+            'gravado'            => $request->input('gravado'),
+            'exonerado'          => $request->input('exonerado'),
+            'selectTypePay'      => $request->input('selectTypePay') ?? $expense->selectTypePay,
 
         ];
 
@@ -793,12 +828,12 @@ class DriverExpenseController extends Controller
         $image = $request->file('image');
         if ($image) {
             Log::info('Imagen recibida: ' . $image->getClientOriginalName());
-            $file = $image;
+            $file        = $image;
             $currentTime = now();
-            $filename = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/photosDrivers', $filename);
+            $filename    = $currentTime->format('YmdHis') . '_' . $file->getClientOriginalName();
+            $path        = $file->storeAs('public/photosDrivers', $filename);
             Log::info('Imagen almacenada en: ' . $path);
-            $rutaImagen = Storage::url($path);
+            $rutaImagen         = Storage::url($path);
             $expense->routeFact = $rutaImagen;
             $expense->save();
             Log::info('Imagen guardada en la base de datos con ruta: ' . $rutaImagen);
@@ -808,20 +843,20 @@ class DriverExpenseController extends Controller
         $movimentDriver = Moviment::where('driverExpense_id', $expense->id)->first();
 
         $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
+        $yape     = $request->input('yape') ?? 0;
+        $plin     = $request->input('plin') ?? 0;
+        $tarjeta  = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         if ($movimentDriver) {
-            $movimentDriver->total = $total;
-            $movimentDriver->cash = $efectivo;
-            $movimentDriver->yape = $yape;
-            $movimentDriver->deposit = $deposito;
-            $movimentDriver->card = $tarjeta;
-            $movimentDriver->plin = $plin;
+            $movimentDriver->total        = $total;
+            $movimentDriver->cash         = $efectivo;
+            $movimentDriver->yape         = $yape;
+            $movimentDriver->deposit      = $deposito;
+            $movimentDriver->card         = $tarjeta;
+            $movimentDriver->plin         = $plin;
             $movimentDriver->date_expense = $request->input('date_expense');
             $movimentDriver->save();
 
@@ -829,23 +864,41 @@ class DriverExpenseController extends Controller
 
         }
 
+        $bank_account  = BankAccount::find($request->input(key: 'bank_account_id'));
+        if ($bank_account != null) {
+            $data_movement_bank = [
+                'driver_expense_id'      => $expense->id,
+                'bank_id'                => $request->input('bank_id'),
+                'bank_account_id'        => $bank_account->id,
+                'currency'               => $bank_account->currency,
+                'date_moviment'          => $request->input('date_expense'),
+                'total_moviment'         => $total,
+                'comment'                => $request->input('comment'),
+                'user_created_id'        => $user->id,
+                'transaction_concept_id' => $request->input('transaction_concept_id'),
+                'person_id'              => $expense->worker_id,
+                'type_moviment'          => 'SALIDA',
+            ];
+            $this->bankmovementService->updateBankMovement($expense, $data_movement_bank);
+        }
+
         $programming->updateTotalDriversExpenses();
         $programming->save();
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // ;
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // ;
         })->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
@@ -855,9 +908,9 @@ class DriverExpenseController extends Controller
         DriverExpense::with(['programming', 'expensesConcept', 'worker.person'])->find($expense->id);
 
         return response()->json(['data' => $object,
-            'total_ingreso' => number_format($totalIngreso, 2, '.', ''),
-            'total_egreso' => number_format($totalEgreso, 2, '.', ''),
-            'saldo' => number_format((float) $saldo, 2, '.', ''),
+            'total_ingreso'                 => number_format($totalIngreso, 2, '.', ''),
+            'total_egreso'                  => number_format($totalEgreso, 2, '.', ''),
+            'saldo'                         => number_format((float) $saldo, 2, '.', ''),
         ], 200);
     }
     /**
@@ -903,7 +956,7 @@ class DriverExpenseController extends Controller
     public function show($id)
     {
         $object = DriverExpense::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Driver Expense not found'], 422);
         }
 
@@ -952,7 +1005,7 @@ class DriverExpenseController extends Controller
         $object = DriverExpense::find($id);
 
         // Si no existe el objeto, retornar error
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Driver Expense not found'], 404); // Cambié el código de estado a 404 para 'no encontrado'
         }
 
@@ -996,8 +1049,8 @@ class DriverExpenseController extends Controller
 
             return response()->json([
                 'total_ingreso' => number_format($totalIngreso, 2, '.', ''),
-                'total_egreso' => number_format($totalEgreso, 2, '.', ''),
-                'saldo' => number_format((float) $saldo, 2, '.', ''),
+                'total_egreso'  => number_format($totalEgreso, 2, '.', ''),
+                'saldo'         => number_format((float) $saldo, 2, '.', ''),
             ], 200);
         } catch (\Exception $e) {
             // Manejo de excepciones: retornar un mensaje de error

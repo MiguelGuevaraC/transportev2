@@ -283,9 +283,9 @@ class Programming extends Model
             ->where('expensesConcept_id', '!=', 1)
             ->whereNull('deleted_at')
             ->where(function ($query) {
-                $query->where('selectTypePay', 'Efectivo')
-                    ->orWhere('selectTypePay', 'Descuento_sueldo')
-                    ->orWhere('selectTypePay', 'Proxima_liquidacion');
+                // $query->where('selectTypePay', 'Efectivo')
+                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+                //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
             })
             ->sum('total');
 
@@ -294,9 +294,9 @@ class Programming extends Model
             ->where('expensesConcept_id', '=', 1)
             ->whereNull('deleted_at')
             ->where(function ($query) {
-                $query->where('selectTypePay', 'Efectivo')
-                    ->orWhere('selectTypePay', 'Descuento_sueldo')
-                    ->orWhere('selectTypePay', 'Proxima_liquidacion');
+                // $query->where('selectTypePay', 'Efectivo')
+                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+                //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
             })
             ->sum('total');
 

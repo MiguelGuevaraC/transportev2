@@ -16,6 +16,10 @@ class BankMovement extends Model
         'total_moviment',
         'currency',
         'comment',
+
+        'pay_installment_id',
+        'driver_expense_id',
+
         'user_created_id',
         'bank_id',
         'bank_account_id',
@@ -41,6 +45,8 @@ class BankMovement extends Model
         'transaction_concept_id' => '=',
         'person_id'              => '=',
         'created_at'             => '=',
+        'pay_installment_id'=> '=',
+        'driver_expense_id'=> '=',
     ];
     const sorts = [
         'id' => 'desc',
@@ -80,5 +86,13 @@ class BankMovement extends Model
     public function person()
     {
         return $this->belongsTo(Person::class, 'person_id');
+    }
+    public function pay_installment()
+    {
+        return $this->belongsTo(PayInstallment::class, 'pay_installment_id');
+    }
+    public function driver_expense()
+    {
+        return $this->belongsTo(DriverExpense::class, 'driver_expense_id');
     }
 }

@@ -74,9 +74,24 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $saldoInicial = $this->getStockBefore($product_id, $this->branch_id);
             
             $finalCollection->push(
-                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '','num_anexo' => '', 'quantity' => '', 'saldo' => '', 'comment' => ''],
-                ['is_header' => true, 'movement_date' => 'Fecha Movimiento', 'type' => 'Tipo Movimiento', 'concept' => 'Concepto', 'document' => 'Documento', 'num_anexo' => 'Número Anexo','quantity' => 'Cantidad', 'saldo' => 'Saldo', 'comment' => 'Comentario'],
-                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL', 'concept' => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'), 'document' => '0000-0000000','num_anexo' => '-', 'quantity' => 0, 'saldo' => $saldoInicial, 'comment' => '-']
+                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '','num_anexo' => '','person' => '','distribuidor' => ''
+                , 'quantity' => '', 'saldo' => '', 'comment' => ''],
+                ['is_header' => true, 'movement_date' => 'Fecha Movimiento', 'type' => 'Tipo Movimiento', 
+                'concept' => 'Concepto', 'document' => 'Documento', 
+                'num_anexo' => 'Número Anexo',
+                'person' => 'Persona', 
+                'distribuidor' => 'Distribuidor', 
+
+                'quantity' => 'Cantidad', 
+                'saldo' => 'Saldo', 
+                
+                'comment' => 'Comentario'],
+                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL', 
+                'concept' => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'), 
+                'document' => '','num_anexo' => '-', 
+                'person' => '-', 
+                'distribuidor' => '-', 
+                'quantity' => 0, 'saldo' => $saldoInicial, 'comment' => '-']
             );
     
             $cargaDocuments = $queryCarga->orderByDesc('movement_date')->take(100)->get()->map(fn($doc) => [
@@ -86,6 +101,8 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 'document' => $doc->code_doc,
                 'num_anexo' => $doc->num_anexo,
                 'quantity' => $doc->quantity,
+                'person' => $doc?->person?->names ." ".$doc?->person?->businessName, 
+                'distribuidor' => $doc->distribuidor->names ." ".$doc->distribuidor->businessName, 
                 'saldo' => null,
                 'comment' => $doc->comment ?? "-",
             ]);
@@ -96,6 +113,9 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 'concept' => 'GUIA TRANSPORTE',
                 'document' => $detail->reception->firstCarrierGuide->numero ?? 'Sin Número',
                 'num_anexo' => $detail->reception->firstCarrierGuide->document ?? 'Sin Número',
+                'person' => $detail?->reception?->sender->names ." ".$detail?->reception?->sender->businessName, 
+                'distribuidor' => '', 
+
                 'quantity' => $detail->cant,
                 'saldo' => null,
                 'comment' => '-',
@@ -113,6 +133,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
     
             $finalCollection = $finalCollection->merge($records)->push([
                 'movement_date' => '', 'type' => '', 'concept' => '', 'document' => '','num_anexo' => '',
+                'person' => '','distribuidor' => '',
                  'quantity' => '', 'saldo' => '', 'comment' => ''
             ]);
         }
@@ -133,6 +154,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function map($row): array
     {
+  
         if (isset($row['is_header']) && $row['is_header']) {
             return [
                 strtoupper($row['movement_date']),
@@ -140,6 +162,9 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 $row['concept'],
                 $row['document'],
                 $row['num_anexo'],
+                $row['person'],
+                $row['distribuidor'],
+
                 $row['quantity'],
                 $row['saldo'],
                 $row['comment'],
@@ -152,6 +177,8 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             (string) $row['concept'],
             (string) $row['document'],
             (string) $row['num_anexo'],
+            (string) $row['person'],
+            (string) $row['distribuidor'],
             (string) $row['quantity'],
             (string) $row['saldo'],
             (string) $row['comment'],
@@ -211,12 +238,15 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $cellF = trim($sheet->getCell("F{$rowIndex}")->getValue());
             $cellG = trim($sheet->getCell("G{$rowIndex}")->getValue());
             $cellH = trim($sheet->getCell("H{$rowIndex}")->getValue());
+            $cellI = trim($sheet->getCell("I{$rowIndex}")->getValue());
+            $cellJ = trim($sheet->getCell("J{$rowIndex}")->getValue());
 
             // 1. Estilo para la cabecera del producto (ej.: "PRODUCTO 01", "PRODUCTO 03", etc.)
             // Se asume que esa fila tiene contenido solo en la columna A y las demás vacías.
-            if ($cellA !== '' && $cellB === '' && $cellC === '' && $cellD === '' && $cellE === '' && $cellF === '' && $cellG === ''&& $cellH === '') {
+            if ($cellA !== '' && $cellB === '' && $cellC === '' && $cellD === '' && $cellE === '' && $cellF === ''
+             && $cellG === ''&& $cellH === ''&& $cellI === ''&& $cellJ === '') {
                 // Combinar celdas de A a G en esa fila
-                $sheet->mergeCells("A{$rowIndex}:H{$rowIndex}");
+                $sheet->mergeCells("A{$rowIndex}:J{$rowIndex}");
                 // Aplicar estilo: fondo blanco, borde negro, texto centrado y en negrita
                 $sheet->getStyle("A{$rowIndex}")->applyFromArray([
                     'fill'      => [
@@ -242,7 +272,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             // 2. Estilo para el cabezal de la tabla (encabezados de columna)
             // Se asume que la fila cuyo valor en A es "Fecha Movimiento" es el cabezal.
             if (strcasecmp($cellA, 'Fecha Movimiento') === 0) {
-                $sheet->getStyle("A{$rowIndex}:H{$rowIndex}")->applyFromArray([
+                $sheet->getStyle("A{$rowIndex}:J{$rowIndex}")->applyFromArray([
                     'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'D9D9D9'], // Color de fondo para el encabezado (gris claro)
@@ -263,7 +293,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             // 3. Estilos para los registros de movimientos
             // a) Filas de SALIDA (fondo rojo suave)
             if ($cellB === 'SALIDA') {
-                $sheet->getStyle("A{$rowIndex}:H{$rowIndex}")->applyFromArray([
+                $sheet->getStyle("A{$rowIndex}:J{$rowIndex}")->applyFromArray([
                     'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'FF9999'],
@@ -279,7 +309,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
             // b) Filas de ENTRADA y SALDO INICIAL (se tratará SALDO INICIAL igual que ENTRADA, fondo verde suave)
             if ($cellB === 'ENTRADA' || $cellB === 'SALDO INICIAL') {
-                $sheet->getStyle("A{$rowIndex}:H{$rowIndex}")->applyFromArray([
+                $sheet->getStyle("A{$rowIndex}:J{$rowIndex}")->applyFromArray([
                     'fill'      => [
                         'fillType'   => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => '99FF99'],

@@ -35,6 +35,7 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'comment'       => 'nullable|string|max:500',
             'product_id'    => 'required|exists:products,id,deleted_at,NULL',
             'person_id'     => 'required|exists:people,id,deleted_at,NULL',
+            'distribuidor_id'     => 'required|exists:people,id,deleted_at,NULL',
 
             'lote_doc'=>'nullable|string',
             'date_expiration'=>'nullable|date',
@@ -82,6 +83,9 @@ class UpdateCargaDocumentRequest extends UpdateRequest
 
             'person_id.required'     => 'La persona es obligatoria.',
             'person_id.exists'       => 'La persona seleccionada no es válida o ha sido eliminada.',
+
+            'distribuidor_id.required'     => 'El distribuidor es obligatorio.',
+            'distribuidor_id.exists'       => 'El distribuidor seleccionada no es válida o ha sido eliminada.',
 
             'lote_doc.string' => 'El campo Lote de Documento debe ser una cadena de texto.',
             'date_expiration.date' => 'El campo Fecha de Expiración debe ser una fecha válida.',

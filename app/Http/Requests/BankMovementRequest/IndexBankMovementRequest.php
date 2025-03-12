@@ -10,7 +10,7 @@ use App\Http\Requests\IndexRequest;
  *     title="Bank Movement Filters",
  *     description="Parámetros de filtro para obtener movimientos bancarios",
  *     @OA\Property(property="type_moviment", type="string", nullable=true, description="Tipo de movimiento"),
- 
+
  *     @OA\Property(property="from", type="string", nullable=true, format="date", description="Fecha de inicio para el filtro de movimiento"),
  *     @OA\Property(property="to", type="string", nullable=true, format="date", description="Fecha de fin para el filtro de movimiento"),
  *     @OA\Property(property="total_moviment", type="string", nullable=true, description="Monto total del movimiento"),
@@ -53,6 +53,10 @@ class IndexBankMovementRequest extends IndexRequest
             'user_created_id'        => 'nullable|string',
             'bank_id'                => 'nullable|string',
             'bank_account_id'        => 'nullable|string',
+
+            'pay_installment_id'     => 'nullable|string',
+            'driver_expense_id'      => 'nullable|string',
+
             'transaction_concept_id' => 'nullable|string',
             'person_id'              => 'nullable|string',
             'created_at'             => 'nullable|string',

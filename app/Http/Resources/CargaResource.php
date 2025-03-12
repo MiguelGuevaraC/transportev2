@@ -54,6 +54,10 @@ class CargaResource extends JsonResource
             'product'              => $this->product ? new ProductResource($this->product) : null,
             'person_id'            => $this->person_id ?? null,
             'person'               => $this->person ? new PersonaResource($this->person) : null,
+
+            'distribuidor_id'            => $this->distribuidor_id ?? null,
+            'distribuidor'               => $this->distribuidor ? new PersonaResource($this->distribuidor) : null,
+
             'created_at'           => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

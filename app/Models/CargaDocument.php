@@ -16,6 +16,8 @@ class CargaDocument extends Model
         'total_cost',
         'weight',
 
+        'distribuidor_id',
+
         'lote_doc',
         'code_doc',
         'date_expiration',
@@ -55,6 +57,7 @@ class CargaDocument extends Model
         'unit_price'      => 'like',
         'total_cost'      => 'like',
         'stock_balance'   => 'like',
+        'distribuidor_id' => '='
     ];
 
     /**
@@ -67,6 +70,11 @@ class CargaDocument extends Model
     public function person()
     {
         return $this->belongsTo(Person::class, 'person_id');
+    }
+
+    public function distribuidor()
+    {
+        return $this->belongsTo(Person::class, 'distribuidor_id');
     }
 
     public function product()
