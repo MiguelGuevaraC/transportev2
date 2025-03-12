@@ -597,16 +597,16 @@ class ExcelController extends Controller
         // Clonar la consulta para calcular los totales de ingreso y egreso
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion');
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
         })->sum('amount');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion');
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
         })->sum('amount');
 
 // Calcular el saldo (diferencia entre ingresos y egresos)

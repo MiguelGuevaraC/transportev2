@@ -121,17 +121,17 @@ class DriverExpenseController extends Controller
         // Clonar la consulta para calcular los totales de ingreso y egreso
         $totalIngreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
         $totalEgreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
@@ -671,17 +671,17 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->where('selectTypePay', 'Efectivo')
-                ->orWhere('selectTypePay', 'Descuento_sueldo')
-                ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            // $q->where('selectTypePay', 'Efectivo')
+            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
             ;
         })->sum('total');
 
@@ -1030,17 +1030,17 @@ class DriverExpenseController extends Controller
             }
             $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Ingreso');
-                $q->where('selectTypePay', 'Efectivo')
-                    ->orWhere('selectTypePay', 'Descuento_sueldo')
-                    ->orWhere('selectTypePay', 'Proxima_liquidacion')
+                // $q->where('selectTypePay', 'Efectivo')
+                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+                //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
                 ;
             })->sum('total');
 
             $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Egreso');
-                $q->where('selectTypePay', 'Efectivo')
-                    ->orWhere('selectTypePay', 'Descuento_sueldo')
-                    ->orWhere('selectTypePay', 'Proxima_liquidacion')
+                // $q->where('selectTypePay', 'Efectivo')
+                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
+                //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
                 ;
             })->sum('total');
 
