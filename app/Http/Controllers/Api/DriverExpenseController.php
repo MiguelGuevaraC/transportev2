@@ -338,7 +338,7 @@ class DriverExpenseController extends Controller
                 'comment'                => $request->input('comment'),
                 'user_created_id'        => $user->id,
                 'transaction_concept_id' => $request->input('transaction_concept_id'),
-                'person_id'              => $objectExpense->worker_id,
+                'person_id'              => $objectExpense->worker->person->id,
                 'type_moviment'          => 'SALIDA',
             ];
             $this->bankmovementService->createBankMovement($data_movement_bank);
@@ -876,7 +876,7 @@ class DriverExpenseController extends Controller
                 'comment'                => $request->input('comment'),
                 'user_created_id'        => $user->id,
                 'transaction_concept_id' => $request->input('transaction_concept_id'),
-                'person_id'              => $expense->worker_id,
+                'person_id'              => $expense->worker->person->id,
                 'type_moviment'          => 'SALIDA',
             ];
             $this->bankmovementService->updateBankMovement($expense, $data_movement_bank);
