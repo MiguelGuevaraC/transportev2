@@ -26,7 +26,7 @@ class CuentasPorCobrarExport implements FromCollection, WithStyles
             'Item', 'RUC / DNI', 'Razón Social', 'Fecha de Emision',
             'Fecha de Vencimiento', 'Documento',
             'Total', 'Total Deuda', 'Detraccion',
-            'Saldo Neto', 'Obs',
+            'Saldo Neto', 'Obs','Pagos',
         ]);
 
         // Retornar la colección con los datos
@@ -43,24 +43,24 @@ class CuentasPorCobrarExport implements FromCollection, WithStyles
         $lastRow = $sheet->getHighestRow();
 
         // Establecer ajuste automático para todas las columnas
-        foreach (range('A', 'K') as $column) {
+        foreach (range('A', 'L') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Negrita y centrado para los encabezados
-        $sheet->getStyle('A1:K1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:K1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:L1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Color negro para los textos de los encabezados
-        $sheet->getStyle('A1:K1')->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+        $sheet->getStyle('A1:L1')->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
 
         // Color de fondo para los encabezados (puedes eliminar esto si no lo necesitas)
-        $sheet->getStyle('A1:K1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A1:K1')->getFill()->getStartColor()->setARGB('FF000000'); // Fondo blanco
-        $sheet->getStyle('A1:K1')->getFont()->getColor()->setARGB('FFFFFFFF');      // Letra blanca
+        $sheet->getStyle('A1:L1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('A1:L1')->getFill()->getStartColor()->setARGB('FF000000'); // Fondo blanco
+        $sheet->getStyle('A1:L1')->getFont()->getColor()->setARGB('FFFFFFFF');      // Letra blanca
 
         // Estilo de bordes para la tabla
-        $sheet->getStyle('A1:K' . $lastRow)->applyFromArray([
+        $sheet->getStyle('A1:L' . $lastRow)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -70,10 +70,10 @@ class CuentasPorCobrarExport implements FromCollection, WithStyles
         ]);
 
         // Alineación a la izquierda para los datos (excepto encabezados)
-        $sheet->getStyle('A1:K' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A1:L' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
         // Centrar el contenido de la columna de enlaces "DOCUMENTO"
-        $sheet->getStyle('A1:K' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:L' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     }
 
 }

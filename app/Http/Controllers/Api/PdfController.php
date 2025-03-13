@@ -1495,6 +1495,8 @@ class PdfController extends Controller
                     ($moviment->person->fatherSurname ?? '') . ' ' .
                     ($moviment->person->motherSurname ?? '');
             }
+      
+
 
             // Construir el array de exportación con validaciones
             $exportData[] = [
@@ -1510,6 +1512,9 @@ class PdfController extends Controller
                 'Detraccion'           => (string) $montoDetraccion,  // Convertir a cadena
                 'Saldo Neto'           => (string) $saldoNeto,        // Convertir a cadena
                 'Obs'                  => $item->status ?? 'Desconocido',
+                'Pagos' => $installment->resumenPagos(),
+
+
             ];
         }
 
@@ -1526,6 +1531,7 @@ class PdfController extends Controller
             'Detraccion'           => (string) $totalDetraccion, // Convertir a cadena
             'Saldo Neto'           => (string) $totalSaldoNeto,  // Convertir a cadena
             'Obs'                  => '',
+            'Pagos'                  => '',
         ];
         // Agregar una fila adicional para los totales
 
