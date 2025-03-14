@@ -385,7 +385,11 @@ class Reception extends Model
             ->with(['districtStart.province.department',
                 'districtEnd.province.department',
                 'motive', 'sender', 'recipient', 'payResponsible',
-
+                'programming',
+                'programming.tract',
+                'programming.platform',
+                'programming.origin',
+                'programming.destination',
             ]);
     }
     public function moviment()
