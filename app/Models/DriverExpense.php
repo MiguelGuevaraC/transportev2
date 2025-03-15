@@ -140,4 +140,9 @@ class DriverExpense extends Model
     {
         return $this->belongsTo(Worker::class, 'worker_id');
     }
+    public function latest_bank_movement()
+    {
+        return $this->hasOne(BankMovement::class, 'driver_expense_id')->latestOfMany();
+    }
+    
 }

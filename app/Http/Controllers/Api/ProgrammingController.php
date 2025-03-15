@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -18,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class ProgrammingController extends Controller
 {
@@ -64,23 +64,23 @@ class ProgrammingController extends Controller
         ]);
 
         // Obtener los parámetros de búsqueda
-        $number = $request->input('number');
-        $origin = $request->input('origin');
+        $number      = $request->input('number');
+        $origin      = $request->input('origin');
         $destination = $request->input('destination');
-        $route = $request->input('route');
+        $route       = $request->input('route');
 
-        $vehicles = $request->input('vehicles');
-        $drivers = $request->input('drivers');
-        $status = $request->input('status');
-        $statusExpense = $request->input('statusExpense');
+        $vehicles         = $request->input('vehicles');
+        $drivers          = $request->input('drivers');
+        $status           = $request->input('status');
+        $statusExpense    = $request->input('statusExpense');
         $branch_office_id = $request->input('branch_office_id');
-        $startDate = $request->input('startDate'); // Para filtrar por la fecha de salida (departureDate)
-        $endDate = $request->input('endDate'); // Para filtrar por la fecha de salida (departureDate)
+        $startDate        = $request->input('startDate'); // Para filtrar por la fecha de salida (departureDate)
+        $endDate          = $request->input('endDate');   // Para filtrar por la fecha de salida (departureDate)
 
         // Verificar la oficina principal
-        if (!empty($branch_office_id) && is_numeric($branch_office_id)) {
+        if (! empty($branch_office_id) && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -91,9 +91,9 @@ class ProgrammingController extends Controller
         //     $branchOffice = BranchOffice::find($branch_office_id);
         // }
 
-        // Validación de la paginación
+                                                    // Validación de la paginación
         $perPage = $request->input('per_page', 10); // Valor por defecto 10
-        if (!is_numeric($perPage) || $perPage <= 0) {
+        if (! is_numeric($perPage) || $perPage <= 0) {
             $perPage = 10; // Valor por defecto
         }
 
@@ -110,7 +110,7 @@ class ProgrammingController extends Controller
             'programming',
             'reprogramming',
             // Relación con función de cierre para incluir eliminados
-            'detailsWorkers.worker' => function ($query) {
+            'detailsWorkers.worker'        => function ($query) {
                 $query->withTrashed(); // Incluye los registros de trabajadores eliminados de forma suave
             },
             'detailsWorkers.worker.person' => function ($query) {
@@ -120,26 +120,26 @@ class ProgrammingController extends Controller
         // ->where('branchOffice_id', $branch_office_id)
             ->orderBy('id', 'desc');
 
-        if (!empty($branch_office_id)) {
+        if (! empty($branch_office_id)) {
             $programmingQuery->where('branchOffice_id', $branch_office_id);
         }
         // Filtros adicionales
-        if (!empty($number)) {
+        if (! empty($number)) {
             $programmingQuery->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($number) . '%']);
         }
 
-        if (!empty($origin)) {
+        if (! empty($origin)) {
             $programmingQuery->whereHas('origin', function ($query) use ($origin) {
                 $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($origin) . '%']);
             });
         }
-        if (!empty($destination)) {
+        if (! empty($destination)) {
             $programmingQuery->whereHas('destination', function ($query) use ($destination) {
                 $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($destination) . '%']);
             });
         }
 
-        if (!empty($route)) {
+        if (! empty($route)) {
             $routeParts = explode('-', $route);
 
             // Si sólo se ingresó una parte de la ruta (ej. "Chiclayo")
@@ -159,7 +159,7 @@ class ProgrammingController extends Controller
             }
         }
 
-        if (!empty($vehicles)) {
+        if (! empty($vehicles)) {
             $programmingQuery->where(function ($query) use ($vehicles) {
                 $query->whereHas('tract', function ($query) use ($vehicles) {
                     $query->whereRaw('LOWER(currentPlate) LIKE ?', ['%' . strtolower($vehicles) . '%'])
@@ -171,27 +171,27 @@ class ProgrammingController extends Controller
             });
         }
 
-        if (!empty($drivers)) {
+        if (! empty($drivers)) {
             $programmingQuery->whereHas('detailsWorkers.worker.person', function ($query) use ($drivers) {
                 $query->whereRaw('LOWER(CONCAT(names, " ", fatherSurname, " ", motherSurname)) LIKE ?', ['%' . strtolower($drivers) . '%']);
             });
         }
 
-        if (!empty($status)) {
+        if (! empty($status)) {
             $programmingQuery->where('status', $status);
         }
 
-        if (!empty($statusExpense)) {
+        if (! empty($statusExpense)) {
             $programmingQuery->where('statusLiquidacion', $statusExpense);
         }
 
-        if (!empty($startDate) && !empty($endDate)) {
+        if (! empty($startDate) && ! empty($endDate)) {
             // Comparación entre dos fechas, solo considerando el año, mes y día
             $programmingQuery->whereBetween(DB::raw('DATE(departureDate)'), [$startDate, $endDate]);
-        } elseif (!empty($startDate)) {
+        } elseif (! empty($startDate)) {
             // Comparación de fecha de inicio, solo considerando el año, mes y día
             $programmingQuery->whereDate('departureDate', '>=', $startDate);
-        } elseif (!empty($endDate)) {
+        } elseif (! empty($endDate)) {
             // Comparación de fecha de fin, solo considerando el año, mes y día
             $programmingQuery->whereDate('departureDate', '<=', $endDate);
         }
@@ -206,7 +206,7 @@ class ProgrammingController extends Controller
             // ID del vehículo
             $vehicleId = $programming->tract->serie;
 
-            // ID de la oficina (branchOffice_id) que se usará como parte del número de programación
+                                                                                            // ID de la oficina (branchOffice_id) que se usará como parte del número de programación
             $branchOfficeId = str_pad($programming->branchOffice_id, 3, '0', STR_PAD_LEFT); // Aseguramos que tenga 3 dígitos
 
             // Obtener el contador de programaciones para el vehículo y año
@@ -220,17 +220,17 @@ class ProgrammingController extends Controller
         });
 
         return response()->json([
-            'total' => $list->total(),
-            'data' => $list->items(),
-            'current_page' => $list->currentPage(),
-            'last_page' => $list->lastPage(),
-            'per_page' => $list->perPage(),
+            'total'          => $list->total(),
+            'data'           => $list->items(),
+            'current_page'   => $list->currentPage(),
+            'last_page'      => $list->lastPage(),
+            'per_page'       => $list->perPage(),
             'first_page_url' => $list->url(1),
-            'from' => $list->firstItem(),
-            'next_page_url' => $list->nextPageUrl(),
-            'path' => $list->path(),
-            'prev_page_url' => $list->previousPageUrl(),
-            'to' => $list->lastItem(),
+            'from'           => $list->firstItem(),
+            'next_page_url'  => $list->nextPageUrl(),
+            'path'           => $list->path(),
+            'prev_page_url'  => $list->previousPageUrl(),
+            'to'             => $list->lastItem(),
         ], 200);
     }
 
@@ -303,83 +303,60 @@ class ProgrammingController extends Controller
     public function store(Request $request)
     {
         // Validación de la solicitud
+
+
         $validator = validator()->make($request->all(), [
-            'tract_id' => 'required|exists:vehicles,id',
-            'platform_id' => 'nullable|exists:vehicles,id',
-            'origin_id' => 'required|exists:places,id',
-            'destination_id' => 'required|exists:places,id',
-            'driver_id' => 'nullable|exists:workers,id',
-            'copilot_id' => 'nullable|exists:workers,id',
-            'branch_office_id' => 'nullable|exists:branch_offices,id',
-            'assistant1_id' => 'nullable|exists:workers,id',
-            'assistant2_id' => 'nullable|exists:workers,id',
-            'assistant3_id' => 'nullable|exists:workers,id',
-            'assistant4_id' => 'nullable|exists:workers,id',
+            'tract_id'          => ['required', Rule::exists('vehicles', 'id')->whereNot('status', 'Ocupado')],
+            'platform_id'       => ['nullable', Rule::exists('vehicles', 'id')->whereNot('status', 'Ocupado')],
+            'driver_id'         => ['nullable', Rule::exists('workers', 'id')->whereNot('status', 'Ocupado')],
+            'copilot_id'        => ['nullable', Rule::exists('workers', 'id')->whereNot('status', 'Ocupado')],
+            'origin_id'         => 'required|exists:places,id',
+            'destination_id'    => 'required|exists:places,id',
+            'branch_office_id'  => 'nullable|exists:branch_offices,id',
+            'assistant1_id'     => 'nullable|exists:workers,id',
+            'assistant2_id'     => 'nullable|exists:workers,id',
+            'assistant3_id'     => 'nullable|exists:workers,id',
+            'assistant4_id'     => 'nullable|exists:workers,id',
             'detailsReceptions' => 'nullable|array',
-            'isload' => 'nullable|boolean',
+            'isload'            => 'nullable|boolean',
+        ], [
+            'tract_id.exists'     => 'El tracto seleccionado está ocupado.',
+            'platform_id.exists'  => 'La plataforma seleccionada está ocupada.',
+            'driver_id.exists'    => 'El conductor seleccionado está ocupado.',
+            'copilot_id.exists'   => 'El copiloto seleccionado está ocupado.',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
-        }
-        if ($request->has('driver_id')) {
-            $driver = Worker::find($request->driver_id);
-            if ($driver && $driver->status === 'Ocupado') {
-                return response()->json(['error' => 'El conductor seleccionado está ocupado.'], 422);
-            }
-        }
-
-        if ($request->has('copilot_id')) {
-            $copilot = Worker::find($request->copilot_id);
-            if ($copilot && $copilot->status === 'Ocupado') {
-                return response()->json(['error' => 'El copiloto seleccionado está ocupado.'], 422);
-            }
-        }
-        if ($request->has('tract_id')) {
-            $tract = Vehicle::find($request->tract_id);
-            if ($tract && $tract->status === 'Ocupado') {
-                return response()->json(['error' => 'El tracto seleccionado está ocupado.'], 422);
-            }
-        }
-
-        // Validación adicional para platform_id
-        if ($request->has('platform_id')) {
-            $platform = Vehicle::find($request->platform_id);
-            if ($platform && $platform->status === 'Ocupado') {
-                return response()->json(['error' => 'La Carreta seleccionada está ocupada.'], 422);
-            }
-        }
+        
 
         // Manejo de la sucursal
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json(["message" => "Branch Office Not Found"], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         // Generación del número de programación
-        $tipo = 'P' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
-        $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM programmings WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $tipo         = 'P' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
+        $tipo         = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM programmings WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $data = [
-            'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'state' => $request->input('state') ?? 'Generada',
-            'departureDate' => $request->input('departureDate') ?? null,
+            'numero'               => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'state'                => $request->input('state') ?? 'Generada',
+            'departureDate'        => $request->input('departureDate') ?? null,
             'estimatedArrivalDate' => $request->input('estimatedArrivalDate') ?? null,
-            'tract_id' => $request->input('tract_id'),
-            'platForm_id' => $request->input('platform_id'),
-            'origin_id' => $request->input('origin_id'),
-            'destination_id' => $request->input('destination_id'),
-            'branchOffice_id' => $branch_office_id,
-            'isload' => $request->input('isload', 0),
-            'user_created_id' => Auth::user()->id,
+            'tract_id'             => $request->input('tract_id'),
+            'platForm_id'          => $request->input('platform_id'),
+            'origin_id'            => $request->input('origin_id'),
+            'destination_id'       => $request->input('destination_id'),
+            'branchOffice_id'      => $branch_office_id,
+            'isload'               => $request->input('isload', 0),
+            'user_created_id'      => Auth::user()->id,
         ];
 
         // Creación del objeto Programming
@@ -396,8 +373,8 @@ class ProgrammingController extends Controller
         if ($object) {
             // Asignación de trabajadores al objeto Programming
             $workers = [
-                'driver' => $request->input('driver_id'),
-                'copilot' => $request->input('copilot_id'),
+                'driver'     => $request->input('driver_id'),
+                'copilot'    => $request->input('copilot_id'),
                 'assistant1' => $request->input('assistant1_id'),
                 'assistant2' => $request->input('assistant2_id'),
                 'assistant3' => $request->input('assistant3_id'),
@@ -409,9 +386,9 @@ class ProgrammingController extends Controller
             foreach ($workers as $function => $worker_id) {
                 if ($worker_id) {
                     DetailWorker::create([
-                        'function' => $function,
+                        'function'       => $function,
                         'programming_id' => $object->id,
-                        'worker_id' => $worker_id,
+                        'worker_id'      => $worker_id,
                     ]);
 
                     $workerProgramming = Worker::find($worker_id);
@@ -430,7 +407,7 @@ class ProgrammingController extends Controller
                     if ($detailReception) {
                         $detailReception->update(['programming_id' => $object->id]);
                         CarrierByProgramming::create([
-                            'programming_id' => $object->id,
+                            'programming_id'   => $object->id,
                             'carrier_guide_id' => $detailReception->id,
                         ]);
                     }
@@ -438,9 +415,9 @@ class ProgrammingController extends Controller
             }
 
             // Cálculo de pesos, cantidades y montos
-            $totalWeight = 0;
+            $totalWeight    = 0;
             $detailQuantity = 0;
-            $totalAmount = 0;
+            $totalAmount    = 0;
 
             foreach ($object->carrierGuides as $guide) {
                 $reception = Reception::find($guide->reception_id);
@@ -452,10 +429,10 @@ class ProgrammingController extends Controller
             }
 
             $object->update([
-                'totalWeight' => $totalWeight,
+                'totalWeight'     => $totalWeight,
                 'carrierQuantity' => $object->carrierGuides->count(),
-                'detailQuantity' => $detailQuantity,
-                'totalAmount' => $totalAmount,
+                'detailQuantity'  => $detailQuantity,
+                'totalAmount'     => $totalAmount,
             ]);
         }
 
@@ -472,7 +449,7 @@ class ProgrammingController extends Controller
             'programming',
             'reprogramming',
             // Relación con función de cierre para incluir eliminados
-            'detailsWorkers.worker' => function ($query) {
+            'detailsWorkers.worker'        => function ($query) {
                 $query->withTrashed(); // Incluye los registros de trabajadores eliminados de forma suave
             },
             'detailsWorkers.worker.person' => function ($query) {
@@ -481,14 +458,14 @@ class ProgrammingController extends Controller
         ])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'POST',         // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Guardar Programación', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),          // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),   // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($object, 200);
@@ -537,7 +514,7 @@ class ProgrammingController extends Controller
             'origin', 'destination', 'detailsWorkers', 'detailsWorkers.worker.person',
             'detailReceptions', 'carrierGuides.reception.details', 'branchOffice', 'programming'
         )->find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
 
@@ -618,19 +595,19 @@ class ProgrammingController extends Controller
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
-            'tract_id' => 'nullable|exists:vehicles,id',
-            'platform_id' => 'nullable|exists:vehicles,id',
-            'origin_id' => 'nullable|exists:places,id',
-            'destination_id' => 'nullable|exists:places,id',
-            'driver_id' => 'nullable|exists:workers,id',
-            'copilot_id' => 'nullable|exists:workers,id',
-            'assistant1_id' => 'nullable|exists:workers,id',
-            'assistant2_id' => 'nullable|exists:workers,id',
-            'assistant3_id' => 'nullable|exists:workers,id',
-            'assistant4_id' => 'nullable|exists:workers,id',
+            'tract_id'          => 'nullable|exists:vehicles,id',
+            'platform_id'       => 'nullable|exists:vehicles,id',
+            'origin_id'         => 'nullable|exists:places,id',
+            'destination_id'    => 'nullable|exists:places,id',
+            'driver_id'         => 'nullable|exists:workers,id',
+            'copilot_id'        => 'nullable|exists:workers,id',
+            'assistant1_id'     => 'nullable|exists:workers,id',
+            'assistant2_id'     => 'nullable|exists:workers,id',
+            'assistant3_id'     => 'nullable|exists:workers,id',
+            'assistant4_id'     => 'nullable|exists:workers,id',
             'detailsReceptions' => 'nullable|array',
-            'branch_office_id' => 'nullable|exists:branch_offices,id',
-            'isload' => 'nullable|boolean',
+            'branch_office_id'  => 'nullable|exists:branch_offices,id',
+            'isload'            => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -638,34 +615,34 @@ class ProgrammingController extends Controller
         }
 
         $object = Programming::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
 
         // Revertir el estado de los vehículos a "Disponible" si se van a cambiar
         if ($object->tract_id != $request->input('tract_id')) {
-            $tract = Vehicle::withTrashed()->find($object->tract_id);
+            $tract         = Vehicle::withTrashed()->find($object->tract_id);
             $tract->status = "Disponible";
             $tract->save();
         }
         if ($object->platForm_id != $request->input('platform_id')) {
 
-            $tract = Vehicle::withTrashed()->find($object->platForm_id);
+            $tract         = Vehicle::withTrashed()->find($object->platForm_id);
             $tract->status = "Disponible";
             $tract->save();
         }
 
         // Actualizar los datos de la programación
         $data = [
-            'departureDate' => $request->input('departureDate') ?? null,
+            'departureDate'        => $request->input('departureDate') ?? null,
             'estimatedArrivalDate' => $request->input('estimatedArrivalDate') ?? null,
-            'tract_id' => $request->input('tract_id') ?? null,
-            'platForm_id' => $request->input('platform_id') ?? null,
-            'origin_id' => $request->input('origin_id') ?? null,
-            'destination_id' => $request->input('destination_id') ?? null,
-            'branch_office_id' => $request->input('branch_office_id') ?? null,
-            'isload' => $request->input('isload') ?? null,
-            'user_edited_id' => Auth::user()->id,
+            'tract_id'             => $request->input('tract_id') ?? null,
+            'platForm_id'          => $request->input('platform_id') ?? null,
+            'origin_id'            => $request->input('origin_id') ?? null,
+            'destination_id'       => $request->input('destination_id') ?? null,
+            'branch_office_id'     => $request->input('branch_office_id') ?? null,
+            'isload'               => $request->input('isload') ?? null,
+            'user_edited_id'       => Auth::user()->id,
         ];
 
         $object->update($data);
@@ -681,8 +658,8 @@ class ProgrammingController extends Controller
         if ($object) {
             // Actualizar los trabajadores asignados
             $workers = [
-                'driver' => $request->input('driver_id'),
-                'copilot' => $request->input('copilot_id'),
+                'driver'     => $request->input('driver_id'),
+                'copilot'    => $request->input('copilot_id'),
                 'assistant1' => $request->input('assistant1_id'),
                 'assistant2' => $request->input('assistant2_id'),
                 'assistant3' => $request->input('assistant3_id'),
@@ -710,9 +687,9 @@ class ProgrammingController extends Controller
                         $newDetailIds[] = $detail->id;
                     } else {
                         $newDetail = DetailWorker::create([
-                            'function' => $function,
+                            'function'       => $function,
                             'programming_id' => $object->id,
-                            'worker_id' => $worker_id,
+                            'worker_id'      => $worker_id,
                         ]);
                         Worker::find($worker_id)->update(['status' => 'Ocupado']);
                         $newDetailIds[] = $newDetail->id;
@@ -727,19 +704,19 @@ class ProgrammingController extends Controller
             if ($request->input('isload') == 1) {
                 $currentDetailReceptionIds = $object->carrierGuides()->pluck('id')->toArray(); // IDs de las guías
 
-                // Obtén las guías directamente desde la relación
+                                                                                  // Obtén las guías directamente desde la relación
                 $relationGuides = $object->carrierGuides->pluck('id')->toArray(); // IDs de las guías desde la relación
 
                 // Obtén las guías directamente desde la tabla 'carrier_by_programmings'
                 $dbGuides = DB::table('carrier_by_programmings')
                     ->where('programming_id', $id)
                     ->pluck('carrier_guide_id') // Obtén solo los IDs de las guías
-                    ->toArray(); // Convertirlo en array nativo
+                    ->toArray();                // Convertirlo en array nativo
 
-                // Combina ambas fuentes y elimina duplicados
+                                                                                                 // Combina ambas fuentes y elimina duplicados
                 $currentDetailReceptionIds = array_merge($currentDetailReceptionIds, $dbGuides); // Combina los arrays
-                $currentDetailReceptionIds = array_unique($currentDetailReceptionIds); // Elimina los duplicados
-                $currentDetailReceptionIds = array_values($currentDetailReceptionIds); // Reindexa el array para que los índices sean consecutivos
+                $currentDetailReceptionIds = array_unique($currentDetailReceptionIds);           // Elimina los duplicados
+                $currentDetailReceptionIds = array_values($currentDetailReceptionIds);           // Reindexa el array para que los índices sean consecutivos
 
                 // Si prefieres trabajar con una colección en lugar de un array nativo
                 $currentDetailReceptionIds = collect($currentDetailReceptionIds)
@@ -755,14 +732,14 @@ class ProgrammingController extends Controller
                 foreach ($detailsReceptions as $detailData) {
                     if (isset($detailData['idDetail']) && $detailData['idDetail'] !== 'null') {
                         $newReceptionDetailIds[] = $detailData['idDetail'];
-                        $detailReception = CarrierGuide::find($detailData['idDetail']);
+                        $detailReception         = CarrierGuide::find($detailData['idDetail']);
 
                         if ($detailReception) {
 
                             $detailReception->update(['programming_id' => $object->id]);
 
                             $carrierByProgramming = CarrierByProgramming::where([
-                                'programming_id' => $object->id,
+                                'programming_id'   => $object->id,
                                 'carrier_guide_id' => $detailReception->id,
                             ])->first();
 
@@ -770,13 +747,13 @@ class ProgrammingController extends Controller
 
                                 // Si ya existe, actualiza
                                 $carrierByProgramming->update([
-                                    'programming_id' => $object->id,
+                                    'programming_id'   => $object->id,
                                     'carrier_guide_id' => $detailReception->id,
                                 ]);
                             } else {
                                 // Si no existe, crea uno nuevo
                                 CarrierByProgramming::create([
-                                    'programming_id' => $object->id,
+                                    'programming_id'   => $object->id,
                                     'carrier_guide_id' => $detailReception->id,
                                 ]);
                             }
@@ -788,7 +765,7 @@ class ProgrammingController extends Controller
 
                 $detailsToDelete = array_diff($currentDetailReceptionIds, $newReceptionDetailIds);
 
-                if (!empty($detailsToDelete)) {
+                if (! empty($detailsToDelete)) {
                     // Actualiza CarrierByProgramming para eliminar las relaciones
                     CarrierByProgramming::whereIn('carrier_guide_id', $detailsToDelete)
                         ->where('programming_id', $object->id)
@@ -802,9 +779,9 @@ class ProgrammingController extends Controller
             }
 
             // Recalcular pesos, cantidades y montos
-            $totalWeight = 0;
+            $totalWeight    = 0;
             $detailQuantity = 0;
-            $totalAmount = 0;
+            $totalAmount    = 0;
 
             foreach ($object->carrierGuides as $guide) {
                 $reception = Reception::find($guide->reception_id);
@@ -816,10 +793,10 @@ class ProgrammingController extends Controller
             }
 
             $object->update([
-                'totalWeight' => $totalWeight,
+                'totalWeight'     => $totalWeight,
                 'carrierQuantity' => $object->carrierGuides->count(),
-                'detailQuantity' => $detailQuantity,
-                'totalAmount' => $totalAmount,
+                'detailQuantity'  => $detailQuantity,
+                'totalAmount'     => $totalAmount,
             ]);
         }
 
@@ -836,7 +813,7 @@ class ProgrammingController extends Controller
             'programming',
             'reprogramming',
             // Relación con función de cierre para incluir eliminados
-            'detailsWorkers.worker' => function ($query) {
+            'detailsWorkers.worker'        => function ($query) {
                 $query->withTrashed(); // Incluye los registros de trabajadores eliminados de forma suave
             },
             'detailsWorkers.worker.person' => function ($query) {
@@ -845,14 +822,14 @@ class ProgrammingController extends Controller
         ])->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'PUT', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'PUT',          // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Editar Programación', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),         // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),  // Información sobre el navegador/dispositivo
         ]);
         return response()->json($object, 200);
     }
@@ -912,7 +889,7 @@ class ProgrammingController extends Controller
     {
 
         $object = Programming::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
 
@@ -928,38 +905,38 @@ class ProgrammingController extends Controller
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
 
         }
         $tipo = 'P' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
 
         $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
 
-        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM programmings WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM programmings WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $originReprogramming = $object->destination_id;
 
         $data = [
 
-            'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'state' => 'Generada',
-            'departureDate' => Carbon::now() ?? null,
+            'numero'               => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'state'                => 'Generada',
+            'departureDate'        => Carbon::now() ?? null,
             'estimatedArrivalDate' => $request->input('estimatedArrivalDate') ?? null,
-            'tract_id' => $object->tract_id ?? null,
-            'platForm_id' => $object->platForm_id ?? null,
-            'origin_id' => $originReprogramming ?? null,
-            'destination_id' => $request->input('destination_id') ?? null,
-            'branchOffice_id' => $branch_office_id,
-            'isload' => 0, //No lleva carga
-            'programming_id' => $id, //No lleva carga
+            'tract_id'             => $object->tract_id ?? null,
+            'platForm_id'          => $object->platForm_id ?? null,
+            'origin_id'            => $originReprogramming ?? null,
+            'destination_id'       => $request->input('destination_id') ?? null,
+            'branchOffice_id'      => $branch_office_id,
+            'isload'               => 0,   //No lleva carga
+            'programming_id'       => $id, //No lleva carga
         ];
 
         $objectReprogramming = Programming::create($data);
@@ -967,8 +944,8 @@ class ProgrammingController extends Controller
         if ($objectReprogramming) {
 
             $workers = [
-                'driver' => $object->detailsWorkers->where('function', 'driver')->pluck('worker_id')->first(),
-                'copilot' => $object->detailsWorkers->where('function', 'copilot')->pluck('worker_id')->first(),
+                'driver'     => $object->detailsWorkers->where('function', 'driver')->pluck('worker_id')->first(),
+                'copilot'    => $object->detailsWorkers->where('function', 'copilot')->pluck('worker_id')->first(),
                 'assistant1' => $object->detailsWorkers->where('function', 'assistant1')->pluck('worker_id')->first(),
                 'assistant2' => $object->detailsWorkers->where('function', 'assistant2')->pluck('worker_id')->first(),
                 'assistant3' => $object->detailsWorkers->where('function', 'assistant3')->pluck('worker_id')->first(),
@@ -982,9 +959,9 @@ class ProgrammingController extends Controller
 
                 if (Worker::find($worker_id)) {
                     $detail = DetailWorker::create([
-                        'function' => $function,
+                        'function'       => $function,
                         'programming_id' => $objectReprogramming->id,
-                        'worker_id' => $worker_id,
+                        'worker_id'      => $worker_id,
                     ]);
                 }
 
@@ -1001,14 +978,14 @@ class ProgrammingController extends Controller
         )->find($objectReprogramming->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $objectReprogramming->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($objectReprogramming),
-            'description' => 'Reprogramación', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),               // ID del usuario que realiza la acción
+            'record_id'   => $objectReprogramming->id, // El ID del usuario afectado
+            'action'      => 'POST',                   // Acción realizada
+            'table_name'  => 'programmings',           // Tabla afectada
+            'data'        => json_encode($objectReprogramming),
+            'description' => 'Reprogramación',     // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         return response()->json($objectReprogramming, 200);
 
@@ -1055,7 +1032,7 @@ class ProgrammingController extends Controller
     {
         try {
             $object = Programming::find($id);
-            if (!$object) {
+            if (! $object) {
                 return response()->json(['message' => 'Programming not found'], 422);
             }
 
@@ -1091,14 +1068,14 @@ class ProgrammingController extends Controller
 
             $object->delete();
             Bitacora::create([
-                'user_id' => Auth::id(), // ID del usuario que realiza la acción
-                'record_id' => $object2->id, // El ID del usuario afectado
-                'action' => 'DELETE', // Acción realizada
-                'table_name' => 'programmings', // Tabla afectada
-                'data' => json_encode($object2),
+                'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+                'record_id'   => $object2->id,   // El ID del usuario afectado
+                'action'      => 'DELETE',       // Acción realizada
+                'table_name'  => 'programmings', // Tabla afectada
+                'data'        => json_encode($object2),
                 'description' => 'Eliminar Programación', // Descripción de la acción
-                'ip_address' => $request->ip(), // Dirección IP del usuario
-                'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+                'ip_address'  => $request->ip(),           // Dirección IP del usuario
+                'user_agent'  => $request->userAgent(),    // Información sobre el navegador/dispositivo
             ]);
             return response()->json(['message' => 'Programming deleted successfully']);
 
@@ -1154,13 +1131,13 @@ class ProgrammingController extends Controller
     public function finishProgramming(Request $request, $id)
     {
         $object = Programming::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
         $object->detailsWorkers()->with('worker')->get()->each(function ($detailWorker) {
             $detailWorker->worker->update(['status' => 'Disponible']);
         });
-        $object->status = 'Finalizado';
+        $object->status            = 'Finalizado';
         $object->actualArrivalDate = now();
         $object->save();
         if ($object->tract_id != null) {
@@ -1197,7 +1174,7 @@ class ProgrammingController extends Controller
             'programming',
             'reprogramming',
             // Relación con función de cierre para incluir eliminados
-            'detailsWorkers.worker' => function ($query) {
+            'detailsWorkers.worker'        => function ($query) {
                 $query->withTrashed(); // Incluye los registros de trabajadores eliminados de forma suave
             },
             'detailsWorkers.worker.person' => function ($query) {
@@ -1205,14 +1182,14 @@ class ProgrammingController extends Controller
             },
         ])->find($object->id);
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'DELETE', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'DELETE',       // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Finalizando Programación', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),              // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),       // Información sobre el navegador/dispositivo
         ]);
         return response()->json($object, 200);
     }
@@ -1220,7 +1197,7 @@ class ProgrammingController extends Controller
     public function getPlatformByVehicleId($vehicleId)
     {
         $vehicle = Vehicle::find($vehicleId);
-        if (!$vehicle) {
+        if (! $vehicle) {
             return response()->json(['message' => 'Vehículo no Encontrado'], 422);
         }
         $programming = Programming::select('tract_id', 'platForm_id')
@@ -1233,12 +1210,12 @@ class ProgrammingController extends Controller
         // Estructura de respuesta
         if ($programming) {
             return response()->json([
-                'tract_id' => $programming->tract_id,
+                'tract_id'    => $programming->tract_id,
                 'platForm_id' => $programming->platForm_id,
             ], 200); // Código 200
         } else {
             return response()->json([
-                'tract_id' => (int) $vehicleId, // Convertir a cadena
+                'tract_id'    => (int) $vehicleId, // Convertir a cadena
                 'platForm_id' => null,
             ], 200); // Código 200
         }
@@ -1247,7 +1224,7 @@ class ProgrammingController extends Controller
     public function programmingLiquidado(Request $request, $id)
     {
         $object = Programming::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Programación no encontrada'], 422);
         }
         //AGREGAR UNA VALIDACIÓN
@@ -1256,7 +1233,7 @@ class ProgrammingController extends Controller
             return response()->json(['message' => 'Programación ya liquidada'], 422);
         }
 
-        $object->dateLiquidacion = now();
+        $object->dateLiquidacion   = now();
         $object->statusLiquidacion = 'Liquidada';
         $object->save();
         $object = Programming::with('tract.photos', 'platform.photos',
@@ -1265,14 +1242,14 @@ class ProgrammingController extends Controller
         )->find($id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'DELETE', // Acción realizada
-            'table_name' => 'programmings', // Tabla afectada
-            'data' => json_encode($object),
+            'user_id'     => Auth::id(),     // ID del usuario que realiza la acción
+            'record_id'   => $object->id,    // El ID del usuario afectado
+            'action'      => 'DELETE',       // Acción realizada
+            'table_name'  => 'programmings', // Tabla afectada
+            'data'        => json_encode($object),
             'description' => 'Liquidado Programación', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),            // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),     // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json(

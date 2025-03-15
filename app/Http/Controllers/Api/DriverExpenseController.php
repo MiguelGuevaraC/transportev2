@@ -144,7 +144,7 @@ class DriverExpenseController extends Controller
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
 
         // Paginar la lista de resultados
-        $list = $query->with(['programming', 'expensesConcept', 'worker.person'])
+        $list = $query->with(['programming', 'expensesConcept', 'worker.person','latest_bank_movement'])
             ->orderBy('id', 'desc')
             ->paginate($per_page, ['*'], 'page', $page);
 
