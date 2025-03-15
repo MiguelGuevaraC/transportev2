@@ -2,6 +2,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+
+use App\Http\Requests\DriverExpenseRequest\TransferSaldoRequest;
+use App\Http\Resources\DriverExpenseResource;
 use App\Models\BankAccount;
 use App\Models\Box;
 use App\Models\DriverExpense;
@@ -10,6 +13,7 @@ use App\Models\Programming;
 use App\Models\User;
 use App\Models\Worker;
 use App\Services\BankMovementService;
+use App\Services\DriverExpenseService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +25,11 @@ class DriverExpenseController extends Controller
 {
 
     protected $bankmovementService;
-
-    public function __construct(BankMovementService $BankMovementService)
+    protected $driverExpense;
+    public function __construct(BankMovementService $BankMovementService, DriverExpenseService $ProductService)
     {
         $this->bankmovementService = $BankMovementService;
+        $this->driverExpense       = $ProductService;
     }
 
     /**
@@ -245,15 +250,15 @@ class DriverExpenseController extends Controller
     public function store(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'programming_id'     => 'required|exists:programmings,id',
-            'expensesConcept_id' => 'required|exists:expenses_concepts,id',
+            'programming_id'         => 'required|exists:programmings,id',
+            'expensesConcept_id'     => 'required|exists:expenses_concepts,id',
             'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
-            'worker_id'          => 'required|exists:workers,id',
-            'amount'             => 'required',
+            'worker_id'              => 'required|exists:workers,id',
+            'amount'                 => 'required',
             // 'quantity' => 'required',
-            'bank_id'            => 'nullable|exists:banks,id',
-            'proveedor_id'       => 'nullable|exists:people,id',
-            'bank_account_id'    => [
+            'bank_id'                => 'nullable|exists:banks,id',
+            'proveedor_id'           => 'nullable|exists:people,id',
+            'bank_account_id'        => [
                 'nullable',
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
             ],
@@ -371,8 +376,6 @@ class DriverExpenseController extends Controller
         $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(sequentialNumber, LOCATE("-", sequentialNumber) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM moviments WHERE SUBSTRING(sequentialNumber, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
-
-
         if ($request->input('expensesConcept_id') == 1) { //GENERA MOVIMEITNO EGRESO DE CAJA
 
             if ($request->input('isMovimentCaja') == 1) {
@@ -452,18 +455,10 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            // ->orWhere('selectTypePay', 'Descuento_sueldo')
-            // ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            // ->orWhere('selectTypePay', 'Descuento_sueldo')
-            // ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
         })->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
@@ -478,6 +473,38 @@ class DriverExpenseController extends Controller
             'saldo'                         => number_format((float) $saldo, 2, '.', ''),
         ], 200);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/transporte/public/api/transferir-saldo",
+     *     summary="Transfer driver expense",
+     *     tags={"DriverExpense"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(@OA\JsonContent(ref="#/components/schemas/TransferSaldoRequest")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DriverExpense")),
+     *         @OA\Property(property="total_ingreso", type="string", example="1500.00"),
+     *         @OA\Property(property="total_egreso", type="string", example="500.00"),
+     *         @OA\Property(property="saldo", type="string", example="1000.00")
+     *     )),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function transferir_saldo(TransferSaldoRequest $request)
+    {
+        $validatedData           = $request->validated();
+        $updated_driver_expenses = $this->driverExpense->transferDriverExpense($validatedData);
+        $programming_out= Programming::find($validatedData['programming_out_id']);
+        $montos                  = $this->driverExpense->montos_programacion($programming_out);
+        return response()->json([
+            'data'          => DriverExpenseResource::collection(collect($updated_driver_expenses)),
+            'total_ingreso' => $montos['total_ingreso'],
+            'total_egreso'  => $montos['total_egreso'],
+            'saldo'         => $montos['saldo'],
+        ], 200);
+    }
+
 /**
  * @OA\Post(
  *     path="/transporte/public/api/devolverMontoaCaja",
@@ -756,20 +783,20 @@ class DriverExpenseController extends Controller
 
         //en duda el actualizar porque genera mov caja
         $validator = validator()->make($request->all(), [
-            'programming_id'     => 'required|exists:programmings,id',
-            'expensesConcept_id' => 'required|exists:expenses_concepts,id',
-            'worker_id'          => 'required|exists:workers,id',
-            'proveedor_id'       => 'nullable|exists:people,id',
+            'programming_id'         => 'required|exists:programmings,id',
+            'expensesConcept_id'     => 'required|exists:expenses_concepts,id',
+            'worker_id'              => 'required|exists:workers,id',
+            'proveedor_id'           => 'nullable|exists:people,id',
             'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
-            'amount'             => 'required',
+            'amount'                 => 'required',
             // 'quantity' => 'required',
-            'bank_id'            => 'nullable|exists:banks,id',
+            'bank_id'                => 'nullable|exists:banks,id',
 
-            'yape'               => 'nullable|numeric',
-            'deposit'            => 'nullable|numeric',
-            'cash'               => 'nullable|numeric',
-            'plin'               => 'nullable|numeric',
-            'card'               => 'nullable|numeric',
+            'yape'                   => 'nullable|numeric',
+            'deposit'                => 'nullable|numeric',
+            'cash'                   => 'nullable|numeric',
+            'plin'                   => 'nullable|numeric',
+            'card'                   => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -866,7 +893,7 @@ class DriverExpenseController extends Controller
 
         }
 
-        $bank_account  = BankAccount::find($request->input(key: 'bank_account_id'));
+        $bank_account = BankAccount::find($request->input(key: 'bank_account_id'));
         if ($bank_account != null) {
             $data_movement_bank = [
                 'driver_expense_id'      => $expense->id,

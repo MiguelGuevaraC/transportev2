@@ -362,6 +362,11 @@ class Reception extends Model
     {
         return $this->hasMany(DetailReception::class);
     }
+    public function detailsResumen()
+    {
+        return $this->details()
+            ->selectRaw('reception_id, GROUP_CONCAT(description SEPARATOR ", ") as carga');
+    }
     public function cargos()
     {
         return $this->hasMany(Cargos::class);

@@ -1,6 +1,8 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\DriverExpense;
+use App\Models\ExpensesConcept;
 use App\Models\GroupMenu;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -14,6 +16,16 @@ class MejorasRutasPermission extends Seeder
      */
     public function run()
     {
+
+        $conceptosDriverExpenses = [
+            ['id' => '22', 'type' => 'Transferir', 'typeConcept' => 'Ingreso','name'=>'TRANFERENCIA-INGRESO SALDO'],
+            ['id' => '23', 'type' => 'Transferir', 'typeConcept' => 'Egreso','name'=>'TRANFERENCIA-EGRESO SALDO'],
+        ];
+
+        foreach ($conceptosDriverExpenses as $driverexpense) {
+            ExpensesConcept::updateOrCreate(['id' => $driverexpense['id']], $driverexpense);
+        }
+
 
         $grupos = [
             ['id' => '6', 'name' => 'Caja Grande', 'icon' => 'bank'],

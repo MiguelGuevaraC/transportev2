@@ -78,17 +78,17 @@ class ReceptionResource extends JsonResource
             'recipient_id'          => $this->recipient_id ?? null,
             'recipient'             => $this->recipient ?? null,
             'pickupResponsible_id'  => $this->pickupResponsible_id ?? null,
-            'pickupResponsible'     => $this->pickupResponsible ?? null,
+            'pickup_responsible'     => $this->pickupResponsible ?? null,
             'payResponsible_id'     => $this->payResponsible_id ?? null,
-            'payResponsible'        => $this->payResponsible ?? null,
+            'pay_responsible'        => $this->payResponsible ?? null,
             'seller_id'             => $this->seller_id ?? null,
             'seller'                => $this->seller ?? null,
             'pointSender_id'        => $this->pointSender_id ?? null,
-            'pointSender'           => $this->pointSender ?? null,
+            'point_sender'           => $this->pointSender ?? null,
             'pointDestination_id'   => $this->pointDestination_id ?? null,
-            'pointDestination'      => $this->pointDestination ?? null,
+            'point_destination'      => $this->pointDestination ?? null,
             'branchOffice_id'       => $this->branchOffice_id ?? null,
-            'branchOffice'          => $this->branchOffice ?? null,
+            'branch_office'          => $this->branchOffice ?? null,
             'office_id'             => $this->office_id ?? null,
 
             'comment'               => $this->comment ?? null,
@@ -99,9 +99,10 @@ class ReceptionResource extends JsonResource
             'created_at'            => $this->created_at ?? null,
 
             'details'               => $this->details ?? null,
-            'firstCarrierGuide'     => $this->firstCarrierGuide? new CarrierGuideResource($this->firstCarrierGuide) : null,
+            'first_carrier_guide'     => $this->firstCarrierGuide? new CarrierGuideResource($this->firstCarrierGuide) : null,
             'moviment'              => $this->moviment ?? null,
             'cargos'                => $this->cargos ?? null,
+            'carga'                => $this->carga ?? null,
         ];
     }
 }

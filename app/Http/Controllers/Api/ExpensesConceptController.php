@@ -231,7 +231,9 @@ class ExpensesConceptController extends Controller
         if (!$object) {
             return response()->json(['message' => 'Expenses Concept not found'], 422);
         }
-
+        if (in_array($id, [22, 23]) || !$object = ExpensesConcept::find($id)) {
+            return response()->json(['message' => 'Esta operación no se puede realizar'], 422);
+        }
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
             'name' => [
@@ -307,6 +309,9 @@ class ExpensesConceptController extends Controller
         $object = ExpensesConcept::find($id);
         if (!$object) {
             return response()->json(['message' => 'ExpensesConcept not found'], 422);
+        }
+        if (in_array($id, [22, 23]) || !$object = ExpensesConcept::find($id)) {
+            return response()->json(['message' => 'Esta operación no se puede realizar'], 422);
         }
         $object->state = 0;
         $object->save();

@@ -42,6 +42,9 @@ class ProgrammingResource extends JsonResource
             'platForm'           => $this->platForm ?? null,
             'branchOffice_id'       => $this->branchOffice_id ?? null,
 
+            'detailsWorkers'=> $this->detailsWorkers ?? null,
+
+
             'programming_id'        => $this->programming_id ?? null,
             'status'                => $this->status ?? null,
 

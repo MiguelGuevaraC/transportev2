@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,24 +26,24 @@ class CarrierGuideResource extends JsonResource
             'transferDateEstimated' => $this->transferDateEstimated ?? null,
 
             'tract_id'              => $this->tract_id ?? null,
-            'tract'              => $this->tract ?? null,
+            'tract'                 => $this->tract ?? null,
             'platform_id'           => $this->platform_id ?? null,
-            'platform'           => $this->platform ?? null,
+            'platform'              => $this->platform ?? null,
             'origin_id'             => $this->origin_id ?? null,
-            'origin'             => $this->origin ?? null,
+            'origin'                => $this->origin ?? null,
             'destination_id'        => $this->destination_id ?? null,
-            'destination'        => $this->destination ?? null,
+            'destination'           => $this->destination ?? null,
 
             'sender_id'             => $this->sender_id ?? null,
-            'sender'             => $this->sender ?? null,
+            'sender'                => $this->sender ?? null,
             'recipient_id'          => $this->recipient_id ?? null,
-            'recipient'          => $this->recipient ?? null,
+            'recipient'             => $this->recipient ?? null,
             'programming_id'        => $this->programming_id ?? null,
 
             'districtStart_id'      => $this->districtStart_id ?? null,
-            'districtStart'      => $this->districtStart ?? null,
+            'districtStart'         => $this->districtStart ?? null,
             'districtEnd_id'        => $this->districtEnd_id ?? null,
-'districtEnd'        => $this->districtEnd ?? null,
+            'districtEnd'           => $this->districtEnd ?? null,
             'reception_id'          => $this->reception_id ?? null,
             'payResponsible_id'     => $this->payResponsible_id ?? null,
             'driver_id'             => $this->driver_id ?? null,
@@ -61,7 +60,7 @@ class CarrierGuideResource extends JsonResource
             'addressEnd'            => $this->addressEnd ?? null,
             'motive_id'             => $this->motive_id ?? null,
 
-            'programming'              => new ProgrammingResource ($this->programming) ?? null,
+            'programming'           => new ProgrammingResource($this->programming) ?? null,
 
             'user_edited_id'        => $this->user_edited_id ?? null,
             'user_deleted_id'       => $this->user_deleted_id ?? null,
