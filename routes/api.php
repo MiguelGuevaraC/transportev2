@@ -429,3 +429,4 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/BankMovementApi.php';        //BANK MOVIMENT
     require __DIR__ . '/Api/DriverExpenseApi.php';        //DRIVER EXPENSE
 });
+Route::get('report-workers', [WorkerController::class, 'index_export_excel']);

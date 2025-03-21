@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -152,6 +151,43 @@ class Worker extends Model
 
     ];
 
+    const fields_export = [
+        'Licencia' => 'licencia',
+        'Fecha Licencia' => 'licencia_date',
+        'Nro Identidad' => 'person.documentNumber',
+        'Nombre' => 'person.names',
+        'Apellido Paterno' => 'person.fatherSurname',
+        'Telefono' => 'person.telephone',
+        'Ocuapación' => 'occupation',
+    ];
+    const filters = [
+        'bank_id'          => '=',
+        'code'             => 'like',
+        'department'       => 'like',
+        'province'         => 'like',
+        'district'         => 'like',
+        'person.deleted_at'         => '=',
+
+        'maritalStatus'    => 'like',
+        'levelInstitution' => 'like',
+        'occupation'       => 'like',
+        'person.names'       => 'like',
+        'licencia'         => 'like',
+        'licencia_date'    => 'date',
+
+        'status'           => '=',
+        'startDate'        => 'date',
+        'endDate'          => '=',
+        'state'            => '=',
+
+        'district_id'      => '=',
+        'person_id'        => '=',
+        'area_id'          => '=',
+        'branchOffice_id'  => '=',
+    ];
+    const sorts = [
+        'id' => 'desc',
+    ];
     public function person()
     {
         return $this->belongsTo(Person::class, 'person_id');

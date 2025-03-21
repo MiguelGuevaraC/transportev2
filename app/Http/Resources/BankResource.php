@@ -6,6 +6,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class BankResource extends JsonResource
 {
 
+    
+
     /**
      * @OA\Schema(
      *     schema="Bank",

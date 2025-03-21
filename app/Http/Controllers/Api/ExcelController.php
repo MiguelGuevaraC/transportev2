@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Exports\DocumentExport;
@@ -30,32 +29,32 @@ class ExcelController extends Controller
     public function reporteDocumentsExcel(Request $request)
     {
 
-        $number = $request->input('number'); // Número de documento
+        $number     = $request->input('number');     // Número de documento
         $vehicle_id = $request->input('vehicle_id'); // ID de vehículo
-        $startDate = $request->input('startDate'); // Fecha de inicio (created_at >=)
-        $endDate = $request->input('endDate'); // Fecha de fin (created_at <=)
-        $status = $request->input('status');
+        $startDate  = $request->input('startDate');  // Fecha de inicio (created_at >=)
+        $endDate    = $request->input('endDate');    // Fecha de fin (created_at <=)
+        $status     = $request->input('status');
         // Construir la consulta con filtros condicionales
         $query = Document::with(['vehicle'])->where('state', 1);
 
         // Filtrar por número de documento si está presente
-        if (!empty($number)) {
+        if (! empty($number)) {
             $query->where('number', 'LIKE', "%$number%");
         }
-        if (!empty($status)) {
+        if (! empty($status)) {
             $query->where('status', 'LIKE', "%$status%");
         }
         // Filtrar por ID de vehículo si está presente
-        if (!empty($vehicle_id)) {
+        if (! empty($vehicle_id)) {
             $query->where('vehicle_id', $vehicle_id);
         }
 
         // Filtrar por fechas de creación (rangos)
-        if (!empty($startDate)) {
+        if (! empty($startDate)) {
             $query->where('created_at', '>=', $startDate);
         }
 
-        if (!empty($endDate)) {
+        if (! empty($endDate)) {
             $query->where('created_at', '<=', $endDate);
         }
         $documents = $query->orderBy('id', 'desc')
@@ -68,11 +67,11 @@ class ExcelController extends Controller
             // Construir el array de exportación con validaciones y convertir todo a string
             $exportData[] = [
                 'FECHA VENCIMIENTO' => (string) ($document->dueDate ?? ''),
-                'NUMERO' => (string) ($document->number ?? ''),
-                'ESTADO' => (string) ($document->status),
-                'VEHÍCULO' => (string) (($document->vehicle->currentPlate) ?? ''),
-                'DESCRIPCIÓN' => (string) ($document->description ?? ''),
-                'DOCUMENTO' => (string) ("https://develop.garzasoft.com/transporte/public" . $document->pathFile),
+                'NUMERO'            => (string) ($document->number ?? ''),
+                'ESTADO'            => (string) ($document->status),
+                'VEHÍCULO'          => (string) (($document->vehicle->currentPlate) ?? ''),
+                'DESCRIPCIÓN'       => (string) ($document->description ?? ''),
+                'DOCUMENTO'         => (string) ("https://develop.garzasoft.com/transporte/public" . $document->pathFile),
             ];
 
         }
@@ -82,7 +81,6 @@ class ExcelController extends Controller
         return Excel::download(new DocumentExport($exportData, $startDate, $endDate), 'reporte_documentos.xlsx');
     }
 
-    
     public function applyNameFilter($query, $searchTermUpper)
     {
         // Crear un campo virtual concatenado
@@ -113,42 +111,41 @@ class ExcelController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         // Paginación
         $perPage = $request->input('per_page', 10);
-        $page = $request->input('page', 1);
+        $page    = $request->input('page', 1);
 
-        if (!is_numeric($perPage) || (int) $perPage <= 0) {
+        if (! is_numeric($perPage) || (int) $perPage <= 0) {
             $perPage = 10;
         }
 
         // FILTROS
-        $numero = $request->input('numero');
+        $numero      = $request->input('numero');
         $id_sucursal = $request->input('branch_office_id');
 
-        $document = $request->input('document');
-        $startDate = $request->input('startDate');
-        $endDate = $request->input('endDate');
-        $route = $request->input('route');
-        $typeGuia = $request->input('typeGuia');
-        $statusGuia = $request->input('statusGuia');
+        $document        = $request->input('document');
+        $startDate       = $request->input('startDate');
+        $endDate         = $request->input('endDate');
+        $route           = $request->input('route');
+        $typeGuia        = $request->input('typeGuia');
+        $statusGuia      = $request->input('statusGuia');
         $statusFacturado = $request->input('statusFacturado');
-        $observation = $request->input('observation');
-        $vehicles = $request->input('vehicles');
-        $drivers = $request->input('drivers');
+        $observation     = $request->input('observation');
+        $vehicles        = $request->input('vehicles');
+        $drivers         = $request->input('drivers');
 
-        
-        $nombreClientePaga = $request->input('nombreClientePaga');
-        $nombreRemitente = $request->input('nombreRemitente');
+        $nombreClientePaga  = $request->input('nombreClientePaga');
+        $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
 
         // Iniciar consulta base
@@ -158,15 +155,15 @@ class ExcelController extends Controller
         );
 
         // Aplicación de los filtros con comparaciones en minúsculas
-        if (!empty($numero)) {
+        if (! empty($numero)) {
             $carrierGuides->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($numero) . '%']);
         }
 
-        if (!empty($document)) {
+        if (! empty($document)) {
             $carrierGuides->whereRaw('LOWER(document) LIKE ?', ['%' . strtolower($document) . '%']);
         }
 
-        if (!empty($drivers)) {
+        if (! empty($drivers)) {
             $lowerDrivers = strtolower($drivers);
             $carrierGuides->where(function ($query) use ($lowerDrivers) {
                 $query->whereHas('driver.person', function ($q) use ($lowerDrivers) {
@@ -177,7 +174,7 @@ class ExcelController extends Controller
             });
         }
 
-        if (!empty($route)) {
+        if (! empty($route)) {
             $routeParts = explode('-', $route);
 
             if (count($routeParts) === 1) {
@@ -195,7 +192,7 @@ class ExcelController extends Controller
             }
         }
 
-        if (!empty($nombreClientePaga)) {
+        if (! empty($nombreClientePaga)) {
             $nombreClientePagaUpper = strtoupper($nombreClientePaga);
 
             $carrierGuides->where(function ($query) use ($nombreClientePagaUpper) {
@@ -207,7 +204,7 @@ class ExcelController extends Controller
                 });
             });
         }
-        if (!empty($nombreRemitente)) {
+        if (! empty($nombreRemitente)) {
             $nombreRemitenteUpper = strtoupper($nombreRemitente);
 
             $carrierGuides->where(function ($query) use ($nombreRemitenteUpper) {
@@ -219,7 +216,7 @@ class ExcelController extends Controller
                 });
             });
         }
-        if (!empty($nombreDestinatario)) {
+        if (! empty($nombreDestinatario)) {
             $nombreDestinatarioUpper = strtoupper($nombreDestinatario);
 
             $carrierGuides->where(function ($query) use ($nombreDestinatarioUpper) {
@@ -232,7 +229,7 @@ class ExcelController extends Controller
             });
         }
 
-        if (!empty($vehicles)) {
+        if (! empty($vehicles)) {
             $carrierGuides->where(function ($query) use ($vehicles) {
                 $lowerVehicles = strtolower($vehicles);
                 $query->whereHas('tract', function ($query) use ($lowerVehicles) {
@@ -245,30 +242,30 @@ class ExcelController extends Controller
             });
         }
 
-        if (!empty($typeGuia)) {
+        if (! empty($typeGuia)) {
             $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
         }
-        if (!empty($id_sucursal)) {
+        if (! empty($id_sucursal)) {
             $carrierGuides->where('branchOffice_id', $id_sucursal);
         }
 
-        if (!empty($statusGuia)) {
+        if (! empty($statusGuia)) {
             $carrierGuides->whereRaw('LOWER(status) = ?', [strtolower($statusGuia)]);
         }
 
-        if (!empty($statusFacturado)) {
+        if (! empty($statusFacturado)) {
             $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
         }
 
-        if (!empty($observation)) {
+        if (! empty($observation)) {
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
         }
 
-        if (!empty($startDate) && !empty($endDate)) {
+        if (! empty($startDate) && ! empty($endDate)) {
             $carrierGuides->whereBetween(DB::raw('DATE(transferStartDate)'), [$startDate, $endDate]);
-        } elseif (!empty($startDate)) {
+        } elseif (! empty($startDate)) {
             $carrierGuides->whereDate('transferStartDate', '>=', $startDate);
-        } elseif (!empty($endDate)) {
+        } elseif (! empty($endDate)) {
             $carrierGuides->whereDate('transferStartDate', '<=', $endDate);
         }
 
@@ -276,124 +273,123 @@ class ExcelController extends Controller
         $carrierGuides = $carrierGuides->orderBy('id', 'desc')
             ->take(800)->get();
 
-        $sumFlete = 0;
+        $sumFlete  = 0;
         $sumaSaldo = 0;
-        $sumaPeso = 0;
-        $index = 1;
+        $sumaPeso  = 0;
+        $index     = 1;
         foreach ($carrierGuides as $carrier) {
             $reception = $carrier->reception ?? null;
-            $details = $reception ? $reception->details()->pluck('description')->toArray() : [];
-            $flete = 0;
-        
+            $details   = $reception ? $reception->details()->pluck('description')->toArray() : [];
+            $flete     = 0;
+
             if ($reception) {
                 // Calcular flete
                 $flete = $reception->conditionPay == 'Credito'
-                    ? $reception->creditAmount ?? 0
-                    : $reception->paymentAmount ?? 0;
-        
+                ? $reception->creditAmount ?? 0
+                : $reception->paymentAmount ?? 0;
+
                 $sumFlete += $flete;
                 $sumaSaldo += $reception->debtAmount ?? 0;
                 $sumaPeso += $reception->netWeight ?? 0;
             }
-        
+
             // Datos del conductor y vehículos
             $conductor1name = $this->personNames($carrier->driver?->person ?? '');
             $conductor2name = $this->personNames($carrier->copilot?->person ?? '');
-            $licencia1 = $carrier->driver?->licencia ?? '';
-            $licencia2 = $carrier->copilot?->licencia ?? '';
-            $placa1 = $carrier->tract?->currentPlate ?? '';
-            $placa2 = $carrier->platform?->currentPlate ?? '';
-            $mtc1 = $carrier->tract?->numberMtc ?? '';
-            $mtc2 = $carrier->platform?->numberMtc ?? '';
-        
+            $licencia1      = $carrier->driver?->licencia ?? '';
+            $licencia2      = $carrier->copilot?->licencia ?? '';
+            $placa1         = $carrier->tract?->currentPlate ?? '';
+            $placa2         = $carrier->platform?->currentPlate ?? '';
+            $mtc1           = $carrier->tract?->numberMtc ?? '';
+            $mtc2           = $carrier->platform?->numberMtc ?? '';
+
             if ($carrier->subcontract_id !== null) {
-                $data = json_decode($carrier->datasubcontract, true);
+                $data           = json_decode($carrier->datasubcontract, true);
                 $conductor1name = $data['namedriver'] . ' ' . ($data['lastnamedriver'] ?? '');
                 $conductor2name = '';
-                $licencia1 = $data['licenciadriver'] ?? '';
-                $placa1 = $data['placa1'] ?? '';
-                $placa2 = $data['placa2'] ?? '';
-                $mtc1 = $data['mtc1'] ?? '';
-                $mtc2 = $data['mtc2'] ?? '';
+                $licencia1      = $data['licenciadriver'] ?? '';
+                $placa1         = $data['placa1'] ?? '';
+                $placa2         = $data['placa2'] ?? '';
+                $mtc1           = $data['mtc1'] ?? '';
+                $mtc2           = $data['mtc2'] ?? '';
             }
-        
+
             // Añadir los datos de la guía a la exportación
             $exportData[] = [
-                'N°' => $index++,
-                'CARGA MATERIAL' => $details ? implode(', ', $details) : 'Sin detalles',
-                'REMITENTE' => $this->namePerson($carrier?->sender ?? null) ?? '-',
-                'REM. RUC/DNI' => $carrier?->sender?->documentNumber ?? '-',
-                'DESTINATARIO' => $this->namePerson($carrier?->recipient ?? null) ?? '-',
-                'DEST. RUC/DNI' => $carrier?->recipient?->documentNumber ?? '-',
-                'PUNTO PARTIDA' => $carrier?->origin?->name ?? '-',
-                'PUNTO LLEGADA' => $carrier?->destination?->name ?? '-',
+                'N°'                => $index++,
+                'CARGA MATERIAL'    => $details ? implode(', ', $details) : 'Sin detalles',
+                'REMITENTE'         => $this->namePerson($carrier?->sender ?? null) ?? '-',
+                'REM. RUC/DNI'      => $carrier?->sender?->documentNumber ?? '-',
+                'DESTINATARIO'      => $this->namePerson($carrier?->recipient ?? null) ?? '-',
+                'DEST. RUC/DNI'     => $carrier?->recipient?->documentNumber ?? '-',
+                'PUNTO PARTIDA'     => $carrier?->origin?->name ?? '-',
+                'PUNTO LLEGADA'     => $carrier?->destination?->name ?? '-',
                 'DOCUMENTOS ANEXOS' => $reception?->comment ?? '-',
-                'GUÍA GRT' => $carrier?->numero ?? '-',
-                'TOTAL PESO' => $reception?->netWeight ?? 0,
-                'TOTAL FLETE' => $flete,
-                'SALDO' => $reception?->debtAmount ?? 0,
-                'COND. PAGO' => $reception?->conditionPay ?? '-',
-                'ESTADO ENTREGA' => $carrier?->status ?? '-',
-                'CONDUCTOR 1' => $conductor1name,
-                'LICENCIA 1' => $licencia1,
-                'CONDUCTOR 2' => $conductor2name,
-                'LICENCIA 2' => $licencia2,
-                'PLACA 1' => $placa1,
-                'PLACA 2' => $placa2,
-                'MTC 1' => $mtc1,
-                'MTC 2' => $mtc2,
+                'GUÍA GRT'          => $carrier?->numero ?? '-',
+                'TOTAL PESO'        => $reception?->netWeight ?? 0,
+                'TOTAL FLETE'       => $flete,
+                'SALDO'             => $reception?->debtAmount ?? 0,
+                'COND. PAGO'        => $reception?->conditionPay ?? '-',
+                'ESTADO ENTREGA'    => $carrier?->status ?? '-',
+                'CONDUCTOR 1'       => $conductor1name,
+                'LICENCIA 1'        => $licencia1,
+                'CONDUCTOR 2'       => $conductor2name,
+                'LICENCIA 2'        => $licencia2,
+                'PLACA 1'           => $placa1,
+                'PLACA 2'           => $placa2,
+                'MTC 1'             => $mtc1,
+                'MTC 2'             => $mtc2,
             ];
         }
-        
 
         // Agregar fila de totales al final de la segunda tabla
         $exportData[] = [
-            'N°' => '',
-            'CARGA MATERIAL' => '',
-            'REMITENTE' => '',
-            'REM. RUC/DNI' => '-',
-            'DESTINATARIO' => '',
-            'DEST. RUC/DNI' => '-',
-            'PUNTO PARTIDA' => '',
-            'PUNTO LLEGADA' => '',
+            'N°'                => '',
+            'CARGA MATERIAL'    => '',
+            'REMITENTE'         => '',
+            'REM. RUC/DNI'      => '-',
+            'DESTINATARIO'      => '',
+            'DEST. RUC/DNI'     => '-',
+            'PUNTO PARTIDA'     => '',
+            'PUNTO LLEGADA'     => '',
             'DOCUMENTOS ANEXOS' => '',
-            'GUÍA GRT' => 'TOTAL',
-            'TOTAL PESO' => $sumaPeso,
-            'TOTAL FLETE' => $sumFlete,
-            'SALDO' => $sumaSaldo,
-            'COND. PAGO' => '',
-            'ESTADO ENTREGA' => '',
-            'CONDUCTOR 1' => '',
-            'LICENCIA 1' => '',
-            'CONDUCTOR 2' => '',
-            'LICENCIA 2' => '',
-            'PLACA 1' => '',
-            'PLACA 2' => '',
-            'MTC 1' => '',
-            'MTC 2' => '',
+            'GUÍA GRT'          => 'TOTAL',
+            'TOTAL PESO'        => $sumaPeso,
+            'TOTAL FLETE'       => $sumFlete,
+            'SALDO'             => $sumaSaldo,
+            'COND. PAGO'        => '',
+            'ESTADO ENTREGA'    => '',
+            'CONDUCTOR 1'       => '',
+            'LICENCIA 1'        => '',
+            'CONDUCTOR 2'       => '',
+            'LICENCIA 2'        => '',
+            'PLACA 1'           => '',
+            'PLACA 2'           => '',
+            'MTC 1'             => '',
+            'MTC 2'             => '',
         ];
-        
+
         return Excel::download(new GuidesExport($exportData, $startDate, $endDate), 'reporte_guias.xlsx');
 
     }
     public function reporteVehiclesExcel(Request $request)
     {
 
-        $branch_office_id = $request->input('branch_office_id');
+        $branch_office_id  = $request->input('branch_office_id');
         $sinProgramaciones = $request->input('sinProgramaciones'); //
 
         $start = $request->input('start'); // Fecha de inicio
-        $end = $request->input('end'); // Fecha de fin
+        $end   = $request->input('end');   // Fecha de fin
 
-        $placa = $request->input('placa');
-        $mtc = $request->input('mtc');
-        $marca = $request->input('marca');
+        $placa  = $request->input('placa');
+        $mtc    = $request->input('mtc');
+        $marca  = $request->input('marca');
         $modelo = $request->input('modelo');
 
         // Validar Branch Office
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -401,7 +397,7 @@ class ExcelController extends Controller
         }
 
         // Obtener el usuario autenticado
-        $user = auth()->user();
+        $user    = auth()->user();
         $user_id = $user->id ?? '';
 
         // Construir consulta inicial
@@ -420,28 +416,28 @@ class ExcelController extends Controller
                 ->whereDoesntHave('platformProgrammings');
         }
 
-        if (!empty($modelo)) {
+        if (! empty($modelo)) {
             $vehiclesQuery->whereHas('modelFunctional', function ($query) use ($modelo) {
                 $query->where('name', 'LIKE', '%' . $modelo . '%');
             });
         }
 
         // Filtros adicionales por LIKE para otros campos
-        if (!empty($placa)) {
+        if (! empty($placa)) {
             $vehiclesQuery->where('currentPlate', 'LIKE', '%' . $placa . '%');
         }
 
-        if (!empty($mtc)) {
+        if (! empty($mtc)) {
             $vehiclesQuery->where('numberMtc', 'LIKE', '%' . $mtc . '%');
         }
 
-        if (!empty($marca)) {
+        if (! empty($marca)) {
             $vehiclesQuery->where('brand', 'LIKE', '%' . $marca . '%');
         }
 
-        // Validación de la paginación
+                                                       // Validación de la paginación
         $pagination = $request->input('per_page', 10); // Valor por defecto: 10
-        if (!is_numeric($pagination) || $pagination <= 0) {
+        if (! is_numeric($pagination) || $pagination <= 0) {
             $pagination = 10; // Restablecer a valor por defecto
         }
 
@@ -451,13 +447,13 @@ class ExcelController extends Controller
         foreach ($list as $vehicle) {
 
             $exportData[] = [
-                'PLACA' => $vehicle->currentPlate ?? '',
-                'MTC' => $vehicle->numberMtc ?? '',
-                'MARCA' => $vehicle->brand ?? '',
-                'MODELO' => $vehicle?->modelFunctional?->name ?? '',
+                'PLACA'         => $vehicle->currentPlate ?? '',
+                'MTC'           => $vehicle->numberMtc ?? '',
+                'MARCA'         => $vehicle->brand ?? '',
+                'MODELO'        => $vehicle?->modelFunctional?->name ?? '',
                 'TIPO VEHICULO' => $vehicle?->typeCarroceria?->typeCompany?->description ?? '',
-                'COLOR' => $vehicle?->color ?? '',
-                'RESPONSABLE' => $this->namePerson($vehicle?->responsable) ?? '',
+                'COLOR'         => $vehicle?->color ?? '',
+                'RESPONSABLE'   => $this->namePerson($vehicle?->responsable) ?? '',
             ];
         }
 
@@ -470,12 +466,12 @@ class ExcelController extends Controller
     {
         $programming = Programming::find($id);
 
-        if (!$programming) {
+        if (! $programming) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
 
-        // Obtener las guías de transportista asociadas
-        // Obtener las guías de transportista asociadas, excluyendo los eliminados
+                                                                                        // Obtener las guías de transportista asociadas
+                                                                                        // Obtener las guías de transportista asociadas, excluyendo los eliminados
         $carrierGuides = $programming->carrierGuides()->whereNull('deleted_at')->get(); // Solo guías no eliminadas
 
 // Pluck de los IDs de las guías desde la relación, excluyendo las eliminadas
@@ -484,7 +480,7 @@ class ExcelController extends Controller
 // Obtén las guías directamente desde la tabla, excluyendo los eliminados
         $dbGuides = DB::table('carrier_by_programmings')
             ->where('programming_id', $id)
-            ->whereNull('deleted_at') // Excluir los registros eliminados
+            ->whereNull('deleted_at')   // Excluir los registros eliminados
             ->pluck('carrier_guide_id') // Obtén solo los IDs de las guías
             ->toArray();
 
@@ -506,30 +502,30 @@ class ExcelController extends Controller
         // Primera tabla: Información del manifiesto
         $manifiestoData = [
             [
-                'NUMERO' => (string) $programming?->numero ?? '-',
-                'F. VIAJE' => (string) $programming?->departureDate ?? '-',
-                'ORIGEN' => (string) $programming?->origin?->name ?? '-',
-                'DESTINO' => (string) $programming?->destination?->name ?? '-',
-                'TRACTO' => (string) $programming?->tract?->currentPlate ?? '-',
-                'CARRETA' => (string) $programming?->platForm?->currentPlate ?? '-',
-                'TOTAL PESO' => (string) $programming?->totalWeight ?? 0,
-                'ESTADO' => (string) $programming?->status ?? '-',
+                'NUMERO'          => (string) $programming?->numero ?? '-',
+                'F. VIAJE'        => (string) $programming?->departureDate ?? '-',
+                'ORIGEN'          => (string) $programming?->origin?->name ?? '-',
+                'DESTINO'         => (string) $programming?->destination?->name ?? '-',
+                'TRACTO'          => (string) $programming?->tract?->currentPlate ?? '-',
+                'CARRETA'         => (string) $programming?->platForm?->currentPlate ?? '-',
+                'TOTAL PESO'      => (string) $programming?->totalWeight ?? 0,
+                'ESTADO'          => (string) $programming?->status ?? '-',
                 'ESTADO DE GASTO' => (string) $programming?->statusLiquidacion ?? '-',
-                'LIQUIDADO' => (string) $programming?->dateLiquidacion ? 'Sí' : 'No',
+                'LIQUIDADO'       => (string) $programming?->dateLiquidacion ? 'Sí' : 'No',
             ],
         ];
 
         $exportData = [];
-        $index = 1;
-        $sumFlete = 0;
-        $sumaPeso = 0;
-        $sumaSaldo = 0;
+        $index      = 1;
+        $sumFlete   = 0;
+        $sumaPeso   = 0;
+        $sumaSaldo  = 0;
 
         // Segunda tabla: Información de las guías de transportista
         foreach ($carrierGuides as $carrier) {
             $reception = $carrier->reception ?? null;
-            $details = $reception ? $reception->details()->pluck('description')->toArray() : [];
-            $flete = 0;
+            $details   = $reception ? $reception->details()->pluck('description')->toArray() : [];
+            $flete     = 0;
 
             if ($reception) {
                 // Calcular flete
@@ -544,41 +540,41 @@ class ExcelController extends Controller
 
             // Añadir los datos de la guía a la exportación
             $exportData[] = [
-                'N°' => $index++,
-                'CARGA MATERIAL' => $details ? implode(', ', $details) : 'Sin detalles',
-                'REMITENTE' => $this->namePerson($reception?->firstCarrierGuide?->sender ?? null) ?? '-',
-                'REM. RUC/DNI' => $reception?->firstCarrierGuide?->sender?->documentNumber ?? '-',
-                'DESTINATARIO' => $this->namePerson($reception?->firstCarrierGuide?->recipient ?? null) ?? '-',
-                'DEST. RUC/DNI' => $reception?->firstCarrierGuide?->recipient?->documentNumber ?? '-',
-                'PUNTO PARTIDA' => $reception?->firstCarrierGuide?->origin?->name ?? '-',
-                'PUNTO LLEGADA' => $reception?->firstCarrierGuide?->destination?->name ?? '-',
+                'N°'                => $index++,
+                'CARGA MATERIAL'    => $details ? implode(', ', $details) : 'Sin detalles',
+                'REMITENTE'         => $this->namePerson($reception?->firstCarrierGuide?->sender ?? null) ?? '-',
+                'REM. RUC/DNI'      => $reception?->firstCarrierGuide?->sender?->documentNumber ?? '-',
+                'DESTINATARIO'      => $this->namePerson($reception?->firstCarrierGuide?->recipient ?? null) ?? '-',
+                'DEST. RUC/DNI'     => $reception?->firstCarrierGuide?->recipient?->documentNumber ?? '-',
+                'PUNTO PARTIDA'     => $reception?->firstCarrierGuide?->origin?->name ?? '-',
+                'PUNTO LLEGADA'     => $reception?->firstCarrierGuide?->destination?->name ?? '-',
                 'DOCUMENTOS ANEXOS' => $reception?->firstCarrierGuide?->document ?? '-',
-                'GUÍA GRT' => $reception?->firstCarrierGuide?->numero ?? '-',
-                'TOTAL PESO' => $reception?->netWeight ?? 0,
-                'TOTAL FLETE' => $flete,
-                'SALDO' => $reception?->debtAmount ?? 0,
-                'COND. PAGO' => $reception?->conditionPay ?? '-',
-                'ESTADO ENTREGA' => $carrier?->status ?? '-',
+                'GUÍA GRT'          => $reception?->firstCarrierGuide?->numero ?? '-',
+                'TOTAL PESO'        => $reception?->netWeight ?? 0,
+                'TOTAL FLETE'       => $flete,
+                'SALDO'             => $reception?->debtAmount ?? 0,
+                'COND. PAGO'        => $reception?->conditionPay ?? '-',
+                'ESTADO ENTREGA'    => $carrier?->status ?? '-',
             ];
         }
 
         // Agregar fila de totales al final de la segunda tabla
         $exportData[] = [
-            'N°' => '',
-            'CARGA MATERIAL' => '',
-            'REMITENTE' => '',
-            'REM. RUC/DNI' => '-',
-            'DESTINATARIO' => '',
-            'DEST. RUC/DNI' => '-',
-            'PUNTO PARTIDA' => '',
-            'PUNTO LLEGADA' => '',
+            'N°'                => '',
+            'CARGA MATERIAL'    => '',
+            'REMITENTE'         => '',
+            'REM. RUC/DNI'      => '-',
+            'DESTINATARIO'      => '',
+            'DEST. RUC/DNI'     => '-',
+            'PUNTO PARTIDA'     => '',
+            'PUNTO LLEGADA'     => '',
             'DOCUMENTOS ANEXOS' => '',
-            'GUÍA GRT' => 'TOTAL',
-            'TOTAL PESO' => $sumaPeso,
-            'TOTAL FLETE' => $sumFlete,
-            'SALDO' => $sumaSaldo,
-            'COND. PAGO' => '',
-            'ESTADO ENTREGA' => '',
+            'GUÍA GRT'          => 'TOTAL',
+            'TOTAL PESO'        => $sumaPeso,
+            'TOTAL FLETE'       => $sumFlete,
+            'SALDO'             => $sumaSaldo,
+            'COND. PAGO'        => '',
+            'ESTADO ENTREGA'    => '',
         ];
 
         // Exportar los datos en dos tablas separadas
@@ -588,7 +584,7 @@ class ExcelController extends Controller
     {
         $programming = Programming::find($id);
 
-        if (!$programming) {
+        if (! $programming) {
             return response()->json(['message' => 'Programming not found'], 422);
         }
 
@@ -615,33 +611,33 @@ class ExcelController extends Controller
         // Primera tabla: Información del manifiesto
         $manifiestoData = [
             [
-                'NUMERO' => (string) $programming?->numero ?? '-',
-                'F. VIAJE' => (string) $programming?->departureDate ?? '-',
-                'INGRESOS VIAJE' => (string) $totalIngreso,
-                'EGRESOS VIAJE' => (string) $totalEgreso,
-                'SALDO VIAJE' => (string) $saldo,
+                'NUMERO'          => (string) $programming?->numero ?? '-',
+                'F. VIAJE'        => (string) $programming?->departureDate ?? '-',
+                'INGRESOS VIAJE'  => (string) $totalIngreso,
+                'EGRESOS VIAJE'   => (string) $totalEgreso,
+                'SALDO VIAJE'     => (string) $saldo,
 
-                'ORIGEN' => (string) $programming?->origin?->name ?? '-',
-                'DESTINO' => (string) $programming?->destination?->name ?? '-',
-                'TRACTO' => (string) $programming?->tract?->currentPlate ?? '-',
-                'CARRETA' => (string) $programming?->platForm?->currentPlate ?? '-',
-                'TOTAL PESO' => (string) $programming?->totalWeight ?? 0,
-                'ESTADO' => (string) $programming?->status ?? '-',
+                'ORIGEN'          => (string) $programming?->origin?->name ?? '-',
+                'DESTINO'         => (string) $programming?->destination?->name ?? '-',
+                'TRACTO'          => (string) $programming?->tract?->currentPlate ?? '-',
+                'CARRETA'         => (string) $programming?->platForm?->currentPlate ?? '-',
+                'TOTAL PESO'      => (string) $programming?->totalWeight ?? 0,
+                'ESTADO'          => (string) $programming?->status ?? '-',
                 'ESTADO DE GASTO' => (string) $programming?->statusLiquidacion ?? '-',
 
-                'LIQUIDADO' => (string) $programming?->dateLiquidacion ? 'Sí' : 'No',
+                'LIQUIDADO'       => (string) $programming?->dateLiquidacion ? 'Sí' : 'No',
             ],
         ];
 
         $exportData = [];
-        $index = 1;
-        $sumtotal = 0;
-        $sumaPeso = 0;
-        $sumaSaldo = 0;
+        $index      = 1;
+        $sumtotal   = 0;
+        $sumaPeso   = 0;
+        $sumaSaldo  = 0;
 
         // Segunda tabla: Información de las guías de transportista
         $sumtotal = 0;
-        $index = 1; // Asegurarse de que el índice esté inicializado
+        $index    = 1; // Asegurarse de que el índice esté inicializado
 
         foreach ($driverExpenses as $expense) {
             // Convertir el total a número flotante, con un valor por defecto de 0, y redondearlo a 2 decimales
@@ -659,45 +655,45 @@ class ExcelController extends Controller
 
             // Añadir los datos de la guía a la exportación
             $exportData[] = [
-                'N°' => $index++,
-                'CONCEPTO GASTO' => $expense?->expensesConcept?->name ?? '',
-                'CANTIDAD' => $expense?->quantity ?? '1',
-                'LUGAR' => $expense?->place ?? '-',
-                'KM' => $expense?->KM ?? '-',
-                'GALONES' => $expense?->gallons ?? '-',
-                'NRO OPERACION' => $expense?->operationNumber ?? '-',
-                'IGV' => $expense?->igv ?? '0',
-                'EXONERADO' => $expense?->exonerado ?? '0',
-                'GRAVADO' => $expense?->gravado ?? '0',
-                'BANCO' => $expense?->bank?->name ?? 'Sin Banco',
-                'PROVEEDOR' => $expense?->proveedor ? $this->namePerson($expense->proveedor) : 'Sin Proveedor',
-                'COMENTARIO' => $expense?->comment ?? '-',
+                'N°'              => $index++,
+                'CONCEPTO GASTO'  => $expense?->expensesConcept?->name ?? '',
+                'CANTIDAD'        => $expense?->quantity ?? '1',
+                'LUGAR'           => $expense?->place ?? '-',
+                'KM'              => $expense?->KM ?? '-',
+                'GALONES'         => $expense?->gallons ?? '-',
+                'NRO OPERACION'   => $expense?->operationNumber ?? '-',
+                'IGV'             => $expense?->igv ?? '0',
+                'EXONERADO'       => $expense?->exonerado ?? '0',
+                'GRAVADO'         => $expense?->gravado ?? '0',
+                'BANCO'           => $expense?->bank?->name ?? 'Sin Banco',
+                'PROVEEDOR'       => $expense?->proveedor ? $this->namePerson($expense->proveedor) : 'Sin Proveedor',
+                'COMENTARIO'      => $expense?->comment ?? '-',
                 'TIPO MOVIMIENTO' => $typeConcept,
-                'TIPO DE PAGO' => $expense?->selectTypePay ?? '-',
-                'FECHA' => $expense?->date_expense ?? 'Sin Fecha',
-                'TOTAL' => number_format($monto, 2, '.', ''), // Formatear a 2 decimales como string
+                'TIPO DE PAGO'    => $expense?->selectTypePay ?? '-',
+                'FECHA'           => $expense?->date_expense ?? 'Sin Fecha',
+                'TOTAL'           => number_format($monto, 2, '.', ''), // Formatear a 2 decimales como string
             ];
         }
 
         // Agregar fila de totales al final de la segunda tabla
         $exportData[] = [
-            'N°' => '',
-            'CONCEPTO GASTO' => '',
-            'CANTIDAD' => '',
-            'LUGAR' => '',
-            'KM' => '',
-            'GALONES' => '',
-            'NRO OPERACION' => '',
-            'IGV' => '',
-            'EXONERADO' => '',
-            'GRAVADO' => '',
-            'BANCO' => '',
-            'PROVEEDOR' => '',
-            'COMENTARIO' => '',
+            'N°'              => '',
+            'CONCEPTO GASTO'  => '',
+            'CANTIDAD'        => '',
+            'LUGAR'           => '',
+            'KM'              => '',
+            'GALONES'         => '',
+            'NRO OPERACION'   => '',
+            'IGV'             => '',
+            'EXONERADO'       => '',
+            'GRAVADO'         => '',
+            'BANCO'           => '',
+            'PROVEEDOR'       => '',
+            'COMENTARIO'      => '',
             'TIPO MOVIMIENTO' => '',
-            'TIPO DE PAGO' => '',
-            'FECHA' => '',
-            'TOTAL' => (string) $sumtotal,
+            'TIPO DE PAGO'    => '',
+            'FECHA'           => '',
+            'TOTAL'           => (string) $sumtotal,
         ];
 
         // Exportar los datos en dos tablas separadas
@@ -710,7 +706,7 @@ class ExcelController extends Controller
             return '-'; // Si $person es nulo, retornamos un valor predeterminado
         }
 
-        $typeD = $person->typeofDocument ?? 'dni';
+        $typeD  = $person->typeofDocument ?? 'dni';
         $cadena = '';
 
         if (strtolower($typeD) === 'ruc') {
@@ -728,17 +724,18 @@ class ExcelController extends Controller
     {
         // Variables de entrada
         $branch_office_id = $request->input('branch_office_id');
-        $typeDocument = $request->input('typeDocument');
-        $status = $request->input('status');
-        $personId = $request->input('person_id');
-        $start = $request->input('start'); // Fecha de inicio
-        $end = $request->input('end'); // Fecha de fin
+        $typeDocument     = $request->input('typeDocument');
+        $status           = $request->input('status');
+        $personId         = $request->input('person_id');
+        $start            = $request->input('start'); // Fecha de inicio
+        $end              = $request->input('end');   // Fecha de fin
+        $end              = Carbon::parse($end)->addDay()->format('Y-m-d');
         $sequentialNumber = $request->input('sequentialNumber'); // Número secuencial (opcional)
 
         // Buscar sucursal
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -753,7 +750,7 @@ class ExcelController extends Controller
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -761,14 +758,14 @@ class ExcelController extends Controller
         }
         $ventas = Moviment::query()
 
-            ->when(!empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
-            ->when(!empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
-            ->when(!empty($box_id), fn($query) => $query->where('box_id', $box_id))
-            ->when(!empty($personId), fn($query) => $query->where('person_id', $personId))
-            ->when(!empty($status), fn($query) => $query->where('status', $status))
-            ->when(!empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
-            ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
-            ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
+            ->when(! empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
+            ->when(! empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
+            ->when(! empty($box_id), fn($query) => $query->where('box_id', $box_id))
+            ->when(! empty($personId), fn($query) => $query->where('person_id', $personId))
+            ->when(! empty($status), fn($query) => $query->where('status', $status))
+            ->when(! empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
+            ->when(! empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
+            ->when(! empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
             ->where('movType', 'Venta')
             ->with([
                 'receptions',
@@ -789,12 +786,12 @@ class ExcelController extends Controller
 
         // Variables de totales
 
-        $totalIgv = 0;
+        $totalIgv              = 0;
         $totalOperacionGravada = 0;
-        $totalImporteTotal = 0;
-        $dateinstallment = "--/--/--";
-        $iterador = 1;
-        $condicion = 'NO ENCONTRADO EN EL FACTURADOR';
+        $totalImporteTotal     = 0;
+        $dateinstallment       = "--/--/--";
+        $iterador              = 1;
+        $condicion             = 'NO ENCONTRADO EN EL FACTURADOR';
         // Procesar las ventas sin nota de crédito
         foreach ($ventas as $moviment) {
 
@@ -803,9 +800,9 @@ class ExcelController extends Controller
             // Agregar el campo 'nombre' al nuevo request
             $newRequest->merge(['nombre' => $moviment->sequentialNumber]);
             if ($moviment->getstatus_fact == null || $moviment->getstatus_fact != "DECLARADO Y ACTIVO") {
-                $condicion = $this->getStatusFacturacion($newRequest);
-                $condicion = $condicion == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicion;
-                $movimentupdatestatus = Moviment::find($moviment->id);
+                $condicion                            = $this->getStatusFacturacion($newRequest);
+                $condicion                            = $condicion == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicion;
+                $movimentupdatestatus                 = Moviment::find($moviment->id);
                 $movimentupdatestatus->getstatus_fact = $condicion;
                 $movimentupdatestatus->save();
             } else {
@@ -814,7 +811,7 @@ class ExcelController extends Controller
             // Llamar a la función pasando el nuevo request
 
             $dateinstallment = "--/--/--";
-            $installment = Installment::withTrashed()->where("moviment_id", $moviment->id)
+            $installment     = Installment::withTrashed()->where("moviment_id", $moviment->id)
                 ->orderBy('created_at', 'desc')->first();
 
             if ($installment) { // Verifica si existe un registro
@@ -835,7 +832,7 @@ class ExcelController extends Controller
                 // Lógica similar para calcular los totales
 
                 $personaCliente = $moviment->person ?? null;
-                $nombreCliente = '-';
+                $nombreCliente  = '-';
                 if ($personaCliente) {
                     $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
                     ? ($personaCliente->businessName ?? '-')
@@ -844,9 +841,9 @@ class ExcelController extends Controller
 
                 // Cálculos
                 $totalDetalle = $moviment->total ?? 0;
-                $afecto = $totalDetalle ? $totalDetalle / 1.18 : 0;
-                $igv = $afecto * 0.18;
-                $total = $afecto + $igv;
+                $afecto       = $totalDetalle ? $totalDetalle / 1.18 : 0;
+                $igv          = $afecto * 0.18;
+                $total        = $afecto + $igv;
                 $totalOperacionGravada += $afecto;
                 $totalImporteTotal += $total;
                 $totalIgv += $igv;
@@ -857,53 +854,53 @@ class ExcelController extends Controller
                 // Sumar totales
 
                 // Asignar tipo de documento en base al prefijo del correlativo
-                $correlativo = $moviment->sequentialNumber;
+                $correlativo   = $moviment->sequentialNumber;
                 $tipoDocumento = '';
-                $serie = '';
-                $numeroC = '';
+                $serie         = '';
+                $numeroC       = '';
 
                 if (str_starts_with($correlativo, 'B')) {
                     $tipoDocumento = 'BOLETA DE VENTA'; // Boleta
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
+                    $serie         = substr($correlativo, 0, 4);
+                    $numeroC       = substr($correlativo, 5);
                 } elseif (str_starts_with($correlativo, 'T')) {
                     $tipoDocumento = 'TICKET VENTA'; // Factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
+                    $serie         = substr($correlativo, 0, 4);
+                    $numeroC       = substr($correlativo, 5);
                 } elseif (str_starts_with($correlativo, 'F')) {
                     $tipoDocumento = 'FACTURA VENTA'; // Factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
+                    $serie         = substr($correlativo, 0, 4);
+                    $numeroC       = substr($correlativo, 5);
                 } elseif (str_starts_with($correlativo, 'FC')) {
                     $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
+                    $serie         = substr($correlativo, 0, 4);
+                    $numeroC       = substr($correlativo, 5);
                 } elseif (str_starts_with($correlativo, 'BC')) {
                     $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para boleta
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
+                    $serie         = substr($correlativo, 0, 4);
+                    $numeroC       = substr($correlativo, 5);
                 }
                 // Sumar al total de ventas sin nota
                 $fechaEmision = $moviment->paymentDate ? Carbon::parse($moviment->paymentDate)->format('d/m/y') : '';
 
                 $exportDataSinNotaCredito[] = [
-                    'NRO' => $iterador++,
-                    'FECHA EMISIÓN' => $fechaEmision,
-                    'CONDICIÓN' => $condicion,
-                    'FORMA DE PAGO' => $moviment->typePayment == 'Contado' ? 'CONTADO' : 'CRÉDITO',
+                    'NRO'                     => $iterador++,
+                    'FECHA EMISIÓN'           => $fechaEmision,
+                    'CONDICIÓN'               => $condicion,
+                    'FORMA DE PAGO'           => $moviment->typePayment == 'Contado' ? 'CONTADO' : 'CRÉDITO',
                     'FECHA CREDITO / CONTADO' => $dateinstallment,
-                    'TIPO C.' => $tipoDocumento,
-                    'SERIE C.' => (string) $serie,
-                    'NUMERO C.' => (string) $numeroC,
-                    'TIPO DOC' => (string) $personaCliente->typeofDocument,
-                    'NUMERO DOC' => (string) $personaCliente->documentNumber ?? '',
-                    'RAZON SOCIAL' => (string) $nombreCliente,
-                    'GUIAS' => (string) implode(',', $moviment?->detalles()->pluck('guia')->toArray() ?? []),
-                    'OPERACIÓN GRAVADA' => (string) number_format($afecto, 2, '.', ''),
-                    'IGV' => (string) number_format($igv, 2, '.', ''),
-                    'IMPORTE TOTAL' => (string) number_format($total, 2, '.', ''),
-                    'FECHA REF. COMPROBANTE' => '',
-                    'SERIE REF. COMPROBANTE' => '',
+                    'TIPO C.'                 => $tipoDocumento,
+                    'SERIE C.'                => (string) $serie,
+                    'NUMERO C.'               => (string) $numeroC,
+                    'TIPO DOC'                => (string) $personaCliente->typeofDocument,
+                    'NUMERO DOC'              => (string) $personaCliente->documentNumber ?? '',
+                    'RAZON SOCIAL'            => (string) $nombreCliente,
+                    'GUIAS'                   => (string) implode(',', $moviment?->detalles()->pluck('guia')->toArray() ?? []),
+                    'OPERACIÓN GRAVADA'       => (string) number_format($afecto, 2, '.', ''),
+                    'IGV'                     => (string) number_format($igv, 2, '.', ''),
+                    'IMPORTE TOTAL'           => (string) number_format($total, 2, '.', ''),
+                    'FECHA REF. COMPROBANTE'  => '',
+                    'SERIE REF. COMPROBANTE'  => '',
                     'NÚMERO REF. COMPROBANTE' => '',
                 ];
             }
@@ -911,218 +908,225 @@ class ExcelController extends Controller
 
 // Agregar fila de totales para ventas sin nota de crédito
         $exportDataSinNotaCredito[] = [
-            'NRO' => '',
-            'FECHA EMISIÓN' => '',
-            'CONDICIÓN' => '',
-            'FORMA DE PAGO' => '',
+            'NRO'                     => '',
+            'FECHA EMISIÓN'           => '',
+            'CONDICIÓN'               => '',
+            'FORMA DE PAGO'           => '',
             'FECHA CREDITO / CONTADO' => '',
-            'TIPO C.' => '',
-            'SERIE C.' => '',
-            'NUMERO C.' => '',
-            'TIPO DOC' => '',
-            'NUMERO DOC' => '',
-            'RAZON SOCIAL' => '',
-            'GUIAS' => 'TOTAL',
-            'OPERACIÓN GRAVADA' => (string) number_format($totalOperacionGravada, 2, '.', ''),
-            'IGV' => (string) number_format($totalIgv, 2, '.', ''),
-            'IMPORTE TOTAL' => (string) number_format($totalImporteTotal, 2, '.', ''),
-            'FECHA REF. COMPROBANTE' => '',
-            'SERIE REF. COMPROBANTE' => '',
+            'TIPO C.'                 => '',
+            'SERIE C.'                => '',
+            'NUMERO C.'               => '',
+            'TIPO DOC'                => '',
+            'NUMERO DOC'              => '',
+            'RAZON SOCIAL'            => '',
+            'GUIAS'                   => 'TOTAL',
+            'OPERACIÓN GRAVADA'       => (string) number_format($totalOperacionGravada, 2, '.', ''),
+            'IGV'                     => (string) number_format($totalIgv, 2, '.', ''),
+            'IMPORTE TOTAL'           => (string) number_format($totalImporteTotal, 2, '.', ''),
+            'FECHA REF. COMPROBANTE'  => '',
+            'SERIE REF. COMPROBANTE'  => '',
             'NÚMERO REF. COMPROBANTE' => '',
         ];
         $exportDataSinNotaCredito[] = [
-            'NRO' => '',
-            'FECHA EMISIÓN' => '',
-            'CONDICIÓN' => '',
-            'FORMA DE PAGO' => '',
+            'NRO'                     => '',
+            'FECHA EMISIÓN'           => '',
+            'CONDICIÓN'               => '',
+            'FORMA DE PAGO'           => '',
             'FECHA CREDITO / CONTADO' => '',
-            'TIPO C.' => '',
-            'SERIE C.' => '',
-            'NUMERO C.' => '',
-            'TIPO DOC' => '',
-            'NUMERO DOC' => '',
-            'RAZON SOCIAL' => '',
-            'GUIAS' => '',
-            'OPERACIÓN GRAVADA' => '',
-            'IGV' => '',
-            'IMPORTE TOTAL' => '',
-            'FECHA REF. COMPROBANTE' => '',
-            'SERIE REF. COMPROBANTE' => '',
+            'TIPO C.'                 => '',
+            'SERIE C.'                => '',
+            'NUMERO C.'               => '',
+            'TIPO DOC'                => '',
+            'NUMERO DOC'              => '',
+            'RAZON SOCIAL'            => '',
+            'GUIAS'                   => '',
+            'OPERACIÓN GRAVADA'       => '',
+            'IGV'                     => '',
+            'IMPORTE TOTAL'           => '',
+            'FECHA REF. COMPROBANTE'  => '',
+            'SERIE REF. COMPROBANTE'  => '',
             'NÚMERO REF. COMPROBANTE' => '',
         ];
 
 // Procesar las ventas con nota de crédito
-        $totalIgv2 = 0;
+        $totalIgv2              = 0;
         $totalOperacionGravada2 = 0;
-        $totalImporteTotal2 = 0;
-        $condicionNC = '';
-        $dateinstallmentNC = "--/--/--";
+        $totalImporteTotal2     = 0;
+        $condicionNC            = '';
+        $dateinstallmentNC      = "--/--/--";
 
-        foreach ($ventas as $moviment) {
+        $notascredito = CreditNote::whereBetween('created_at', [$start, $end])->orderBy('id', 'desc')->get();
+
+        foreach ($notascredito as $nc) {
+            $moviment=$nc->moviment;
             if ($moviment->creditNote) { // Ventas con nota de crédito
-                $installment = Installment::withTrashed() // Incluye registros eliminados
-                    ->where("moviment_id", $moviment->id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+                $fechaEmisionNC = $moviment->creditNote->created_at ? Carbon::parse($moviment->creditNote->created_at) : false;
 
-                $newRequest = new Request();
+                if ($fechaEmisionNC && $fechaEmisionNC->between($start, $end)) {
+                    $installment = Installment::withTrashed() // Incluye registros eliminados
+                        ->where("moviment_id", $moviment->id)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
 
-                // Agregar el campo 'nombre' al nuevo request
-                $newRequest->merge(['nombre' => $moviment->creditNote->number]);
+                    $newRequest = new Request();
 
-                if ($moviment->creditNote->getstatus_fact == null || $moviment->creditNote->getstatus_fact != "DECLARADO Y ACTIVO") {
-                    $condicionNC = $this->getStatusFacturacion($newRequest);
-                    $condicionNC = $condicionNC == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicionNC;
-                    $creditupdatestatus = CreditNote::find($moviment->creditNote->id);
-                    $creditupdatestatus->getstatus_fact = $condicionNC;
-                    $creditupdatestatus->save();
-                } else {
-                    $condicionNC = $moviment->creditNote->getstatus_fact;
-                }
+                    // Agregar el campo 'nombre' al nuevo request
+                    $newRequest->merge(['nombre' => $moviment->creditNote->number]);
 
-                $dateinstallmentNC = "--/--/--";
-
-                if ($installment) { // Verifica si existe un registro
-                    $dateinstallmentNC = $installment->date
-                    ? Carbon::parse($installment->date)->format('d/m/y')
-                    : "--/--/--"; // Formatea la fecha si existe
-                } else {
-                    $movcaja = Moviment::withTrashed()->where("mov_id", $moviment->id)->first();
-                    if ($movcaja) {
-                        $dateinstallmentNC = $movcaja->paymentDate
-                        ? Carbon::parse($movcaja->paymentDate)->format('d/m/y')
-                        : "--/--/--"; // Formatea la fecha si existe
+                    if ($moviment->creditNote->getstatus_fact == null || $moviment->creditNote->getstatus_fact != "DECLARADO Y ACTIVO") {
+                        $condicionNC                        = $this->getStatusFacturacion($newRequest);
+                        $condicionNC                        = $condicionNC == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicionNC;
+                        $creditupdatestatus                 = CreditNote::find($moviment->creditNote->id);
+                        $creditupdatestatus->getstatus_fact = $condicionNC;
+                        $creditupdatestatus->save();
+                    } else {
+                        $condicionNC = $moviment->creditNote->getstatus_fact;
                     }
+
+                    $dateinstallmentNC = "--/--/--";
+
+                    if ($installment) { // Verifica si existe un registro
+                        $dateinstallmentNC = $installment->date
+                        ? Carbon::parse($installment->date)->format('d/m/y')
+                        : "--/--/--"; // Formatea la fecha si existe
+                    } else {
+                        $movcaja = Moviment::withTrashed()->where("mov_id", $moviment->id)->first();
+                        if ($movcaja) {
+                            $dateinstallmentNC = $movcaja->paymentDate
+                            ? Carbon::parse($movcaja->paymentDate)->format('d/m/y')
+                            : "--/--/--"; // Formatea la fecha si existe
+                        }
+                    }
+
+                    $personaCliente = $moviment->person ?? null;
+                    $nombreCliente  = '-';
+                    if ($personaCliente) {
+                        $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
+                        ? ($personaCliente->businessName ?? '-')
+                        : trim(($personaCliente->names ?? '') . ' ' . ($personaCliente->fatherSurname ?? '') . ' ' . ($personaCliente->motherSurname ?? ''));
+                    }
+
+                    $notacredito = $moviment->creditNote;
+                    // Cálculos
+                    $totalDetalle = $notacredito->total ?? 0;
+                    $afecto       = $totalDetalle ? $totalDetalle / 1.18 : 0;
+                    $igv          = $afecto * 0.18;
+                    $total        = $afecto + $igv;
+                    $totalOperacionGravada2 += $afecto;
+                    $totalImporteTotal2 += $total;
+                    $totalIgv2 += $igv;
+                    // Calcular detracción usando percentDetraction
+                    // $montoDetraccion = isset($moviment->percentDetraction) ? round($totalDetalle * ($moviment->percentDetraction / 100), 2) : 0;
+                    // $saldoNeto = $totalDetalle - $montoDetraccion;
+
+                    // Sumar totales
+
+                    // Asignar tipo de documento en base al prefijo del correlativo
+                    $correlativo   = $notacredito->number;
+                    $tipoDocumento = '';
+                    $serie         = '';
+                    $numeroC       = '';
+
+                    if (str_starts_with($correlativo, 'B')) {
+                        $tipoDocumento = 'BOLETA DE VENTA'; // Boleta
+                        $serie         = substr($correlativo, 0, 4);
+                        $numeroC       = substr($correlativo, 5);
+                    } elseif (str_starts_with($correlativo, 'T')) {
+                        $tipoDocumento = 'TICKET VENTA'; // Factura
+                        $serie         = substr($correlativo, 0, 4);
+                        $numeroC       = substr($correlativo, 5);
+                    } elseif (str_starts_with($correlativo, 'F')) {
+                        $tipoDocumento = 'FACTURA VENTA'; // Factura
+                        $serie         = substr($correlativo, 0, 4);
+                        $numeroC       = substr($correlativo, 5);
+                    } elseif (str_starts_with($correlativo, 'FC')) {
+                        $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para factura
+                        $serie         = substr($correlativo, 0, 4);
+                        $numeroC       = substr($correlativo, 5);
+                    } elseif (str_starts_with($correlativo, 'BC')) {
+                        $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para boleta
+                        $serie         = substr($correlativo, 0, 4);
+                        $numeroC       = substr($correlativo, 5);
+                    }
+
+                    //ESTO ES PARA VENTA
+                    $correlativoV   = $moviment->sequentialNumber;
+                    $tipoDocumentoV = '';
+                    $serieV         = '';
+                    $numeroV        = '';
+
+                    if (str_starts_with($correlativoV, 'B')) {
+                        $tipoDocumento = 'BOLETA DE VENTA'; // Boleta
+                        $serieV        = substr($correlativoV, 0, 4);
+                        $numeroV       = substr($correlativoV, 5);
+                    } elseif (str_starts_with($correlativoV, 'T')) {
+                        $tipoDocumento = 'TICKET VENTA'; // Factura
+                        $serieV        = substr($correlativoV, 0, 4);
+                        $numeroV       = substr($correlativoV, 5);
+                    } elseif (str_starts_with($correlativoV, 'F')) {
+                        $tipoDocumento = 'FACTURA VENTA'; // Factura
+                        $serieV        = substr($correlativoV, 0, 4);
+                        $numeroV       = substr($correlativoV, 5);
+                    } elseif (str_starts_with($correlativoV, 'FC')) {
+                        $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para factura
+                        $serieV        = substr($correlativoV, 0, 4);
+                        $numeroV       = substr($correlativoV, 5);
+                    } elseif (str_starts_with($correlativoV, 'BC')) {
+                        $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para boleta
+                        $serieV        = substr($correlativoV, 0, 4);
+                        $numeroV       = substr($correlativoV, 5);
+                    }
+                    // Sumar al total de ventas sin nota
+                    $fechaEmision  = $notacredito->created_at ? Carbon::parse($notacredito->created_at)->format('d/m/y') : '';
+                    $fechaEmisionV = $moviment->paymentDate ? Carbon::parse($moviment->paymentDate)->format('d/m/y') : '';
+
+                    $exportDataSinNotaCredito[] = [
+                        'NRO'                     => $iterador++,
+                        'FECHA EMISIÓN'           => $fechaEmision,
+                        'CONDICIÓN'               => $condicionNC,
+                        'FORMA DE PAGO'           => $moviment->typePayment == 'Contado' ? 'CONTADO' : 'CRÉDITO',
+                        'FECHA CREDITO / CONTADO' => $dateinstallmentNC,
+                        'TIPO C.'                 => 'NOTA DE CRÉDITO',
+                        'SERIE C.'                => (string) $serie,
+                        'NUMERO C.'               => (string) $numeroC,
+                        'TIPO DOC'                => (string) $personaCliente->typeofDocument,
+                        'NUMERO DOC'              => (string) $personaCliente->documentNumber ?? '',
+                        'RAZON SOCIAL'            => (string) $nombreCliente,
+                        'GUIAS'                   => (string) implode(',', $moviment?->detalles()->pluck('guia')->toArray() ?? []),
+                        'OPERACIÓN GRAVADA'       => (string) number_format(-1 * $afecto, 2, '.', ''),
+                        'IGV'                     => (string) number_format(-1 * $igv, 2, '.', ''),
+                        'IMPORTE TOTAL'           => (string) number_format(-1 * $total, 2, '.', ''),
+
+                        'FECHA REF. COMPROBANTE'  => $fechaEmisionV ?? '',
+                        'TIPO REF. COMPROBANTE'   => '01',
+                        'SERIE REF. COMPROBANTE'  => $serieV ?? '',
+                        'NÚMERO REF. COMPROBANTE' => $numeroV ?? '',
+                    ];
                 }
-
-                $personaCliente = $moviment->person ?? null;
-                $nombreCliente = '-';
-                if ($personaCliente) {
-                    $nombreCliente = strtoupper($personaCliente->typeofDocument) != 'DNI'
-                    ? ($personaCliente->businessName ?? '-')
-                    : trim(($personaCliente->names ?? '') . ' ' . ($personaCliente->fatherSurname ?? '') . ' ' . ($personaCliente->motherSurname ?? ''));
-                }
-
-                $notacredito = $moviment->creditNote;
-                // Cálculos
-                $totalDetalle = $notacredito->total ?? 0;
-                $afecto = $totalDetalle ? $totalDetalle / 1.18 : 0;
-                $igv = $afecto * 0.18;
-                $total = $afecto + $igv;
-                $totalOperacionGravada2 += $afecto;
-                $totalImporteTotal2 += $total;
-                $totalIgv2 += $igv;
-                // Calcular detracción usando percentDetraction
-                // $montoDetraccion = isset($moviment->percentDetraction) ? round($totalDetalle * ($moviment->percentDetraction / 100), 2) : 0;
-                // $saldoNeto = $totalDetalle - $montoDetraccion;
-
-                // Sumar totales
-
-                // Asignar tipo de documento en base al prefijo del correlativo
-                $correlativo = $notacredito->number;
-                $tipoDocumento = '';
-                $serie = '';
-                $numeroC = '';
-
-                if (str_starts_with($correlativo, 'B')) {
-                    $tipoDocumento = 'BOLETA DE VENTA'; // Boleta
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
-                } elseif (str_starts_with($correlativo, 'T')) {
-                    $tipoDocumento = 'TICKET VENTA'; // Factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
-                } elseif (str_starts_with($correlativo, 'F')) {
-                    $tipoDocumento = 'FACTURA VENTA'; // Factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
-                } elseif (str_starts_with($correlativo, 'FC')) {
-                    $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para factura
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
-                } elseif (str_starts_with($correlativo, 'BC')) {
-                    $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para boleta
-                    $serie = substr($correlativo, 0, 4);
-                    $numeroC = substr($correlativo, 5);
-                }
-
-                //ESTO ES PARA VENTA
-                $correlativoV = $moviment->sequentialNumber;
-                $tipoDocumentoV = '';
-                $serieV = '';
-                $numeroV = '';
-
-                if (str_starts_with($correlativoV, 'B')) {
-                    $tipoDocumento = 'BOLETA DE VENTA'; // Boleta
-                    $serieV = substr($correlativoV, 0, 4);
-                    $numeroV = substr($correlativoV, 5);
-                } elseif (str_starts_with($correlativoV, 'T')) {
-                    $tipoDocumento = 'TICKET VENTA'; // Factura
-                    $serieV = substr($correlativoV, 0, 4);
-                    $numeroV = substr($correlativoV, 5);
-                } elseif (str_starts_with($correlativoV, 'F')) {
-                    $tipoDocumento = 'FACTURA VENTA'; // Factura
-                    $serieV = substr($correlativoV, 0, 4);
-                    $numeroV = substr($correlativoV, 5);
-                } elseif (str_starts_with($correlativoV, 'FC')) {
-                    $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para factura
-                    $serieV = substr($correlativoV, 0, 4);
-                    $numeroV = substr($correlativoV, 5);
-                } elseif (str_starts_with($correlativoV, 'BC')) {
-                    $tipoDocumento = 'NOTA DE CRÉDITO'; // Nota de crédito para boleta
-                    $serieV = substr($correlativoV, 0, 4);
-                    $numeroV = substr($correlativoV, 5);
-                }
-                // Sumar al total de ventas sin nota
-                $fechaEmision = $notacredito->created_at ? Carbon::parse($notacredito->created_at)->format('d/m/y') : '';
-                $fechaEmisionV = $moviment->paymentDate ? Carbon::parse($moviment->paymentDate)->format('d/m/y') : '';
-
-                $exportDataSinNotaCredito[] = [
-                    'NRO' => $iterador++,
-                    'FECHA EMISIÓN' => $fechaEmision,
-                    'CONDICIÓN' => $condicionNC,
-                    'FORMA DE PAGO' => $moviment->typePayment == 'Contado' ? 'CONTADO' : 'CRÉDITO',
-                    'FECHA CREDITO / CONTADO' => $dateinstallmentNC,
-                    'TIPO C.' => 'NOTA DE CRÉDITO',
-                    'SERIE C.' => (string) $serie,
-                    'NUMERO C.' => (string) $numeroC,
-                    'TIPO DOC' => (string) $personaCliente->typeofDocument,
-                    'NUMERO DOC' => (string) $personaCliente->documentNumber ?? '',
-                    'RAZON SOCIAL' => (string) $nombreCliente,
-                    'GUIAS' => (string) implode(',', $moviment?->detalles()->pluck('guia')->toArray() ?? []),
-                    'OPERACIÓN GRAVADA' => (string) number_format(-1 * $afecto, 2, '.', ''),
-                    'IGV' => (string) number_format(-1 * $igv, 2, '.', ''),
-                    'IMPORTE TOTAL' => (string) number_format(-1 * $total, 2, '.', ''),
-
-                    'FECHA REF. COMPROBANTE' => $fechaEmisionV ?? '',
-                    'TIPO REF. COMPROBANTE' => '01',
-                    'SERIE REF. COMPROBANTE' => $serieV ?? '',
-                    'NÚMERO REF. COMPROBANTE' => $numeroV ?? '',
-                ];
             }
         }
 
 // Agregar fila de totales para ventas con nota de crédito
         $exportDataConNotaCredito[] = [
-            'NRO' => '',
-            'FECHA EMISIÓN' => '',
-            'CONDICIÓN' => '',
-            'FORMA DE PAGO' => '',
+            'NRO'                     => '',
+            'FECHA EMISIÓN'           => '',
+            'CONDICIÓN'               => '',
+            'FORMA DE PAGO'           => '',
             'FECHA CREDITO / CONTADO' => '',
-            'TIPO C.' => '',
-            'SERIE C.' => '',
-            'NUMERO C.' => '',
-            'TIPO DOC' => '',
-            'NUMERO DOC' => '',
-            'RAZON SOCIAL' => '',
-            'GUIAS' => 'TOTAL',
-            'OPERACIÓN GRAVADA' => (string) number_format(-1 * $totalOperacionGravada2, 2, '.', ''),
-            'IGV' => (string) number_format(-1 * $totalIgv2, 2, '.', ''),
-            'IMPORTE TOTAL' => (string) number_format(-1 * $totalImporteTotal2, 2, '.', ''),
+            'TIPO C.'                 => '',
+            'SERIE C.'                => '',
+            'NUMERO C.'               => '',
+            'TIPO DOC'                => '',
+            'NUMERO DOC'              => '',
+            'RAZON SOCIAL'            => '',
+            'GUIAS'                   => 'TOTAL',
+            'OPERACIÓN GRAVADA'       => (string) number_format(-1 * $totalOperacionGravada2, 2, '.', ''),
+            'IGV'                     => (string) number_format(-1 * $totalIgv2, 2, '.', ''),
+            'IMPORTE TOTAL'           => (string) number_format(-1 * $totalImporteTotal2, 2, '.', ''),
 
-            'FECHA REF. COMPROBANTE' => '',
+            'FECHA REF. COMPROBANTE'  => '',
 
-            'SERIE REF. COMPROBANTE' => '',
+            'SERIE REF. COMPROBANTE'  => '',
             'NÚMERO REF. COMPROBANTE' => '',
         ];
 
@@ -1132,46 +1136,46 @@ class ExcelController extends Controller
 //         $totalGeneralAfecto = $totalAfectoSinNota + $totalAfectoConNota;
 //         $totalGeneralIgv = $totalIgvSinNota + $totalIgvConNota;
         $exportDataConNotaCredito[] = [
-            'NRO' => '',
-            'FECHA EMISIÓN' => '',
-            'CONDICIÓN' => '',
-            'FORMA DE PAGO' => '',
+            'NRO'                     => '',
+            'FECHA EMISIÓN'           => '',
+            'CONDICIÓN'               => '',
+            'FORMA DE PAGO'           => '',
             'FECHA CREDITO / CONTADO' => '',
-            'TIPO C.' => '',
-            'SERIE C.' => '',
-            'NUMERO C.' => '',
-            'TIPO DOC' => '',
-            'NUMERO DOC' => '',
-            'RAZON SOCIAL' => '',
-            'GUIAS' => '',
-            'OPERACIÓN GRAVADA' => '',
-            'IGV' => '',
-            'IMPORTE TOTAL' => '',
-            'FECHA REF. COMPROBANTE' => '',
+            'TIPO C.'                 => '',
+            'SERIE C.'                => '',
+            'NUMERO C.'               => '',
+            'TIPO DOC'                => '',
+            'NUMERO DOC'              => '',
+            'RAZON SOCIAL'            => '',
+            'GUIAS'                   => '',
+            'OPERACIÓN GRAVADA'       => '',
+            'IGV'                     => '',
+            'IMPORTE TOTAL'           => '',
+            'FECHA REF. COMPROBANTE'  => '',
 
-            'SERIE REF. COMPROBANTE' => '',
+            'SERIE REF. COMPROBANTE'  => '',
             'NÚMERO REF. COMPROBANTE' => '',
         ];
         $exportDataConNotaCredito[] = [
-            'NRO' => '',
-            'FECHA EMISIÓN' => '',
-            'CONDICIÓN' => '',
-            'FORMA DE PAGO' => '',
+            'NRO'                     => '',
+            'FECHA EMISIÓN'           => '',
+            'CONDICIÓN'               => '',
+            'FORMA DE PAGO'           => '',
             'FECHA CREDITO / CONTADO' => '',
-            'TIPO C.' => '',
-            'SERIE C.' => '',
-            'NUMERO C.' => '',
-            'TIPO DOC' => '',
-            'NUMERO DOC' => '',
-            'RAZON SOCIAL' => '',
-            'GUIAS' => 'TOTALES',
-            'OPERACIÓN GRAVADA' => (string) number_format($totalOperacionGravada - $totalOperacionGravada2, 2, '.', ''),
-            'IGV' => (string) number_format($totalIgv - $totalIgv2, 2, '.', ''),
-            'IMPORTE TOTAL' => (string) number_format($totalImporteTotal - $totalImporteTotal2, 2, '.', ''),
+            'TIPO C.'                 => '',
+            'SERIE C.'                => '',
+            'NUMERO C.'               => '',
+            'TIPO DOC'                => '',
+            'NUMERO DOC'              => '',
+            'RAZON SOCIAL'            => '',
+            'GUIAS'                   => 'TOTALES',
+            'OPERACIÓN GRAVADA'       => (string) number_format($totalOperacionGravada - $totalOperacionGravada2, 2, '.', ''),
+            'IGV'                     => (string) number_format($totalIgv - $totalIgv2, 2, '.', ''),
+            'IMPORTE TOTAL'           => (string) number_format($totalImporteTotal - $totalImporteTotal2, 2, '.', ''),
 
-            'FECHA REF. COMPROBANTE' => '',
+            'FECHA REF. COMPROBANTE'  => '',
 
-            'SERIE REF. COMPROBANTE' => '',
+            'SERIE REF. COMPROBANTE'  => '',
             'NÚMERO REF. COMPROBANTE' => '',
         ];
 
@@ -1194,13 +1198,13 @@ class ExcelController extends Controller
         $funcion = "getstatusservidor";
 
         // Construir la URL con los parámetros
-        $url = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
+        $url    = "https://develop.garzasoft.com:81/transporteFacturadorZip/controlador/contComprobante.php";
         $params = [
-            'funcion' => $funcion,
+            'funcion'         => $funcion,
             'nombresolicitud' => $nombre,
-            'empresa_id' => 437,
-            'fecini' => $fecini,
-            'fecfin' => $fecfin,
+            'empresa_id'      => 437,
+            'fecini'          => $fecini,
+            'fecfin'          => $fecfin,
         ];
         $url .= '?' . http_build_query($params);
 
@@ -1212,8 +1216,8 @@ class ExcelController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         // Ejecutar la solicitud y obtener la respuesta
-        $response = curl_exec($ch);
-        $data = [];
+        $response  = curl_exec($ch);
+        $data      = [];
         $statusfac = 'NO ENCONTRADO EN EL FACTURADOR';
 
         // Verificar si ocurrió algún error
@@ -1222,10 +1226,10 @@ class ExcelController extends Controller
 
             // Definir la respuesta de error
             $data = [
-                "mensaje" => 'Error',
+                "mensaje"           => 'Error',
                 "nombre-solicitado" => $nombre,
-                "response" => [],
-                "status" => null,
+                "response"          => [],
+                "status"            => null,
             ];
             $statusfac = 'NO ENCONTRADO EN EL FACTURADOR';
         } else {
@@ -1233,23 +1237,23 @@ class ExcelController extends Controller
             if (empty($response)) {
 
                 $data = [
-                    "mensaje" => 'Error',
+                    "mensaje"           => 'Error',
                     "nombre-solicitado" => $nombre,
-                    "response" => [],
-                    "status" => null,
+                    "response"          => [],
+                    "status"            => null,
                 ];
                 $statusfac = 'NO ENCONTRADO EN EL FACTURADOR';
             } else {
                 $responseArray = json_decode($response, true); // Convertir JSON a array
 
                 // Verificar si 'data' existe en la respuesta
-                $status = isset($responseArray['data'][0]['descripcion']) ? $responseArray['data'][0]['descripcion'] : null;
+                $status    = isset($responseArray['data'][0]['descripcion']) ? $responseArray['data'][0]['descripcion'] : null;
                 $statusfac = $status;
-                $data = [
-                    "mensaje" => 'Correcto',
+                $data      = [
+                    "mensaje"           => 'Correcto',
                     "nombre-solicitado" => $nombre,
-                    "response" => $responseArray,
-                    "status" => $statusfac,
+                    "response"          => $responseArray,
+                    "status"            => $statusfac,
                 ];
             }
         }

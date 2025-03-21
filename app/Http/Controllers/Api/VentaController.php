@@ -2644,34 +2644,7 @@ class VentaController extends Controller
         $page    = $request->input('page', 1);      // Valor por defecto es 1
 
         // Obtener el total de la deuda sin paginación
-        $totalDebtSum = Moviment::query()
-            ->when(! empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
-            ->when(! empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
-            ->when(! empty($box_id), fn($query) => $query->where('box_id', $box_id))
-            ->when(! empty($personId), fn($query) => $query->where('person_id', $personId))
-            ->when(! empty($status), fn($query) => $query->where('status', $status))
-            ->when(! empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
-            ->when(! empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
-            ->when(! empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
-            ->where('movType', 'Venta')
-            ->with('creditNote') // Cargar la relación creditNote para cálculos
-            ->get()              // Obtener todos los resultados
-            ->map(function ($item) {
-                $ventaTotal = $item->total; // Total de la venta
-                if ($item->creditNote) {
-                    $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
-                    $item->total      = max($ventaTotal - $notaCreditoTotal, 0);
-                    $item->saldo      = max($item->saldo - $notaCreditoTotal, 0);
-
-                } else {
-                    if ($item->status == "Anulada") {
-                        $item->total = 0;
-                        $item->saldo = 0;
-                    }
-                }
-                return $item->total; // Retornar solo el total ajustado
-            })
-            ->sum(); // Sumar los valores ajustados
+        $totalDebtSum = $this->calcularTotalDeuda($branch_office_id, $typeDocument, $box_id, $personId, $status, $start, $end, $sequentialNumber);
 
         // Consulta con paginación
         $movCaja = Moviment::query()
@@ -2749,6 +2722,28 @@ class VentaController extends Controller
             'totalSum'       => $totalDebtSum, // Total sin paginación
         ], 200);
     }
+    function calcularTotalDeuda($branch_office_id = null, $typeDocument = null, $box_id = null, $personId = null, $status = null, $start = null, $end = null, $sequentialNumber = null) {
+        $totalSumVentas = Moviment::query()
+            ->when(!empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
+            ->when(!empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
+            ->when(!empty($box_id), fn($query) => $query->where('box_id', $box_id))
+            ->when(!empty($personId), fn($query) => $query->where('person_id', $personId))
+            ->when(!empty($status), fn($query) => $query->where('status', $status))
+            ->when(!empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
+            ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
+            ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
+            ->where('movType', 'Venta')
+            ->with('creditNote')
+            ->get()
+            ->sum('total');
+    
+        $totalSumNC = CreditNote::whereBetween('created_at', [$start, $end])
+            ->get()
+            ->sum('total');
+    
+        return $totalSumVentas - $totalSumNC;
+    }
+    
 
     public function show($id)
     {

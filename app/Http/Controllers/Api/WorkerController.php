@@ -1,8 +1,10 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ExcelExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\WorkerRequest\IndexWorkerRequest;
+use App\Http\Resources\WorkerResource;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
 use App\Models\DetailWorker;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WorkerController extends Controller
 {
@@ -87,29 +90,29 @@ class WorkerController extends Controller
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice = BranchOffice::find($branch_office_id);
+            $branchOffice     = BranchOffice::find($branch_office_id);
         }
 
         $occupation = $request->input('occupation') ?? '';
 
-        $status = $request->input('status') ?? '';
+        $status      = $request->input('status') ?? '';
         $namesCadena = $request->input('namesCadena') ?? '';
         $namesCadena = str_replace('%20', '', $namesCadena); // Elimina %20
-        $namesCadena = strtolower($namesCadena); // Convierte todo a minúsculas
-        
+        $namesCadena = strtolower($namesCadena);             // Convierte todo a minúsculas
+
         $isConductor = $request->input('isConductor') ?? '';
 
         $workers_per_page = $request->input('per_page', 10); // Default items per page
-        $workers_page = $request->input('page', 1); // Current page
+        $workers_page     = $request->input('page', 1);      // Current page
 
-        $user = Auth()->user();
+        $user          = Auth()->user();
         $typeofUser_id = $user->typeofUser_id ?? '';
 
         $workers = Worker::with('person', 'area', 'district.province.department', 'branchOffice')
@@ -121,7 +124,7 @@ class WorkerController extends Controller
                 }
 
                 // Siempre filtra por la ocupación, si se ha especificado
-                if (!empty($occupation)) {
+                if (! empty($occupation)) {
                     // Cambiar a where para aplicar ambos filtros como un AND
                     $query->where('occupation', $occupation);
                 }
@@ -140,7 +143,7 @@ class WorkerController extends Controller
                         ->orWhere('businessName', 'LIKE', '%' . $namesCadena . '%')
                         ->orWhere(DB::raw("CONCAT(names, ' ', fatherSurname, ' ', motherSurname)"), 'LIKE', '%' . $namesCadena . '%');
                 });
-                
+
             })
             ->orderBy(
                 Person::select('names')
@@ -154,19 +157,57 @@ class WorkerController extends Controller
         // $totalPages = ceil($list->total() / $workers_per_page);
 
         return response()->json([
-            'total' => $workers->total(),
-            'data' => $workers->items(),
-            'current_page' => $workers->currentPage(),
-            'last_page' => $workers->lastPage(),
-            'per_page' => $workers->perPage(),
-            'pagination' => $workers_per_page, // New field for pagination size
+            'total'          => $workers->total(),
+            'data'           => $workers->items(),
+            'current_page'   => $workers->currentPage(),
+            'last_page'      => $workers->lastPage(),
+            'per_page'       => $workers->perPage(),
+            'pagination'     => $workers_per_page, // New field for pagination size
             'first_page_url' => $workers->url(1),
-            'from' => $workers->firstItem(),
-            'next_page_url' => $workers->nextPageUrl(),
-            'path' => $workers->path(),
-            'prev_page_url' => $workers->previousPageUrl(),
-            'to' => $workers->lastItem(),
+            'from'           => $workers->firstItem(),
+            'next_page_url'  => $workers->nextPageUrl(),
+            'path'           => $workers->path(),
+            'prev_page_url'  => $workers->previousPageUrl(),
+            'to'             => $workers->lastItem(),
         ], 200);
+    }
+
+    public function list(IndexWorkerRequest $request)
+    {
+
+        return $this->getFilteredResults(
+            Worker::class,
+            $request,
+            Worker::filters,
+            Worker::sorts,
+            WorkerResource::class
+        );
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/transporte/public/api/bank-account-export-excel",
+     *     summary="Exportar BankAccounts con filtros y ordenamiento",
+     *     tags={"BankAccount"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="filters", in="query", description="Filtros aplicables", @OA\Schema(ref="#/components/schemas/BankAccountFilters")),
+     *     @OA\Response(response=200, description="Lista de BankAccounts", @OA\JsonContent(ref="#/components/schemas/BankAccount")),
+     *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
+     * )
+     */
+
+    public function index_export_excel(IndexWorkerRequest $request, $sumColumns = [])
+    {
+
+        $request['all']               = "true";
+        $request['branchOffice_id']   = $request['branch_office_id'];
+        $request['person$names']      = $request['namesCadena'];
+        $request['person$deleted_at'] = null;
+        $data                         = $this->list($request);
+
+        $fileName = 'Trabajadores_' . now()->timestamp . '.xlsx';
+        $columns  = Worker::fields_export;
+        return Excel::download(new ExcelExport($data, $columns, $sumColumns), $fileName);
     }
 
     /**
@@ -226,24 +267,24 @@ class WorkerController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-  
-            'person_id' => [
+
+            'person_id'       => [
                 'required',
                 Rule::unique('workers', 'person_id')->whereNull('deleted_at'),
             ],
-            'area_id' => 'required|exists:areas,id',
+            'area_id'         => 'required|exists:areas,id',
             'branchOffice_id' => 'required|exists:branch_offices,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id'     => 'required|exists:districts,id',
 
         ], [
-            'person_id.required' => 'El campo persona es obligatorio.',
-            'person_id.unique' => 'Esta persona ya está asignada a otro trabajador.',
-            'area_id.required' => 'El campo área es obligatorio.',
-            'area_id.exists' => 'El área seleccionada no es válida.',
+            'person_id.required'       => 'El campo persona es obligatorio.',
+            'person_id.unique'         => 'Esta persona ya está asignada a otro trabajador.',
+            'area_id.required'         => 'El campo área es obligatorio.',
+            'area_id.exists'           => 'El área seleccionada no es válida.',
             'branchOffice_id.required' => 'El campo sucursal es obligatorio.',
-            'branchOffice_id.exists' => 'La sucursal seleccionada no es válida.',
-            'district_id.required' => 'El campo distrito es obligatorio.',
-            'district_id.exists' => 'El distrito seleccionado no es válido.',
+            'branchOffice_id.exists'   => 'La sucursal seleccionada no es válida.',
+            'district_id.required'     => 'El campo distrito es obligatorio.',
+            'district_id.exists'       => 'El distrito seleccionado no es válido.',
         ]);
 
         if ($validator->fails()) {
@@ -251,30 +292,30 @@ class WorkerController extends Controller
         }
 
         $data = [
-            'code' => $request->input('code') ?? null,
+            'code'             => $request->input('code') ?? null,
 
-            'maritalStatus' => $request->input('maritalStatus') ?? null,
+            'maritalStatus'    => $request->input('maritalStatus') ?? null,
             'levelInstitution' => $request->input('levelInstitution') ?? null,
-            'occupation' => $request->input('occupation') ?? null,
+            'occupation'       => $request->input('occupation') ?? null,
 
-            'startDate' => $request->input('startDate') ?? null,
-            'licencia' => $request->input('licencia') ?? null,
-            'licencia_date' => $request->input('licencia_date') ?? null,
-            'district_id' => $request->input('district_id') ?? null,
-            'person_id' => $request->input('person_id') ?? null,
-            'area_id' => $request->input('area_id') ?? null,
-            'branchOffice_id' => $request->input('branchOffice_id') ?? null,
+            'startDate'        => $request->input('startDate') ?? null,
+            'licencia'         => $request->input('licencia') ?? null,
+            'licencia_date'    => $request->input('licencia_date') ?? null,
+            'district_id'      => $request->input('district_id') ?? null,
+            'person_id'        => $request->input('person_id') ?? null,
+            'area_id'          => $request->input('area_id') ?? null,
+            'branchOffice_id'  => $request->input('branchOffice_id') ?? null,
         ];
         $object = Worker::create($data);
 
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('public/photosWorker');
+            $filePath          = $request->file('file')->store('public/photosWorker');
             $object->pathPhoto = Storage::url($filePath);
             $object->save();
         }
 
         // Guarda el documento
-        $currentDate = now();
+        $currentDate   = now();
         $licencia_date = $request->input('licencia_date');
 
         if ($licencia_date < $currentDate) {
@@ -289,14 +330,14 @@ class WorkerController extends Controller
         $object = Worker::with('person', 'area', 'district.province.department', 'branchOffice')->find($object->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'workers', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Crea Trabajador', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'workers',   // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Crea Trabajador',     // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($object, 200);
@@ -367,7 +408,7 @@ class WorkerController extends Controller
     public function update(Request $request, $id)
     {
         $object = Worker::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Worker not found'], 422);
         }
 
@@ -385,14 +426,14 @@ class WorkerController extends Controller
             // 'startDate' => 'required',
             // 'endDate' => 'required',
 
-            'district_id' => 'required|exists:districts,id',
-            'person_id' => [
+            'district_id'     => 'required|exists:districts,id',
+            'person_id'       => [
                 'required',
                 'string',
                 Rule::unique('people', 'id')->whereNull('deleted_at')
-                ->ignore($object->person_id),
+                    ->ignore($object->person_id),
             ],
-            'area_id' => 'required|exists:areas,id',
+            'area_id'         => 'required|exists:areas,id',
             'branchOffice_id' => 'required|exists:branch_offices,id',
 
         ]);
@@ -406,22 +447,22 @@ class WorkerController extends Controller
         };
 
         $Data = array_filter([
-            'code' => $request->input('code') ?? null,
+            'code'             => $request->input('code') ?? null,
             // 'department' => $request->input('department') ?? null,
             // 'province' => $request->input('province') ?? null,
             // 'district' => $request->input('district') ?? null,
-            'district_id' => $request->input('district_id') ?? null,
-            'maritalStatus' => $request->input('maritalStatus') ?? null,
+            'district_id'      => $request->input('district_id') ?? null,
+            'maritalStatus'    => $request->input('maritalStatus') ?? null,
             'levelInstitution' => $request->input('levelInstitution') ?? null,
-            'occupation' => $request->input('occupation') ?? null,
-            'center' => $request->input('center') ?? null,
+            'occupation'       => $request->input('occupation') ?? null,
+            'center'           => $request->input('center') ?? null,
             'typeRelationship' => $request->input('typeRelationship') ?? null,
-            'startDate' => $request->input('startDate') ?? null,
-            'licencia' => $request->input('licencia') ?? null,
-            'licencia_date' => $request->input('licencia_date') ?? null,
-            'person_id' => $request->input('person_id') ?? null,
-            'area_id' => $request->input('area_id') ?? null,
-            'branchOffice_id' => $request->input('branchOffice_id') ?? null,
+            'startDate'        => $request->input('startDate') ?? null,
+            'licencia'         => $request->input('licencia') ?? null,
+            'licencia_date'    => $request->input('licencia_date') ?? null,
+            'person_id'        => $request->input('person_id') ?? null,
+            'area_id'          => $request->input('area_id') ?? null,
+            'branchOffice_id'  => $request->input('branchOffice_id') ?? null,
 
         ], $filterNullValues);
 
@@ -434,7 +475,7 @@ class WorkerController extends Controller
             }
 
             // Almacenar la nueva imagen y obtener la ruta
-            $filePath = $request->file('file')->store('public/photosWorker');
+            $filePath          = $request->file('file')->store('public/photosWorker');
             $object->pathPhoto = Storage::url($filePath);
             $object->save();
         }
@@ -506,28 +547,27 @@ class WorkerController extends Controller
         $worker = $id != 'null' ? Worker::find($id) : new Worker();
         // Validación de los datos
         $validator = validator()->make($request->all(), [
-            'person_id' => [
+            'person_id'       => [
                 'required',
                 'string',
                 Rule::unique('workers', 'person_id')
                     ->whereNull('deleted_at')
                     ->ignore($worker->id),
             ],
-            'area_id' => 'required|exists:areas,id',
+            'area_id'         => 'required|exists:areas,id',
             'branchOffice_id' => 'required|exists:branch_offices,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id'     => 'required|exists:districts,id',
         ], [
-            'person_id.required' => 'El campo persona es obligatorio.',
-            'person_id.string' => 'El campo persona debe ser una cadena de texto.',
-            'person_id.unique' => 'Esta persona ya está asignada a otro trabajador.',
-            'area_id.required' => 'El campo área es obligatorio.',
-            'area_id.exists' => 'El área seleccionada no es válida.',
+            'person_id.required'       => 'El campo persona es obligatorio.',
+            'person_id.string'         => 'El campo persona debe ser una cadena de texto.',
+            'person_id.unique'         => 'Esta persona ya está asignada a otro trabajador.',
+            'area_id.required'         => 'El campo área es obligatorio.',
+            'area_id.exists'           => 'El área seleccionada no es válida.',
             'branchOffice_id.required' => 'El campo sucursal es obligatorio.',
-            'branchOffice_id.exists' => 'La sucursal seleccionada no es válida.',
-            'district_id.required' => 'El campo distrito es obligatorio.',
-            'district_id.exists' => 'El distrito seleccionado no es válido.',
+            'branchOffice_id.exists'   => 'La sucursal seleccionada no es válida.',
+            'district_id.required'     => 'El campo distrito es obligatorio.',
+            'district_id.exists'       => 'El distrito seleccionado no es válido.',
         ]);
-    
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -536,22 +576,22 @@ class WorkerController extends Controller
         // Buscar o crear un nuevo objeto Worker
         $worker = $id != 'null' ? Worker::find($id) : new Worker();
 
-        if ($id && !$worker) {
+        if ($id && ! $worker) {
             return response()->json(['error' => 'Worker not found'], 404);
         }
 
         // Asignar datos al trabajador
-        $worker->code = $request->input('code');
+        $worker->code             = $request->input('code');
         $worker->levelInstitution = $request->input('levelInstitution');
-        $worker->maritalStatus = $request->input('maritalStatus');
-        $worker->district_id = $request->input('district_id');
-        $worker->occupation = $request->input('occupation');
-        $worker->person_id = $request->input('person_id');
-        $worker->area_id = $request->input('area_id');
-        $worker->branchOffice_id = $request->input('branchOffice_id');
-        $worker->licencia = $request->input('licencia');
-        $worker->licencia_date = $request->input('licencia_date');
-        $worker->startDate = $request->input('startDate');
+        $worker->maritalStatus    = $request->input('maritalStatus');
+        $worker->district_id      = $request->input('district_id');
+        $worker->occupation       = $request->input('occupation');
+        $worker->person_id        = $request->input('person_id');
+        $worker->area_id          = $request->input('area_id');
+        $worker->branchOffice_id  = $request->input('branchOffice_id');
+        $worker->licencia         = $request->input('licencia');
+        $worker->licencia_date    = $request->input('licencia_date');
+        $worker->startDate        = $request->input('startDate');
 
         // Guardar los datos
         $worker->save();
@@ -564,7 +604,7 @@ class WorkerController extends Controller
                 Storage::delete(str_replace('/storage/', 'public/', $worker->pathPhoto));
             }
 
-            $filePath = $request->file('file')->store('public/photosWorker');
+            $filePath          = $request->file('file')->store('public/photosWorker');
             $worker->pathPhoto = Storage::url($filePath);
             $worker->save();
         }
@@ -573,14 +613,14 @@ class WorkerController extends Controller
         $worker = Worker::with('person', 'area', 'district.province.department', 'branchOffice')->find($worker->id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $worker->id, // El ID del usuario afectado
-            'action' => 'POST', // Acción realizada
-            'table_name' => 'workers', // Tabla afectada
-            'data' => json_encode($worker),
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $worker->id, // El ID del usuario afectado
+            'action'      => 'POST',      // Acción realizada
+            'table_name'  => 'workers',   // Tabla afectada
+            'data'        => json_encode($worker),
             'description' => 'Actualiza o crea Trabajador', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address'  => $request->ip(),                // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),         // Información sobre el navegador/dispositivo
         ]);
 
         return response()->json($worker, 200);
@@ -631,7 +671,7 @@ class WorkerController extends Controller
     public function show($id)
     {
         $worker = Worker::with('person', 'area', 'district.province.department', 'branchOffice')->find($id);
-        if (!$worker) {
+        if (! $worker) {
             return response()->json(['message' => 'Worker not found'], 422);
         }
         return response()->json($worker, 200);
@@ -689,11 +729,11 @@ class WorkerController extends Controller
         // Obtener el trabajador por su ID
         $worker = Worker::find($workerId);
 
-        if (!$worker) {
+        if (! $worker) {
             return response()->json(['error' => 'Worker not found'], 404);
         }
 
-        // Definir el número de elementos por página
+                                                     // Definir el número de elementos por página
         $perPage = request()->input('per_page', 10); // Puedes ajustar el valor predeterminado
 
         // Obtener el historial de programaciones del trabajador con paginación y ordenado de forma descendente
@@ -723,18 +763,18 @@ class WorkerController extends Controller
 
         // Preparar la respuesta con los datos paginados
         return response()->json([
-            'total' => $history->total(),
-            'data' => $programmingCollection, // Aquí están las programaciones pluckeadas y ordenadas
-            'current_page' => $history->currentPage(),
-            'last_page' => $history->lastPage(),
-            'per_page' => $history->perPage(),
-            'pagination' => $perPage, // Nuevo campo para el tamaño de la paginación
+            'total'          => $history->total(),
+            'data'           => $programmingCollection, // Aquí están las programaciones pluckeadas y ordenadas
+            'current_page'   => $history->currentPage(),
+            'last_page'      => $history->lastPage(),
+            'per_page'       => $history->perPage(),
+            'pagination'     => $perPage, // Nuevo campo para el tamaño de la paginación
             'first_page_url' => $history->url(1),
-            'from' => $history->firstItem(),
-            'next_page_url' => $history->nextPageUrl(),
-            'path' => $history->path(),
-            'prev_page_url' => $history->previousPageUrl(),
-            'to' => $history->lastItem(),
+            'from'           => $history->firstItem(),
+            'next_page_url'  => $history->nextPageUrl(),
+            'path'           => $history->path(),
+            'prev_page_url'  => $history->previousPageUrl(),
+            'to'             => $history->lastItem(),
         ]);
     }
 
@@ -778,7 +818,7 @@ class WorkerController extends Controller
     public function destroy(Request $request, $id)
     {
         $worker = Worker::find($id);
-        if (!$worker) {
+        if (! $worker) {
             return response()->json(['message' => 'Worker not found'], 422);
         }
 
@@ -789,7 +829,7 @@ class WorkerController extends Controller
         if ($worker->carrierGuidesPilotos()->exists()) {
             return response()->json(['message' => 'Este trabajador esta asignado a una guia como Piloto'], 422);
         }
-    
+
         if ($worker->carrierGuidesCoPilotos()->exists()) {
             return response()->json(['message' => 'Este trabajador esta asignado a una guia como Copiloto'], 422);
         }
@@ -798,14 +838,14 @@ class WorkerController extends Controller
             ->find($id);
 
         Bitacora::create([
-            'user_id' => Auth::id(), // ID del usuario que realiza la acción
-            'record_id' => $object->id, // El ID del usuario afectado
-            'action' => 'DELETE', // Acción realizada
-            'table_name' => 'workers', // Tabla afectada
-            'data' => json_encode($object),
-            'description' => 'Elimina Trabajador', // Descripción de la acción
-            'ip_address' => $request->ip(), // Dirección IP del usuario
-            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $object->id, // El ID del usuario afectado
+            'action'      => 'DELETE',    // Acción realizada
+            'table_name'  => 'workers',   // Tabla afectada
+            'data'        => json_encode($object),
+            'description' => 'Elimina Trabajador',  // Descripción de la acción
+            'ip_address'  => $request->ip(),        // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
 
         $worker->delete();
