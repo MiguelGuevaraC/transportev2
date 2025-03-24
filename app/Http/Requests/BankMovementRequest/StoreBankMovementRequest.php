@@ -49,6 +49,11 @@ class StoreBankMovementRequest extends StoreRequest
             'total_moviment'         => 'required|numeric|min:0',
             'currency'               => 'required|string|max:3',
             'comment'                => 'nullable|string',
+            'number_operation'       => [
+                'nullable',
+                'string',
+                Rule::unique('bank_movements', 'number_operation')->whereNull('deleted_at'),
+            ],
             'bank_id'                => 'required|exists:banks,id,deleted_at,NULL',
             'bank_account_id'        => [
                 'required',
@@ -96,6 +101,8 @@ class StoreBankMovementRequest extends StoreRequest
 
             'person_id.required'              => 'La persona es obligatoria.',
             'person_id.exists'                => 'La persona seleccionada no existe o ha sido eliminada.',
+            
+            'number_operation.unique' => 'El número de operación ya está en uso.',
         ];
     }
 

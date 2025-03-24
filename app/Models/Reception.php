@@ -382,21 +382,21 @@ class Reception extends Model
     {
         return $this->hasMany(CarrierGuide::class);
     }
-    public function firstCarrierGuide()
+    public function firstCarrierGuide($id = null)
     {
         return $this->hasOne(CarrierGuide::class)
             ->where('status_facturado', '!=', 'Anulada')
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', $id); // Prioriza el ID si está presente
+            })
             ->latestOfMany()
-            ->with(['districtStart.province.department',
+            ->with([
+                'districtStart.province.department',
                 'districtEnd.province.department',
                 'motive', 'sender', 'recipient', 'payResponsible',
-                'programming',
-                'programming.tract',
-                'programming.platform',
-                'programming.origin',
-                'programming.destination',
             ]);
     }
+
     public function moviment()
     {
         return $this->belongsTo(Moviment::class)

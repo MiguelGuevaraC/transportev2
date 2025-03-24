@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('total_moviment', 15, 2)->nullable();
             $table->string('currency', 10)->nullable();
             $table->text('comment')->nullable();
+            $table->text('number_operation')->nullable();
             $table->foreignId('user_created_id')->nullable()->unsigned()->constrained('users');
             $table->foreignId('bank_id')->nullable()->unsigned()->constrained('banks');
             $table->foreignId('bank_account_id')->nullable()->unsigned()->constrained('bank_accounts');

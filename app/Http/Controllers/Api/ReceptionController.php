@@ -888,11 +888,11 @@ public function __construct(Excel $excel)
         
         // Filtros por fechas
         if (!empty($filters['dateStart'])) {
-            $query->whereDate('created_at', '>=', $filters['dateStart']);
+            $query->whereDate('receptionDate', '>=', $filters['dateStart']);
         }
         
         if (!empty($filters['dateEnd'])) {
-            $query->whereDate('created_at', '<=', $filters['dateEnd']);
+            $query->whereDate('receptionDate', '<=', $filters['dateEnd']);
         }
         
         // Filtro por guía

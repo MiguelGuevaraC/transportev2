@@ -16,6 +16,7 @@ class BankMovement extends Model
         'total_moviment',
         'currency',
         'comment',
+        'number_operation',
 
         'pay_installment_id',
         'driver_expense_id',
@@ -39,14 +40,15 @@ class BankMovement extends Model
         'total_moviment'         => '=',
         'currency'               => 'like',
         'comment'                => 'like',
+        'number_operation'                => 'like',
         'user_created_id'        => '=',
         'bank_id'                => '=',
         'bank_account_id'        => '=',
         'transaction_concept_id' => '=',
         'person_id'              => '=',
         'created_at'             => '=',
-        'pay_installment_id'=> '=',
-        'driver_expense_id'=> '=',
+        'pay_installment_id'     => '=',
+        'driver_expense_id'      => '=',
     ];
     const sorts = [
         'id' => 'desc',

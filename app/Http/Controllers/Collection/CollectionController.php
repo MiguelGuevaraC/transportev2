@@ -2,7 +2,6 @@
 namespace App\Http\Controllers\Collection;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CarrierGuideResource;
 use App\Http\Resources\ReceptionResource;
 use App\Models\Address;
 use App\Models\BranchOffice;
@@ -108,63 +107,71 @@ class CollectionController extends Controller
 
         // Filtro por fecha inicio (>=) y fecha fin (<=)
         if (! empty($dateStart)) {
-            $receptionsQuery->whereDate('created_at', '>=', $dateStart);
+            $receptionsQuery->whereDate('receptionDate', '>=', $dateStart);
         }
 
         if (! empty($dateEnd)) {
-            $receptionsQuery->whereDate('created_at', '<=', $dateEnd);
+            $receptionsQuery->whereDate('receptionDate', '<=', $dateEnd);
         }
 
         $receptionsQuery = Reception::select('receptions.*',
             DB::raw('(
-            SELECT GROUP_CONCAT(description SEPARATOR ", ")
-            FROM detail_receptions
-            WHERE detail_receptions.reception_id = receptions.id
-        ) as carga'),
+        SELECT GROUP_CONCAT(description SEPARATOR ", ")
+        FROM detail_receptions
+        WHERE detail_receptions.reception_id = receptions.id
+    ) as carga'), 'carrier_guides.numero as guide_number', 'carrier_guides.id as guide_id'
+
         )
+            ->join('carrier_guides', function ($join) {
+                $join->on('receptions.id', '=', 'carrier_guides.reception_id')
+                    ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
+            })
             ->with([
                 'user', 'origin', 'sender', 'destination',
                 'recipient', 'pickupResponsible', 'payResponsible',
                 'seller', 'pointDestination', 'pointSender', 'branchOffice',
-                'details', 'firstCarrierGuide',
+                'details',
+                // 'firstCarrierGuide',
                 'moviment', 'cargos',
             ]);
 
         if (! empty($branch_office_id)) {
-            $receptionsQuery->where('branchOffice_id', $branch_office_id);
+            $receptionsQuery->where('receptions.branchOffice_id', $branch_office_id);
         }
         // Filtro por código de recepción
         if (! empty($codeReception)) {
-            $receptionsQuery->where('codeReception', 'LIKE', '%' . $codeReception . '%');
+            $receptionsQuery->where('receptions.codeReception', 'LIKE', '%' . $codeReception . '%');
         }
 
         // Filtro por fecha inicio (>=) y fecha fin (<=)
         if (! empty($dateStart)) {
-            $receptionsQuery->whereDate('created_at', '>=', $dateStart);
+            $receptionsQuery->whereDate('receptions.receptionDate', '>=', $dateStart);
         }
 
         if (! empty($dateEnd)) {
-            $receptionsQuery->whereDate('created_at', '<=', $dateEnd);
+            $receptionsQuery->whereDate('receptions.receptionDate', '<=', $dateEnd);
         }
 
         // Filtro por número de guía
+        // if (! empty($numberGuia)) {
+        //     // Filtro por número de guía dentro de la relación firstCarrierGuide
+        //     $receptionsQuery->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
+        //         $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
+        //     });
+
+        // }
         if (! empty($numberGuia)) {
-            // Filtro por número de guía dentro de la relación firstCarrierGuide
-            $receptionsQuery->whereHas('firstCarrierGuide', function ($query) use ($numberGuia) {
-                $query->where('numero', 'LIKE', '%' . $numberGuia . '%');
-            });
-            // $receptionsQuery->join('carrier_guides as cg', 'receptions.id', '=', 'cg.reception_id');
-            // $receptionsQuery->where('cg.numero', 'LIKE', '%' . $numberGuia . '%');
+            $receptionsQuery->where('carrier_guides.numero', 'LIKE', '%' . $numberGuia . '%');
         }
 
         // Filtro por número de venta dentro de la relación moviment
         if (! empty($numberVenta)) {
             $receptionsQuery->where(function ($query) use ($numberVenta) {
                 // Filtrar primero por el campo nro_sale
-                $query->where('nro_sale', $numberVenta)
+                $query->where('receptions.nro_sale', $numberVenta)
                     ->orWhere(function ($subQuery) use ($numberVenta) {
                         // En caso de que nro_sale sea NULL, filtrar por moviment
-                        $subQuery->whereNull('nro_sale')
+                        $subQuery->whereNull('receptions.nro_sale')
                             ->whereHas('moviment', function ($movimentQuery) use ($numberVenta) {
                                 $movimentQuery->where('sequentialNumber', 'LIKE', '%' . $numberVenta . '%');
                             });
@@ -265,13 +272,28 @@ class CollectionController extends Controller
 
         // Transformación de la colección para definir el 'status'
         $receptions->getCollection()->transform(function ($reception) {
-            if (! $reception->firstCarrierGuide) {
+            // Cargar la guía específica usando el guide_id
+            $reception->first_carrier_guide = CarrierGuide::with([
+                'districtStart.province.department',
+                'districtEnd.province.department',
+                'motive', 'sender', 'recipient', 'payResponsible',
+                'programming',
+                'programming.tract',
+                'programming.platform',
+                'programming.origin',
+                'programming.destination',
+            ])->find($reception->guide_id); // Obtener la guía específica
+
+            // Evitar error si no existe la guía
+            if (! $reception->first_carrier_guide) {
                 $reception->status = 'Sin Guia';
-            } elseif ($reception->firstCarrierGuide && ! $reception->firstCarrierGuide->Programming) {
+            } elseif (! $reception->first_carrier_guide->relationLoaded('programming') || is_null($reception->first_carrier_guide->programming)) {
+                // Verificar correctamente si la programación existe
                 $reception->status = 'Sin Programar';
             } else {
                 $reception->status = 'Programado';
             }
+
             return $reception;
         });
         // Places pagination
