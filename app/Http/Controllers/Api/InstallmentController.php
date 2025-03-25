@@ -6,6 +6,7 @@ use App\Models\BankAccount;
 use App\Models\Box;
 use App\Models\BranchOffice;
 use App\Models\Installment;
+use App\Models\Moviment;
 use App\Models\PayInstallment;
 use App\Models\Person;
 use App\Services\BankMovementService;
@@ -126,9 +127,9 @@ class InstallmentController extends Controller
             'moviment.person',
             'payInstallments',
             'payInstallments.bank'
-            ,'payInstallments.latest_bank_movement'
+            , 'payInstallments.latest_bank_movement'
             , 'payInstallments.bank_account',
-         
+
         ]);
 
         // Filtro de rango de fechas (start y end)
@@ -400,9 +401,9 @@ class InstallmentController extends Controller
         ];
         $installmentPay = PayInstallment::create($data);
         if ($bank_account != null) {
-            $user=Auth::user()->id;
+            $user               = Auth::user()->id;
             $data_movement_bank = [
-                'pay_installment_id'      => $installmentPay->id,
+                'pay_installment_id'     => $installmentPay->id,
                 'bank_id'                => $request->input('bank_id'),
                 'bank_account_id'        => $bank_account->id,
                 'currency'               => $bank_account->currency,
@@ -417,10 +418,12 @@ class InstallmentController extends Controller
             $this->bankmovementService->createBankMovement($data_movement_bank);
         }
 
-        
+        // $moviment     = $installmentPay->installment->moviment;
+        // $installments = $moviment->installments;
 
-        $moviment     = $installmentPay->installment->moviment;
-        $installments = $moviment->installments;
+        $installment  = $installmentPay->installment ?? null;
+        $moviment     = Moviment::find($installment->moviment_id);
+        $installments = $moviment?->installments ?? collect();
 
         $allPaid = $installments->every(function ($installment) {
             return $installment->status === 'Pagado';
