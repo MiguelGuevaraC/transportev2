@@ -334,6 +334,11 @@ class InstallmentController extends Controller
 
         $validatedData = $request->validated();
 
+        if (!$validatedData || empty($validatedData)) {
+            return response()->json(['error' => 'Datos no válidos o incompletos'], 422);
+        }
+        
+
         // Asignar valores con fallback a 0
         $efectivo     = $validatedData['cash'] ?? 0;
         $yape         = $validatedData['yape'] ?? 0;
@@ -367,12 +372,13 @@ class InstallmentController extends Controller
             ->max(DB::raw('CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)')) + 1;
 
         // Buscar cuenta bancaria
-        $bank_account = BankAccount::find($validatedData['bank_account_id']);
+        $bank_account = isset($validatedData['bank_account_id']) ? BankAccount::find($validatedData['bank_account_id']) : null;
+
 
         // Crear pago
         $installmentPay = PayInstallment::create([
             'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate'     => $validatedData['paymentDate'],
+            'paymentDate'     => isset($validatedData['paymentDate']) ? $validatedData['paymentDate'] : null,
             'total'           => $total,
             'yape'            => $yape,
             'deposit'         => $deposito,
@@ -383,13 +389,15 @@ class InstallmentController extends Controller
             'nroOperacion'    => $nroOperacion,
             'comment'         => $comentario,
             'installment_id'  => $installment->id,
-            'bank_id'         => $validatedData['bank_id'],
-            'is_detraction'   => $validatedData['is_detraction'],
-            'bank_account_id' => optional($bank_account)->id,
+           'bank_id' => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : optional($bank_account)->bank_id,
+
+            'is_detraction'   => isset($validatedData['is_detraction']) ? $validatedData['is_detraction'] : 0,
+            'bank_account_id' => isset($bank_account) ? $bank_account->id : null,
         ]);
+        
 
         // Registrar movimiento bancario si hay cuenta bancaria
-        if ($bank_account) {
+        if ($bank_account && $bank_account!= null) {
             $moviment= Moviment::find($installment->moviment_id);
             $this->bankmovementService->createBankMovement([
                 'pay_installment_id'     => $installmentPay->id,
