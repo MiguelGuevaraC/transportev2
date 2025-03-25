@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignId('bank_account_id')->nullable()->unsigned()->constrained('bank_accounts');
             $table->foreignId('transaction_concept_id')->nullable()->unsigned()->constrained('transaction_concepts');
             $table->foreignId('person_id')->nullable()->unsigned()->constrained('people');
+            $table->string('status', 255)->default('No Confirmado')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

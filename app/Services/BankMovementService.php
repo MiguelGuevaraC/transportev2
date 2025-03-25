@@ -36,4 +36,16 @@ class BankMovementService
         return BankMovement::find($id)?->delete() ?? false;
     }
 
+    public function change_status($id)
+    {
+        $movement = BankMovement::find($id);
+
+        if (! $movement) {
+            return false;
+        }
+
+        $movement->status = $movement->status === 'Permitido' ? 'No Permitido' : 'Permitido';
+        return $movement->save();
+    }
+
 }

@@ -401,7 +401,7 @@ class InstallmentController extends Controller
         ];
         $installmentPay = PayInstallment::create($data);
         if ($bank_account != null) {
-            $user               = Auth::user()->id;
+            $user               = Auth::user();
             $data_movement_bank = [
                 'pay_installment_id'     => $installmentPay->id,
                 'bank_id'                => $request->input('bank_id'),
@@ -436,9 +436,13 @@ class InstallmentController extends Controller
         $moviment->updateSaldo();
         $moviment->save();
 
-        $installmentPay = PayInstallment::with(
-            ['installment', 'bank'])
-            ->find($installmentPay->id);
+        $installmentPay = PayInstallment::with([
+
+            'bank'
+            , 'latest_bank_movement'
+            , 'bank_account',
+
+        ])->find($installmentPay->id);
 
         return response()->json($installmentPay, 200);
     }

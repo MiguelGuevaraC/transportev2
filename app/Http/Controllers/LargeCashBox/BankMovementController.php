@@ -85,7 +85,7 @@ class BankMovementController extends Controller
         if ($data instanceof \Illuminate\Http\JsonResponse) {
             $data = $data->getData(true); // Convertir a array asociativo
         }
-        return Excel::download(new BankMovementExport($data,$request['from'],$request['to']),$fileName);
+        return Excel::download(new BankMovementExport($data, $request['from'], $request['to']), $fileName);
     }
 
 /**
@@ -227,19 +227,32 @@ class BankMovementController extends Controller
 
     public function destroy($id)
     {
-
         $bank = $this->bankmovementService->getBankMovementById($id);
-
         if (! $bank) {
             return response()->json([
                 'error' => 'Movimiento de Banco No Encontrada.',
             ], 404);
         }
         $bank = $this->bankmovementService->destroyById($id);
-
         return response()->json([
             'message' => 'Movimiento de Banco eliminado exitosamente',
         ], 200);
     }
+
+    public function change_status($id)
+    {
+        $bank = $this->bankmovementService->getBankMovementById($id);
+    
+        if (!$bank) {
+            return response()->json(['error' => 'Movimiento de Banco no encontrado.'], 404);
+        }
+    
+        if ($this->bankmovementService->change_status($id)) {
+            return response()->json(['status' => $bank->status], 200);
+        }
+    
+        return response()->json(['error' => 'No se pudo cambiar el estado.'], 422);
+    }
+    
 
 }

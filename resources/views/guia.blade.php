@@ -1,6 +1,6 @@
 @php
     use Carbon\Carbon;
-    header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
@@ -630,11 +630,17 @@
                     {{ $object->modalidad=="02" ? 'Transporte Privado':'Transporte Público' }}
                 </td>
                 <th class="w20 blue">
+                    Entrega:
+                </th>
+                <td class="w20">
+                    {{ strtoupper($object->reception?->typeDelivery ?? '') }}
+                </td>
+                {{-- <th class="w20 blue">
                     Motivo:
                 </th>
                 <td class="w20">
                     {{ $object->motive?->name ?? '' }}
-                </td>
+                </td> --}}
             </tr>
 
             {{-- <tr>
@@ -668,10 +674,10 @@
                     {{ $object?->document ?? '' }}
                 </td>
                 <th class="w20 blue">
-                    Entrega:
+                    {{-- Entrega: --}}
                 </th>
                 <td class="w20">
-                    {{ strtoupper($object->reception?->typeDelivery ?? '') }}
+                    {{-- {{ strtoupper($object->reception?->typeDelivery ?? '') }} --}}
                 </td>
 
             </tr>

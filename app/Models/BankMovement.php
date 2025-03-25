@@ -26,6 +26,7 @@ class BankMovement extends Model
         'bank_account_id',
         'transaction_concept_id',
         'person_id',
+        'status',
         'created_at',
         'updated_at',
         'deleted_at',

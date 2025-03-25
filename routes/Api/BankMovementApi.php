@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Http\Controllers\LargeCashBox\BankMovementController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +12,5 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('bank-movement', [BankMovementController::class, 'store']);
     Route::delete('bank-movement/{id}', [BankMovementController::class, 'destroy']);
     Route::put('bank-movement/{id}', [BankMovementController::class, 'update']);
+    Route::put('bank-movement-change-status/{id}', [BankMovementController::class, 'change_status']);
 });
