@@ -44,7 +44,7 @@ class BankMovementService
             return false;
         }
 
-        $movement->status = $movement->status === 'Permitido' ? 'No Permitido' : 'Permitido';
+        $movement->status = $movement->status === 'No Confirmado' ? 'Confirmado' : 'No Confirmado';
         return $movement->save();
     }
 
