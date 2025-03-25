@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Models\BankAccount;
 use App\Models\Bitacora;
 use App\Models\Installment;
 use App\Models\PayInstallment;
@@ -10,6 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class MovimentService
 {
+    protected $bankmovementService;
+
+    public function __construct(BankMovementService $BankMovementService)
+    {
+        $this->bankmovementService = $BankMovementService;
+    }
     public function getSalesPendientesByPerson($names): array
     {
         $nameFilter = $names;
@@ -20,7 +27,7 @@ class MovimentService
             ->whereHas('movimentsVenta', function ($query) {
                 $query->whereHas('installmentPendientes'); // Asegura que los movimientos tengan cuotas pendientes
             })
-            ->with(['movimentsVenta.creditNote','movimentsVenta' => function ($query) {
+            ->with(['movimentsVenta.creditNote', 'movimentsVenta' => function ($query) {
                 $query->whereHas('installmentPendientes') // Solo obtener movimientos con cuotas pendientes
                     ->with(['installmentPendientes']);        // Cargar las cuotas pendientes
             }]);
@@ -79,24 +86,48 @@ class MovimentService
 
             $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
+            $bank_account = isset($validatedData['bank_account_id']) ? BankAccount::find($validatedData['bank_account_id']) : null;
+
             $payData = [
-                'number'         => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate'    => now(), // Fecha de pago actual
-                'total'          => $amount,
-                'installment_id' => $installment->id,
-                'type'           => 'Pago Masivo',
+                'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                'paymentDate'     => now(), // Fecha de pago actual
+                'total'           => $amount,
+                'installment_id'  => $installment->id,
+                'type'            => 'Pago Masivo',
+                'bank_account_id' => $bank_account != null ? $bank_account->id : null,
             ];
 
             // Registrar el pago en la tabla `pay_installments`
-            $payinstallments[] = PayInstallment::create($payData);
+            $installmentPay    = PayInstallment::create($payData);
+            $payinstallments[] = $installmentPay;
             $moviment          = $installment->moviment;
             $moviment->updateSaldo();
+
+            if ($bank_account != null) {
+                $user               = Auth::user()->id;
+                $data_movement_bank = [
+                    'pay_installment_id'     => isset($installmentPay->id) ? $installmentPay->id : null,
+                    'bank_id'                => ($bank_account) ? $bank_account->bank_id : null,
+                    'bank_account_id'        => isset($bank_account->id) ? $bank_account->id : null,
+                    'currency'               => isset($bank_account->currency) ? $bank_account->currency : null,
+                    'date_moviment'          => now(),
+                    'total_moviment'         => $amount ?? 0,
+                    'comment'                => 'Pago Masivo',
+                    'user_created_id'        => isset($user->id) ? $user->id : null,
+                    'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
+                    'person_id'              => isset($installmentPay->person_id) ? $installmentPay->person_id : null,
+                    'type_moviment'          => 'ENTRADA',
+                ];
+
+                $this->bankmovementService->createBankMovement($data_movement_bank);
+
+            }
         }
         Bitacora::create([
-            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
-            'record_id'   => $moviment->id,        // El ID del usuario afectado
-            'action'      => 'POST',      // Acción realizada
-            'table_name'  => 'paymasive', // Tabla afectada
+            'user_id'     => Auth::id(),    // ID del usuario que realiza la acción
+            'record_id'   => $moviment->id, // El ID del usuario afectado
+            'action'      => 'POST',        // Acción realizada
+            'table_name'  => 'paymasive',   // Tabla afectada
             'data'        => json_encode($payinstallments),
             'description' => 'Pago Masivo Realizado: ' . $totalPagoMasivo, // Descripción de la acción
             'ip_address'  => null,                                         // Dirección IP del usuario

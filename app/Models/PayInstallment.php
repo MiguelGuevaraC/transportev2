@@ -125,6 +125,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
          'status',
          'type',
          'state',
+         'bank_account_id',
          'installment_id',
          'moviment_id',
          'created_at',

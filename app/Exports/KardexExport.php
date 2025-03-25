@@ -113,7 +113,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 'num_anexo'     => $doc->num_anexo,
                 'quantity'      => $doc->quantity,
                 'person'        => $doc?->person?->names . " " . $doc?->person?->businessName,
-                'distribuidor'  => $doc->distribuidor->names . " " . $doc->distribuidor->businessName,
+                'distribuidor'  => $doc?->distribuidor?->names . " " . $doc?->distribuidor?->businessName,
                 'saldo'         => null,
                 'comment'       => $doc->comment ?? "-",
             ]);

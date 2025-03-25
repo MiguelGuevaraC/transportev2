@@ -14,7 +14,7 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
       
-        $rangoadelante = 3; // Cantidad de días hacia adelante
+        $rangoadelante = 15; // Cantidad de días hacia adelante
         $rangoatras = 3;    // Cantidad de días hacia atrás
         
         // Calcular el rango de fechas alrededor del día actual (3 días atrás hasta 3 días adelante)
@@ -22,7 +22,7 @@ class NotificationController extends Controller
         $fechaFin = now()->addDays($rangoadelante)->endOfDay(); // Fecha 3 días adelante
         
         // Obtener documentos cuya fecha de vencimiento está dentro del rango de interés
-        $documentsExpiringSoon = Document::whereDate('dueDate', '>=', $fechaInicio)
+        $documentsExpiringSoon = Document::with(['document'])->whereDate('dueDate', '>=', $fechaInicio)
         ->whereDate('dueDate', '<=', $fechaFin)
         ->where('status', "Vigente") // Asegúrate de tener este campo para filtrar los vigentes
         ->where('state', "1")

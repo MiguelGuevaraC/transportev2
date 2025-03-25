@@ -1,18 +1,26 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankAccount;
 use App\Models\Box;
 use App\Models\BranchOffice;
 use App\Models\Installment;
 use App\Models\PayInstallment;
 use App\Models\Person;
+use App\Services\BankMovementService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class InstallmentController extends Controller
 {
+    protected $bankmovementService;
+
+    public function __construct(BankMovementService $BankMovementService)
+    {
+        $this->bankmovementService = $BankMovementService;
+    }
 /**
  * Get all Installments
  *
@@ -79,16 +87,16 @@ class InstallmentController extends Controller
 
     public function index(Request $request)
     {
-        $status = $request->input('status') ?? '';
-        $personId = $request->input('person_id') ?? '';
-        $start = $request->input('start') ?? ''; // Fecha de inicio de Installment
-        $end = $request->input('end') ?? ''; // Fecha de fin de Installment
+        $status           = $request->input('status') ?? '';
+        $personId         = $request->input('person_id') ?? '';
+        $start            = $request->input('start') ?? '';            // Fecha de inicio de Installment
+        $end              = $request->input('end') ?? '';              // Fecha de fin de Installment
         $sequentialNumber = $request->input('sequentialNumber') ?? ''; // Este campo está dentro de Moviment
 
         $branchOffice_id = $request->input('branchOffice_id') ?? '';
         if ($branchOffice_id && is_numeric($branchOffice_id)) {
             $branchOffice = BranchOffice::find($branchOffice_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -98,7 +106,7 @@ class InstallmentController extends Controller
         $box_id = $request->input('box_id') ?? '';
         if ($box_id != '') {
             $box = Box::find($box_id);
-            if (!$box) {
+            if (! $box) {
                 return response()->json([
                     "message" => "Box Not Found",
                 ], 404);
@@ -107,7 +115,7 @@ class InstallmentController extends Controller
 
         // Actualizar estado de cuotas vencidas
         Installment::where('status', 'Pendiente')
-            ->where('date', '<', now()) // Si la fecha actual es mayor que la fecha de vencimiento
+            ->where('date', '<', now())        // Si la fecha actual es mayor que la fecha de vencimiento
             ->update(['status' => 'Vencido']); // Actualiza el estado a "Vencido"
 
         // Iniciar la consulta base
@@ -118,46 +126,43 @@ class InstallmentController extends Controller
             'moviment.person',
             'payInstallments',
             'payInstallments.bank'
-            ,'payInstallments.movement',
+            , 'payInstallments.movement',
         ]);
 
         // Filtro de rango de fechas (start y end)
- 
-        
 
 // Aplicar filtros si están presentes
-        if (!empty($status) && $status!='""') {
+        if (! empty($status) && $status != '""') {
             $query->where('status', $status);
         }
 
-        if (!empty($personId)) {
+        if (! empty($personId)) {
             $query->whereHas('moviment', function ($q) use ($personId) {
                 $q->where('person_id', $personId);
             });
         }
 
-        if (!empty($branchOffice_id)) {
+        if (! empty($branchOffice_id)) {
             $query->whereHas('moviment', function ($q) use ($branchOffice_id) {
                 $q->where('branchOffice_id', $branchOffice_id);
             });
         }
 
-        if (!empty($box_id)) {
+        if (! empty($box_id)) {
             $query->whereHas('moviment', function ($q) use ($box_id) {
                 $q->where('box_id', $box_id);
             });
         }
 
-
-        if (!empty($sequentialNumber)) {
+        if (! empty($sequentialNumber)) {
             $query->whereHas('moviment', function ($q) use ($sequentialNumber) {
                 $q->where('sequentialNumber', 'like', '%' . $sequentialNumber . '%');
             });
         }
-        if (!empty($start)) {
+        if (! empty($start)) {
             $query->where('date', '>=', $start);
-        } 
-        if (!empty($end)) {
+        }
+        if (! empty($end)) {
             $query->where('date', '<=', $end);
         }
 
@@ -166,30 +171,30 @@ class InstallmentController extends Controller
 
 // Obtener los parámetros de paginación desde el request
         $perPage = $request->input('per_page', 15); // Número de registros por página
-        $page = $request->input('page', 1); // Página actual
+        $page    = $request->input('page', 1);      // Página actual
 
 // Obtener los registros filtrados con paginación
         $list = $query->orderBy('id', 'desc')->paginate($perPage, ['*'], 'page', $page);
-        
+
         // Gets raw SQL from $query using `toSql` and `getBindings` and combines their results with `vsprintf`
         $rawSql = vsprintf(str_replace(['?'], ['\'%s\''], $query->toSql()), $query->getBindings());
         //error_log($rawSql);
-        
+
         // Formatear la respuesta en el formato deseado
         return response()->json([
-            'data' => [
-                'total' => $list->total(),
-                'data' => $list->items(),
-                'current_page' => $list->currentPage(),
-                'last_page' => $list->lastPage(),
-                'per_page' => $list->perPage(),
-                'pagination' => $list->perPage(), // Campo para el tamaño de la paginación
+            'data'         => [
+                'total'          => $list->total(),
+                'data'           => $list->items(),
+                'current_page'   => $list->currentPage(),
+                'last_page'      => $list->lastPage(),
+                'per_page'       => $list->perPage(),
+                'pagination'     => $list->perPage(), // Campo para el tamaño de la paginación
                 'first_page_url' => $list->url(1),
-                'from' => $list->firstItem(),
-                'next_page_url' => $list->nextPageUrl(),
-                'path' => $list->path(),
-                'prev_page_url' => $list->previousPageUrl(),
-                'to' => $list->lastItem(),
+                'from'           => $list->firstItem(),
+                'next_page_url'  => $list->nextPageUrl(),
+                'path'           => $list->path(),
+                'prev_page_url'  => $list->previousPageUrl(),
+                'to'             => $list->lastItem(),
             ],
             'totalDebtSum' => $totalDebtSum,
         ], 200);
@@ -318,18 +323,18 @@ class InstallmentController extends Controller
     public function payInstallment(Request $request, $id)
     {
         $installment = Installment::find($id);
-        if (!$installment) {
+        if (! $installment) {
             return response()->json(['error' => "Installment No Encontrado"], 422);
         }
         $validator = validator()->make($request->all(), [
 
-            'paymentDate' => 'required|date',
-            'yape' => 'nullable|numeric',
-            'deposit' => 'nullable|numeric',
-            'cash' => 'nullable|numeric',
-            'card' => 'nullable|numeric',
-            'plin' => 'nullable|numeric',
-            'comment' => 'nullable|string',
+            'paymentDate'    => 'required|date',
+            'yape'           => 'nullable|numeric',
+            'deposit'        => 'nullable|numeric',
+            'cash'           => 'nullable|numeric',
+            'card'           => 'nullable|numeric',
+            'plin'           => 'nullable|numeric',
+            'comment'        => 'nullable|string',
             'installment_id' => 'required|exists:installments,id',
         ]);
 
@@ -337,12 +342,12 @@ class InstallmentController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        $efectivo = $request->input('cash') ?? 0;
-        $yape = $request->input('yape') ?? 0;
-        $plin = $request->input('plin') ?? 0;
-        $tarjeta = $request->input('card') ?? 0;
-        $deposito = $request->input('deposit') ?? 0;
-        $comentario = $request->input('comment') ?? 0;
+        $efectivo     = $request->input('cash') ?? 0;
+        $yape         = $request->input('yape') ?? 0;
+        $plin         = $request->input('plin') ?? 0;
+        $tarjeta      = $request->input('card') ?? 0;
+        $deposito     = $request->input('deposit') ?? 0;
+        $comentario   = $request->input('comment') ?? 0;
         $nroOperacion = $request->input('nroOperacion') ?? '';
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
@@ -363,7 +368,7 @@ class InstallmentController extends Controller
             $installment->save();
         }
 
-        $tipo = 'CC01';
+        $tipo      = 'CC01';
         $resultado = DB::select(
             'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
              FROM pay_installments
@@ -372,30 +377,47 @@ class InstallmentController extends Controller
         );
 
         $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
+        $bank_account = BankAccount::find($request->input('bank_account_id'));
 
         $data = [
-
-            'number' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate' => $request->input('paymentDate'),
-            'total' => $total ?? 0,
-            'yape' => $yape,
-            'deposit' => $deposito,
-            'cash' => $efectivo,
-            'card' => $tarjeta,
-            'plin' => $plin,
-            'type' => 'Pago Amortizado',
-
-            'nroOperacion' => $nroOperacion,
-            'comment' => $comentario,
-            'installment_id' => $installment->id,
-            'bank_id' => $request->input('bank_id'),
-            'is_detraction' => $request->input('is_detraction'),
-
+            'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'     => $request->input('paymentDate'),
+            'total'           => $total ?? 0,
+            'yape'            => $yape,
+            'deposit'         => $deposito,
+            'cash'            => $efectivo,
+            'card'            => $tarjeta,
+            'plin'            => $plin,
+            'type'            => 'Pago Amortizado',
+            'nroOperacion'    => $nroOperacion,
+            'comment'         => $comentario,
+            'installment_id'  => $installment->id,
+            'bank_id'         => $request->input('bank_id'),
+            'is_detraction'   => $request->input('is_detraction'),
+            'bank_account_id' => $bank_account ? $bank_account->id : null,
         ];
-
         $installmentPay = PayInstallment::create($data);
+        if ($bank_account != null) {
+            $user=Auth::user()->id;
+            $data_movement_bank = [
+                'pay_installment_id'      => $installmentPay->id,
+                'bank_id'                => $request->input('bank_id'),
+                'bank_account_id'        => $bank_account->id,
+                'currency'               => $bank_account->currency,
+                'date_moviment'          => $request->input('paymentDate'),
+                'total_moviment'         => $total,
+                'comment'                => $request->input('comment'),
+                'user_created_id'        => $user->id,
+                'transaction_concept_id' => $request->input('transaction_concept_id'),
+                'person_id'              => $installmentPay->person_id,
+                'type_moviment'          => 'SALIDA',
+            ];
+            $this->bankmovementService->createBankMovement($data_movement_bank);
+        }
 
-        $moviment = $installmentPay->installment->moviment;
+        
+
+        $moviment     = $installmentPay->installment->moviment;
         $installments = $moviment->installments;
 
         $allPaid = $installments->every(function ($installment) {
@@ -416,12 +438,10 @@ class InstallmentController extends Controller
         return response()->json($installmentPay, 200);
     }
 
-
-
     public function show($id)
     {
         $person = Person::find($id);
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => "Persona No Encontrada"], 422);
         }
 
