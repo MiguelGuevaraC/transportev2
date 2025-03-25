@@ -21,6 +21,7 @@ class BankMovement extends Model
         'pay_installment_id',
         'driver_expense_id',
         'is_anticipo',
+'total_anticipado',
 
         'user_created_id',
         'bank_id',
