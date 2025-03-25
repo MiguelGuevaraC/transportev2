@@ -49,8 +49,10 @@ class BankMovementResource extends JsonResource
             'transaction_concept'    => $this->transaction_concept ? new TransactionConceptResource($this->transaction_concept) : null,
             'person_id'              => $this->person_id ?? null,
             'person'                 => $this->person ? $this->person : null,
-            'number_operation'                => $this->number_operation ?? null,
-            'status'                => $this->status ?? null,
+            'number_operation'       => $this->number_operation ?? null,
+            'status'                 => $this->status ?? null,
+            'is_anticipo'            => $this->is_anticipo ?? null,
+            'total_anticipado'       => $this->total_anticipado ?? null,
 
             'pay_installment_id'     => $this->pay_installment_id ?? null,
             'pay_installment'        => $this->pay_installment ? $this->pay_installment : null,

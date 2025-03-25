@@ -67,6 +67,7 @@ class StoreBankMovementRequest extends StoreRequest
             ],
             'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
             'person_id'              => 'required|exists:people,id,deleted_at,NULL',
+
         ];
     }
 
@@ -101,8 +102,10 @@ class StoreBankMovementRequest extends StoreRequest
 
             'person_id.required'              => 'La persona es obligatoria.',
             'person_id.exists'                => 'La persona seleccionada no existe o ha sido eliminada.',
-            
-            'number_operation.unique' => 'El número de operación ya está en uso.',
+
+            'number_operation.unique'         => 'El número de operación ya está en uso.',
+
+
         ];
     }
 

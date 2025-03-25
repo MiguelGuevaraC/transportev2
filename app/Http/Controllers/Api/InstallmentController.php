@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\InstallmentRequest\PayInstallmentRequest;
 use App\Models\BankAccount;
 use App\Models\Box;
 use App\Models\BranchOffice;
@@ -323,69 +324,56 @@ class InstallmentController extends Controller
  * )
  */
 
-    public function payInstallment(Request $request, $id)
+    public function payInstallment(PayInstallmentRequest $request, $id)
     {
         $installment = Installment::find($id);
+
         if (! $installment) {
-            return response()->json(['error' => "Installment No Encontrado"], 422);
-        }
-        $validator = validator()->make($request->all(), [
-
-            'paymentDate'    => 'required|date',
-            'yape'           => 'nullable|numeric',
-            'deposit'        => 'nullable|numeric',
-            'cash'           => 'nullable|numeric',
-            'card'           => 'nullable|numeric',
-            'plin'           => 'nullable|numeric',
-            'comment'        => 'nullable|string',
-            'installment_id' => 'required|exists:installments,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
+            return response()->json(['error' => "Cuota no encontrada."], 404);
         }
 
-        $efectivo     = $request->input('cash') ?? 0;
-        $yape         = $request->input('yape') ?? 0;
-        $plin         = $request->input('plin') ?? 0;
-        $tarjeta      = $request->input('card') ?? 0;
-        $deposito     = $request->input('deposit') ?? 0;
-        $comentario   = $request->input('comment') ?? 0;
-        $nroOperacion = $request->input('nroOperacion') ?? '';
+        $validatedData = $request->validated();
 
+        // Asignar valores con fallback a 0
+        $efectivo     = $validatedData['cash'] ?? 0;
+        $yape         = $validatedData['yape'] ?? 0;
+        $plin         = $validatedData['plin'] ?? 0;
+        $tarjeta      = $validatedData['card'] ?? 0;
+        $deposito     = $validatedData['deposit'] ?? 0;
+        $comentario   = $validatedData['comment'] ?? null;
+        $nroOperacion = $validatedData['nroOperacion'] ?? '';
+
+        // Calcular el total del pago
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
 
         if ($installment->totalDebt - $total < 0) {
             $difference = abs($installment->totalDebt - $total);
             return response()->json([
-                'error' => "Se encontró un total de $total soles, pero la deuda es de {$installment->totalDebt} soles. Hay $difference soles de más.",
+                'error' => "El pago de $total soles excede la deuda de {$installment->totalDebt} soles por $difference soles.",
             ], 422);
         }
 
-        $installment->totalDebt = $installment->totalDebt - $total;
-
-        $installment->save();
-
+        // Actualizar la deuda y estado de pago
+        $installment->totalDebt -= $total;
         if ($installment->totalDebt == 0) {
             $installment->status = 'Pagado';
-            $installment->save();
         }
+        $installment->save();
 
-        $tipo      = 'CC01';
-        $resultado = DB::select(
-            'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
-             FROM pay_installments
-             WHERE SUBSTRING_INDEX(number, "-", 1) = ?',
-            [$tipo]
-        );
+        // Generar número de transacción
+        $tipo         = 'CC01';
+        $siguienteNum = DB::table('pay_installments')
+            ->whereRaw('SUBSTRING_INDEX(number, "-", 1) = ?', [$tipo])
+            ->max(DB::raw('CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)')) + 1;
 
-        $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
-        $bank_account = BankAccount::find($request->input('bank_account_id'));
+        // Buscar cuenta bancaria
+        $bank_account = BankAccount::find($validatedData['bank_account_id']);
 
-        $data = [
+        // Crear pago
+        $installmentPay = PayInstallment::create([
             'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate'     => $request->input('paymentDate'),
-            'total'           => $total ?? 0,
+            'paymentDate'     => $validatedData['paymentDate'],
+            'total'           => $total,
             'yape'            => $yape,
             'deposit'         => $deposito,
             'cash'            => $efectivo,
@@ -395,56 +383,48 @@ class InstallmentController extends Controller
             'nroOperacion'    => $nroOperacion,
             'comment'         => $comentario,
             'installment_id'  => $installment->id,
-            'bank_id'         => $request->input('bank_id'),
-            'is_detraction'   => $request->input('is_detraction'),
-            'bank_account_id' => $bank_account ? $bank_account->id : null,
-        ];
-        $installmentPay = PayInstallment::create($data);
-        if ($bank_account != null) {
-            $user               = Auth::user();
-            $data_movement_bank = [
+            'bank_id'         => $validatedData['bank_id'],
+            'is_detraction'   => $validatedData['is_detraction'],
+            'bank_account_id' => optional($bank_account)->id,
+        ]);
+
+        // Registrar movimiento bancario si hay cuenta bancaria
+        if ($bank_account) {
+            $moviment= Moviment::find($installment->moviment_id);
+            $this->bankmovementService->createBankMovement([
                 'pay_installment_id'     => $installmentPay->id,
-                'bank_id'                => $request->input('bank_id'),
-                'bank_account_id'        => $bank_account->id,
-                'currency'               => $bank_account->currency,
-                'date_moviment'          => $request->input('paymentDate'),
+                'bank_id'                => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : null,
+                'is_anticipo'            => isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0,
+                'total_anticipado'       => isset($validatedData['total_anticipado']) ? $validatedData['total_anticipado'] : 0,
+                'bank_account_id'        => isset($bank_account) ? $bank_account->id : null,
+                'currency'               => isset($bank_account) ? $bank_account->currency : null,
+                'date_moviment'          => isset($validatedData['paymentDate']) ? $validatedData['paymentDate'] : null,
                 'total_moviment'         => $total,
-                'comment'                => $request->input('comment'),
-                'user_created_id'        => $user->id,
-                'transaction_concept_id' => $request->input('transaction_concept_id'),
-                'person_id'              => $installmentPay->person_id,
-                'type_moviment'          => 'SALIDA',
-            ];
-            $this->bankmovementService->createBankMovement($data_movement_bank);
+                'comment'                => isset($comentario) ? $comentario : null,
+                'user_created_id'        => Auth::user()->id,
+                'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
+                'person_id'              => isset($moviment->person_id) ? $moviment->person_id : null,
+                'type_moviment'          => 'ENTRADA',
+                'number_operation'          => $nroOperacion,
+            ]);
+            
         }
 
-        // $moviment     = $installmentPay->installment->moviment;
-        // $installments = $moviment->installments;
-
-        $installment  = $installmentPay->installment ?? null;
-        $moviment     = Moviment::find($installment->moviment_id);
-        $installments = $moviment?->installments ?? collect();
-
-        $allPaid = $installments->every(function ($installment) {
-            return $installment->status === 'Pagado';
-        });
-        if ($allPaid) {
-            $moviment->status = 'Pagado';
+        // Verificar si todas las cuotas del movimiento están pagadas
+        $moviment = Moviment::find($installment->moviment_id);
+        if ($moviment) {
+            $allPaid = $moviment->installments->every(fn($i) => $i->status === 'Pagado');
+            if ($allPaid) {
+                $moviment->status = 'Pagado';
+            }
             $moviment->updateSaldo();
             $moviment->save();
         }
-        $moviment->updateSaldo();
-        $moviment->save();
 
-        $installmentPay = PayInstallment::with([
-
-            'bank'
-            , 'latest_bank_movement'
-            , 'bank_account',
-
-        ])->find($installmentPay->id);
-
-        return response()->json($installmentPay, 200);
+        return response()->json(
+            PayInstallment::with(['bank', 'latest_bank_movement', 'bank_account'])->find($installmentPay->id),
+            200
+        );
     }
 
     public function show($id)

@@ -27,6 +27,8 @@ return new class extends Migration
             $table->foreignId('transaction_concept_id')->nullable()->unsigned()->constrained('transaction_concepts');
             $table->foreignId('person_id')->nullable()->unsigned()->constrained('people');
             $table->string('status', 255)->default('Pendiente')->nullable();
+            $table->boolean('is_anticipo')->default(0)->nullable();
+            $table->decimal('total_anticipado', 15, 2)->nullable()->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

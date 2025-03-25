@@ -242,17 +242,17 @@ class BankMovementController extends Controller
     public function change_status($id)
     {
         $bank = $this->bankmovementService->getBankMovementById($id);
-    
-        if (!$bank) {
+
+        if (! $bank) {
             return response()->json(['error' => 'Movimiento de Banco no encontrado.'], 404);
         }
-    
+
         if ($this->bankmovementService->change_status($id)) {
+            $bank = $this->bankmovementService->getBankMovementById($id);
             return response()->json(['status' => $bank->status], 200);
         }
-    
+
         return response()->json(['error' => 'No se pudo cambiar el estado.'], 422);
     }
-    
 
 }
