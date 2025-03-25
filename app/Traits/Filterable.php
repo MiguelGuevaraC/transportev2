@@ -85,19 +85,16 @@ trait Filterable
     {
         $sortField = $request->query('sort');
         $sortOrder = $request->query('direction', 'desc');
-
         if ($sortField !== null && in_array($sortField, $sorts)) {
             $query->orderBy($sortField, $sortOrder);
         } else {
             $query->orderBy('id', $sortOrder);
         }
-
         return $query;
     }
 
     protected function getFilteredResults($modelOrQuery, $request, $filters, $sorts, $resource)
     {
-
         if ($modelOrQuery instanceof Builder) {
             $query = $modelOrQuery;
         } else {

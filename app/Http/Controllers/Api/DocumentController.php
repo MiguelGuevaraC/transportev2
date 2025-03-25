@@ -2,11 +2,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bitacora;
 use App\Models\Document;
 use App\Models\Notification;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -432,8 +434,17 @@ class DocumentController extends Controller
         $document->update($data);
 
         $this->actualizarEstadoDocumentos();
-
         $document = Document::with(['vehicle'])->find($document->id);
+        Bitacora::create([
+            'user_id'     => Auth::id(),    // ID del usuario que realiza la acción
+            'record_id'   => $document->id, // El ID del usuario afectado
+            'action'      => 'PUT',         // Acción realizada
+            'table_name'  => 'documents',   // Tabla afectada
+            'data'        => json_encode($document),
+            'description' => 'Actualizar Documentos', // Descripción de la acción
+            'ip_address'  => $request->ip(),          // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),   // Información sobre el navegador/dispositivo
+        ]);
 
         return response()->json($document, 200);
     }
@@ -565,7 +576,16 @@ class DocumentController extends Controller
         $this->actualizarEstadoDocumentos();
         // Cargar relaciones y devolver el documento
         $document = Document::with(['vehicle'])->find($document->id);
-
+        Bitacora::create([
+            'user_id'     => Auth::id(),    // ID del usuario que realiza la acción
+            'record_id'   => $document->id, // El ID del usuario afectado
+            'action'      => 'PUT',         // Acción realizada
+            'table_name'  => 'documents',   // Tabla afectada
+            'data'        => json_encode($document),
+            'description' => 'Actualizar Documentos', // Descripción de la acción
+            'ip_address'  => $request->ip(),          // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),   // Información sobre el navegador/dispositivo
+        ]);
         return response()->json($document, 200);
     }
 

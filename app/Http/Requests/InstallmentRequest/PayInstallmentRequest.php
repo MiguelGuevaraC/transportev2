@@ -34,6 +34,7 @@ class PayInstallmentRequest extends StoreRequest
             'plin'             => 'nullable|numeric',
             'comment'          => 'nullable|string',
             'installment_id'   => 'required|exists:installments,id',
+            'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
             'bank_id'          => 'nullable|exists:banks,id',
             'is_anticipo'      => 'nullable|boolean',
             'total_anticipado' => 'nullable|numeric|min:0',
@@ -47,6 +48,9 @@ class PayInstallmentRequest extends StoreRequest
                     }
                 },
             ],
+
+            'transaction_concept_id.required' => 'El concepto de transacción es obligatorio.',
+            'transaction_concept_id.exists'   => 'El concepto de transacción seleccionado no existe o ha sido eliminado.',
         ];
     }
 
