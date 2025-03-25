@@ -38,7 +38,7 @@ class PayInstallmentRequest extends StoreRequest
             'is_anticipo'      => 'nullable|boolean',
             'total_anticipado' => 'nullable|numeric|min:0',
             'bank_account_id'  => [
-                'required',
+                'nullable',
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
                 function ($attribute, $value, $fail) {
                     $status = DB::table('bank_accounts')->where('id', $value)->value('status');

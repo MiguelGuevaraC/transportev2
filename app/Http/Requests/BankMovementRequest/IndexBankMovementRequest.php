@@ -53,7 +53,7 @@ class IndexBankMovementRequest extends IndexRequest
             'user_created_id'        => 'nullable|string',
             'bank_id'                => 'nullable|string',
             'bank_account_id'        => 'nullable|string',
-
+'status'                => 'nullable|string',
             'pay_installment_id'     => 'nullable|string',
             'driver_expense_id'      => 'nullable|string',
 

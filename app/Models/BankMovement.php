@@ -45,6 +45,7 @@ class BankMovement extends Model
         'comment'                => 'like',
         'number_operation'       => 'like',
         'user_created_id'        => '=',
+        'status'                 => '=',
         'bank_id'                => '=',
         'bank_account_id'        => '=',
         'transaction_concept_id' => '=',
