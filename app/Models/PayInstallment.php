@@ -149,7 +149,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
      {
        return $this->hasOne(Moviment::class, 'pay_installment_id')->latest('id');
      }
-     
+
+     public function latest_bank_movement()
+    {
+        return $this->hasOne(BankMovement::class, 'driver_expense_id')->latestOfMany();
+    }
+    public function bank_account()
+    {
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
+    }
  }
  
 

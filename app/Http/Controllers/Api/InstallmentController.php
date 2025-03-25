@@ -126,7 +126,9 @@ class InstallmentController extends Controller
             'moviment.person',
             'payInstallments',
             'payInstallments.bank'
-            , 'payInstallments.movement',
+            ,'payInstallments.latest_bank_movement'
+            , 'payInstallments.bank_account',
+         
         ]);
 
         // Filtro de rango de fechas (start y end)

@@ -22,7 +22,7 @@ class NotificationController extends Controller
         $fechaFin = now()->addDays($rangoadelante)->endOfDay(); // Fecha 3 días adelante
         
         // Obtener documentos cuya fecha de vencimiento está dentro del rango de interés
-        $documentsExpiringSoon = Document::with(['document'])->whereDate('dueDate', '>=', $fechaInicio)
+        $documentsExpiringSoon = Document::whereDate('dueDate', '>=', $fechaInicio)
         ->whereDate('dueDate', '<=', $fechaFin)
         ->where('status', "Vigente") // Asegúrate de tener este campo para filtrar los vigentes
         ->where('state', "1")
@@ -110,7 +110,7 @@ class NotificationController extends Controller
         $per_page = $validated['per_page'] ?? 10;
 
         // Construir consulta inicial con relaciones necesarias
-        $query = Notification::with('vehicle');
+        $query = Notification::with('vehicle','document');
 
         // Aplicar filtros condicionalmente
         if (!empty($validated['title'])) {
