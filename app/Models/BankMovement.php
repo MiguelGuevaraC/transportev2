@@ -57,18 +57,32 @@ class BankMovement extends Model
     protected static function boot()
     {
         parent::boot();
-
+    
         static::saved(function ($movement) {
             $movement->bank_account->updateBalance();
+    
+            if (in_array($movement->transaction_concept_id, [1, 2])) {
+                $movement->person->updateAnticipadoAmount();
+            }
         });
+    
         static::updated(function ($movement) {
             $movement->bank_account->updateBalance();
+    
+            if (in_array($movement->transaction_concept_id, [1, 2])) {
+                $movement->person->updateAnticipadoAmount();
+            }
         });
+    
         static::deleted(function ($movement) {
             $movement->bank_account->updateBalance();
+    
+            if (in_array($movement->transaction_concept_id, [1, 2])) {
+                $movement->person->updateAnticipadoAmount();
+            }
         });
     }
-
+    
     public function user_created()
     {
         return $this->belongsTo(User::class, 'user_created_id');

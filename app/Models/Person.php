@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Person extends Model
 {
@@ -91,6 +91,11 @@ class Person extends Model
      *         description="DNI del representante de la persona"
      *     ),
      *     @OA\Property(
+     *         property="amount_anticipado",
+     *         type="string",
+     *         description="Monto Anticipado"
+     *     ),
+     *     @OA\Property(
      *         property="representativePersonName",
      *         type="string",
      *         description="Nombre del representante de la persona"
@@ -147,7 +152,7 @@ class Person extends Model
         'representativePersonDni',
         'representativePersonName',
         'branchOffice_id',
-
+        'amount_anticipado',
         'state',
         'created_at',
         'updated_at',
@@ -161,6 +166,17 @@ class Person extends Model
     public function worker()
     {
         return $this->hasOne(Worker::class, 'person_id');
+    }
+    public function updateAnticipadoAmount()
+    {
+        $balance = DB::table('bank_movements')
+            ->where('person_id', $this->id)
+            ->whereIn('transaction_concept_id', [1, 2]) // Filtra solo los conceptos 1 y 2
+            ->whereIn('type_moviment', ['ENTRADA', 'SALIDA'])
+            ->whereNull('deleted_at')
+            ->sum(DB::raw("IF(type_moviment = 'ENTRADA', total_moviment, -total_moviment)"));
+
+        $this->update(['amount_anticipado' => $balance ?? 0]);
     }
 
     public function contacts()

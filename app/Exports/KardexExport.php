@@ -4,7 +4,6 @@ namespace App\Exports;
 use App\Models\CargaDocument;
 use App\Models\DetailReception;
 use App\Models\Product;
-use Hamcrest\Type\IsArray;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -24,124 +23,134 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     protected $branch_id;
 
-    public function __construct($product_id = [], $from = null, $to = null,$branch_id=null)
+    public function __construct($product_id = [], $from = null, $to = null, $branch_id = null)
     {
         $this->product_id = is_array($product_id) ? $product_id : ($product_id == "null" ? "null" : [$product_id]);
         $this->from       = $from;
         $this->to         = $to;
         $this->branch_id  = $branch_id;
     }
-    
 
     public function collection()
     {
-        $products = is_array($this->product_id)
-        ? array_filter($this->product_id) // Filtra valores nulos
-        : ($this->product_id !== "null" && $this->product_id !== null
-            ? [$this->product_id]
-            : CargaDocument::whereHas('product', function ($query) {
+        if ($this->product_id[0] === null) { 
+            $products = CargaDocument::whereHas('product', function ($query) {
                 $query->whereNull('deleted_at');
             })
-                ->latest()
-                ->pluck('product_id')
-                ->unique()
-                ->take(10)
-                ->filter()    // Filtra valores nulos
-                ->toArray()); // Asegura que sea un array
-
+            ->latest()
+            ->pluck('product_id')
+            ->unique()
+            ->take(50)
+            ->filter()    // Filtra valores nulos
+            ->toArray(); // Convierte a array
+        } else {
+            $products = is_array($this->product_id)
+                ? array_filter($this->product_id) // Filtra valores nulos
+                : ($this->product_id !== "null" && $this->product_id !== null
+                    ? [$this->product_id]
+                    : CargaDocument::whereHas('product', function ($query) {
+                        $query->whereNull('deleted_at');
+                    })
+                        ->latest()
+                        ->pluck('product_id')
+                        ->unique()
+                        ->take(50)
+                        ->filter()    // Filtra valores nulos
+                        ->toArray());
+        }
+        
+      
         // Si sigue siendo null, lo convertimos en un array vacío
         $products = empty($products) ? [] : $products;
-    
+
         $finalCollection = new Collection();
-    
+
         foreach ($products as $product_id) {
             $queryCarga = CargaDocument::whereNull('deleted_at')
                 ->where('product_id', $product_id)
                 ->where('branchOffice_id', $this->branch_id); // Filtrar por sucursal
-            
+
             $queryRecep = DetailReception::whereNull('deleted_at')
                 ->where('product_id', $product_id)
                 ->whereHas('reception', fn($q) => $q->where('branchOffice_id', $this->branch_id)); // Filtrar por sucursal
-    
+
             if ($this->from) {
                 $toDate = $this->to ?? now();
                 $queryCarga->whereBetween('movement_date', [$this->from, $toDate]);
-                $queryRecep->whereHas('reception.firstCarrierGuide', fn($q) => 
+                $queryRecep->whereHas('reception.firstCarrierGuide', fn($q) =>
                     $q->whereBetween('transferStartDate', [$this->from, $toDate])
                 );
             }
-    
+
             $saldoInicial = $this->getStockBefore($product_id, $this->branch_id);
-            
+
             $finalCollection->push(
-                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '','num_anexo' => '','person' => '','distribuidor' => ''
-                , 'quantity' => '', 'saldo' => '', 'comment' => ''],
-                ['is_header' => true, 'movement_date' => 'Fecha Movimiento', 'type' => 'Tipo Movimiento', 
-                'concept' => 'Concepto', 'document' => 'Documento', 
-                'num_anexo' => 'Número Anexo',
-                'person' => 'Persona', 
-                'distribuidor' => 'Distribuidor', 
+                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '', 'num_anexo' => '', 'person' => '', 'distribuidor' => ''
+                    , 'quantity' => '', 'saldo' => '', 'comment' => ''],
+                ['is_header'   => true, 'movement_date'  => 'Fecha Movimiento', 'type' => 'Tipo Movimiento',
+                    'concept'      => 'Concepto', 'document' => 'Documento',
+                    'num_anexo'    => 'Número Anexo',
+                    'person'       => 'Persona',
+                    'distribuidor' => 'Distribuidor',
 
-                'quantity' => 'Cantidad', 
-                'saldo' => 'Saldo', 
-                
-                'comment' => 'Comentario'],
-                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL', 
-                'concept' => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'), 
-                'document' => '','num_anexo' => '-', 
-                'person' => '-', 
-                'distribuidor' => '-', 
-                'quantity' => 0, 'saldo' => $saldoInicial, 'comment' => '-']
+                    'quantity'     => 'Cantidad',
+                    'saldo'        => 'Saldo',
+
+                    'comment'      => 'Comentario'],
+                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL',
+                    'concept'        => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'),
+                    'document'       => '', 'num_anexo'              => '-',
+                    'person'         => '-',
+                    'distribuidor'   => '-',
+                    'quantity'       => 0, 'saldo'                   => $saldoInicial, 'comment' => '-']
             );
-    
-            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->take(100)->get()->map(fn($doc) => [
-                'movement_date' => $doc->movement_date,
-                'type' => $doc->movement_type,
-                'concept' => 'DOCUMENTO DE CARGA',
-                'document' => $doc->code_doc,
-                'num_anexo' => $doc->num_anexo,
-                'quantity' => $doc->quantity,
-                'person' => $doc?->person?->names ." ".$doc?->person?->businessName, 
-                'distribuidor' => $doc->distribuidor->names ." ".$doc->distribuidor->businessName, 
-                'saldo' => null,
-                'comment' => $doc->comment ?? "-",
-            ]);
-    
-            $detailReceptions = $queryRecep->take(100)->get()->map(fn($detail) => [
-                'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(),
-                'type' => 'SALIDA',
-                'concept' => 'GUIA TRANSPORTE',
-                'document' => $detail->reception->firstCarrierGuide->numero ?? 'Sin Número',
-                'num_anexo' => $detail->reception->firstCarrierGuide->document ?? 'Sin Número',
-                'person' => $detail?->reception?->sender->names ." ".$detail?->reception?->sender->businessName, 
-                'distribuidor' => '', 
 
-                'quantity' => $detail->cant,
-                'saldo' => null,
-                'comment' => '-',
+            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->take(200)->get()->map(fn($doc) => [
+                'movement_date' => $doc->movement_date,
+                'type'          => $doc->movement_type,
+                'concept'       => 'DOCUMENTO DE CARGA',
+                'document'      => $doc->code_doc,
+                'num_anexo'     => $doc->num_anexo,
+                'quantity'      => $doc->quantity,
+                'person'        => $doc?->person?->names . " " . $doc?->person?->businessName,
+                'distribuidor'  => $doc->distribuidor->names . " " . $doc->distribuidor->businessName,
+                'saldo'         => null,
+                'comment'       => $doc->comment ?? "-",
             ]);
-    
-            $saldo = $saldoInicial;
-            $records = collect([...$cargaDocuments, ...$detailReceptions])
+
+            $detailReceptions = $queryRecep->take(200)->get()->map(fn($detail) => [
+                'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(),
+                'type'          => 'SALIDA',
+                'concept'       => 'GUIA TRANSPORTE',
+                'document'      => $detail->reception->firstCarrierGuide->numero ?? 'Sin Número',
+                'num_anexo'     => $detail->reception->firstCarrierGuide->document ?? 'Sin Número',
+                'person'        => $detail?->reception?->sender->names . " " . $detail?->reception?->sender->businessName,
+                'distribuidor'  => '',
+
+                'quantity'      => $detail->cant,
+                'saldo'         => null,
+                'comment'       => '-',
+            ]);
+
+            $saldo   = $saldoInicial;
+            $records = collect([ ...$cargaDocuments, ...$detailReceptions])
                 ->sortBy('movement_date') // Orden cronológico
                 ->map(function ($row) use (&$saldo) {
-                    $row['saldo'] = ($row['type'] === 'ENTRADA') 
-                        ? $saldo += $row['quantity'] 
-                        : $saldo -= $row['quantity'];
+                    $row['saldo'] = ($row['type'] === 'ENTRADA')
+                    ? $saldo += $row['quantity']
+                    : $saldo -= $row['quantity'];
                     return $row;
                 });
-    
+
             $finalCollection = $finalCollection->merge($records)->push([
-                'movement_date' => '', 'type' => '', 'concept' => '', 'document' => '','num_anexo' => '',
-                'person' => '','distribuidor' => '',
-                 'quantity' => '', 'saldo' => '', 'comment' => ''
+                'movement_date' => '', 'type'         => '', 'concept' => '', 'document' => '', 'num_anexo' => '',
+                'person'        => '', 'distribuidor' => '',
+                'quantity'      => '', 'saldo'        => '', 'comment' => '',
             ]);
         }
-    
+
         return $finalCollection;
     }
-    
-    
 
     public function headings(): array
     {
@@ -154,7 +163,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function map($row): array
     {
-  
+
         if (isset($row['is_header']) && $row['is_header']) {
             return [
                 strtoupper($row['movement_date']),
@@ -188,7 +197,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
     private function getStockBefore($productId, $branchOfficeId)
     {
         $toDate = $this->from;
-    
+
         // Obtener stock antes de la fecha filtrado por sucursal
         $stockCalculado = CargaDocument::where('product_id', $productId)
             ->where('branchOffice_id', $branchOfficeId)
@@ -199,22 +208,20 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 COALESCE(SUM(CASE WHEN movement_type = 'SALIDA' THEN quantity ELSE 0 END), 0)
             AS stock_calculado")
             ->value('stock_calculado') ?? 0;
-            
+
         // Obtener la cantidad total de recepciones en el rango de fechas
         $totalDetailQuantity = DetailReception::where('product_id', $productId)
             ->whereHas('reception', function ($query) use ($toDate, $branchOfficeId) {
                 $query->where('branchOffice_id', $branchOfficeId)
-                    ->whereHas('firstCarrierGuide', fn($q) => 
-                        $q->where('transferStartDate','<', $toDate)
+                    ->whereHas('firstCarrierGuide', fn($q) =>
+                        $q->where('transferStartDate', '<', $toDate)
                     );
             })
             ->whereNull('deleted_at')->sum('cant') ?? 0;
-       
+
         // Calcular el stock final
         return $stockCalculado - $totalDetailQuantity;
     }
-    
-    
 
     public function title(): string
     {
@@ -244,7 +251,7 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             // 1. Estilo para la cabecera del producto (ej.: "PRODUCTO 01", "PRODUCTO 03", etc.)
             // Se asume que esa fila tiene contenido solo en la columna A y las demás vacías.
             if ($cellA !== '' && $cellB === '' && $cellC === '' && $cellD === '' && $cellE === '' && $cellF === ''
-             && $cellG === ''&& $cellH === ''&& $cellI === ''&& $cellJ === '') {
+                && $cellG === '' && $cellH === '' && $cellI === '' && $cellJ === '') {
                 // Combinar celdas de A a G en esa fila
                 $sheet->mergeCells("A{$rowIndex}:J{$rowIndex}");
                 // Aplicar estilo: fondo blanco, borde negro, texto centrado y en negrita

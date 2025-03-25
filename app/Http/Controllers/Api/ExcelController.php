@@ -958,7 +958,8 @@ class ExcelController extends Controller
         $notascredito = CreditNote::whereBetween('created_at', [$start, $end])->orderBy('id', 'desc')->get();
 
         foreach ($notascredito as $nc) {
-            $moviment=$nc->moviment;
+            // $nc=CreditNote::with(['moviment'])->find($nc->id);
+            $moviment=Moviment::find($nc->moviment_id);
             if ($moviment->creditNote) { // Ventas con nota de crédito
                 $fechaEmisionNC = $moviment->creditNote->created_at ? Carbon::parse($moviment->creditNote->created_at) : false;
 
