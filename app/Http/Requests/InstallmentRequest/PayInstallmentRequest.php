@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
-
 class PayInstallmentRequest extends StoreRequest
 {
     /**
@@ -35,9 +34,10 @@ class PayInstallmentRequest extends StoreRequest
             'plin'             => 'nullable|numeric',
             'comment'          => 'nullable|string',
             'installment_id'   => 'required|exists:installments,id',
+            'bank_id'          => 'nullable|exists:banks,id',
             'is_anticipo'      => 'nullable|boolean',
             'total_anticipado' => 'nullable|numeric|min:0',
-            'bank_account_id'        => [
+            'bank_account_id'  => [
                 'required',
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
                 function ($attribute, $value, $fail) {
@@ -67,12 +67,15 @@ class PayInstallmentRequest extends StoreRequest
             'installment_id.required'  => 'El ID de la cuota es obligatorio.',
             'installment_id.exists'    => 'El ID de la cuota no existe en la base de datos.',
 
+            'bank_id.required'         => 'El ID de la cuota es obligatorio.',
+            'bank_id.exists'           => 'El ID de la cuota no existe en la base de datos.',
+
             'is_anticipo.boolean'      => 'El campo "Es anticipo" debe ser 1 o 0.',
             'total_anticipado.numeric' => 'El campo "Total anticipado" debe ser un número.',
             'total_anticipado.min'     => 'El campo "Total anticipado" debe ser mayor o igual a 0.',
 
-            'bank_account_id.required'        => 'La cuenta bancaria es obligatoria.',
-            'bank_account_id.exists'          => 'La cuenta bancaria seleccionada no existe o ha sido eliminada.',
+            'bank_account_id.required' => 'La cuenta bancaria es obligatoria.',
+            'bank_account_id.exists'   => 'La cuenta bancaria seleccionada no existe o ha sido eliminada.',
         ];
     }
 

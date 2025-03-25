@@ -21,7 +21,7 @@ class BankMovement extends Model
         'pay_installment_id',
         'driver_expense_id',
         'is_anticipo',
-'total_anticipado',
+        'total_anticipado',
 
         'user_created_id',
         'bank_id',
@@ -43,7 +43,7 @@ class BankMovement extends Model
         'total_moviment'         => '=',
         'currency'               => 'like',
         'comment'                => 'like',
-        'number_operation'                => 'like',
+        'number_operation'       => 'like',
         'user_created_id'        => '=',
         'bank_id'                => '=',
         'bank_account_id'        => '=',
@@ -60,32 +60,32 @@ class BankMovement extends Model
     protected static function boot()
     {
         parent::boot();
-    
+
         static::saved(function ($movement) {
             $movement->bank_account->updateBalance();
-    
+
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmount();
             }
         });
-    
+
         static::updated(function ($movement) {
             $movement->bank_account->updateBalance();
-    
+
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmount();
             }
         });
-    
+
         static::deleted(function ($movement) {
             $movement->bank_account->updateBalance();
-    
+
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmount();
             }
         });
     }
-    
+
     public function user_created()
     {
         return $this->belongsTo(User::class, 'user_created_id');

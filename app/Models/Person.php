@@ -171,10 +171,15 @@ class Person extends Model
     {
         $balance = DB::table('bank_movements')
             ->where('person_id', $this->id)
-            ->whereIn('transaction_concept_id', [1, 2]) // Filtra solo los conceptos 1 y 2
-            ->whereIn('type_moviment', ['ENTRADA', 'SALIDA'])
             ->whereNull('deleted_at')
-            ->sum(DB::raw("IF(type_moviment = 'ENTRADA', total_moviment, -total_moviment)"));
+            ->sum(DB::raw("
+            CASE
+                WHEN transaction_concept_id = 1 THEN total_moviment
+                WHEN transaction_concept_id = 2 THEN -total_moviment
+                WHEN is_anticipo = 1 THEN -total_anticipado
+                ELSE 0
+            END
+        "));
 
         $this->update(['amount_anticipado' => $balance ?? 0]);
     }
