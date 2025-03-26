@@ -399,10 +399,11 @@ class InstallmentController extends Controller
         // Registrar movimiento bancario si hay cuenta bancaria
         if ($bank_account && $bank_account!= null) {
             $moviment= Moviment::find($installment->moviment_id);
+            $isanticipo=isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0;
             $this->bankmovementService->createBankMovement([
                 'pay_installment_id'     => $installmentPay->id,
                 'bank_id'                => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : null,
-                'is_anticipo'            => isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0,
+                'is_anticipo'            => $isanticipo,
                 'total_anticipado'       => isset($validatedData['total_anticipado']) ? $validatedData['total_anticipado'] : 0,
                 'bank_account_id'        => isset($bank_account) ? $bank_account->id : null,
                 'currency'               => isset($bank_account) ? $bank_account->currency : null,
@@ -415,6 +416,10 @@ class InstallmentController extends Controller
                 'type_moviment'          => 'ENTRADA',
                 'number_operation'          => $nroOperacion,
             ]);
+            $person_anticipo= Person::find($moviment->person_id);
+            if($person_anticipo && $isanticipo!=0){
+                $person_anticipo->updateAnticipadoAmount();
+            }
             
         }
 

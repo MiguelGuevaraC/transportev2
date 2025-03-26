@@ -252,7 +252,7 @@ class DriverExpenseController extends Controller
         $validator = validator()->make($request->all(), [
             'programming_id'         => 'required|exists:programmings,id',
             'expensesConcept_id'     => 'required|exists:expenses_concepts,id',
-            'transaction_concept_id' => 'required|exists:transaction_concepts,id,deleted_at,NULL',
+            'transaction_concept_id' => 'nullable|exists:transaction_concepts,id,deleted_at,NULL',
             'worker_id'              => 'required|exists:workers,id',
             'amount'                 => 'required',
             // 'quantity' => 'required',

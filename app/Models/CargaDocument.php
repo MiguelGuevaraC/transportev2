@@ -41,7 +41,7 @@ class CargaDocument extends Model
     const filters = [
         'code_doc'        => '=',
         'person_id'       => '=',
-        'product_id'      => '=',
+        'product_id'      => 'in',
         'branchOffice_id' => '=',
         'quantity'        => 'like',
         'movement_type'   => 'like',

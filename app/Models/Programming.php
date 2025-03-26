@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -276,32 +275,20 @@ class Programming extends Model
     public function updateTotalDriversExpenses()
     {
         $programming = $this;
+        $programming = Programming::find($programming->id);
 
-        // Calcular total de gastos (excepto el concepto con ID 1)
-        // Calcular total de gastos excluyendo el concepto de viaje (ID != 1)
-        $programming->totalExpenses = $programming->driverExpenses()
-            ->where('expensesConcept_id', '!=', 1)
-            ->whereNull('deleted_at')
-            ->where(function ($query) {
-                // $query->where('selectTypePay', 'Efectivo')
-                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-                //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
-            })
-            ->sum('total');
+        $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
+            $q->where('typeConcept', 'Ingreso');
+        })->sum('total');
 
-// Calcular total de gastos para el concepto de viaje (ID = 1)
-        $programming->totalViaje = $programming->driverExpenses()
-            ->where('expensesConcept_id', '=', 1)
-            ->whereNull('deleted_at')
-            ->where(function ($query) {
-                // $query->where('selectTypePay', 'Efectivo')
-                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-                //     ->orWhere('selectTypePay', 'Proxima_liquidacion');
-            })
-            ->sum('total');
+        $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
+            $q->where('typeConcept', 'Egreso');
+        })->sum('total');
 
-        // Calcular total devuelto
-        $programming->totalReturned = $programming->totalViaje - $programming->totalExpenses;
+        // Calcular el saldo (diferencia entre ingresos y egresos)
+        $programming->totalExpenses = $totalEgreso;
+        $programming->totalViaje    = $totalIngreso;
+        $programming->totalReturned = number_format($totalIngreso - $totalEgreso, 2, '.', '');
 
         // Guardar cambios
         $programming->save();

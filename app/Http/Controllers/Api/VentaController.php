@@ -1033,7 +1033,7 @@ class VentaController extends Controller
             }
 
             // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
-            if ($totalReceptionPayments != $totalPayments) {
+            if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
                 $difference = $totalReceptionPayments - $totalPayments;
                 $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
             }
@@ -2082,7 +2082,7 @@ class VentaController extends Controller
             }
 
             // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
-            if ($totalReceptionPayments != $totalPayments) {
+            if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
                 $difference = $totalReceptionPayments - $totalPayments;
                 $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
             }

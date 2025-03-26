@@ -216,7 +216,7 @@ class ProgrammingController extends Controller
 
             // Formatear el número de programación con el año, ID del vehículo y el contador
             $programming->numero = 'P' . str_pad($branchOfficeId, 3, '0', STR_PAD_LEFT) . '-' . $year . '-' . str_pad($vehicleId, 2, '0', STR_PAD_LEFT) . '-' . $ultimo6Caracteres = substr($programming->numero, -8);;
-
+            $programming->updateTotalDriversExpenses();
         });
 
         return response()->json([
@@ -304,7 +304,6 @@ class ProgrammingController extends Controller
     {
         // Validación de la solicitud
 
-
         $validator = validator()->make($request->all(), [
             'tract_id'          => ['required', Rule::exists('vehicles', 'id')->whereNot('status', 'Ocupado')],
             'platform_id'       => ['nullable', Rule::exists('vehicles', 'id')->whereNot('status', 'Ocupado')],
@@ -320,12 +319,11 @@ class ProgrammingController extends Controller
             'detailsReceptions' => 'nullable|array',
             'isload'            => 'nullable|boolean',
         ], [
-            'tract_id.exists'     => 'El tracto seleccionado está ocupado.',
-            'platform_id.exists'  => 'La plataforma seleccionada está ocupada.',
-            'driver_id.exists'    => 'El conductor seleccionado está ocupado.',
-            'copilot_id.exists'   => 'El copiloto seleccionado está ocupado.',
+            'tract_id.exists'    => 'El tracto seleccionado está ocupado.',
+            'platform_id.exists' => 'La plataforma seleccionada está ocupada.',
+            'driver_id.exists'   => 'El conductor seleccionado está ocupado.',
+            'copilot_id.exists'  => 'El copiloto seleccionado está ocupado.',
         ]);
-        
 
         // Manejo de la sucursal
         $branch_office_id = $request->input('branch_office_id');

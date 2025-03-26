@@ -2,6 +2,7 @@
 namespace App\Http\Requests\CargaDocumentRequest;
 
 use App\Http\Requests\IndexRequest;
+use App\Models\Product;
 
 class IndexCargaDocumentRequest extends IndexRequest
 {
@@ -26,7 +27,21 @@ class IndexCargaDocumentRequest extends IndexRequest
 
             'code_doc'        => 'nullable|string',
             'person_id'       => 'nullable|string',
-            'product_id'      => 'nullable|string',
+            'product_id' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (! is_numeric($value) && ! is_array($value) && $value !== "null") {
+                        return $fail('No se está enviando de forma correcta los productos.');
+                    }
+
+                    if ($value !== "null") {
+                        $ids = is_array($value) ? $value : [$value];
+                        if (Product::whereIn('id', $ids)->whereNull('deleted_at')->count() !== count($ids)) {
+                            $fail('Uno o más productos no existen o han sido eliminados.');
+                        }
+                    }
+                },
+            ],
             'branchOffice_id' => 'nullable|string',
             'quantity'        => 'nullable|string',
             'movement_type'   => 'nullable|string',

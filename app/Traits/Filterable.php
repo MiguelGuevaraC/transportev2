@@ -61,6 +61,12 @@ trait Filterable
             case '>':
                 $query->where($filter, '>', $value);
                 break;
+                case 'in':
+         
+                    $query->whereIn($filter, (array) $value);
+                    break;
+                
+     
             case '<':
                 $query->where($filter, '<', $value);
                 break;
