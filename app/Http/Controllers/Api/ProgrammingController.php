@@ -247,11 +247,11 @@ class ProgrammingController extends Controller
 
         if ($driverId) {
             $query->whereHas('detailsWorkers', function ($q) use ($driverId) {
-                $q->where('worker_id', $driverId)->whereIn('function', ['driver', 'copilot']);
+                $q->where('worker_id', $driverId)->whereIn('function', ['driver']);
             });
 
             if (Programming::where('id', $programmingId)->whereHas('detailsWorkers', function ($q) use ($driverId) {
-                $q->where('worker_id', $driverId)->whereIn('function', ['driver', 'copilot']);
+                $q->where('worker_id', $driverId)->whereIn('function', ['driver']);
             })->exists()) {
                 $query->where('id', '>', $programmingId);
             }

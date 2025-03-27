@@ -100,7 +100,9 @@ class BankMovement extends Model
     }
     public function pay_installments()
     {
-        return $this->hasMany(PayInstallment::class)->where('bank_movement_id', $this->id);
+        return $this->hasMany(PayInstallment::class)
+        ->whereNull('deleted_at')
+        ->where('bank_movement_id', $this->id);
     }
 
     public function getMovimentNumbersConcatenatedAttribute()

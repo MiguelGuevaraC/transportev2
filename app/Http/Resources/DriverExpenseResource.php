@@ -29,6 +29,7 @@ class DriverExpenseResource extends JsonResource
             'bank_id'            => $this->bank_id ?? null,
             'worker_id'          => $this->worker_id ?? null,
             'expensesConcept_id' => $this->expensesConcept_id ?? null,
+            'expenses_concept'   => $this->expensesConcept ? $this->expensesConcept : null,
             'proveedor_id'       => $this->proveedor_id ?? null,
             'created_at'         => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];

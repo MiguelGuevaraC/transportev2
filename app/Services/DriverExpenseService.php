@@ -32,30 +32,30 @@ class DriverExpenseService
     }
     public function transferDriverExpense(array $data): array
     {
-        $programming_in=Programming::find( $data['programming_in_id']);
+        $programming_in   = Programming::find($data['programming_in_id']);
         $driverExpenseOut = DriverExpense::create([
-            'worker_id'      => $data['driver_id'],
+            'worker_id'          => $data['driver_id'],
             'expensesConcept_id' => 23,
-            'programming_id' => $data['programming_out_id'],
-            'type'           => 'EGRESO',
-            'amount'         => ($data['amount']), // Aseguramos que sea negativo
-            'total'         => ($data['amount']),
+            'programming_id'     => $data['programming_out_id'],
+            'type'               => 'EGRESO',
+            'amount'             => ($data['amount']), // Aseguramos que sea negativo
+            'total'              => ($data['amount']),
             'selectTypePay'      => "Efectivo",
-            'date_expense'      => Carbon::now(),
-            'comment'    => 'Transferencia de saldo a programación ' . $programming_in->numero,
+            'date_expense'       => Carbon::now(),
+            'comment'            => 'Transferencia de saldo a programación ' . $programming_in->numero,
         ]);
 
-        $programming_out=Programming::find( $data['programming_out_id']);
+        $programming_out = Programming::find($data['programming_out_id']);
         $driverExpenseIn = DriverExpense::create([
-            'worker_id'      => $data['driver_id'],
-            'expensesConcept_id' => 22, 
-            'programming_id' => $data['programming_in_id'],
-            'type'           => 'INGRESO',
-            'amount'         => ($data['amount']), // Aseguramos que sea positivo
-            'total'         => ($data['amount']),
+            'worker_id'          => $data['driver_id'],
+            'expensesConcept_id' => 22,
+            'programming_id'     => $data['programming_in_id'],
+            'type'               => 'INGRESO',
+            'amount'             => ($data['amount']), // Aseguramos que sea positivo
+            'total'              => ($data['amount']),
             'selectTypePay'      => "Efectivo",
-            'date_expense'      => Carbon::now(),
-            'comment'    => 'Transferencia de saldo desde programación ' . $programming_out->numero,
+            'date_expense'       => Carbon::now(),
+            'comment'            => 'Transferencia de saldo desde programación ' . $programming_out->numero,
         ]);
 
         return [
