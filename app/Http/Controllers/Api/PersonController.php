@@ -142,6 +142,12 @@ class PersonController extends Controller
         COALESCE(businessName, '') ASC
     ")
             ->paginate($perPage);
+
+        $persons->getCollection()->each(function ($person) {
+            if ($person) {
+                $person->updateAnticipadoAmountClient();
+            }
+        });
         // Estructura de respuesta
         return response()->json([
             'persons' => [
@@ -421,7 +427,7 @@ class PersonController extends Controller
             // $object = ContactInfo::with(["person"])->find($object->id);
         }
 
-        $client = Person::with('contacts','tarifas')->find($client->id);
+        $client = Person::with('contacts', 'tarifas')->find($client->id);
         return response()->json($client, 200);
 
     }
@@ -469,7 +475,7 @@ class PersonController extends Controller
 
     public function show($id)
     {
-        $client = Person::with('contacts','tarifas')->find($id);
+        $client = Person::with('contacts', 'tarifas')->find($id);
         if (! $client) {
             return response()->json(['message' => 'Client not found'], 422);
         }
@@ -602,7 +608,7 @@ class PersonController extends Controller
         // }
 
         $client->save();
-        $client = Person::with('contacts','tarifas')->find($client->id);
+        $client = Person::with('contacts', 'tarifas')->find($client->id);
 
         return response()->json($client, 200);
     }

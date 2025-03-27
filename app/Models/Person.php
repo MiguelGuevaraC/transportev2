@@ -173,6 +173,7 @@ class Person extends Model
             ->where('person_id', $this->id)
             ->whereNull('deleted_at')
             ->sum('total_anticipado_restante');
+    
 
         $this->update(['amount_anticipado' => $balance ?? 0]);
     }

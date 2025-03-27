@@ -181,6 +181,12 @@ class InstallmentController extends Controller
 // Obtener los registros filtrados con paginación
         $list = $query->orderBy('id', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
+        $list->getCollection()->each(function ($installment) {
+            if ($installment->moviment && $installment->moviment->person) {
+                $installment->moviment->person->updateAnticipadoAmountClient();
+            }
+        });
+
         // Gets raw SQL from $query using `toSql` and `getBindings` and combines their results with `vsprintf`
         $rawSql = vsprintf(str_replace(['?'], ['\'%s\''], $query->toSql()), $query->getBindings());
         //error_log($rawSql);
