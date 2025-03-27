@@ -167,21 +167,21 @@ class Person extends Model
     {
         return $this->hasOne(Worker::class, 'person_id');
     }
-    public function updateAnticipadoAmount()
+    public function updateAnticipadoAmountClient()
     {
         $balance = DB::table('bank_movements')
             ->where('person_id', $this->id)
             ->whereNull('deleted_at')
-            ->sum(DB::raw("
-            CASE
-                WHEN transaction_concept_id = 1 THEN total_moviment
-                WHEN transaction_concept_id = 2 THEN -total_moviment
-                WHEN is_anticipo = 1 THEN -total_anticipado
-                ELSE 0
-            END
-        "));
+            ->sum('total_anticipado_restante');
 
         $this->update(['amount_anticipado' => $balance ?? 0]);
+    }
+
+    public function anticipos_cliente_con_saldo()
+    {
+        return $this->hasMany(BankMovement::class)
+            ->where('transaction_concept_id', 1)
+            ->where('total_anticipado_restante', '>', 0);
     }
 
     public function contacts()

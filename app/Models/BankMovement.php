@@ -23,6 +23,10 @@ class BankMovement extends Model
         'is_anticipo',
         'total_anticipado',
 
+        'total_anticipado_restante',
+        'total_anticipado_egreso',
+        'total_anticipado_egreso_restante',
+
         'user_created_id',
         'bank_id',
         'bank_account_id',
@@ -38,21 +42,24 @@ class BankMovement extends Model
         'deleted_at',
     ];
     const filters = [
-        'type_moviment'          => 'like',
-        'date_moviment'          => 'between',
-        'total_moviment'         => '=',
-        'currency'               => 'like',
-        'comment'                => 'like',
-        'number_operation'       => 'like',
-        'user_created_id'        => '=',
-        'status'                 => '=',
-        'bank_id'                => '=',
-        'bank_account_id'        => '=',
-        'transaction_concept_id' => '=',
-        'person_id'              => '=',
-        'created_at'             => '=',
-        'pay_installment_id'     => '=',
-        'driver_expense_id'      => '=',
+        'type_moviment'                    => 'like',
+        'date_moviment'                    => 'between',
+        'total_moviment'                   => '=',
+        'currency'                         => 'like',
+        'comment'                          => 'like',
+        'number_operation'                 => 'like',
+        'user_created_id'                  => '=',
+        'status'                           => '=',
+        'bank_id'                          => '=',
+        'bank_account_id'                  => '=',
+        'transaction_concept_id'           => '=',
+        'person_id'                        => '=',
+        'created_at'                       => '=',
+        'pay_installment_id'               => '=',
+        'driver_expense_id'                => '=',
+        'total_anticipado_restante'        => '=',
+        'total_anticipado_egreso'          => '=',
+        'total_anticipado_egreso_restante' => '=',
     ];
     const sorts = [
         'id' => 'desc',
@@ -66,7 +73,7 @@ class BankMovement extends Model
             $movement->bank_account->updateBalance();
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
-                $movement->person->updateAnticipadoAmount();
+                $movement->person->updateAnticipadoAmountClient();
             }
         });
 
@@ -74,7 +81,7 @@ class BankMovement extends Model
             $movement->bank_account->updateBalance();
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
-                $movement->person->updateAnticipadoAmount();
+                $movement->person->updateAnticipadoAmountClient();
             }
         });
 
@@ -82,7 +89,7 @@ class BankMovement extends Model
             $movement->bank_account->updateBalance();
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
-                $movement->person->updateAnticipadoAmount();
+                $movement->person->updateAnticipadoAmountClient();
             }
         });
     }
@@ -91,6 +98,28 @@ class BankMovement extends Model
     {
         return $this->belongsTo(User::class, 'user_created_id');
     }
+    public function pay_installments()
+    {
+        return $this->hasMany(PayInstallment::class)->where('bank_movement_id', $this->id);
+    }
+
+    public function getMovimentNumbersConcatenatedAttribute()
+    {
+        return $this->pay_installments()
+            ->with('installment.moviment')
+            ->get()
+            ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber ?? '')
+            ->filter()
+            ->unique() // Elimina duplicados
+            ->implode(', ') ?: '';
+    }
+
+    public function update_montos_anticipo()
+    {
+        $this->total_anticipado_restante = max(0, $this->total_anticipado - $this->pay_installments()->sum('total'));
+        $this->save();
+    }
+
     public function bank()
     {
         return $this->belongsTo(Bank::class, 'bank_id');

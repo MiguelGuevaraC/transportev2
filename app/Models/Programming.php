@@ -206,6 +206,15 @@ class Programming extends Model
         'deleted_at',
 
     ];
+
+    const filters = [
+        'numero' => 'like',
+  
+    ];
+    const sorts = [
+        'id' => 'desc',
+    ];
+
     public function branchOffice()
     {
         return $this->belongsTo(BranchOffice::class, 'branchOffice_id');

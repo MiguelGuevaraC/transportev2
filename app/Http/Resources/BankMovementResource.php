@@ -55,10 +55,12 @@ class BankMovementResource extends JsonResource
             'total_anticipado'       => $this->total_anticipado ?? null,
 
             'pay_installment_id'     => $this->pay_installment_id ?? null,
-            'pay_installment'        => $this->pay_installment ? $this->pay_installment : null,
+            'pay_installment'        => $this->pay_installments ? $this->pay_installments : null,
 
             'driver_expense_id'      => $this->driver_expense_id ?? null,
             'driver_expense'         => $this->driver_expense ? $this->driver_expense : null,
+
+            'facturas_anticipos'     => $this->getMovimentNumbersConcatenatedAttribute() ? $this->getMovimentNumbersConcatenatedAttribute() : '',
 
             'created_at'             => $this->created_at ?? null,
             'updated_at'             => $this->updated_at ?? null,

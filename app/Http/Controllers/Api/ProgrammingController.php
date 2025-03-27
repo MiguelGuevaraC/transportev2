@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProgrammingRequest\IndexProgrammingRequest;
+use App\Http\Resources\ProgrammingResource;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
 use App\Models\CarrierByProgramming;
@@ -232,6 +234,30 @@ class ProgrammingController extends Controller
             'prev_page_url'  => $list->previousPageUrl(),
             'to'             => $list->lastItem(),
         ], 200);
+    }
+
+    public function list(IndexProgrammingRequest $request)
+    {
+        $driverId      = $request->driver_id;
+        $programmingId = $request->programming_id;
+  
+
+        $query = Programming::with(['detailsWorkers'])
+        ->where('statusLiquidacion', '=', 'Pendiente');
+
+        if ($driverId) {
+            $query->whereHas('detailsWorkers', function ($q) use ($driverId) {
+                $q->where('worker_id', $driverId)->whereIn('function', ['driver', 'copilot']);
+            });
+
+            if (Programming::where('id', $programmingId)->whereHas('detailsWorkers', function ($q) use ($driverId) {
+                $q->where('worker_id', $driverId)->whereIn('function', ['driver', 'copilot']);
+            })->exists()) {
+                $query->where('id', '>', $programmingId);
+            }
+        }
+
+        return $this->getFilteredResults($query, $request, Programming::filters, Programming::sorts, ProgrammingResource::class);
     }
 
     /**

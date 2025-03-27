@@ -415,7 +415,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
 
     Route::get('notification', [NotificationController::class, 'index']);
-
+    Route::get('report-workers', [WorkerController::class, 'index_export_excel']);
 
     require __DIR__ . '/Api/CarrierApi.php';        //CARRIER GUIDE
     require __DIR__ . '/Api/SaleApi.php';        //SALES
@@ -428,5 +428,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/BankAccountApi.php';        //BANK ACCOUNT
     require __DIR__ . '/Api/BankMovementApi.php';        //BANK MOVIMENT
     require __DIR__ . '/Api/DriverExpenseApi.php';        //DRIVER EXPENSE
+
+    require __DIR__ . '/Api/ProgrammingApi.php';        //DRIVER EXPENSE
 });
-Route::get('report-workers', [WorkerController::class, 'index_export_excel']);

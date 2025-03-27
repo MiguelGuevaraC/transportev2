@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -104,60 +103,59 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * )
  */
 
- class PayInstallment extends Model
- {
-     use SoftDeletes;
- 
-     protected $fillable = [
-         'id',
-         'number',  // Corregido de 'namber' a 'number'
-         'total',
-         'paymentDate',  // Corregido de 'datePay' a 'paymentDate'
-         'comment',
-         'nroOperacion',
-         'is_detraction',
-         'yape',
-         'concept',
-         'deposit',
-         'cash',
-         'card',
-         'plin',
-         'status',
-         'type',
-         'state',
-         'bank_account_id',
-         'installment_id',
-         'moviment_id',
-         'created_at',
-         'updated_at',
-         'bank_id'
-         
-     ];
-     public function bank()
-     {
-         return $this->belongsTo(Bank::class, 'bank_id');
-     }
-     public function installment()
-     {
-         return $this->belongsTo(Installment::class, 'installment_id');
-     }
-     public function movements()
-     {
-         return $this->hasMany(Moviment::class, 'pay_installment_id');
-     }
-     public function movement()
-     {
-       return $this->hasOne(Moviment::class, 'pay_installment_id')->latest('id');
-     }
+class PayInstallment extends Model
+{
+    use SoftDeletes;
 
-     public function latest_bank_movement()
+    protected $fillable = [
+        'id',
+        'number', // Corregido de 'namber' a 'number'
+        'total',
+        'paymentDate', // Corregido de 'datePay' a 'paymentDate'
+        'comment',
+        'nroOperacion',
+        'is_detraction',
+        'yape',
+        'concept',
+        'deposit',
+        'cash',
+        'card',
+        'plin',
+        'status',
+        'type',
+        'state',
+        'bank_account_id',
+        'bank_movement_id',
+        'installment_id',
+        'moviment_id',
+        'created_at',
+        'updated_at',
+        'bank_id',
+
+    ];
+    public function bank()
     {
-        return $this->hasOne(BankMovement::class, 'pay_installment_id')->latestOfMany();
+        return $this->belongsTo(Bank::class, 'bank_id');
+    }
+    public function installment()
+    {
+        return $this->belongsTo(Installment::class, 'installment_id');
+    }
+    public function movements()
+    {
+        return $this->hasMany(Moviment::class, 'pay_installment_id');
+    }
+    public function movement()
+    {
+        return $this->hasOne(Moviment::class, 'pay_installment_id')->latest('id');
+    }
+
+    public function latest_bank_movement()
+    {
+        return $this->belongsTo(BankMovement::class, 'bank_movement_id');
     }
     public function bank_account()
     {
         return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
- }
- 
-
+}

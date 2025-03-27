@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('pay_installments', function (Blueprint $table) {
-            $table->foreignId('bank_account_id')->nullable()->unsigned()->constrained('bank_accounts');
-          
+            $table->foreignId('bank_movement_id')->nullable()->unsigned()->constrained('bank_movements');
         });
     }
 
@@ -27,8 +26,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('pay_installments', function (Blueprint $table) {
-            if (Schema::hasColumn('pay_installments', 'bank_account_id')) {
-                $table->dropColumn('bank_account_id');
+            if (Schema::hasColumn('pay_installments', 'bank_movement_id')) {
+                $table->dropColumn('bank_movement_id');
             }
         });
     }

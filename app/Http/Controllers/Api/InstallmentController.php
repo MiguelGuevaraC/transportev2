@@ -126,6 +126,7 @@ class InstallmentController extends Controller
             'moviment',
             'moviment.creditNote',
             'moviment.person',
+            'moviment.person.anticipos_cliente_con_saldo',
             'payInstallments',
             'payInstallments.bank'
             , 'payInstallments.latest_bank_movement'
@@ -334,10 +335,9 @@ class InstallmentController extends Controller
 
         $validatedData = $request->validated();
 
-        if (!$validatedData || empty($validatedData)) {
+        if (! $validatedData || empty($validatedData)) {
             return response()->json(['error' => 'Datos no válidos o incompletos'], 422);
         }
-        
 
         // Asignar valores con fallback a 0
         $efectivo     = $validatedData['cash'] ?? 0;
@@ -374,53 +374,31 @@ class InstallmentController extends Controller
         // Buscar cuenta bancaria
         $bank_account = isset($validatedData['bank_account_id']) ? BankAccount::find($validatedData['bank_account_id']) : null;
 
-
         // Crear pago
         $installmentPay = PayInstallment::create([
-            'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'paymentDate'     => isset($validatedData['paymentDate']) ? $validatedData['paymentDate'] : null,
-            'total'           => $total,
-            'yape'            => $yape,
-            'deposit'         => $deposito,
-            'cash'            => $efectivo,
-            'card'            => $tarjeta,
-            'plin'            => $plin,
-            'type'            => 'Pago Amortizado',
-            'nroOperacion'    => $nroOperacion,
-            'comment'         => $comentario,
-            'installment_id'  => $installment->id,
-           'bank_id' => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : optional($bank_account)->bank_id,
-
-            'is_detraction'   => isset($validatedData['is_detraction']) ? $validatedData['is_detraction'] : 0,
-            'bank_account_id' => isset($bank_account) ? $bank_account->id : null,
+            'number'           => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'paymentDate'      => isset($validatedData['paymentDate']) ? $validatedData['paymentDate'] : null,
+            'total'            => $total,
+            'yape'             => $yape,
+            'deposit'          => $deposito,
+            'cash'             => $efectivo,
+            'card'             => $tarjeta,
+            'plin'             => $plin,
+            'type'             => 'Pago Amortizado',
+            'nroOperacion'     => $nroOperacion,
+            'comment'          => $comentario,
+            'installment_id'   => $installment->id,
+            'bank_id'          => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : optional($bank_account)->bank_id,
+            'bank_movement_id' => isset($validatedData['bank_movement_id']) ? $validatedData['bank_movement_id'] : null,
+            'is_detraction'    => isset($validatedData['is_detraction']) ? $validatedData['is_detraction'] : 0,
+            'bank_account_id'  => isset($bank_account) ? $bank_account->id : null,
         ]);
-        
 
         // Registrar movimiento bancario si hay cuenta bancaria
-        if ($bank_account && $bank_account!= null) {
-            $moviment= Moviment::find($installment->moviment_id);
-            $isanticipo=isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0;
-            $this->bankmovementService->createBankMovement([
-                'pay_installment_id'     => $installmentPay->id,
-                'bank_id'                => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : null,
-                'is_anticipo'            => $isanticipo,
-                'total_anticipado'       => isset($validatedData['total_anticipado']) ? $validatedData['total_anticipado'] : 0,
-                'bank_account_id'        => isset($bank_account) ? $bank_account->id : null,
-                'currency'               => isset($bank_account) ? $bank_account->currency : null,
-                'date_moviment'          => isset($validatedData['paymentDate']) ? $validatedData['paymentDate'] : null,
-                'total_moviment'         => $total,
-                'comment'                => isset($comentario) ? $comentario : null,
-                'user_created_id'        => Auth::user()->id,
-                'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
-                'person_id'              => isset($moviment->person_id) ? $moviment->person_id : null,
-                'type_moviment'          => 'ENTRADA',
-                'number_operation'          => $nroOperacion,
-            ]);
-            $person_anticipo= Person::find($moviment->person_id);
-            if($person_anticipo && $isanticipo!=0){
-                $person_anticipo->updateAnticipadoAmount();
-            }
-            
+        $isanticipo   = isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0;
+        $mov_anticipo = $this->bankmovementService->getBankMovementById($validatedData['bank_movement_id']);
+        if ($isanticipo == 1 && $mov_anticipo) {
+            $mov_anticipo->update_montos_anticipo();
         }
 
         // Verificar si todas las cuotas del movimiento están pagadas
@@ -435,7 +413,12 @@ class InstallmentController extends Controller
         }
 
         return response()->json(
-            PayInstallment::with(['bank', 'latest_bank_movement', 'bank_account'])->find($installmentPay->id),
+            PayInstallment::with(['bank', 'latest_bank_movement', 'bank_account',
+            'installment.moviment',
+            'installment.moviment.creditNote',
+            'installment.moviment.person',
+            'installment.moviment.person.anticipos_cliente_con_saldo',
+            ])->find($installmentPay->id),
             200
         );
     }

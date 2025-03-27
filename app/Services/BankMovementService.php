@@ -31,6 +31,7 @@ class BankMovementService
         return $proyect;
     }
 
+
     public function destroyById($id)
     {
         return BankMovement::find($id)?->delete() ?? false;

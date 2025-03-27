@@ -289,6 +289,7 @@ class Reception extends Model
 
         'comment',
         'tokenResponsible',
+        'amount_fundo',
 
         'address',
         'status',

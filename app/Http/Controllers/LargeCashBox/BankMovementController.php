@@ -144,7 +144,12 @@ class BankMovementController extends Controller
 
     public function store(StoreBankMovementRequest $request)
     {
-        $bank = $this->bankmovementService->createBankMovement($request->validated());
+        $data = $request->validated();
+        if ($request->transaction_concept_id == 1) {
+            $data['total_anticipado_restante'] = $request->total_moviment;
+            $data['total_anticipado']          = $request->total_moviment;
+        }
+        $bank = $this->bankmovementService->createBankMovement($data);
         return new BankMovementResource($bank);
     }
 

@@ -13,9 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('pay_installments', function (Blueprint $table) {
-            $table->foreignId('bank_account_id')->nullable()->unsigned()->constrained('bank_accounts');
-          
+        Schema::table('receptions', function (Blueprint $table) {
+            $table->decimal('amount_fundo', 15, 2)->default(0)->nullable();
         });
     }
 
@@ -26,9 +25,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('pay_installments', function (Blueprint $table) {
-            if (Schema::hasColumn('pay_installments', 'bank_account_id')) {
-                $table->dropColumn('bank_account_id');
+        Schema::table('receptions', function (Blueprint $table) {
+            if (Schema::hasColumn('receptions', 'amount_fundo')) {
+                $table->dropColumn('amount_fundo');
             }
         });
     }
