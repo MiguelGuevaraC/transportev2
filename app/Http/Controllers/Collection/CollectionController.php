@@ -122,7 +122,7 @@ class CollectionController extends Controller
     ) as carga'), 'carrier_guides.numero as guide_number', 'carrier_guides.id as guide_id'
 
         )
-            ->join('carrier_guides', function ($join) {
+        ->leftJoin('carrier_guides', function ($join) {
                 $join->on('receptions.id', '=', 'carrier_guides.reception_id')
                     ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
             })

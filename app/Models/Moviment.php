@@ -314,7 +314,7 @@ class Moviment extends Model
     public function installmentPendientes()
     {
         return $this->hasMany(Installment::class)
-            ->where('status', 'Pendiente')
+            ->where('totalDebt', '>',0)
             ->orderBy('date', 'asc'); // Prioriza las fechas de vencimiento más próximas
     }
 

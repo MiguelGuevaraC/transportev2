@@ -135,8 +135,15 @@ class PayInstallmentController extends Controller
             $movement_anticipo = BankMovement::find($object->latest_bank_movement->id);
             $movement_anticipo->update_montos_anticipo();
         }
-        $installment = Installment::with(['moviment', 'moviment.person', 'payInstallments',
-            'payInstallments.bank'])->find($installment->id);
+        $installment = Installment::with([
+            'moviment',
+            'moviment.creditNote',
+            'moviment.person',
+            'moviment.person.anticipos_cliente_con_saldo',
+            'payInstallments',
+            'payInstallments.bank'
+            , 'payInstallments.latest_bank_movement'
+            , 'payInstallments.bank_account'])->find($installment->id);
 
         return response()->json(['installment' => $installment], 200);
     }
