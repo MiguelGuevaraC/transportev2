@@ -70,7 +70,10 @@ class BankMovement extends Model
         parent::boot();
 
         static::saved(function ($movement) {
-            $movement->bank_account->updateBalance();
+            if (isset($movement->bank_account)) {
+                $movement->bank_account->updateBalance();
+            }
+            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();
@@ -78,7 +81,10 @@ class BankMovement extends Model
         });
 
         static::updated(function ($movement) {
-            $movement->bank_account->updateBalance();
+            if (isset($movement->bank_account)) {
+                $movement->bank_account->updateBalance();
+            }
+            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();
@@ -86,7 +92,10 @@ class BankMovement extends Model
         });
 
         static::deleted(function ($movement) {
-            $movement->bank_account->updateBalance();
+            if (isset($movement->bank_account)) {
+                $movement->bank_account->updateBalance();
+            }
+            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();

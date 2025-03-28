@@ -150,9 +150,20 @@ class PayInstallment extends Model
         return $this->hasOne(Moviment::class, 'pay_installment_id')->latest('id');
     }
 
-    public function latest_bank_movement()
+    public function latest_bank_movement_anticipo()
     {
         return $this->belongsTo(BankMovement::class, 'bank_movement_id');
+    }
+    public function latest_bank_movement()
+    {
+        return $this->is_anticipo
+        ? $this->latest_bank_movement_anticipo()
+        : $this->latest_bank_movement_transaction();
+    }
+
+    public function latest_bank_movement_transaction()
+    {
+        return $this->hasOne(BankMovement::class, 'pay_installment_id')->latestOfMany();
     }
     public function bank_account()
     {

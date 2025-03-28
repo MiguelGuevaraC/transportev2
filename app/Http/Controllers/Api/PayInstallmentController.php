@@ -132,8 +132,14 @@ class PayInstallmentController extends Controller
 
         $installment->updateMontos();
         if ($object->latest_bank_movement) {
-            $movement_anticipo = BankMovement::find($object->latest_bank_movement->id);
-            $movement_anticipo->update_montos_anticipo();
+            
+            if ($object->latest_bank_movement->transaction_concept_id == 1) {
+                $movement_anticipo = BankMovement::find($object->latest_bank_movement->id);
+                $movement_anticipo->update_montos_anticipo();
+            } else {
+                $movement = BankMovement::find($object->latest_bank_movement->id);
+                $movement->delete();
+            }
         }
         $installment = Installment::with([
             'moviment',

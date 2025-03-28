@@ -5,6 +5,7 @@ use App\Exports\ReceptionsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
+use App\Models\CarrierGuide;
 use App\Models\DetailReception;
 use App\Models\Reception;
 use App\Models\Route;
@@ -813,21 +814,33 @@ class ReceptionController extends Controller
         }
 
         // 2. Construir query base con solo las relaciones necesarias
-        $query = Reception::with([
+        $query = Reception:: select(
+            'receptions.*',
+            DB::raw('(
+                SELECT GROUP_CONCAT(description SEPARATOR ", ")
+                FROM detail_receptions
+                WHERE detail_receptions.reception_id = receptions.id
+            ) as carga'),
+            'carrier_guides.numero as guide_number',
+            'carrier_guides.id as guide_id' // Aquí el error podría estar en la coma antes del cierre
+        )->leftJoin('carrier_guides', function ($join) {
+            $join->on('receptions.id', '=', 'carrier_guides.reception_id')
+                ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
+        })->with([
             'user:id,username',
             'origin:id,name',
             'sender',
             'destination:id,name',
             'recipient',
             'payResponsible',
-            'firstCarrierGuide' => function ($query) {
-                $query->select(
-                    'carrier_guides.id',
-                    'carrier_guides.reception_id',
-                    'carrier_guides.numero',
-                    'carrier_guides.programming_id'
-                );
-            },
+            // 'firstCarrierGuide' => function ($query) {
+            //     $query->select(
+            //         'carrier_guides.id',
+            //         'carrier_guides.reception_id',
+            //         'carrier_guides.numero',
+            //         'carrier_guides.programming_id'
+            //     );
+            // },
             'moviment:id,reception_id,sequentialNumber',
         ]);
 
@@ -878,28 +891,31 @@ class ReceptionController extends Controller
     {
         // Filtro por sucursal
         if (! empty($filters['branch_office_id'])) {
-            $query->where('branchOffice_id', $filters['branch_office_id']);
+            $query->where('receptions.branchOffice_id', $filters['branch_office_id']);
         }
 
         // Filtro por código recepción
         if (! empty($filters['codeReception'])) {
-            $query->where('codeReception', 'LIKE', '%' . $filters['codeReception'] . '%');
+            $query->where('receptions.codeReception', 'LIKE', '%' . $filters['codeReception'] . '%');
         }
 
         // Filtros por fechas
         if (! empty($filters['dateStart'])) {
-            $query->whereDate('receptionDate', '>=', $filters['dateStart']);
+            $query->whereDate('receptions.receptionDate', '>=', $filters['dateStart']);
         }
 
         if (! empty($filters['dateEnd'])) {
-            $query->whereDate('receptionDate', '<=', $filters['dateEnd']);
+            $query->whereDate('receptions.receptionDate', '<=', $filters['dateEnd']);
         }
 
         // Filtro por guía
+        // if (! empty($filters['numberGuia'])) {
+        //     $query->whereHas('firstCarrierGuide', function ($q) use ($filters) {
+        //         $q->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
+        //     });
+        // }
         if (! empty($filters['numberGuia'])) {
-            $query->whereHas('firstCarrierGuide', function ($q) use ($filters) {
-                $q->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
-            });
+            $query->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
         }
 
         // Filtros por nombres (remitente, destinatario, cliente que paga)
@@ -919,9 +935,9 @@ class ReceptionController extends Controller
         // Filtro por número de venta
         if (! empty($filters['numberVenta'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('nro_sale', $filters['numberVenta'])
+                $q->where('receptions.nro_sale', $filters['numberVenta'])
                     ->orWhere(function ($sq) use ($filters) {
-                        $sq->whereNull('nro_sale')
+                        $sq->whereNull('receptions.nro_sale')
                             ->whereHas('moviment', function ($mq) use ($filters) {
                                 $mq->where('sequentialNumber', 'LIKE', '%' . $filters['numberVenta'] . '%');
                             });
@@ -1059,6 +1075,17 @@ class ReceptionController extends Controller
             $carga = isset($detailsMap[$reception->id])
             ? $detailsMap[$reception->id]->pluck('description')->implode(', ')
             : '-';
+
+            $reception->firstCarrierGuide= CarrierGuide::with([
+                'districtStart.province.department',
+                'districtEnd.province.department',
+                'motive', 'sender', 'recipient', 'payResponsible',
+                'programming',
+                'programming.tract',
+                'programming.platform',
+                'programming.origin',
+                'programming.destination',
+            ])->find($reception->guide_id); // Obtener la guía específica
 
             // Preparar datos para exportación
             $exportData[] = [

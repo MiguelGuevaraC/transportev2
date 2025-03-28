@@ -2,7 +2,6 @@
 namespace App\Http\Controllers\Collection;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ReceptionResource;
 use App\Models\Address;
 use App\Models\BranchOffice;
 use App\Models\CarrierGuide;
@@ -114,15 +113,17 @@ class CollectionController extends Controller
             $receptionsQuery->whereDate('receptionDate', '<=', $dateEnd);
         }
 
-        $receptionsQuery = Reception::select('receptions.*',
+        $receptionsQuery = Reception::select(
+            'receptions.*',
             DB::raw('(
-        SELECT GROUP_CONCAT(description SEPARATOR ", ")
-        FROM detail_receptions
-        WHERE detail_receptions.reception_id = receptions.id
-    ) as carga'), 'carrier_guides.numero as guide_number', 'carrier_guides.id as guide_id'
-
+                SELECT GROUP_CONCAT(description SEPARATOR ", ")
+                FROM detail_receptions
+                WHERE detail_receptions.reception_id = receptions.id
+            ) as carga'),
+            'carrier_guides.numero as guide_number',
+            'carrier_guides.id as guide_id' // Aquí el error podría estar en la coma antes del cierre
         )
-        ->leftJoin('carrier_guides', function ($join) {
+            ->leftJoin('carrier_guides', function ($join) {
                 $join->on('receptions.id', '=', 'carrier_guides.reception_id')
                     ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
             })
@@ -420,7 +421,8 @@ class CollectionController extends Controller
         $response = [
             'receptions'    => [
                 'total'          => $receptions->total(),
-                'data'           => ReceptionResource::collection($receptions->items()),
+                // 'data'           => ReceptionResource::collection($receptions->items()),
+                'data'           => $receptions->items(),
                 'current_page'   => $receptions->currentPage(),
                 'last_page'      => $receptions->lastPage(),
                 'per_page'       => $receptions->perPage(),

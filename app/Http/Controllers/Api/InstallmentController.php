@@ -401,12 +401,30 @@ class InstallmentController extends Controller
         ]);
 
         // Registrar movimiento bancario si hay cuenta bancaria
-        $isanticipo   = isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0;
-        $mov_anticipo = $this->bankmovementService->getBankMovementById($validatedData['bank_movement_id']);
-        if ($isanticipo == 1 && $mov_anticipo) {
-            $mov_anticipo->update_montos_anticipo();
-        }
+        $isanticipo = isset($validatedData['is_anticipo']) ? $validatedData['is_anticipo'] : 0;
 
+        if ($isanticipo == 1) {
+            $mov_anticipo = $this->bankmovementService->getBankMovementById($validatedData['bank_movement_id']);
+            $mov_anticipo->update_montos_anticipo();
+        } else {
+            if ($bank_account) {
+                $data_movement_bank = [
+                    'pay_installment_id'     => isset($installmentPay->id) ? $installmentPay->id : null,
+                    'bank_id'                => isset($bank_account->bank_id) ? $bank_account->bank_id : null,
+                    'bank_account_id'        => isset($bank_account->id) ? $bank_account->id : null,
+                    'currency'               => isset($bank_account->currency) ? $bank_account->currency : null,
+                    'date_moviment'          => isset($installmentPay->paymentDate) ? $installmentPay->paymentDate : null,
+                    'total_moviment'         => isset($total) ? $total : null,
+                    'comment'                => isset($installmentPay->comment) ? $installmentPay->comment : null,
+                    'user_created_id'        => isset(Auth::user()->id) ? Auth::user()->id : null,
+                    'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
+                    'person_id'              => isset($installmentPay->installment->moviment->person->id) ? $installmentPay->installment->moviment->person->id : null,
+                    'type_moviment'          => 'ENTRADA',
+                ];
+                $this->bankmovementService->createBankMovement($data_movement_bank);
+            }
+
+        }
         // Verificar si todas las cuotas del movimiento están pagadas
         $moviment = Moviment::find($installment->moviment_id);
         if ($moviment) {
@@ -420,10 +438,10 @@ class InstallmentController extends Controller
 
         return response()->json(
             PayInstallment::with(['bank', 'latest_bank_movement', 'bank_account',
-            'installment.moviment',
-            'installment.moviment.creditNote',
-            'installment.moviment.person',
-            'installment.moviment.person.anticipos_cliente_con_saldo',
+                'installment.moviment',
+                'installment.moviment.creditNote',
+                'installment.moviment.person',
+                'installment.moviment.person.anticipos_cliente_con_saldo',
             ])->find($installmentPay->id),
             200
         );

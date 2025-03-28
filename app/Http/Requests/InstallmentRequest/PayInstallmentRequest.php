@@ -34,7 +34,7 @@ class PayInstallmentRequest extends StoreRequest
             'plin'                   => 'nullable|numeric',
             'comment'                => 'nullable|string',
             'installment_id'         => 'required|exists:installments,id',
-            'bank_id'                => 'nullable|exists:banks,id',
+            'bank_id'                => 'sometimes|exists:banks,id',
 
             'card'                   => 'nullable|numeric',
             'deposit'                => 'nullable|numeric',
@@ -73,9 +73,8 @@ class PayInstallmentRequest extends StoreRequest
                 },
             ],
 
-            'bank_movement_id'       => 'required_if:is_anticipo,1|exists:bank_movements,id,deleted_at,NULL',
-
-            'transaction_concept_id' => 'required_if:is_anticipo,1|exists:transaction_concepts,id,deleted_at,NULL',
+            'bank_movement_id'       => 'nullable|required_if:is_anticipo,1|exists:bank_movements,id,deleted_at,NULL',
+            'transaction_concept_id' => 'nullable|required_if:is_anticipo,1|exists:transaction_concepts,id,deleted_at,NULL',
         ];
     }
 
