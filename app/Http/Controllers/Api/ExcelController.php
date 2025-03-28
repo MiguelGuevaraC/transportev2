@@ -960,7 +960,7 @@ class ExcelController extends Controller
         foreach ($notascredito as $nc) {
             // $nc=CreditNote::with(['moviment'])->find($nc->id);
             $moviment=Moviment::find($nc->moviment_id);
-            if ($moviment->creditNote) { // Ventas con nota de crédito
+            if ($moviment && $moviment->creditNote) { // Ventas con nota de crédito
                 $fechaEmisionNC = $moviment->creditNote->created_at ? Carbon::parse($moviment->creditNote->created_at) : false;
 
                 if ($fechaEmisionNC && $fechaEmisionNC->between($start, $end)) {
