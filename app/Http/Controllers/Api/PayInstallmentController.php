@@ -124,6 +124,13 @@ class PayInstallmentController extends Controller
 
         $installment = Installment::find($object->installment_id);
 
+        if (!empty($object->latest_bank_movement) && $object->latest_bank_movement->status === "Confirmado") {
+            return response()->json([
+                'message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.'
+            ], 422);
+        }
+        
+        
         $venta = Moviment::find($installment->moviment_id);
                            // if ($venta->status == "Anulada") {
                            //     return response()->json(['message' => 'La Venta está Anulada'], 422); // Cambiado a 404 para mejor claridad

@@ -128,9 +128,10 @@ class InstallmentController extends Controller
             'moviment.person',
             'moviment.person.anticipos_cliente_con_saldo',
             'payInstallments',
-            'payInstallments.bank'
-            , 'payInstallments.latest_bank_movement'
-            , 'payInstallments.bank_account',
+            'payInstallments.bank',
+            'payInstallments.latest_bank_movement_anticipo',  // Relación real
+            'payInstallments.latest_bank_movement_transaction', // Relación real
+            'payInstallments.bank_account',
 
         ]);
 

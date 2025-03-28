@@ -238,6 +238,17 @@ class BankMovementController extends Controller
                 'error' => 'Movimiento de Banco No Encontrada.',
             ], 404);
         }
+        if ($bank->status === "Confirmado") {
+            return response()->json([
+                'message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.',
+            ], 422);
+        }
+        if ($bank->pay_installments()->exists()) {
+            return response()->json([
+                'message' => 'Este anticipo ya ha sido aplicado en una o más amortizaciones y no se puede eliminar.',
+            ], 422);
+        }
+
         $bank = $this->bankmovementService->destroyById($id);
         return response()->json([
             'message' => 'Movimiento de Banco eliminado exitosamente',
