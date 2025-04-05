@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 @php
-
+    use App\Models\CarrierGuide;
     header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -217,9 +217,9 @@
                             <td class="font-12 left">
                                 {{ str_replace([' ', '-'], '', strtoupper(data_get($object, 'tract.currentPlate', ''))) }}
                             </td>
-                            
-                            
-                             
+
+
+
 
                             <td class="font-14 tdInfo"><b>FECHA VIAJE:</b></td>
                             <td class="font-12 left">
@@ -238,7 +238,7 @@
                             <td class="font-12 left">
                                 {{ str_replace([' ', '-'], '', strtoupper(data_get($object, 'platform.currentPlate', ''))) }}
                             </td>
-                            
+
 
                             <td class="font-14 tdInfo"><b>TOTAL GRT:</b></td>
                             <td class="font-12 left">{{ count($object['carrierGuides']) }}</td>
@@ -281,6 +281,12 @@
                         <th>ESTADO ENTREGA</th>
                     </tr>
                 </thead>
+                <?php 
+                $object['carrierGuides']= $object['carrierGuides']
+                                ->filter(function ($item) {
+                                    return $item->status_facturado !== 'Anulada';
+                                });
+                ?>
                 @if (count($object['carrierGuides']) > 0)
                     <tbody>
                         @php
@@ -290,13 +296,17 @@
                             $sumaSaldo = 0;
 
                             // Ordenar carrierGuides por punto de partida y luego por punto de llegada
-                            $carrierGuidesSorted = $object['carrierGuides']->sortBy(function ($item) {
-                                return [$item->reception->origin->name, $item->reception->destination->name];
-                            });
+                            $carrierGuidesSorted = $object['carrierGuides']
+                                
+                                ->sortBy(function ($item) {
+                                    return [$item->reception->origin->name, $item->reception->destination->name];
+                                });
+
                         @endphp
                         @foreach ($carrierGuidesSorted as $item)
                             {{-- Usa la colección ordenada --}}
                             @php
+                                $guiagrt = CarrierGuide::find($item->id);
                                 $reception = $item->reception ?? null;
                                 $details = $reception ? $reception->details()->pluck('description')->toArray() : [];
                                 $flete = 0;
@@ -322,19 +332,22 @@
                                 <td width="9%" style="text-align: center">
                                     {{ $details ? implode(', ', $details) : ($titulo === 'MANIFIESTO DE CARGA CONDUCTOR' ? 'Manifiesto sin Detalles' : 'Sin detalles') }}
                                 </td>
-                                <td width="15%" style="text-align: center">{{ $reception ? namePerson($reception?->firstCarrierGuide?->sender) : '-' }}</td>
-                                <td width="15%" style="text-align: center">{{ $reception ? namePerson($reception?->firstCarrierGuide?->recipient) : '-' }}</td>
-                                <td width="5%">{{ $reception ? $reception?->firstCarrierGuide?->origin?->name : '-' }}</td>
-                                <td width="5%">{{ $reception ? $reception?->firstCarrierGuide?->destination?->name : '-' }}</td>
-                                <td width="15%">{{ $reception?->firstCarrierGuide->document ?? '-' }}</td>
-                                <td width="10%">{{ $reception?->firstCarrierGuide?->numero ?? '-' }}</td>
+                                <td width="15%" style="text-align: center">
+                                    {{ $guiagrt ? namePerson($guiagrt?->sender) : '-' }}</td>
+                                <td width="15%" style="text-align: center">
+                                    {{ $guiagrt ? namePerson($guiagrt?->recipient) : '-' }}</td>
+                                <td width="5%">{{ $guiagrt ? $guiagrt?->origin?->name : '-' }}</td>
+                                <td width="5%">{{ $guiagrt ? $guiagrt?->destination?->name : '-' }}</td>
+                                <td width="15%">{{ $guiagrt->document ?? '-' }}</td>
+                                <td width="10%">{{ $guiagrt?->numero ?? '-' }}</td>
                                 <td width="5%">{{ $reception->netWeight ?? 0 }}</td>
                                 @if ($titulo !== 'MANIFIESTO DE CARGA CONDUCTOR')
                                     <td width="5%">{{ $flete }}</td>
                                 @else
                                     <td width="5%">{{ $flete }}</td>
                                 @endif
-                                <td width="5%">{{ $reception->debtAmount == -1 ? '' : $reception->debtAmount }}</td>
+                                <td width="5%">{{ $reception->debtAmount == -1 ? '' : $reception->debtAmount }}
+                                </td>
                                 <td width="5%">{{ $reception->conditionPay ?? '-' }}</td>
                                 <td width="5%">{{ $item->status }}</td>
                             </tr>
@@ -346,7 +359,7 @@
                             <td class="conBordetd total">TOTAL</td>
                             <td class="conBordetd">{{ $sumaPeso }}</td>
                             {{-- @if ($titulo !== 'MANIFIESTO DE CARGA CONDUCTOR') --}}
-                                <td class="conBordetd">{{ $sumFlete }}</td>
+                            <td class="conBordetd">{{ $sumFlete }}</td>
                             {{-- @endif --}}
                             <td class="conBordetd">{{ $sumaSaldo }}</td>
                             <td colspan="2"></td>

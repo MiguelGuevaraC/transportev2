@@ -26,18 +26,15 @@ class PayInstallmentRequest extends StoreRequest
     public function rules()
     {
         return [
-            'paymentDate'            => 'required|date',
-            'yape'                   => 'nullable|numeric',
+           'bank_id' => 'sometimes|nullable|exists:banks,id,deleted_at,NULL',
 
-            'cash'                   => 'nullable|numeric',
-
-            'plin'                   => 'nullable|numeric',
-            'comment'                => 'nullable|string',
-            'installment_id'         => 'required|exists:installments,id',
-            'bank_id'                => 'sometimes|exists:banks,id',
-
+            'bank_movement_id'       => 'sometimes|nullable|required_if:is_anticipo,1|exists:bank_movements,id,deleted_at,NULL',
             'card'                   => 'nullable|numeric',
+            'cash'                   => 'nullable|numeric',
+            'comment'                => 'nullable|string',
             'deposit'                => 'nullable|numeric',
+            'installment_id'         => 'required|exists:installments,id',
+
             'is_anticipo'            => [
                 'nullable',
                 'boolean',
@@ -62,6 +59,12 @@ class PayInstallmentRequest extends StoreRequest
                 },
             ],
 
+            'is_detraction'          => 'nullable',
+            'nroOperacion'           => 'nullable',
+            'paymentDate'            => 'required|date',
+            'plin'                   => 'nullable|numeric',
+
+            'yape'                   => 'nullable|numeric',
             'bank_account_id'        => [
                 'required_if:is_anticipo,1',
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
@@ -73,7 +76,6 @@ class PayInstallmentRequest extends StoreRequest
                 },
             ],
 
-            'bank_movement_id'       => 'nullable|required_if:is_anticipo,1|exists:bank_movements,id,deleted_at,NULL',
             'transaction_concept_id' => 'nullable|required_if:is_anticipo,1|exists:transaction_concepts,id,deleted_at,NULL',
         ];
     }
@@ -95,8 +97,8 @@ class PayInstallmentRequest extends StoreRequest
             'installment_id.required'            => 'El ID de la cuota es obligatorio.',
             'installment_id.exists'              => 'El ID de la cuota no existe en la base de datos.',
 
-            'bank_id.required'                   => 'El ID de la cuota es obligatorio.',
-            'bank_id.exists'                     => 'El ID de la cuota no existe en la base de datos.',
+            'bank_id.required'                   => 'El ID del Banco es obligatorio.',
+            'bank_id.exists'                     => 'El ID del Banco no existe en la base de datos.',
 
             'is_anticipo.boolean'                => 'El campo "Es anticipo" debe ser 1 o 0.',
             'total_anticipado.numeric'           => 'El campo "Total anticipado" debe ser un número.',

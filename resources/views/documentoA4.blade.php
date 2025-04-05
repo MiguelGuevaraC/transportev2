@@ -553,7 +553,7 @@
                 <th class="item ">Cant</th>
                 <th class="quantity ">GRT</th>
                 <th class="unitPrice ">Placa</th>
-                <!-- <th class="sailPrice">OS</th> -->
+                <th class="sailPrice">OS</th>
                 <th class="description ">Descripción</th>
                 <!-- <th class="sailPrice">UM</th>
                 <th class="sailPrice">Cant.</th>
@@ -588,6 +588,7 @@
 
                 <td class="center font-10"> <?php echo $detHab['guia']; ?> </td>
                 <td class="center font-10"> <?php echo $detHab['placaVehiculo']; ?> </td>
+                <td class="center font-10"> <?php echo $detHab['os']; ?> </td>
                 <!-- <td class="center font-10"> -->
 
                 <!-- </td>  -->

@@ -209,7 +209,7 @@ class Programming extends Model
 
     const filters = [
         'numero' => 'like',
-  
+
     ];
     const sorts = [
         'id' => 'desc',
@@ -273,7 +273,14 @@ class Programming extends Model
     }
     public function carrierGuides()
     {
-        return $this->hasMany(CarrierGuide::class);
+        return $this->hasMany(CarrierGuide::class)
+        ->where('status_facturado', '!=', 'Anulada');
+    }
+
+    public function carrierGuides_sin_anuladas()
+    {
+        return $this->hasMany(CarrierGuide::class)
+            ->where('status_facturado', '!=', 'Anulada');
     }
 
     public function driverExpenses()

@@ -27,15 +27,22 @@ class PayMasiveSaleRequest extends StoreRequest
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
             ],
 
-            'transaction_concept_id'     => [
-                'required_with:bank_account_id', // Se requiere si 'bank_account_id' está presente y no es null
-                'exists:transaction_concepts,id,deleted_at,NULL',
-            ],
+            // 'transaction_concept_id'     => [
+            //     'required_with:bank_account_id', // Se requiere si 'bank_account_id' está presente y no es null
+            //     'exists:transaction_concepts,id,deleted_at,NULL',
+            // ],
 
             'bank_id'                    => [
                 'required_with:bank_account_id', // Se requiere si 'bank_account_id' está presente y no es null
                 'exists:banks,id,deleted_at,NULL',
             ],
+
+            'nroOperacion'               => [
+                'nullable',
+                'string',
+                Rule::unique('pay_installments', 'nroOperacion')->whereNull('deleted_at'),
+            ],
+            'comentario'                 => 'nullable',
 
             'paymasive.*.installment_id' => 'required|integer|exists:installments,id,deleted_at,NULL',
             'paymasive.*.amount'         => [
@@ -84,6 +91,8 @@ class PayMasiveSaleRequest extends StoreRequest
 
             'bank_id.required_if'                => 'El banco es obligatorio cuando se selecciona una cuenta bancaria.',
             'bank_id.exists'                     => 'El banco seleccionado no es válido o ha sido eliminado.',
+
+            'nroOperacion.unique'                => 'El número de operación ya está en uso.',
         ];
     }
 

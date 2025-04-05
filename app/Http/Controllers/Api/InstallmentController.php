@@ -421,6 +421,7 @@ class InstallmentController extends Controller
                     'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
                     'person_id'              => isset($installmentPay->installment->moviment->person->id) ? $installmentPay->installment->moviment->person->id : null,
                     'type_moviment'          => 'ENTRADA',
+                    'number_operation'          => $nroOperacion,
                 ];
                 $this->bankmovementService->createBankMovement($data_movement_bank);
             }

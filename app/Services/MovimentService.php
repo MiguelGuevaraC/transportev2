@@ -87,6 +87,11 @@ class MovimentService
             $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
             $bank_account = isset($validatedData['bank_account_id']) ? BankAccount::find($validatedData['bank_account_id']) : null;
+            $bank_id      = isset($validatedData['bank_id']) ? $validatedData['bank_id'] : null;
+
+            $nroOperacion = $validatedData['nroOperacion'] ?? '';
+            $comentario   = $validatedData['comentario'] ?? '';
+            $total        = $amount;
 
             $payData = [
                 'number'          => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
@@ -95,32 +100,34 @@ class MovimentService
                 'installment_id'  => $installment->id,
                 'type'            => 'Pago Masivo',
                 'bank_account_id' => $bank_account != null ? $bank_account->id : null,
+                'bank_id'         => $bank_id ?? null,
+                'nroOperacion'    => $nroOperacion,
+                'comment'         => $comentario,
             ];
 
             // Registrar el pago en la tabla `pay_installments`
-            $installmentPay    = PayInstallment::create($payData);
+            $installmentPay = PayInstallment::create($payData);
+
             $payinstallments[] = $installmentPay;
             $moviment          = $installment->moviment;
             $moviment->updateSaldo();
 
             if ($bank_account != null) {
-                $user               = Auth::user()->id;
                 $data_movement_bank = [
                     'pay_installment_id'     => isset($installmentPay->id) ? $installmentPay->id : null,
-                    'bank_id'                => ($bank_account) ? $bank_account->bank_id : null,
+                    'bank_id'                => isset($bank_id) ? $bank_id : null,
                     'bank_account_id'        => isset($bank_account->id) ? $bank_account->id : null,
                     'currency'               => isset($bank_account->currency) ? $bank_account->currency : null,
-                    'date_moviment'          => now(),
-                    'total_moviment'         => $amount ?? 0,
-                    'comment'                => 'Pago Masivo',
-                    'user_created_id'        => isset($user->id) ? $user->id : null,
-                    'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : null,
-                    'person_id'              => isset($installmentPay->person_id) ? $installmentPay->person_id : null,
+                    'date_moviment'          => isset($installmentPay->paymentDate) ? $installmentPay->paymentDate : null,
+                    'total_moviment'         => isset($total) ? $total : null,
+                    'comment'                => isset($installmentPay->comment) ? $installmentPay->comment : null,
+                    'user_created_id'        => isset(Auth::user()->id) ? Auth::user()->id : null,
+                    'transaction_concept_id' => isset($validatedData['transaction_concept_id']) ? $validatedData['transaction_concept_id'] : 5, //deposito en cuenta
+                    'person_id'              => isset($installmentPay->installment->moviment->person->id) ? $installmentPay->installment->moviment->person->id : null,
                     'type_moviment'          => 'ENTRADA',
+                    'number_operation'       => $nroOperacion,
                 ];
-
                 $this->bankmovementService->createBankMovement($data_movement_bank);
-
             }
         }
         Bitacora::create([

@@ -123,14 +123,16 @@ class PayInstallmentController extends Controller
         }
 
         $installment = Installment::find($object->installment_id);
-
-        if (!empty($object->latest_bank_movement) && $object->latest_bank_movement->status === "Confirmado") {
-            return response()->json([
-                'message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.'
-            ], 422);
+        if ($object->latest_bank_movement_transaction) {
+            if ($object->latest_bank_movement->status === "Confirmado") {
+                return response()->json([
+                    'message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.'
+                ], 422);
+            }
         }
         
         
+
         $venta = Moviment::find($installment->moviment_id);
                            // if ($venta->status == "Anulada") {
                            //     return response()->json(['message' => 'La Venta está Anulada'], 422); // Cambiado a 404 para mejor claridad
@@ -138,12 +140,16 @@ class PayInstallmentController extends Controller
         $object->delete(); // Cambia esto si se necesita otra lógica
 
         $installment->updateMontos();
-        if ($object->latest_bank_movement) {
+        if ($object->latest_bank_movement_anticipo) {
             
             if ($object->latest_bank_movement->transaction_concept_id == 1) {
                 $movement_anticipo = BankMovement::find($object->latest_bank_movement->id);
                 $movement_anticipo->update_montos_anticipo();
-            } else {
+            } 
+        }
+
+        if($object->latest_bank_movement_transaction){
+            {
                 $movement = BankMovement::find($object->latest_bank_movement->id);
                 $movement->delete();
             }
