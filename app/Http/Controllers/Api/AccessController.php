@@ -11,7 +11,7 @@ class AccessController extends Controller
     /**
      * Get all Access
      * @OA\Get (
-     *     path="/transporte/public/api/access",
+     *     path="/transportedev/public/api/access",
      *     tags={"Access"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -20,10 +20,10 @@ class AccessController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/User")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/access?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/access?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/access?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/access"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/access?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/access"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)

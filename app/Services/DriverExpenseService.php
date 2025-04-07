@@ -2,8 +2,11 @@
 namespace App\Services;
 
 use App\Models\DriverExpense;
+use App\Models\Payable;
 use App\Models\Programming;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DriverExpenseService
 {
@@ -85,6 +88,34 @@ class DriverExpenseService
     public function destroyById($id)
     {
         return DriverExpense::find($id)?->delete() ?? false;
+    }
+
+    public function generate_credit_payments($id, $dias = 0)
+    {
+        $expense = DriverExpense::find($id);
+
+        if (! $expense) {
+            return false; // Si no se encuentra el gasto, retornamos falso
+        }
+        $tipo         = 'CP01';
+        $siguienteNum = DB::table('payables')
+            ->whereRaw('SUBSTRING_INDEX(number, "-", 1) = ?', [$tipo])
+            ->max(DB::raw('CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)')) + 1;
+
+        // Crear la cuenta por pagar asociada
+        $payableData = [
+            'number'            => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'days'              => $dias,
+            'date'              => now()->addDays($dias),
+            'total'             => $expense->total, // Total de la deuda (basado en el gasto)
+            'totalDebt'         => $expense->total, // Monto de la deuda (puedes ajustarlo si es necesario)
+            'driver_expense_id' => $expense->id,    // Relacionamos la cuenta por pagar con el gasto
+            'user_created_id' => Auth::user()->id,    // Relacionamos la cuenta por pagar con el gasto
+        ];
+
+        $payable = Payable::create($payableData);
+
+        return $payable ? true : false; // Retornar verdadero si la cuenta por pagar se creó correctamente
     }
 
 }

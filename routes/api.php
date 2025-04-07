@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\AccessController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\areaController;
-
 use App\Http\Controllers\Api\BoxController;
 use App\Http\Controllers\Api\BranchOfficeController;
 use App\Http\Controllers\Api\CargoController;
@@ -41,10 +40,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\VentaController;
 use App\Http\Controllers\Api\WorkerController;
-use App\Http\Controllers\BankController;
 use App\Http\Controllers\Collection\CollectionController;
-use App\Models\CreditNote;
-use App\Models\PayInstallment;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -165,8 +161,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('fleet/{id}', [FleetController::class, 'destroy']);
     Route::put('fleet/{id}', [FleetController::class, 'update']);
 
-
-    
     // PLACE
     Route::get('motive', [MotiveController::class, 'index']);
     Route::get('motive/{id}', [MotiveController::class, 'show']);
@@ -198,11 +192,11 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-     Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
-    Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
+   // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    //Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
     Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
-    
+
     // PROGRAMMING
     Route::get('programming', [ProgrammingController::class, 'index']);
     Route::get('programming/{id}', [ProgrammingController::class, 'show']);
@@ -237,7 +231,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('driverExpense/{id}', [DriverExpenseController::class, 'destroy']);
     Route::put('driverExpense/{id}', [DriverExpenseController::class, 'update']);
     Route::post('devolverMontoaCaja', [DriverExpenseController::class, 'devolverMontoaCaja']);
-    
+
     // DETAIL AREA
     Route::get('area', [areaController::class, 'index']);
     Route::get('area/{id}', [areaController::class, 'show']);
@@ -273,7 +267,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('moviment/{id}', [MovimentController::class, 'destroy']);
     Route::put('moviment/{id}', [MovimentController::class, 'update']);
     Route::get('validateBox', [MovimentController::class, 'validateBox']);
-    Route::get('showAperturaMovements', [MovimentController::class, 'showAperturaMovements']); 
+    Route::get('showAperturaMovements', [MovimentController::class, 'showAperturaMovements']);
 
     // INSTALLMENT
     Route::get('installment', [InstallmentController::class, 'index']);
@@ -305,13 +299,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('reporteCuentasPorCobrarExcel', [PdfController::class, 'reporteCuentasPorCobrarExcel'])->name('reportCajaExcel');
     Route::get('salesExcel', [ExcelController::class, 'reporteVentasExcel'])->name('reportVentasExcel');
     Route::get('reporteRecepcionesExcel', [ReceptionController::class, 'reporteRecepcionesExcel'])->name('reporteRecepcionesExcel');
-    
+
     Route::get('reporteDocumentsExcel', [ExcelController::class, 'reporteDocumentsExcel'])->name('reporteDocumentsExcel');
     Route::get('reporteManifiestoExcel/{id}', [ExcelController::class, 'reporteManifiestoExcel'])->name('reporteManifiestoExcel');
     Route::get('reporteDriverConceptExcel/{id}', [ExcelController::class, 'reporteDriverConceptExcel'])->name('reporteDriverConceptExcel');
     Route::get('reporteGuides', [ExcelController::class, 'guidesExcel'])->name('guidesExcel');
     Route::put('changeStatusFacturado/{id}', [CarrierGuideController::class, 'changeStatusFacturacion']);
-    
+
     // /Route::get('reporteReception/{id}', [PdfController::class, 'reporteReception'])->name('reporteReception');
 
     //USERS
@@ -328,13 +322,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('saleIdNumber', [VentaController::class, 'saleIdNumber']);
     Route::get('receptionWithoutSale', [VentaController::class, 'receptionWithoutSale']);
     Route::get('getArchivosDocument/{id}/{tipodocumento}', [VentaController::class, 'getArchivosDocument']);
-    
-    Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
-    Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
-    Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
-     Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
-    
-   Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+
+    //Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
+    //Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
+    //Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
+    //Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
+
+    //Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
 
     Route::get('saleWithoutCreditNote', [VentaController::class, 'saleWithoutCreditNote']);
     Route::get('salesbynumber', [VentaController::class, 'salesbynumber']);
@@ -346,7 +340,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::put('saleManual/{id}', [VentaController::class, 'updateManual']);
     Route::put('saleReceptions/{id}', [VentaController::class, 'updateReceptions']);
     Route::put('saleUpdateMontos/{id}', [VentaController::class, 'updateMontos']);
-    
+
     Route::post('saleWithReceptions', [VentaController::class, 'storeWithReceptions']);
     Route::post('saleManual', [VentaController::class, 'storeManual']);
     Route::get('getNextCorrelative/{prefix}/{id}', [VentaController::class, 'getNextCorrelative']);
@@ -413,21 +407,22 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('cargo', [CargoController::class, 'store']);
     Route::delete('cargo/{id}', [CargoController::class, 'destroy']);
 
-
     Route::get('notification', [NotificationController::class, 'index']);
     Route::get('report-workers', [WorkerController::class, 'index_export_excel']);
 
-    require __DIR__ . '/Api/CarrierApi.php';        //CARRIER GUIDE
-    require __DIR__ . '/Api/SaleApi.php';        //SALES
-    require __DIR__ . '/Api/CargaDocumentApi.php';        //DOCUMENTO CARGA 
-    require __DIR__ . '/Api/TarifarioApi.php';        //TARIFARIO 
-    require __DIR__ . '/Api/UnityApi.php';        //UNIDAD
-    require __DIR__ . '/Api/ProductApi.php';        //PRODUCT
-    require __DIR__ . '/Api/BankApi.php';        //BANK
-    require __DIR__ . '/Api/TransactionConceptApi.php';        //TransactionConcept
+    require __DIR__ . '/Api/CarrierApi.php';            //CARRIER GUIDE
+    require __DIR__ . '/Api/SaleApi.php';               //SALES
+    require __DIR__ . '/Api/CargaDocumentApi.php';      //DOCUMENTO CARGA
+    require __DIR__ . '/Api/TarifarioApi.php';          //TARIFARIO
+    require __DIR__ . '/Api/UnityApi.php';              //UNIDAD
+    require __DIR__ . '/Api/ProductApi.php';            //PRODUCT
+    require __DIR__ . '/Api/BankApi.php';               //BANK
+    require __DIR__ . '/Api/TransactionConceptApi.php'; //TransactionConcept
     require __DIR__ . '/Api/BankAccountApi.php';        //BANK ACCOUNT
-    require __DIR__ . '/Api/BankMovementApi.php';        //BANK MOVIMENT
-    require __DIR__ . '/Api/DriverExpenseApi.php';        //DRIVER EXPENSE
+    require __DIR__ . '/Api/BankMovementApi.php';       //BANK MOVIMENT
+    require __DIR__ . '/Api/DriverExpenseApi.php';      //DRIVER EXPENSE
 
-    require __DIR__ . '/Api/ProgrammingApi.php';        //DRIVER EXPENSE
+    require __DIR__ . '/Api/ProgrammingApi.php';  //DRIVER EXPENSE
+    require __DIR__ . '/Api/TypeDocumentApi.php'; //TYPE DOCUMENT
+    require __DIR__ . '/Api/PayableApi.php'; //TYPE DOCUMENT
 });

@@ -76,7 +76,7 @@ class PayInstallmentRequest extends StoreRequest
                 },
             ],
 
-            'transaction_concept_id' => 'nullable|required_if:is_anticipo,1|exists:transaction_concepts,id,deleted_at,NULL',
+            'transaction_concept_id' => 'nullable|exists:transaction_concepts,id,deleted_at,NULL',
         ];
     }
 

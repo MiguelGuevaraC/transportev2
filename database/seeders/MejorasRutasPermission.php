@@ -102,6 +102,14 @@ class MejorasRutasPermission extends Seeder
                 'guard_name'   => 'web',
                 'groupMenu_id' => 6,
             ],
+            [
+                'id'           => 39,
+                'name'         => 'Cuentas por Pagar',
+                'route'        => 'cuentasporpagar',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 3,
+            ],
         ];
 
         foreach ($permissions as $permission) {

@@ -23,7 +23,7 @@ class BankMovementController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/bank-movement",
+ *     path="/transportedev/public/api/bank-movement",
  *     summary="Obtener información de BankMovements con filtros y ordenamiento",
  *     tags={"BankMovement"},
  *     security={{"bearerAuth": {}}},
@@ -68,7 +68,7 @@ class BankMovementController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/bank-movement-export-excel",
+     *     path="/transportedev/public/api/bank-movement-export-excel",
      *     summary="Exportar BankMovements con filtros y ordenamiento",
      *     tags={"BankMovement"},
      *     security={{"bearerAuth": {}}},
@@ -90,7 +90,7 @@ class BankMovementController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/bank-movement/{id}",
+ *     path="/transportedev/public/api/bank-movement/{id}",
  *     summary="Obtener detalles de un BankMovement por ID",
  *     tags={"BankMovement"},
  *     security={{"bearerAuth": {}}},
@@ -116,7 +116,7 @@ class BankMovementController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/bank-movement",
+ *     path="/transportedev/public/api/bank-movement",
  *     summary="Crear BankMovement",
  *     tags={"BankMovement"},
  *     security={{"bearerAuth": {}}},
@@ -155,7 +155,7 @@ class BankMovementController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/bank-movement/{id}",
+ *     path="/transportedev/public/api/bank-movement/{id}",
  *     summary="Actualizar un BankMovement",
  *     tags={"BankMovement"},
  *     security={{"bearerAuth": {}}},
@@ -219,7 +219,7 @@ class BankMovementController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/bank-movement/{id}",
+ *     path="/transportedev/public/api/bank-movement/{id}",
  *     summary="Eliminar un BankMovementpor ID",
  *     tags={"BankMovement"},
  *     security={{"bearerAuth": {}}},

@@ -107,7 +107,12 @@ class BankMovement extends Model
     {
         return $this->belongsTo(User::class, 'user_created_id');
     }
-    public function pay_installments()
+
+    public function pay_installment()
+    {
+        return $this->belongsTo(PayInstallment::class, 'pay_installment_id');
+    }    public function pay_installments()
+
     {
         return $this->hasMany(PayInstallment::class)
         ->whereNull('deleted_at')
@@ -116,14 +121,23 @@ class BankMovement extends Model
 
     public function getMovimentNumbersConcatenatedAttribute()
     {
-        return $this->pay_installments()
-            ->with('installment.moviment')
-            ->get()
-            ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber ?? '')
+        // Obtenemos una colección Eloquent unificada
+        $installments = $this->pay_installments;
+    
+        if ($this->pay_installment) {
+            $installments = $installments->push($this->pay_installment);
+        }
+    
+        // Cargar las relaciones para evitar N+1
+        $installments->load('installment.moviment');
+    
+        return $installments
+            ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber)
             ->filter()
-            ->unique() // Elimina duplicados
+            ->unique()
             ->implode(', ') ?: '';
     }
+    
 
     public function update_montos_anticipo()
     {
@@ -147,10 +161,7 @@ class BankMovement extends Model
     {
         return $this->belongsTo(Person::class, 'person_id');
     }
-    public function pay_installment()
-    {
-        return $this->belongsTo(PayInstallment::class, 'pay_installment_id');
-    }
+
     public function driver_expense()
     {
         return $this->belongsTo(DriverExpense::class, 'driver_expense_id');

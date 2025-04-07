@@ -91,6 +91,7 @@ class DriverExpense extends Model
         'gravado',
         'exonerado',
         'selectTypePay',
+        'type_payment',
         
         'total',
         'routeFact',

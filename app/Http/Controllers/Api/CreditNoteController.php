@@ -21,7 +21,7 @@ class CreditNoteController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transporte/public/api/creditNote",
+     *     path="/transportedev/public/api/creditNote",
      *     tags={"CreditNote"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -37,10 +37,10 @@ class CreditNoteController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/MovimentRequest")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/creditNote?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/creditNote?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/creditNote?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/creditNote"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/creditNote?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/creditNote"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -145,7 +145,7 @@ class CreditNoteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/creditNote",
+     *     path="/transportedev/public/api/creditNote",
      *     summary="Store a new credit note",
      *     tags={"CreditNote"},
      *     description="Create a new credit note",

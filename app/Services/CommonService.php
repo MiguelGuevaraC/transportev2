@@ -10,7 +10,7 @@ class CommonService
     public function store_photo(array $data, Object $object, String $name_folder)
     {
 
-        $ruta = "https://develop.garzasoft.com/transporte/public";
+        $ruta = "https://develop.garzasoft.com/transportedev/public";
 
         // Verificar si se han subido imágenes y si es un array
         if (isset($data['imagesave']) && is_array($data['imagesave'])) {
@@ -41,7 +41,7 @@ class CommonService
 
     public function update_photo(array $data, Object $object, String $name_folder): string
     {
-        $ruta = "https://develop.garzasoft.com/transporte/public";
+        $ruta = "https://develop.garzasoft.com/transportedev/public";
     
         // Verificar si existe una ruta de imágenes anteriores y eliminarlas
         if (! empty($object->images)) {

@@ -2,7 +2,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\DriverExpenseRequest\TransferSaldoRequest;
 use App\Http\Resources\DriverExpenseResource;
 use App\Models\BankAccount;
@@ -20,22 +19,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class DriverExpenseController extends Controller
 {
 
     protected $bankmovementService;
     protected $driverExpense;
-    public function __construct(BankMovementService $BankMovementService, DriverExpenseService $ProductService)
+    public function __construct(BankMovementService $BankMovementService, DriverExpenseService $driverService)
     {
         $this->bankmovementService = $BankMovementService;
-        $this->driverExpense       = $ProductService;
+        $this->driverExpense       = $driverService;
     }
 
     /**
      * Get all DriverExpenses
      * @OA\Get (
-     *     path="/transporte/public/api/driverExpense",
+     *     path="/transportedev/public/api/driverExpense",
      *     tags={"DriverExpense"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -51,10 +51,10 @@ class DriverExpenseController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DriverExpense")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -126,25 +126,19 @@ class DriverExpenseController extends Controller
         // Clonar la consulta para calcular los totales de ingreso y egreso
         $totalIngreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         $totalEgreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            ;
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
 
         // Paginar la lista de resultados
-        $list = $query->with(['programming', 'expensesConcept', 'worker.person','latest_bank_movement'])
+        $list = $query->with(['programming', 'expensesConcept', 'worker.person', 'latest_bank_movement'])
             ->orderBy('id', 'desc')
             ->paginate($per_page, ['*'], 'page', $page);
 
@@ -176,7 +170,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/driverExpense",
+     *     path="/transportedev/public/api/driverExpense",
      *     summary="Get all driverExpense",
      *     tags={"DriverExpense"},
      *     description="Show all driverExpense by programming",
@@ -201,7 +195,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/driverExpense",
+     *     path="/transportedev/public/api/driverExpense",
      *     summary="Store a new driverExpense",
      *     tags={"DriverExpense"},
      *     description="Create a new driverExpense",
@@ -249,20 +243,49 @@ class DriverExpenseController extends Controller
 
     public function store(Request $request)
     {
-        $validator = validator()->make($request->all(), [
+
+        
+        $rules = [
             'programming_id'         => 'required|exists:programmings,id',
             'expensesConcept_id'     => 'required|exists:expenses_concepts,id',
             'transaction_concept_id' => 'nullable|exists:transaction_concepts,id,deleted_at,NULL',
             'worker_id'              => 'required|exists:workers,id',
             'amount'                 => 'required',
-            // 'quantity' => 'required',
             'bank_id'                => 'nullable|exists:banks,id',
             'proveedor_id'           => 'nullable|exists:people,id',
-            'bank_account_id'        => [
-                'nullable',
-                Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
-            ],
-        ]);
+            'selectTypePay'          => 'required|in:CONTADO,CREDITO,CANJE',
+            'type_payment'           => 'required|in:YAPE,DEPOSITO,EFECTIVO,COBRANZA_GUIAS',
+            'nro_dias'               => 'nullable|required_if:type_payment,CREDITO',
+            'type_document_id'       => 'required|exists:type_documents,id,deleted_at,NULL',
+            'bank_account_id'        => ['nullable', Rule::exists('bank_accounts', 'id')->whereNull('deleted_at')],
+        ];
+        
+        $messages = [
+            '*.required'         => 'El campo ":attribute" es obligatorio.',
+            '*.exists'           => 'El valor seleccionado para ":attribute" no es válido.',
+            'selectTypePay.in'   => 'El tipo de pago debe ser CONTADO, CREDITO o CANJE.',
+            'type_payment.in'    => 'El método de pago debe ser YAPE, DEPOSITO, EFECTIVO o COBRANZA_GUIAS.',
+            'nro_dias.required_if' => 'Debe especificar "número de días" si el tipo de pago es CREDITO.',
+        ];
+        
+        $niceNames = [
+            'programming_id'         => 'programación',
+            'expensesConcept_id'     => 'concepto de gasto',
+            'transaction_concept_id' => 'concepto de transacción',
+            'worker_id'              => 'trabajador',
+            'amount'                 => 'monto',
+            'bank_id'                => 'banco',
+            'proveedor_id'           => 'proveedor',
+            'selectTypePay'          => 'tipo de pago',
+            'type_payment'           => 'método de pago',
+            'nro_dias'               => 'número de días',
+            'type_document_id'       => 'tipo de documento',
+            'bank_account_id'        => 'cuenta bancaria',
+        ];
+        
+        $validator = Validator::make($request->all(), $rules, $messages);
+        $validator->setAttributeNames($niceNames);
+        
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -332,22 +355,30 @@ class DriverExpenseController extends Controller
         ];
 
         $objectExpense = DriverExpense::create($data);
-        $bank_account  = BankAccount::find($request->input(key: 'bank_account_id'));
-        if ($bank_account != null) {
-            $data_movement_bank = [
-                'driver_expense_id'      => $objectExpense->id,
-                'bank_id'                => $request->input('bank_id'),
-                'bank_account_id'        => $bank_account->id,
-                'currency'               => $bank_account->currency,
-                'date_moviment'          => $request->input('date_expense'),
-                'total_moviment'         => $totalAcum,
-                'comment'                => $request->input('comment'),
-                'user_created_id'        => $user->id,
-                'transaction_concept_id' => $request->input('transaction_concept_id'),
-                'person_id'              => $objectExpense->worker->person->id,
-                'type_moviment'          => 'SALIDA',
-            ];
-            $this->bankmovementService->createBankMovement($data_movement_bank);
+
+        if ($objectExpense->selectTypePay == "CREDITO") {
+            $dias = $request->input('nro_dias', 0) ?? 0;
+            $this->driverExpense->generate_credit_payments($objectExpense->id, $dias);
+        } else if ($objectExpense->selectTypePay == "CONTADO") {
+            $bank_account = BankAccount::find($request->input(key: 'bank_account_id'));
+            if ($bank_account != null) {
+                $data_movement_bank = [
+                    'driver_expense_id'      => $objectExpense->id,
+                    'bank_id'                => $request->input('bank_id'),
+                    'bank_account_id'        => $bank_account->id,
+                    'currency'               => $bank_account->currency,
+                    'date_moviment'          => $request->input('date_expense'),
+                    'total_moviment'         => $totalAcum,
+                    'comment'                => $request->input('comment'),
+                    'user_created_id'        => $user->id,
+                    'transaction_concept_id' => $request->input('transaction_concept_id', '5'),
+                    'person_id'              => $objectExpense->worker->person->id,
+                    'type_moviment'          => 'SALIDA',
+                ];
+                $this->bankmovementService->createBankMovement($data_movement_bank);
+            }
+        } else {
+//PEAJE
         }
 
         $programming = Programming::find($request->input('programming_id'));
@@ -411,7 +442,7 @@ class DriverExpenseController extends Controller
 
             }
 
-            $objectExpense->selectTypePay = 'Efectivo';
+            // $objectExpense->selectTypePay = 'Efectivo';
             $objectExpense->save();
             $programming->updateTotalDriversExpenses();
 
@@ -455,10 +486,12 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
@@ -476,7 +509,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/transferir-saldo",
+     *     path="/transportedev/public/api/transferir-saldo",
      *     summary="Transfer driver expense",
      *     tags={"DriverExpense"},
      *     security={{"bearerAuth":{}}},
@@ -495,7 +528,7 @@ class DriverExpenseController extends Controller
     {
         $validatedData           = $request->validated();
         $updated_driver_expenses = $this->driverExpense->transferDriverExpense($validatedData);
-        $programming_out= Programming::find($validatedData['programming_out_id']);
+        $programming_out         = Programming::find($validatedData['programming_out_id']);
         $montos                  = $this->driverExpense->montos_programacion($programming_out);
         return response()->json([
             'data'          => DriverExpenseResource::collection(collect($updated_driver_expenses)),
@@ -507,7 +540,7 @@ class DriverExpenseController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/devolverMontoaCaja",
+ *     path="/transportedev/public/api/devolverMontoaCaja",
  *     summary="Return an amount to the cash box",
  *     tags={"DriverExpense"},
  *     description="Store a new driverExpense and create a related movement",
@@ -699,17 +732,13 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
             ;
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
             ;
         })->sum('total');
 
@@ -728,7 +757,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/driverExpense/{id}",
+     *     path="/transportedev/public/api/driverExpense/{id}",
      *     summary="Update an existing driverExpense",
      *     tags={"DriverExpense"},
      *     description="Update the details of an existing driverExpense",
@@ -916,18 +945,12 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            // ;
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            // $q->where('selectTypePay', 'Efectivo')
-            //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-            //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-            // ;
+            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
         })->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
@@ -944,7 +967,7 @@ class DriverExpenseController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/driverExpense/{id}",
+     *     path="/transportedev/public/api/driverExpense/{id}",
      *     summary="Get a driverExpense by ID",
      *     tags={"DriverExpense"},
      *     description="Retrieve a driverExpense by its ID",
@@ -994,7 +1017,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/driverExpense/{id}",
+     *     path="/transportedev/public/api/driverExpense/{id}",
      *     summary="Delete a DriverExpense",
      *     tags={"DriverExpense"},
      *     description="Delete a DriverExpense by ID",
@@ -1059,18 +1082,12 @@ class DriverExpenseController extends Controller
             }
             $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Ingreso');
-                // $q->where('selectTypePay', 'Efectivo')
-                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-                //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-                ;
+                $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
             })->sum('total');
 
             $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Egreso');
-                // $q->where('selectTypePay', 'Efectivo')
-                //     ->orWhere('selectTypePay', 'Descuento_sueldo')
-                //     ->orWhere('selectTypePay', 'Proxima_liquidacion')
-                ;
+                $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
             })->sum('total');
 
             // Calcular el saldo (diferencia entre ingresos y egresos)
