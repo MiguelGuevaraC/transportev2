@@ -1006,9 +1006,9 @@ class ReceptionController extends Controller
     protected function applyNameFilter($query, $name)
     {
         return $query->where(function ($q) use ($name) {
-            $q->where(DB::raw('UPPER(name)'), 'LIKE', '%' . $name . '%')
-                ->orWhere(DB::raw('UPPER(business_name)'), 'LIKE', '%' . $name . '%')
-                ->orWhere(DB::raw('UPPER(last_name)'), 'LIKE', '%' . $name . '%');
+            $q->where(DB::raw('UPPER(names)'), 'LIKE', '%' . $name . '%')
+                ->orWhere(DB::raw('UPPER(businessName)'), 'LIKE', '%' . $name . '%')
+                ->orWhere(DB::raw('UPPER(fatherSurname)'), 'LIKE', '%' . $name . '%');
         });
     }
 

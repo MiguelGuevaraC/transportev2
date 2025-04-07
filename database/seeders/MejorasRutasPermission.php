@@ -31,6 +31,7 @@ class MejorasRutasPermission extends Seeder
             ['id' => '6', 'name' => 'Caja Grande', 'icon' => 'bank'],
             ['id' => '7', 'name' => 'Almacén', 'icon' => 'almacen'],
             ['id' => '8', 'name' => 'Taller', 'icon' => 'taller'],
+            ['id' => '9', 'name' => 'Compra', 'icon' => 'compra'],
         ];
 
         foreach ($grupos as $grupo) {
@@ -109,6 +110,72 @@ class MejorasRutasPermission extends Seeder
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
                 'groupMenu_id' => 3,
+            ],
+
+            
+            [
+                'id'           => 40,
+                'name'         => 'Taller',
+                'route'        => 'taller',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 41,
+                'name'         => 'Categorias Repuesto',
+                'route'        => 'category',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 42,
+                'name'         => 'Repuestos',
+                'route'        => 'repuestos',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 43,
+                'name'         => 'Items Checklist',
+                'route'        => 'items',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 44,
+                'name'         => 'Checklist',
+                'route'        => 'checklist',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 45,
+                'name'         => 'Mantenimiento',
+                'route'        => 'maintenance',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id'           => 46,
+                'name'         => 'Orden Compra',
+                'route'        => 'ordencompra',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 9,
+            ],
+            [
+                'id'           => 47,
+                'name'         => 'Compras',
+                'route'        => 'compras',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 9,
             ],
         ];
 

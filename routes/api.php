@@ -192,7 +192,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-   // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
     //Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
     Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
@@ -424,5 +424,9 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     require __DIR__ . '/Api/ProgrammingApi.php';  //DRIVER EXPENSE
     require __DIR__ . '/Api/TypeDocumentApi.php'; //TYPE DOCUMENT
-    require __DIR__ . '/Api/PayableApi.php'; //TYPE DOCUMENT
+    require __DIR__ . '/Api/PayableApi.php';      //TYPE DOCUMENT
+
+    require __DIR__ . '/Api/TallerApi.php';   //TALLER
+    require __DIR__ . '/Api/CategoryApi.php'; //CATEGORY
+    require __DIR__ . '/Api/RepuestoApi.php'; //REPUESTO
 });
