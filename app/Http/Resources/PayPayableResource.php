@@ -55,6 +55,7 @@ class PayPayableResource extends JsonResource
             'type'             => $this->type ?? null,
             'state'            => $this->state ?? null,
             'bank_account_id'  => $this->bank_account_id ?? null,
+            'bank_account_number'  => $this?->bank_account?->account_number ?? null,
             'bank_movement_id' => $this->bank_movement_id ?? null,
             'payable_id'       => $this->payable_id ?? null,
             'user_created_id'  => $this->user_created_id ?? null,

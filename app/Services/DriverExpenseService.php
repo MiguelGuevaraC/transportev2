@@ -107,10 +107,15 @@ class DriverExpenseService
             'number'            => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
             'days'              => $dias,
             'date'              => now()->addDays($dias),
-            'total'             => $expense->total, // Total de la deuda (basado en el gasto)
-            'totalDebt'         => $expense->total, // Monto de la deuda (puedes ajustarlo si es necesario)
-            'driver_expense_id' => $expense->id,    // Relacionamos la cuenta por pagar con el gasto
-            'user_created_id' => Auth::user()->id,    // Relacionamos la cuenta por pagar con el gasto
+            'total'             => $expense->total,  // Total de la deuda (basado en el gasto)
+            'totalDebt'         => $expense->total,  // Monto de la deuda (puedes ajustarlo si es necesario)
+            'driver_expense_id' => $expense->id,     // Relacionamos la cuenta por pagar con el gasto
+            'user_created_id'   => Auth::user()->id, // Relacionamos la cuenta por pagar con el gasto
+
+            'person_id'         => $expense?->proveedor_id ?? null,
+            'correlativo_ref'   => $expense?->operationNumber,
+            'type_document_id'  => $expense?->type_document_id,
+            'type_payable'      => "GASTO CONDUCTOR",
         ];
 
         $payable = Payable::create($payableData);

@@ -27,22 +27,30 @@ class PayableResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'                => $this->id ?? null,
-            'number'            => $this->number ?? null,
-            'days'              => $this->days ?? null,
-            'date'              => $this->date ?? null,
-            'total'             => $this->total ?? null,
-            'totalDebt'         => $this->totalDebt ?? null,
-            'status'         => $this->status ?? null,
-            'pay_payables'      => $this->payPayables ?? [],
-            'driver_expense_id' => $this->driver_expense_id ?? null,
-            'driver_expense'    => $this->driver_expense ? array_merge(
+            'id'                 => $this->id ?? null,
+            'number'             => $this->number ?? null,
+            'days'               => $this->days ?? null,
+            'date'               => $this->date ?? null,
+            'total'              => $this->total ?? null,
+            'totalDebt'          => $this->totalDebt ?? null,
+            'status'             => $this->status ?? null,
+
+            'person_id'          => $this->person_id ?? null,
+            'person'             => $this->person ?? null,
+            'correlativo_ref'    => $this->correlativo_ref ?? null,
+            'type_document_id'   => $this->type_document_id ?? null,
+            'type_document_name' => $this?->type_document?->name ?? null,
+            'type_payable'       => $this->type_payable ?? null,
+
+            'pay_payables'       => PayPayableResource::collection(collect($this->payPayables)),
+            'driver_expense_id'  => $this->driver_expense_id ?? null,
+            'driver_expense'     => $this->driver_expense ? array_merge(
                 $this->driver_expense->toArray(),
                 [
                     'programming' => $this->driver_expense->programming ? $this->driver_expense->programming->toArray() : null,
                 ]
             ) : null,
-            'created_at'        => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
+            'created_at'         => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }
 

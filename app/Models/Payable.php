@@ -29,6 +29,12 @@ class Payable extends Model
         'total',
         'totalDebt',
         'status',
+
+        'person_id',
+        'correlativo_ref',
+        'type_document_id',
+        'type_payable',
+
         'driver_expense_id',
         'user_created_id',
         'created_at',
@@ -39,14 +45,20 @@ class Payable extends Model
         'deleted_at',
     ];
     const filters = [
-        'number'            => 'like',
-        'days'              => '=',
-        'date'              => 'between',
-        'total'             => '=',
-        'totalDebt'         => '=',
-        'driver_expense_id' => '=',
-        'driver_expense.proveedor_id' => '=',
+        'number'                        => 'like',
+        'days'                          => '=',
+        'date'                          => 'between',
+        'total'                         => '=',
+        'totalDebt'                     => '=',
+        'driver_expense_id'             => '=',
+        'driver_expense.proveedor_id'   => '=',
         'driver_expense.programming_id' => '=',
+        'status'                        => '=',
+
+        'person_id'                     => '=',
+        'correlativo_ref'               => 'like',
+        'type_document_id'              => '=',
+        'type_payable'                  => 'like',
     ];
 
     const sorts = [
@@ -64,5 +76,36 @@ class Payable extends Model
     public function user_created()
     {
         return $this->belongsTo(User::class, 'user_created_id');
+    }
+    public function person()
+    {
+        return $this->belongsTo(Person::class, 'person_id');
+    }
+    public function type_document()
+    {
+        return $this->belongsTo(Type_document::class, 'type_document_id');
+    }
+
+    public function updateMontos()
+    {
+        $this->totalDebt = $this->total - $this->payPayables->sum('total');
+
+        // Obtener la fecha actual y la fecha de vencimiento
+        $today = now()->toDateString();
+
+        // Asegurarse de que $this->date sea una fecha válida
+        $dueDate = \Carbon\Carbon::parse($this->date)->toDateString();
+
+// Determinar el estado basado en totalDebt y la fecha de vencimiento
+        if ($this->totalDebt == 0) {
+            $this->status = 'Pagado'; // Asignar 'Pagado' si la deuda es 0
+        } elseif ($dueDate < $today) {
+            $this->status = 'Vencido'; // Asignar 'Vencido' si la fecha de vencimiento ya pasó y aún hay deuda
+        } else {
+            $this->status = 'Pendiente'; // Asignar 'Pendiente' si hay deuda y no está vencida
+        }
+
+        // Guardar el modelo actualizado
+        $this->save();
     }
 }
