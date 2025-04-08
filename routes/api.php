@@ -429,4 +429,5 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/TallerApi.php';   //TALLER
     require __DIR__ . '/Api/CategoryApi.php'; //CATEGORY
     require __DIR__ . '/Api/RepuestoApi.php'; //REPUESTO
+    require __DIR__ . '/Api/CheckListItemApi.php'; //CHECK LIST ITEM
 });

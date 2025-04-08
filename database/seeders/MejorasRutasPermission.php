@@ -31,7 +31,7 @@ class MejorasRutasPermission extends Seeder
             ['id' => '6', 'name' => 'Caja Grande', 'icon' => 'bank'],
             ['id' => '7', 'name' => 'Almacén', 'icon' => 'almacen'],
             ['id' => '8', 'name' => 'Taller', 'icon' => 'taller'],
-            ['id' => '9', 'name' => 'Compra', 'icon' => 'compra'],
+            ['id' => '9', 'name' => 'Compras', 'icon' => 'compra'],
         ];
 
         foreach ($grupos as $grupo) {
