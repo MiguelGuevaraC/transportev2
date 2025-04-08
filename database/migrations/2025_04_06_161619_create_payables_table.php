@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('date')->nullable();                // Fecha del pago
             $table->decimal('total', 10, 2)->nullable();     // Monto total
             $table->decimal('totalDebt', 10, 2)->nullable(); // Monto de la deuda total
+            $table->string('status')->default('Pendiente')->nullable();
             $table->foreignId('driver_expense_id')->nullable()->unsigned()->constrained('driver_expenses');
             $table->foreignId('user_created_id')->nullable()->unsigned()->constrained('users');
             $table->timestamps();  // created_at y updated_at

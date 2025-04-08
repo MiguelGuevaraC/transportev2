@@ -28,6 +28,7 @@ class Payable extends Model
         'date',
         'total',
         'totalDebt',
+        'status',
         'driver_expense_id',
         'user_created_id',
         'created_at',

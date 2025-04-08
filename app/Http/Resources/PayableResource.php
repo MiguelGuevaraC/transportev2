@@ -33,6 +33,7 @@ class PayableResource extends JsonResource
             'date'              => $this->date ?? null,
             'total'             => $this->total ?? null,
             'totalDebt'         => $this->totalDebt ?? null,
+            'status'         => $this->status ?? null,
             'pay_payables'      => $this->payPayables ?? [],
             'driver_expense_id' => $this->driver_expense_id ?? null,
             'driver_expense'    => $this->driver_expense ? array_merge(
