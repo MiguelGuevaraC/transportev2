@@ -59,6 +59,8 @@ class PayPayableResource extends JsonResource
             'bank_account_number'  => $this?->bank_account?->account_number ?? null,
             'bank_movement_id' => $this->bank_movement_id ?? null,
             'payable_id'       => $this->payable_id ?? null,
+            'person_id' => $this->payable->person_id ?? null,
+            'anticipos_proveedor_con_saldo' => $this->payable->person->anticipos_proveedor_con_saldo ?? [],
             'user_created_id'  => $this->user_created_id ?? null,
             'created_at'       => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
             'updated_at'       => $this->updated_at ? $this->updated_at->format('Y-m-d H:i:s') : null,

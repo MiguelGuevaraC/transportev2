@@ -185,7 +185,7 @@ class PayableController extends Controller
         } else {
             if ($bank_account) {
                 $data_movement_bank = [
-                    'pay_installment_id'     => isset($payable_pay->id) ? $payable_pay->id : null,
+                    'pay_payable_id'     => isset($payable_pay->id) ? $payable_pay->id : null,
                     'bank_id'                => isset($bank_account->bank_id) ? $bank_account->bank_id : null,
                     'bank_account_id'        => isset($bank_account->id) ? $bank_account->id : null,
                     'currency'               => isset($bank_account->currency) ? $bank_account->currency : null,

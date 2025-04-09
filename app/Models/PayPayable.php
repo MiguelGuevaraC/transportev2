@@ -96,7 +96,7 @@ class PayPayable extends Model
 
     public function latest_bank_movement_transaction()
     {
-        return $this->hasOne(BankMovement::class, 'pay_installment_id')->latestOfMany();
+        return $this->hasOne(BankMovement::class, 'pay_payable_id')->latestOfMany();
     }
 
 
