@@ -153,6 +153,7 @@ class Person extends Model
         'representativePersonName',
         'branchOffice_id',
         'amount_anticipado',
+        'amount_anticipado_egreso',
         'state',
         'created_at',
         'updated_at',
@@ -173,16 +174,28 @@ class Person extends Model
             ->where('person_id', $this->id)
             ->whereNull('deleted_at')
             ->sum('total_anticipado_restante');
+            $this->update(['amount_anticipado' => $balance ?? 0]);
+        $balance_egreso= DB::table('bank_movements')
+            ->where('person_id', $this->id)
+            ->whereNull('deleted_at')
+            ->sum('total_anticipado_egreso_restante');
     
 
-        $this->update(['amount_anticipado' => $balance ?? 0]);
+        $this->update(['amount_anticipado_egreso' => $balance_egreso ?? 0]);
     }
 
     public function anticipos_cliente_con_saldo()
     {
         return $this->hasMany(BankMovement::class)
             ->where('transaction_concept_id', 1)
-            ->where('total_anticipado_restante', '>', 0);
+            ->where('total_anticipado_egreso_restante', '>', 0);
+    }
+
+    public function anticipos_proveedor_con_saldo()
+    {
+        return $this->hasMany(BankMovement::class)
+            ->where('transaction_concept_id', 2)
+            ->where('total_anticipado_egreso_restante', '>', 0);
     }
 
     public function contacts()

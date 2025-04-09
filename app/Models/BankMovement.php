@@ -18,6 +18,8 @@ class BankMovement extends Model
         'comment',
         'number_operation',
 
+        'pay_payable_id',
+
         'pay_installment_id',
         'driver_expense_id',
         'is_anticipo',
@@ -56,6 +58,7 @@ class BankMovement extends Model
         'person_id'                        => '=',
         'created_at'                       => '=',
         'pay_installment_id'               => '=',
+        'pay_payable_id'               => '=',
         'driver_expense_id'                => '=',
         'total_anticipado_restante'        => '=',
         'total_anticipado_egreso'          => '=',
@@ -73,7 +76,6 @@ class BankMovement extends Model
             if (isset($movement->bank_account)) {
                 $movement->bank_account->updateBalance();
             }
-            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();
@@ -84,7 +86,6 @@ class BankMovement extends Model
             if (isset($movement->bank_account)) {
                 $movement->bank_account->updateBalance();
             }
-            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();
@@ -95,7 +96,6 @@ class BankMovement extends Model
             if (isset($movement->bank_account)) {
                 $movement->bank_account->updateBalance();
             }
-            
 
             if (in_array($movement->transaction_concept_id, [1, 2])) {
                 $movement->person->updateAnticipadoAmountClient();
@@ -108,40 +108,56 @@ class BankMovement extends Model
         return $this->belongsTo(User::class, 'user_created_id');
     }
 
+    
+
     public function pay_installment()
     {
         return $this->belongsTo(PayInstallment::class, 'pay_installment_id');
-    }    public function pay_installments()
-
+    }public function pay_installments()
     {
         return $this->hasMany(PayInstallment::class)
-        ->whereNull('deleted_at')
-        ->where('bank_movement_id', $this->id);
+            ->whereNull('deleted_at')
+            ->where('bank_movement_id', $this->id);
     }
+
+    public function pay_payable()
+    {
+        return $this->belongsTo(PayPayable::class, 'pay_payable_id');
+    }public function pay_payables()
+    {
+        return $this->hasMany(PayPayable::class)
+            ->whereNull('deleted_at')
+            ->where('bank_movement_id', $this->id);
+    }
+
 
     public function getMovimentNumbersConcatenatedAttribute()
     {
         // Obtenemos una colección Eloquent unificada
         $installments = $this->pay_installments;
-    
+
         if ($this->pay_installment) {
             $installments = $installments->push($this->pay_installment);
         }
-    
+
         // Cargar las relaciones para evitar N+1
         $installments->load('installment.moviment');
-    
+
         return $installments
             ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber)
             ->filter()
             ->unique()
             ->implode(', ') ?: '';
     }
-    
 
     public function update_montos_anticipo()
     {
         $this->total_anticipado_restante = max(0, $this->total_anticipado - $this->pay_installments()->sum('total'));
+        $this->save();
+    }
+    public function update_montos_anticipo_egreso()
+    {
+        $this->total_anticipado_egreso_restante = max(0, $this->total_anticipado_egreso - $this->pay_payables()->sum('total'));
         $this->save();
     }
 

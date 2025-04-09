@@ -46,7 +46,8 @@ class PayPayableRequest extends StoreRequest
 
                         $totalRestante = DB::table('bank_movements')
                             ->where('id', request('bank_movement_id'))
-                            ->value('total_anticipado_restante');
+                            ->value('total_anticipado_egreso_restante');
+                         
 
                         if (! $totalRestante) {
                             return $fail('El movimiento bancario no existe o no tiene saldo restante.');

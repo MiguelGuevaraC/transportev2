@@ -54,6 +54,11 @@ class BankMovementResource extends JsonResource
             'is_anticipo'            => $this->is_anticipo ?? null,
             'total_anticipado'       => $this->total_anticipado ?? null,
 
+            'total_anticipado_restante'       => $this->total_anticipado_restante ?? null,
+            'total_anticipado_egreso'       => $this->total_anticipado_egreso ?? null,
+            'total_anticipado_egreso_restante'       => $this->total_anticipado_egreso_restante ?? null,
+
+
             'pay_installment_id'     => $this->pay_installment_id ?? null,
             'pay_installment'        => $this->pay_installments ? $this->pay_installments : null,
 

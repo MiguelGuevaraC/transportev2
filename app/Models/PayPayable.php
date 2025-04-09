@@ -78,4 +78,26 @@ class PayPayable extends Model
         return $this->belongsTo(User::class, 'user_created_id');
     }
 
+    
+    public function latest_bank_movement_anticipo()
+    {
+        return $this->belongsTo(BankMovement::class, 'bank_movement_id');
+    }
+    
+
+    public function latest_bank_movement()
+    {
+        if ($this->bank_movement_id === null) {
+            return $this->latest_bank_movement_transaction();
+        } else {
+            return $this->latest_bank_movement_anticipo();
+        }
+    }
+
+    public function latest_bank_movement_transaction()
+    {
+        return $this->hasOne(BankMovement::class, 'pay_installment_id')->latestOfMany();
+    }
+
+
 }

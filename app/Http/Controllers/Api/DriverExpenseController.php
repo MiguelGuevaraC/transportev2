@@ -5,9 +5,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DriverExpenseRequest\TransferSaldoRequest;
 use App\Http\Resources\DriverExpenseResource;
 use App\Models\BankAccount;
+use App\Models\BankMovement;
 use App\Models\Box;
 use App\Models\DriverExpense;
 use App\Models\Moviment;
+use App\Models\Payable;
 use App\Models\Programming;
 use App\Models\User;
 use App\Models\Worker;
@@ -18,8 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class DriverExpenseController extends Controller
 {
@@ -244,7 +246,6 @@ class DriverExpenseController extends Controller
     public function store(Request $request)
     {
 
-        
         $rules = [
             'programming_id'         => 'required|exists:programmings,id',
             'expensesConcept_id'     => 'required|exists:expenses_concepts,id',
@@ -259,15 +260,15 @@ class DriverExpenseController extends Controller
             'type_document_id'       => 'required|exists:type_documents,id,deleted_at,NULL',
             'bank_account_id'        => ['nullable', Rule::exists('bank_accounts', 'id')->whereNull('deleted_at')],
         ];
-        
+
         $messages = [
-            '*.required'         => 'El campo ":attribute" es obligatorio.',
-            '*.exists'           => 'El valor seleccionado para ":attribute" no es válido.',
-            'selectTypePay.in'   => 'El tipo de pago debe ser CONTADO, CREDITO o CANJE.',
-            'type_payment.in'    => 'El método de pago debe ser YAPE, DEPOSITO, EFECTIVO o COBRANZA_GUIAS.',
+            '*.required'           => 'El campo ":attribute" es obligatorio.',
+            '*.exists'             => 'El valor seleccionado para ":attribute" no es válido.',
+            'selectTypePay.in'     => 'El tipo de pago debe ser CONTADO, CREDITO o CANJE.',
+            'type_payment.in'      => 'El método de pago debe ser YAPE, DEPOSITO, EFECTIVO o COBRANZA_GUIAS.',
             'nro_dias.required_if' => 'Debe especificar "número de días" si el tipo de pago es CREDITO.',
         ];
-        
+
         $niceNames = [
             'programming_id'         => 'programación',
             'expensesConcept_id'     => 'concepto de gasto',
@@ -282,10 +283,9 @@ class DriverExpenseController extends Controller
             'type_document_id'       => 'tipo de documento',
             'bank_account_id'        => 'cuenta bancaria',
         ];
-        
+
         $validator = Validator::make($request->all(), $rules, $messages);
         $validator->setAttributeNames($niceNames);
-        
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -1058,15 +1058,21 @@ class DriverExpenseController extends Controller
 
         // Si no existe el objeto, retornar error
         if (! $object) {
-            return response()->json(['message' => 'Driver Expense not found'], 404); // Cambié el código de estado a 404 para 'no encontrado'
+            return response()->json(['message' => 'Gasto Conductor No Encontrado'], 404); // Cambié el código de estado a 404 para 'no encontrado'
+        }
+        if ($object->payable) {
+            if (($object->payable->payPayables()->exists())) {
+                return response()->json(['message' => 'No se puede eliminar porque se encontraron Amortizaciones.'], 422);
+            }
+            Payable::find($object->payable->id)->delete();
         }
 
-        // Intentar eliminar el movimiento asociado, si existe
-        if ($movimentDriver = $object->moviment) {
-            // Se recomienda verificar si $movimentDriver es una instancia válida
-            if ($movimentDriver instanceof Moviment) {
-                $movimentDriver->delete();
+        if ($object->latest_bank_movement) {
+            if ($object->latest_bank_movement->status === "Confirmado") {
+                return response()->json(['message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.'], 422);
             }
+            BankMovement::find($object->latest_bank_movement->id)->delete();
+            
         }
 
         // Intentar eliminar el objeto y manejar posibles errores

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -92,7 +91,7 @@ class DriverExpense extends Model
         'exonerado',
         'selectTypePay',
         'type_payment',
-        
+
         'total',
         'routeFact',
         'gallons',
@@ -145,5 +144,10 @@ class DriverExpense extends Model
     {
         return $this->hasOne(BankMovement::class, 'driver_expense_id')->latestOfMany();
     }
-    
+
+    public function payable()
+    {
+        return $this->hasOne(Payable::class);
+    }
+
 }

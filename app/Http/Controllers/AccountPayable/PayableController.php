@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PayableRequest\IndexPayableRequest;
 use App\Http\Requests\PayableRequest\PayPayableRequest;
 use App\Http\Resources\PayableResource;
+use App\Http\Resources\PayPayableResource;
 use App\Models\BankAccount;
 use App\Models\Payable;
 use App\Models\PayPayable;
@@ -180,7 +181,7 @@ class PayableController extends Controller
 
         if ($isanticipo == 1) {
             $mov_anticipo = $this->bankmovementService->getBankMovementById($validatedData['bank_movement_id']);
-            $mov_anticipo->update_montos_anticipo();
+            $mov_anticipo->update_montos_anticipo_egreso();
         } else {
             if ($bank_account) {
                 $data_movement_bank = [
@@ -203,10 +204,7 @@ class PayableController extends Controller
         }
 
         return response()->json(
-            PayPayable::with(['bank', 
-            // 'latest_bank_movement',
-             'bank_account',
-            ])->find($payable_pay->id),
+            New PayPayableResource(PayPayable::find($payable_pay->id)),
             200
         );
     }

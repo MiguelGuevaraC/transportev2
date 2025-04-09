@@ -149,6 +149,10 @@ class BankMovementController extends Controller
             $data['total_anticipado_restante'] = $request->total_moviment;
             $data['total_anticipado']          = $request->total_moviment;
         }
+        if ($request->transaction_concept_id == 2) {
+            $data['total_anticipado_egreso_restante'] = $request->total_moviment;
+            $data['total_anticipado_egreso']          = $request->total_moviment;
+        }
         $bank = $this->bankmovementService->createBankMovement($data);
         return new BankMovementResource($bank);
     }

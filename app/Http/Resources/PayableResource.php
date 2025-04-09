@@ -37,6 +37,7 @@ class PayableResource extends JsonResource
 
             'person_id'          => $this->person_id ?? null,
             'person'             => $this->person ?? null,
+            'anticipos_proveedor_con_saldo'             => $this->person->anticipos_proveedor_con_saldo ?? [],
             'correlativo_ref'    => $this->correlativo_ref ?? null,
             'type_document_id'   => $this->type_document_id ?? null,
             'type_document_name' => $this?->type_document?->name ?? null,
