@@ -128,13 +128,11 @@ class DriverExpenseController extends Controller
         // Clonar la consulta para calcular los totales de ingreso y egreso
         $totalIngreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         $totalEgreso = (clone $query)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
@@ -254,10 +252,13 @@ class DriverExpenseController extends Controller
             'amount'                 => 'required',
             'bank_id'                => 'nullable|exists:banks,id',
             'proveedor_id'           => 'nullable|exists:people,id',
-            'selectTypePay'          => 'required|in:CONTADO,CREDITO,CANJE',
+            'selectTypePay'          => 'nullable|in:CONTADO,CREDITO,CANJE',
             'type_payment'           => 'required|in:YAPE,DEPOSITO,EFECTIVO,COBRANZA_GUIAS',
             'nro_dias'               => 'nullable|required_if:type_payment,CREDITO',
-            'type_document_id'       => 'required|exists:type_documents,id,deleted_at,NULL',
+
+            'type_document_id'       => 'nullable|exists:type_documents,id,deleted_at,NULL|required_with:operationNumber',
+            'operationNumber'        => 'nullable|required_with:type_document_id',
+
             'bank_account_id'        => ['nullable', Rule::exists('bank_accounts', 'id')->whereNull('deleted_at')],
         ];
 
@@ -327,7 +328,7 @@ class DriverExpenseController extends Controller
             return response()->json(['error' => 'Caja No está Aperturada'], 422);
         }
 
-        $tipopago = $request->input('selectTypePay');
+        $tipopago = $request->input('selectTypePay', 'CONTADO');
 
         $data = [
             'programming_id'     => $request->input('programming_id'),
@@ -338,7 +339,7 @@ class DriverExpenseController extends Controller
             'exonerado'          => $request->input('exonerado'),
             'date_expense'       => $request->input('date_expense'),
             'selectTypePay'      => $tipopago,
-
+            'type_payment'       => $request->input('type_payment', 'EFECTIVO'),
             'total'              => $total,
             'amount'             => $request->input('amount'),
             'bank_account_id'    => $request->input('bank_account_id'),
@@ -352,6 +353,7 @@ class DriverExpenseController extends Controller
             'gallons'            => $request->input('gallons'),
             'comment'            => $request->input('comment'),
             'isMovimentCaja'     => $request->input('isMovimentCaja'),
+            'type_document_id'   => $request->input('type_document_id'),
         ];
 
         $objectExpense = DriverExpense::create($data);
@@ -371,7 +373,7 @@ class DriverExpenseController extends Controller
                     'total_moviment'         => $totalAcum,
                     'comment'                => $request->input('comment'),
                     'user_created_id'        => $user->id,
-                    'transaction_concept_id' => $request->input('transaction_concept_id', '5'),
+                    'transaction_concept_id' => $request->input('transaction_concept_id', '6'),
                     'person_id'              => $objectExpense->worker->person->id,
                     'type_moviment'          => 'SALIDA',
                 ];
@@ -486,13 +488,11 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
@@ -732,15 +732,11 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-            ;
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-            ;
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
@@ -945,13 +941,11 @@ class DriverExpenseController extends Controller
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');
@@ -1072,7 +1066,7 @@ class DriverExpenseController extends Controller
                 return response()->json(['message' => 'El ingreso a caja grande ya fue confirmado y no se puede eliminar.'], 422);
             }
             BankMovement::find($object->latest_bank_movement->id)->delete();
-            
+
         }
 
         // Intentar eliminar el objeto y manejar posibles errores
@@ -1088,13 +1082,11 @@ class DriverExpenseController extends Controller
             }
             $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Ingreso');
-                $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-            })->sum('total');
+            })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
             $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
                 $q->where('typeConcept', 'Egreso');
-                $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-            })->sum('total');
+            })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
             // Calcular el saldo (diferencia entre ingresos y egresos)
             $saldo = number_format($totalIngreso - $totalEgreso, 2, '.', '');

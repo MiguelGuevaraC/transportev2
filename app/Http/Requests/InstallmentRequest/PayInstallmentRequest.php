@@ -66,6 +66,7 @@ class PayInstallmentRequest extends StoreRequest
 
             'yape'                   => 'nullable|numeric',
             'bank_account_id'        => [
+                'nullable','sometimes',
                 'required_if:is_anticipo,1',
                 Rule::exists('bank_accounts', 'id')->whereNull('deleted_at'),
                 function ($attribute, $value, $fail) {

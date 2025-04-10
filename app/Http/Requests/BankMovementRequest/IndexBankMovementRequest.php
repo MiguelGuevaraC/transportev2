@@ -60,6 +60,7 @@ class IndexBankMovementRequest extends IndexRequest
             'transaction_concept_id' => 'nullable|string',
             'person_id'              => 'nullable|string',
             'created_at'             => 'nullable|string',
+            'moviment_search'             => 'nullable|string',
         ];
     }
 }

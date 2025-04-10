@@ -21,6 +21,7 @@ class BankMovementService
     public function createBankMovement(array $data): BankMovement
     {
         $data['user_created_id'] = Auth::user()->id;
+        $data['status'] = 'No Confirmado';
         $proyect                 = BankMovement::create($data);
         return $proyect;
     }

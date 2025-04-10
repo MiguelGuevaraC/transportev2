@@ -104,6 +104,7 @@ class DriverExpense extends Model
         'bank_id',
         'worker_id',
         'expensesConcept_id',
+        'type_document_id',
         'proveedor_id',
         'created_at',
 

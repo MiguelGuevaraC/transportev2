@@ -295,13 +295,11 @@ class Programming extends Model
 
         $totalIngreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Ingreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');
 
         $totalEgreso = DriverExpense::where('programming_id', $programming->id)->whereHas('expensesConcept', function ($q) {
             $q->where('typeConcept', 'Egreso');
-            $q->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO']);
-        })->sum('total');
+        })->whereNotIn('selectTypePay', ['PEAJE', 'CREDITO'])->sum('total');('total');
 
         // Calcular el saldo (diferencia entre ingresos y egresos)
         $programming->totalExpenses = $totalEgreso;

@@ -51,21 +51,34 @@ class BankMovementController extends Controller
  * )
  */
 
-    public function index(IndexBankMovementRequest $request)
-    {
-        // Clonar el request para evitar modificar el original directamente
-        $modifiedRequest = $request->merge([
-            'to' => $request->has('to') ? Carbon::parse($request->to)->addDay()->toDateString() : null,
-        ]);
+ public function index(IndexBankMovementRequest $request)
+ {
+     // Ajustar las fechas en la solicitud
+     $modifiedRequest = $request->merge([
+         'to' => $request->has('to') ? Carbon::parse($request->to)->addDay()->toDateString() : null,
+     ]);
+     $query = BankMovement::query();
+     if ($request->has('moviment_search') && !empty($request->moviment_search)) {
+         $searchTerm = $request->moviment_search;
+         $bankMovements = $query->get();
+         $filteredMovements = $bankMovements->filter(function ($movement) use ($searchTerm) {
+             return str_contains($movement->moviment_numbers_concatenated, $searchTerm);
+         });
+         $filteredIds = $filteredMovements->pluck('id')->toArray();
+         $query->whereIn('id', $filteredIds);
+     }
+     $movements = $this->getFilteredResults(
+         $query,
+         $modifiedRequest,
+         BankMovement::filters,
+         BankMovement::sorts,
+         BankMovementResource::class
+     );
+     return $movements;
+ }
+ 
+ 
 
-        return $this->getFilteredResults(
-            BankMovement::class,
-            $modifiedRequest,
-            BankMovement::filters,
-            BankMovement::sorts,
-            BankMovementResource::class
-        );
-    }
     /**
      * @OA\Get(
      *     path="/transportedev/public/api/bank-movement-export-excel",
@@ -249,7 +262,13 @@ class BankMovementController extends Controller
         }
         if ($bank->pay_installments()->exists()) {
             return response()->json([
-                'message' => 'Este anticipo ya ha sido aplicado en una o más amortizaciones y no se puede eliminar.',
+                'message' => 'Este anticipo ya ha sido aplicado en una o más amortizaciones en cuentas por cobrar y no se puede eliminar.',
+            ], 422);
+        }
+
+        if ($bank->pay_payables()->exists()) {
+            return response()->json([
+                'message' => 'Este anticipo ya ha sido aplicado en una o más amortizaciones en cuentas por pagar y no se puede eliminar.',
             ], 422);
         }
 

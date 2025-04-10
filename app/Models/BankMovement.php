@@ -58,7 +58,7 @@ class BankMovement extends Model
         'person_id'                        => '=',
         'created_at'                       => '=',
         'pay_installment_id'               => '=',
-        'pay_payable_id'               => '=',
+        'pay_payable_id'                   => '=',
         'driver_expense_id'                => '=',
         'total_anticipado_restante'        => '=',
         'total_anticipado_egreso'          => '=',
@@ -108,8 +108,6 @@ class BankMovement extends Model
         return $this->belongsTo(User::class, 'user_created_id');
     }
 
-    
-
     public function pay_installment()
     {
         return $this->belongsTo(PayInstallment::class, 'pay_installment_id');
@@ -130,25 +128,53 @@ class BankMovement extends Model
             ->where('bank_movement_id', $this->id);
     }
 
-
     public function getMovimentNumbersConcatenatedAttribute()
     {
-        // Obtenemos una colección Eloquent unificada
-        $installments = $this->pay_installments;
-
-        if ($this->pay_installment) {
-            $installments = $installments->push($this->pay_installment);
+        if ($this->pay_installments->isNotEmpty() || $this->pay_installment) {
+            $installments = $this->pay_installments;
+    
+            if ($this->pay_installment) {
+                $installments = $installments->push($this->pay_installment);
+            }
+    
+            $installments->load('installment.moviment');
+    
+            return $installments
+                ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber)
+                ->filter()
+                ->unique()
+                ->implode(', ') ?: '';
         }
+    
+        $payables = $this->pay_payables;
 
-        // Cargar las relaciones para evitar N+1
-        $installments->load('installment.moviment');
-
-        return $installments
-            ->map(fn($pi) => optional(optional($pi->installment)->moviment)->sequentialNumber)
-            ->filter()
-            ->unique()
-            ->implode(', ') ?: '';
+        if ($this->pay_payable) {
+            $payables = $payables->push($this->pay_payable);
+        }
+    
+        $payables->load('payable.driver_expense.programming');
+    
+        $numeros = $payables->map(function ($p) {
+            return optional(optional(optional($p->payable)->driver_expense)->programming)->numero;
+        });
+    
+        // Si BankMovement tiene relación directa con driver_expense
+        if ($this->driver_expense && $this->driver_expense instanceof \App\Models\DriverExpense) {
+            $this->driver_expense->loadMissing('programming');
+            $numeroDirecto = optional($this->driver_expense->programming)->numero;
+    
+            if ($numeroDirecto) {
+                $numeros->push($numeroDirecto);
+            }
+        }
+    
+        return collect($numeros)
+        ->filter(fn($n) => !empty($n) && is_string($n)) // o is_scalar si aceptas int también
+        ->unique()
+        ->implode(', ') ?: '';
+    
     }
+    
 
     public function update_montos_anticipo()
     {

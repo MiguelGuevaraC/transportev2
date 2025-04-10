@@ -17,6 +17,7 @@ class DriverExpenseResource extends JsonResource
             'gravado'            => $this->gravado ?? null,
             'exonerado'          => $this->exonerado ?? null,
             'selectTypePay'      => $this->selectTypePay ?? null,
+            'type_payment'      => $this->type_payment ?? null,
             'total'              => $this->total ?? null,
             'routeFact'          => $this->routeFact ?? null,
             'gallons'            => $this->gallons ?? null,

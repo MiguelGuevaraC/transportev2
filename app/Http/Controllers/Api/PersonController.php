@@ -116,7 +116,7 @@ class PersonController extends Controller
         }
 
         if ($type) {
-            $query->where('type', $type);
+            $query->where('type', 'LIKE', '%' . $type . '%');
         }
 
         // Aplicar filtro por nombres
