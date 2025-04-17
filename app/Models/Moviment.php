@@ -320,7 +320,8 @@ class Moviment extends Model
 
     public function creditNote()
     {
-        return $this->hasOne(CreditNote::class);
+        return $this->hasOne(CreditNote::class)->where('status_facturado', '!=', 'Anulada');
+        // return $this->hasOne(CreditNote::class);
     }
 
     public function updateSaldo()

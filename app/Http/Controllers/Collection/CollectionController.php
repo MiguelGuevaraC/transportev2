@@ -18,7 +18,7 @@ class CollectionController extends Controller
 {
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/dataCollection",
+ *     path="/transporte/public/api/dataCollection",
  *     summary="Get all data",
  *     tags={"CollectionData"},
  *     description="Retrieve all data collections",

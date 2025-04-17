@@ -12,7 +12,7 @@ class ModelFunctionalController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/modelFunctional",
+     *     path="/transporte/public/api/modelFunctional",
      *     summary="Get all modelFunctional",
      *     tags={"ModelFunctional"},
      *     description="Show all modelFunctional",
@@ -42,7 +42,7 @@ class ModelFunctionalController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/modelFunctional",
+     *     path="/transporte/public/api/modelFunctional",
      *     summary="Store a new modelFunctional",
      *     tags={"ModelFunctional"},
      *     description="Create a new modelFunctional",
@@ -114,7 +114,7 @@ class ModelFunctionalController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/modelFunctional/{id}",
+     *     path="/transporte/public/api/modelFunctional/{id}",
      *     summary="Get a modelFunctional by ID",
      *     tags={"ModelFunctional"},
      *     description="Retrieve a modelFunctional by its ID",
@@ -164,7 +164,7 @@ class ModelFunctionalController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/modelFunctional/{id}",
+     *     path="/transporte/public/api/modelFunctional/{id}",
      *     summary="Update an existing Model_functional",
      *     tags={"ModelFunctional"},
      *     description="Update an existing Model_functional",
@@ -261,7 +261,7 @@ class ModelFunctionalController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/modelFunctional/{id}",
+     *     path="/transporte/public/api/modelFunctional/{id}",
      *     summary="Delete a ModelFunctional",
      *     tags={"ModelFunctional"},
      *     description="Delete a ModelFunctional by ID",

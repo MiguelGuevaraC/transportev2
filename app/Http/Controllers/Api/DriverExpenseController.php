@@ -37,7 +37,7 @@ class DriverExpenseController extends Controller
     /**
      * Get all DriverExpenses
      * @OA\Get (
-     *     path="/transportedev/public/api/driverExpense",
+     *     path="/transporte/public/api/driverExpense",
      *     tags={"DriverExpense"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -53,10 +53,10 @@ class DriverExpenseController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/DriverExpense")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/driverExpense"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/driverExpense"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -170,7 +170,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/driverExpense",
+     *     path="/transporte/public/api/driverExpense",
      *     summary="Get all driverExpense",
      *     tags={"DriverExpense"},
      *     description="Show all driverExpense by programming",
@@ -195,7 +195,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/driverExpense",
+     *     path="/transporte/public/api/driverExpense",
      *     summary="Store a new driverExpense",
      *     tags={"DriverExpense"},
      *     description="Create a new driverExpense",
@@ -256,7 +256,7 @@ class DriverExpenseController extends Controller
             'type_payment'           => 'required|in:YAPE,DEPOSITO,EFECTIVO,COBRANZA_GUIAS',
             'nro_dias'               => 'nullable|required_if:type_payment,CREDITO',
 
-            'type_document_id'       => 'nullable|exists:type_documents,id,deleted_at,NULL|required_with:operationNumber',
+            'type_document_id'       => 'nullable|exists:type_documents,id,deleted_at,NULL',
             'operationNumber'        => 'nullable|required_with:type_document_id',
 
             'bank_account_id'        => ['nullable', Rule::exists('bank_accounts', 'id')->whereNull('deleted_at')],
@@ -509,7 +509,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/transferir-saldo",
+     *     path="/transporte/public/api/transferir-saldo",
      *     summary="Transfer driver expense",
      *     tags={"DriverExpense"},
      *     security={{"bearerAuth":{}}},
@@ -540,7 +540,7 @@ class DriverExpenseController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/devolverMontoaCaja",
+ *     path="/transporte/public/api/devolverMontoaCaja",
  *     summary="Return an amount to the cash box",
  *     tags={"DriverExpense"},
  *     description="Store a new driverExpense and create a related movement",
@@ -753,7 +753,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/driverExpense/{id}",
+     *     path="/transporte/public/api/driverExpense/{id}",
      *     summary="Update an existing driverExpense",
      *     tags={"DriverExpense"},
      *     description="Update the details of an existing driverExpense",
@@ -961,7 +961,7 @@ class DriverExpenseController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/driverExpense/{id}",
+     *     path="/transporte/public/api/driverExpense/{id}",
      *     summary="Get a driverExpense by ID",
      *     tags={"DriverExpense"},
      *     description="Retrieve a driverExpense by its ID",
@@ -1011,7 +1011,7 @@ class DriverExpenseController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/driverExpense/{id}",
+     *     path="/transporte/public/api/driverExpense/{id}",
      *     summary="Delete a DriverExpense",
      *     tags={"DriverExpense"},
      *     description="Delete a DriverExpense by ID",

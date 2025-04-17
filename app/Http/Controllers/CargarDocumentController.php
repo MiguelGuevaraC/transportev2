@@ -25,7 +25,7 @@ class CargarDocumentController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/cargaDocument",
+ *     path="/transporte/public/api/cargaDocument",
  *     summary="Obtener información de CargaDocuments con filtros y ordenamiento",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
@@ -65,7 +65,7 @@ class CargarDocumentController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/cargaDocument/{id}",
+ *     path="/transporte/public/api/cargaDocument/{id}",
  *     summary="Obtener detalles de un Documento de Carga por ID",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
@@ -91,7 +91,7 @@ class CargarDocumentController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/cargaDocument",
+ *     path="/transporte/public/api/cargaDocument",
  *     summary="Crear CargaDocument",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
@@ -125,7 +125,7 @@ class CargarDocumentController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/cargaDocument/{id}",
+ *     path="/transporte/public/api/cargaDocument/{id}",
  *     summary="Actualizar un CargaDocument",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
@@ -189,7 +189,7 @@ class CargarDocumentController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/cargadocument/{id}",
+ *     path="/transporte/public/api/cargadocument/{id}",
  *     summary="Eliminar un Documento de Cargapor ID",
  *     tags={"CargaDocument"},
  *     security={{"bearerAuth": {}}},
@@ -218,7 +218,7 @@ class CargarDocumentController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/export-kardex",
+ *     path="/transporte/public/api/export-kardex",
  *     summary="Exportar Kardex",
  *     tags={"CargaDocument"},
   *     security={{"bearerAuth": {}}},
@@ -262,7 +262,7 @@ class CargarDocumentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/ticket-carga/{id}",
+     *     path="/transporte/public/api/ticket-carga/{id}",
      *     summary="Generar ticket de carga",
      *     tags={"CargaDocument"},
      *     security={{"bearerAuth": {}}},

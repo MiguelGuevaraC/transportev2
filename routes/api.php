@@ -192,8 +192,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-    // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
-    //Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
+    Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
     Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
 
@@ -323,12 +323,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('receptionWithoutSale', [VentaController::class, 'receptionWithoutSale']);
     Route::get('getArchivosDocument/{id}/{tipodocumento}', [VentaController::class, 'getArchivosDocument']);
 
-    //Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
-    //Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
-    //Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
-    //Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
+    Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
+    Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
+    Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
+    Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
 
-    //Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+    Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
 
     Route::get('saleWithoutCreditNote', [VentaController::class, 'saleWithoutCreditNote']);
     Route::get('salesbynumber', [VentaController::class, 'salesbynumber']);

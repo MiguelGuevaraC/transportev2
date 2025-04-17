@@ -10,13 +10,14 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/document",
+     *     path="/transporte/public/api/document",
      *     summary="Retrieve all Documents",
      *     tags={"Document"},
      *     description="Fetches a list of all available Documents in the system.",
@@ -205,7 +206,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/document",
+ *     path="/transporte/public/api/document",
  *     summary="Create a new Document",
  *     tags={"Document"},
  *     description="Stores a new Document in the database.",
@@ -293,7 +294,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/document/{id}",
+ *     path="/transporte/public/api/document/{id}",
  *     summary="Get a Document by ID",
  *     tags={"Document"},
  *     description="Retrieve a Document by its ID",
@@ -344,7 +345,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/document/{id}",
+ *     path="/transporte/public/api/document/{id}",
  *     summary="Update an existing Document",
  *     tags={"Document"},
  *     description="Update an existing Document",
@@ -451,7 +452,7 @@ class DocumentController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/document/{id}",
+ *     path="/transporte/public/api/document/{id}",
  *     summary="Create or Update a Document",
  *     tags={"Document"},
  *     description="Stores a new Document in the database or updates an existing one if the ID is provided.",
@@ -502,50 +503,51 @@ class DocumentController extends Controller
  *     )
  * )
  */
-    public function createOrUpdate(Request $request, $id = null)
-    {
+
+public function createOrUpdate(Request $request, $id = null)
+{
+    try {
         $validator = validator()->make($request->all(), [
             'description' => 'required|string|max:255',
             'number'      => 'required|string',
             'dueDate'     => 'required|date',
             'vehicle_id'  => 'required|integer|exists:vehicles,id',
-            'pathFile'    => 'nullable|file', // Validación de archivo
+            'pathFile'    => 'nullable|file',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        // Buscar o crear una instancia de Document
         $document = $id != 'null' ? Document::find($id) : new Document();
 
         if (! $document) {
             return response()->json(['error' => 'Document not found.'], 404);
         }
 
-        // Procesa el archivo si se envía
         if ($request->hasFile('pathFile')) {
-
-            $filePath = str_replace('/storage', 'public', $document->pathFile);
-            Storage::delete($filePath); // Eliminar el archivo de almacenamiento
+            if ($document->pathFile) {
+                $filePath = str_replace('/storage', 'public', $document->pathFile);
+                Storage::delete($filePath);
+            }
+            
 
             $photoFile = $request->file('pathFile');
 
             $vehicleDirectory = 'public/document/' . $request->input('vehicle_id');
-            $filePath         = $photoFile->store($vehicleDirectory); // Guardar la foto en el directorio
+            $filePath         = $photoFile->store($vehicleDirectory);
 
             $photoUrl = Storage::url($filePath);
 
             $document->pathFile = $photoUrl;
         }
-        // Asigna los demás datos
+
         $document->description = $request->input('description');
         $document->number      = $request->input('number');
         $document->dueDate     = $request->input('dueDate');
         $document->type        = $request->input('type');
         $document->vehicle_id  = $request->input('vehicle_id');
 
-        // Guarda el documento
         $currentDate = now();
         $dueDate     = $request->input('dueDate');
 
@@ -556,42 +558,49 @@ class DocumentController extends Controller
 
             $expiredDocument = Document::where('type', $document->type)
                 ->where('vehicle_id', $document->vehicle_id)
-                                               // ->where('status', 'Vencido') // Asegurarse de que esté marcado como vencido
-                ->whereDate('dueDate', '<', now()) // Asegurarse de que la fecha de vencimiento sea anterior a la fecha actual
+                ->whereDate('dueDate', '<', now())
                 ->first();
 
             if ($expiredDocument) {
-                // Eliminar la notificación del documento vencido
-                $not = Notification::where('vehicle_id', $expiredDocument->vehicle_id)
+                Notification::where('vehicle_id', $expiredDocument->vehicle_id)
                     ->where('table', 'documents')
-                    ->where('record_id', $expiredDocument->id) // Coincidir con el document_id del documento vencido
+                    ->where('record_id', $expiredDocument->id)
                     ->delete();
-                // return response()->json($not, 200);
             }
-
         }
 
-        // Guarda el documento
         $document->save();
         $this->actualizarEstadoDocumentos();
-        // Cargar relaciones y devolver el documento
+
         $document = Document::with(['vehicle'])->find($document->id);
+
         Bitacora::create([
-            'user_id'     => Auth::id(),    // ID del usuario que realiza la acción
-            'record_id'   => $document->id, // El ID del usuario afectado
-            'action'      => 'PUT',         // Acción realizada
-            'table_name'  => 'documents',   // Tabla afectada
+            'user_id'     => Auth::id(),
+            'record_id'   => $document->id,
+            'action'      => 'POST/PUT',
+            'table_name'  => 'documents',
             'data'        => json_encode($document),
-            'description' => 'Actualizar Documentos', // Descripción de la acción
-            'ip_address'  => $request->ip(),          // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(),   // Información sobre el navegador/dispositivo
+            'description' => 'Guardo Documentos',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
         ]);
+
         return response()->json($document, 200);
+
+    } catch (\Exception $e) {
+        Log::error('Error en createOrUpdate DocumentController: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all()
+        ]);
+
+        return response()->json(['error' => 'Unexpected error, please try again later.'], 500);
     }
+}
+
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/document/{id}",
+ *     path="/transporte/public/api/document/{id}",
  *     summary="Delete a Document",
  *     tags={"Document"},
  *     description="Mark a Document as deleted by setting its state to inactive",

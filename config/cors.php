@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://transportes-hernandez-dev.vercel.app'],
+    'allowed_origins' => ['https://transportes-hernandez-mrsoft.vercel.app'],
 
     'allowed_origins_patterns' => [],
 
