@@ -13,7 +13,7 @@ class ExpensesConceptController extends Controller
     /**
      * Get all Expneses Concept
      * @OA\Get (
-     *     path="/transporte/public/api/expensesConcept",
+     *     path="/transportedev/public/api/expensesConcept",
      *     tags={"ExpensesConcept"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -22,10 +22,10 @@ class ExpensesConceptController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ExpensesConcept")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/expensesConcept?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/expensesConcept?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/expensesConcept?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/expensesConcept"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/expensesConcept?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/expensesConcept"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -54,7 +54,7 @@ class ExpensesConceptController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/expensesConcept",
+     *     path="/transportedev/public/api/expensesConcept",
      *     summary="Store a new expenses Concept",
      *     tags={"ExpensesConcept"},
      *     description="Create a new expenses Concept",
@@ -126,7 +126,7 @@ class ExpensesConceptController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/expensesConcept/{id}",
+     *     path="/transportedev/public/api/expensesConcept/{id}",
      *     summary="Get a expenses Concept by ID",
      *     tags={"ExpensesConcept"},
      *     description="Retrieve a expenses Concept by its ID",
@@ -176,7 +176,7 @@ class ExpensesConceptController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/expensesConcept/{id}",
+     *     path="/transportedev/public/api/expensesConcept/{id}",
      *     summary="Update an existing ExpensesConcept",
      *     tags={"ExpensesConcept"},
      *     description="Update an existing ExpensesConcept",
@@ -269,7 +269,7 @@ class ExpensesConceptController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/expensesConcept/{id}",
+     *     path="/transportedev/public/api/expensesConcept/{id}",
      *     summary="Delete a ExpensesConcept",
      *     tags={"ExpensesConcept"},
      *     description="Delete a ExpensesConcept by ID",

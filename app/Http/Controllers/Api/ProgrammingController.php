@@ -26,7 +26,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/programming",
+     *     path="/transportedev/public/api/programming",
      *     summary="Get all programming",
      *     tags={"Programming"},
      *     description="Show all programming",
@@ -262,7 +262,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/programming",
+     *     path="/transportedev/public/api/programming",
      *     summary="Create a new programming",
      *     tags={"Programming"},
      *     description="Create a new programming",
@@ -497,7 +497,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/programming/{id}",
+     *     path="/transportedev/public/api/programming/{id}",
      *     summary="Get a programming by ID",
      *     tags={"Programming"},
      *     description="Retrieve a programming by its ID",
@@ -547,7 +547,7 @@ class ProgrammingController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/programming/{id}",
+ *     path="/transportedev/public/api/programming/{id}",
  *     summary="Update an existing programming",
  *     tags={"Programming"},
  *     description="Update an existing programming",
@@ -860,7 +860,7 @@ class ProgrammingController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/reprogramming/{id}",
+ *     path="/transportedev/public/api/reprogramming/{id}",
  *     summary="reprogram an existing programming",
  *     tags={"Programming"},
  *     description="reprogram an existing programming",
@@ -1017,7 +1017,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/programming/{id}",
+     *     path="/transportedev/public/api/programming/{id}",
      *     summary="Delete a Programming",
      *     tags={"Programming"},
      *     description="Delete a Programming by ID",
@@ -1113,7 +1113,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\PUT(
-     *     path="/transporte/public/api/finishProgramming/{id}",
+     *     path="/transportedev/public/api/finishProgramming/{id}",
      *     summary="Get a programming by ID",
      *     tags={"Programming"},
      *     description="Retrieve a programming by its ID and mark it as finished",

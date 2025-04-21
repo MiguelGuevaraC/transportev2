@@ -23,7 +23,7 @@ class SeccionController extends Controller
    
 /**
  * @OA\Get(
- *     path="/transporte/public/api/seccion",
+ *     path="/transportedev/public/api/seccion",
  *     summary="Obtener información de Seccions con filtros y ordenamiento",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -50,7 +50,7 @@ class SeccionController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/seccion/{id}",
+ *     path="/transportedev/public/api/seccion/{id}",
  *     summary="Obtener detalles de un Seccion por ID",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -76,7 +76,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/seccion",
+ *     path="/transportedev/public/api/seccion",
  *     summary="Crear Seccion",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -110,7 +110,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/seccion/{id}",
+ *     path="/transportedev/public/api/seccion/{id}",
  *     summary="Actualizar un Seccion",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -174,7 +174,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/seccion/{id}",
+ *     path="/transportedev/public/api/seccion/{id}",
  *     summary="Eliminar un Seccionpor ID",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},

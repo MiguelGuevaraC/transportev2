@@ -23,7 +23,7 @@ class AlmacenController extends Controller
    
 /**
  * @OA\Get(
- *     path="/transporte/public/api/almacen",
+ *     path="/transportedev/public/api/almacen",
  *     summary="Obtener información de Almacens con filtros y ordenamiento",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -50,7 +50,7 @@ class AlmacenController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/almacen/{id}",
+ *     path="/transportedev/public/api/almacen/{id}",
  *     summary="Obtener detalles de un Almacen por ID",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -76,7 +76,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/almacen",
+ *     path="/transportedev/public/api/almacen",
  *     summary="Crear Almacen",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -110,7 +110,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/almacen/{id}",
+ *     path="/transportedev/public/api/almacen/{id}",
  *     summary="Actualizar un Almacen",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -174,7 +174,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/almacen/{id}",
+ *     path="/transportedev/public/api/almacen/{id}",
  *     summary="Eliminar un Almacenpor ID",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},

@@ -15,7 +15,7 @@ class BoxController extends Controller
     /**
      * Get all Boxes
      * @OA\Get (
-     *     path="/transporte/public/api/box",
+     *     path="/transportedev/public/api/box",
      *     tags={"Box"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -24,10 +24,10 @@ class BoxController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Box")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/box?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/box?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/box"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -56,7 +56,7 @@ class BoxController extends Controller
     /**
      * Get all Boxes
      * @OA\Get (
-     *     path="/transporte/public/api/boxAll",
+     *     path="/transportedev/public/api/boxAll",
      *     tags={"Box"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -65,10 +65,10 @@ class BoxController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="current_page", type="integer", example=1),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Box")),
-     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/box?page=1"),
+     *             @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box?page=1"),
      *             @OA\Property(property="from", type="integer", example=1),
-     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/box?page=2"),
-     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/box"),
+     *             @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box?page=2"),
+     *             @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/box"),
      *             @OA\Property(property="per_page", type="integer", example=15),
      *             @OA\Property(property="prev_page_url", type="string", example="null"),
      *             @OA\Property(property="to", type="integer", example=15)
@@ -131,7 +131,7 @@ class BoxController extends Controller
 
  *
  * @OA\Get(
- *     path="/transporte/public/api/boxByBranch/{id}",
+ *     path="/transportedev/public/api/boxByBranch/{id}",
  *     summary="Get all box by Branch Office",
  *     tags={"Box"},
  *     description="Show all box by Branch Office",
@@ -189,7 +189,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/box",
+     *     path="/transportedev/public/api/box",
      *     summary="Store a new box",
      *     tags={"Box"},
      *     description="Create a new box",
@@ -263,7 +263,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Get a box by ID",
      *     tags={"Box"},
      *     description="Retrieve a box by its ID",
@@ -313,7 +313,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Update an existing Box",
      *     tags={"Box"},
      *     description="Update an existing Box",
@@ -402,7 +402,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Delete a Box",
      *     tags={"Box"},
      *     description="Delete a Box by ID",

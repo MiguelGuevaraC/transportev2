@@ -32,7 +32,7 @@ class PdfController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/saveguia/{id}",
+     *     path="/transportedev/public/api/saveguia/{id}",
      *     summary="Exportar Guía Transportista",
      *     tags={"CarrierGuide"},
      *     description="Genera y descarga una Guía Transportista en formato PDF",
@@ -315,7 +315,7 @@ class PdfController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/manifiesto/{id}",
+     *     path="/transportedev/public/api/manifiesto/{id}",
      *     summary="Exportar Manifiesto",
      *     tags={"Report"},
      *     description="Genera y descarga una Manifiesto en formato PDF",
@@ -501,7 +501,7 @@ class PdfController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reportCaja",
+     *     path="/transportedev/public/api/reportCaja",
      *     summary="Exportar Reporte Caja",
      *     tags={"Report"},
      *     description="Genera y descarga una Reporte Caja Aperturada en formato PDF",
@@ -1169,7 +1169,7 @@ class PdfController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reportCajaExcel",
+     *     path="/transportedev/public/api/reportCajaExcel",
      *     summary="Exportar Reporte Caja a Excel",
      *     tags={"Report"},
      *     description="Genera y descarga un Reporte de Caja Aperturada en formato EXCEL",
