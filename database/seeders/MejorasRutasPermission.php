@@ -177,6 +177,16 @@ class MejorasRutasPermission extends Seeder
                 'guard_name'   => 'web',
                 'groupMenu_id' => 9,
             ],
+
+            [
+                'id'           => 48,
+                'name'         => 'Almacenes',
+                'route'        => 'almacenes',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 7,
+            ],
+
         ];
 
         foreach ($permissions as $permission) {

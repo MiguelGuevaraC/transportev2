@@ -193,7 +193,7 @@ class PayableController extends Controller
                     'total_moviment'         => isset($total) ? $total : null,
                     'comment'                => isset($payable_pay->comment) ? $payable_pay->comment : null,
                     'user_created_id'        => isset(Auth::user()->id) ? Auth::user()->id : null,
-                    'transaction_concept_id' => '6', //Deposito en cuenta EGRESO
+                    'transaction_concept_id' => 6, //Deposito en cuenta EGRESO
                     'person_id'              => isset($payable_pay->payable->person_id) ? $payable_pay->payable->person_id : null,
                     'type_moviment'          => 'SALIDA',
                     'number_operation'       => $nroOperacion,

@@ -373,7 +373,7 @@ class DriverExpenseController extends Controller
                     'total_moviment'         => $totalAcum,
                     'comment'                => $request->input('comment'),
                     'user_created_id'        => $user->id,
-                    'transaction_concept_id' => $request->input('transaction_concept_id', '6'),
+                    'transaction_concept_id' => 6, //Deposito en cuenta EGRESO
                     'person_id'              => $objectExpense->worker->person->id,
                     'type_moviment'          => 'SALIDA',
                 ];
@@ -604,6 +604,7 @@ class DriverExpenseController extends Controller
             'plin'           => 'nullable|numeric',
             'card'           => 'nullable|numeric',
             'bank_id'        => 'nullable|exists:banks,id',
+            'box_id'         => 'required|exists:boxes,id',
             'proveedor_id'   => 'nullable|exists:people,id',
         ]);
 
@@ -620,9 +621,9 @@ class DriverExpenseController extends Controller
 
         $user = User::find(Auth()->id());
 
-        if (! $user->box) {
-            return response()->json(['error' => 'El usuario no tiene una caja'], 422);
-        }
+        // if (! $user->box) {
+        //     return response()->json(['error' => 'El usuario no tiene una caja'], 422);
+        // }
 
         $efectivo = $request->input('cash') ?? 0;
         $yape     = $request->input('yape') ?? 0;
@@ -631,8 +632,13 @@ class DriverExpenseController extends Controller
         $deposito = $request->input('deposit') ?? 0;
 
         $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $box   = null;
+        if ($request->input('box_id')) {
+            $box = Box::find($request->input('box_id'));
+        } else {
+            $box = Box::find($user->box->id);
+        }
 
-        $box = Box::find($user->box->id);
         if ($box->status != 'Activa') {
             return response()->json(['error' => 'Caja No está Aperturada'], 422);
         }
@@ -722,7 +728,7 @@ class DriverExpenseController extends Controller
             'bank_id'           => $request->input('bank_id'),
             'person_id'         => $personWorker->id,
             'user_id'           => auth()->id(),
-            'box_id'            => $user->box->id,
+            'box_id'            => $box->id,
             'driverExpense_id'  => $objectExpense->id,
         ];
 

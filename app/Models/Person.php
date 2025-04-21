@@ -144,6 +144,7 @@ class Person extends Model
         'telephone',
         'email',
         'daysCredit',
+        'daysCredit_proveedor',
         'type',
 
         'businessName',

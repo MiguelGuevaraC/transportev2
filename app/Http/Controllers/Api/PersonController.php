@@ -396,6 +396,7 @@ class PersonController extends Controller
             'places'                   => $request->input('places') ?? null,
 
             'daysCredit'               => $request->input('daysCredit') ?? null,
+            'daysCredit_proveedor'               => $request->input('daysCredit_proveedor') ?? null,
             'type'                     => $request->input('type') ?? null,
 
             'representativePersonDni'  => $request->input('representativePersonDni') ?? null,
@@ -578,6 +579,7 @@ class PersonController extends Controller
             'email'          => $request->input('email'),
             'branch_office'  => $request->input('branch_office'),
             'daysCredit'     => $request->input('daysCredit'),
+            'daysCredit_proveedor'               => $request->input('daysCredit_proveedor') ?? null,
             'places'         => $request->input('places'),
 
             'type'           => $request->input('type'),
