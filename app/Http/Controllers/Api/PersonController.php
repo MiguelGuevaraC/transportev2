@@ -199,14 +199,15 @@ class PersonController extends Controller
                     ->orWhereRaw('lower(documentNumber) LIKE ?', ['%' . strtolower($names) . '%']);
             });
         })
-            ->when(! empty($type), function ($query) use ($type) {
-
-                $query->where(function ($query) use ($type) {
-                    $query->where('type', 'LIKE', '%' . $type . '%')
-                        ->orWhere('type', 'Trabajador');
-
-                });
-            })
+        ->when(!empty($type), function ($query) use ($type) {
+            $types = array_map('trim', explode(',', $type)); // separa por comas y limpia espacios
+        
+            $query->where(function ($query) use ($types) {
+                foreach ($types as $value) {
+                    $query->orWhere('type', 'LIKE', '%' . $value . '%');
+                }
+            });
+        })
             ->when(! empty($names) || ! empty($type), function ($query) {
                 $query->orWhere('id', '2');
             })

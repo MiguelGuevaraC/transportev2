@@ -52,10 +52,10 @@ class Product extends Model
 
     public function branchOffices()
     {
-        return $this->belongsToMany(BranchOffice::class, 'product_stock_by_branches', 'product_id'
-            , 'branchOffice_id')
-            ->withPivot('stock')
+        return $this->belongsToMany(BranchOffice::class, 'product_stock_by_branches', 'product_id', 'branchOffice_id')
+            ->withPivot('stock', 'almacen_id', 'seccion_id') // Incluye las columnas 'almacen_id' y 'seccion_id'
             ->withTimestamps();
     }
+    
 
 }

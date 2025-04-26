@@ -103,6 +103,8 @@ class ReceptionResource extends JsonResource
             'moviment'              => $this->moviment ?? null,
             'cargos'                => $this->cargos ?? null,
             'carga'                => $this->carga ?? null,
+
+           
         ];
     }
 }

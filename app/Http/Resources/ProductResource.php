@@ -48,8 +48,13 @@ class ProductResource extends JsonResource
                     'branch_office_id' => $branch->id,
                     'branch_name'      => $branch->name,
                     'stock'            => $branch->pivot->stock,
+                    'almacen_id'       => $branch->pivot->almacen_id,
+                    'almacen_name'     => \App\Models\Almacen::find($branch->pivot->almacen_id)->name ?? null,
+                    'seccion_id'       => $branch->pivot->seccion_id,
+                    'seccion_name'     => \App\Models\Seccion::find($branch->pivot->seccion_id)->name ?? null,
                 ];
             }),
+
             'created_at'      => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }

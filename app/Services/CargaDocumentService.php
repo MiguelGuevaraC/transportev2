@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\CargaDocument;
+use App\Models\DocumentCargaDetail;
 use App\Models\Product;
 use App\Models\ProductStockByBranch;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -26,29 +27,55 @@ class CargaDocumentService
     public function createCargaDocument(array $data): CargaDocument
     {
         return DB::transaction(function () use ($data) {
-            // Obtener el stock actual del producto
-            $product      = Product::findOrFail($data['product_id']);
-            $productStock = ProductStockByBranch::firstOrCreate(
-                [
-                    'product_id'      => $data['product_id'],
-                    'branchOffice_id' => $data['branchOffice_id'],
-                ],
-                ['stock' => 0]// Si no existe, inicia con stock 0
-            );
+            // Crear documento principal
+            $cargaDocument = CargaDocument::create(array_intersect_key(
+                $data,
+                array_flip((new CargaDocument())->getFillable())
+            ));
 
-            $cargaDocument = CargaDocument::create(array_intersect_key($data
-                , array_flip((new CargaDocument())->getFillable())));
+            // Generar código de documento
+            $tipo         = 'C' . str_pad($cargaDocument->branchOffice_id, 3, '0', STR_PAD_LEFT);
+            $tipo         = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
+            $siguienteNum = DB::selectOne('
+                SELECT COALESCE(MAX(CAST(SUBSTRING(code_doc, LOCATE("-", code_doc) + 1) AS SIGNED)), 0) + 1 AS siguienteNum
+                FROM carga_documents
+                WHERE SUBSTRING(code_doc, 1, 4) = ?
+            ', [$tipo])->siguienteNum;
 
-            $tipo                    = 'C' . str_pad($cargaDocument->branchOffice_id, 3, '0', STR_PAD_LEFT);
-            $tipo                    = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
-            $siguienteNum            = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(code_doc, LOCATE("-", code_doc) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM carga_documents WHERE SUBSTRING(code_doc, 1, 4) = ?', [$tipo])[0]->siguienteNum;
             $cargaDocument->code_doc = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
             $cargaDocument->save();
 
-            $afterStock = $this->updateProductStock($data['product_id'], $cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
-            $cargaDocument->update([
-                'stock_balance_after' => 0,
-            ]);
+            // Procesar cada detalle y guardarlo
+            foreach ($data['details'] as $detail) {
+                DocumentCargaDetail::create([
+                    'quantity'          => $detail['quantity'],
+                    'product_id'        => $detail['product_id'],
+                    'almacen_id'        => $detail['almacen_id'],
+                    'seccion_id'        => $detail['seccion_id'],
+                    'document_carga_id' => $cargaDocument->id,
+                    'branchOffice_id'   => $data['branchOffice_id'],
+                    'comment'           => $detail['comment'] ?? null,
+                    'num_anexo'         => $detail['num_anexo'] ?? null,
+                    'created_at'        => now(),
+                ]);
+
+                  // Actualizar el stock a nivel de sucursal, almacen y seccion
+            $productStock = ProductStockByBranch::firstOrCreate(
+                [
+                    'product_id'      => $detail['product_id'],
+                    'branchOffice_id' => $data['branchOffice_id'],
+                    'almacen_id'      => $detail['almacen_id'],
+                    'seccion_id'      => $detail['seccion_id'],
+                ],
+                [
+                    'stock' => 0
+                ]
+            );
+
+            // Incrementar el stock
+            $productStock->increment('stock', $detail['quantity']);
+            }
+
             return $cargaDocument;
         });
     }

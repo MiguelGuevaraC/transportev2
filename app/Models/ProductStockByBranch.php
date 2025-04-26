@@ -14,6 +14,8 @@ class ProductStockByBranch extends Model
         'product_id',
         'stock',
         'branchOffice_id',
+        'seccion_id',
+        'almacen_id',
         'created_at',
         'updated_at',
         'deleted_at',

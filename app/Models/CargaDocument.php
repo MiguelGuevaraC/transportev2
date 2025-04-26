@@ -85,4 +85,9 @@ class CargaDocument extends Model
     {
         return $this->belongsTo(BranchOffice::class, 'branchOffice_id');
     }
+
+    public function details()
+    {
+        return $this->hasMany(DocumentCargaDetail::class,'document_carga_id');
+    }
 }
