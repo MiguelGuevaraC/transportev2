@@ -15,7 +15,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('cargadocument', [CargarDocumentController::class, 'index']);
     Route::post('cargadocument', [CargarDocumentController::class, 'store']);
     Route::get('cargadocument/{id}', [CargarDocumentController::class, 'show']);
-    Route::put('cargadocument/{id}', [CargarDocumentController::class, 'update']);
+    // Route::put('cargadocument/{id}', [CargarDocumentController::class, 'update']);
     Route::delete('cargadocument/{id}', [CargarDocumentController::class, 'destroy']);
 
     Route::get('ticketcarga/{id}', [CargarDocumentController::class, 'ticketcarga'])->name('ticketcarga');

@@ -59,21 +59,21 @@ class CargaDocumentService
                     'created_at'        => now(),
                 ]);
 
-                  // Actualizar el stock a nivel de sucursal, almacen y seccion
-            $productStock = ProductStockByBranch::firstOrCreate(
-                [
-                    'product_id'      => $detail['product_id'],
-                    'branchOffice_id' => $data['branchOffice_id'],
-                    'almacen_id'      => $detail['almacen_id'],
-                    'seccion_id'      => $detail['seccion_id'],
-                ],
-                [
-                    'stock' => 0
-                ]
-            );
+                // Actualizar el stock a nivel de sucursal, almacen y seccion
+                $productStock = ProductStockByBranch::firstOrCreate(
+                    [
+                        'product_id'      => $detail['product_id'],
+                        'branchOffice_id' => $data['branchOffice_id'],
+                        'almacen_id'      => $detail['almacen_id'],
+                        'seccion_id'      => $detail['seccion_id'],
+                    ],
+                    [
+                        'stock' => 0,
+                    ]
+                );
 
-            // Incrementar el stock
-            $productStock->increment('stock', $detail['quantity']);
+                // Incrementar el stock
+                $productStock->increment('stock', $detail['quantity']);
             }
 
             return $cargaDocument;
@@ -84,7 +84,7 @@ class CargaDocumentService
     {
         return DB::transaction(function () use ($cargaDocument, $data) {
             // Revertir el stock anterior
-           $branch_old = $cargaDocument->branchOffice_id;
+            $branch_old = $cargaDocument->branchOffice_id;
             // Obtener el stock actual del producto
             $product      = Product::findOrFail($data['product_id']);
             $currentStock = $product->stock;
@@ -95,7 +95,6 @@ class CargaDocumentService
                     'stock_balance_before' => 0, // Asegura que no sea null
                 ]
             );
-            
 
             // Aplicar el nuevo stock
             if ($branch_old != $cargaDocument->branchOffice_id) {
@@ -119,9 +118,23 @@ class CargaDocumentService
                 throw new ModelNotFoundException("El documento de carga no existe.");
             }
 
-            // Regresar el stock antes de eliminar el documento
-            $this->updateProductStock($cargaDocument->product_id, $cargaDocument->quantity, $cargaDocument->movement_type, true);
+            // Revertir stock de los detalles
+            foreach ($cargaDocument->details as $detail) {
+                $productStock = ProductStockByBranch::where('product_id', $detail->product_id)
+                    ->where('branchOffice_id', $detail->branchOffice_id)
+                    ->where('almacen_id', $detail->almacen_id)
+                    ->where('seccion_id', $detail->seccion_id)
+                    ->first();
 
+                if ($productStock) {
+                    $productStock->decrement('stock', $detail->quantity);
+                }
+
+                // Eliminar el detalle
+                $detail->delete();
+            }
+
+            // Eliminar el documento principal
             return $cargaDocument->delete();
         });
     }
