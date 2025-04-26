@@ -202,7 +202,7 @@
 <body>
     <div class="ticket">
         <div style="text-align: center;margin:auto">
-            <img width="180px" height="auto" class="logoImage" src="https://develop.garzasoft.com/transportedev/public/storage/app/public/img/logoTransportes.jpeg" alt="logoTransporte">
+            <img width="180px" height="auto" class="logoImage" src="https://develop.garzasoft.com/transporte/public/storage/app/public/img/logoTransportes.jpeg" alt="logoTransporte">
 
             <h1 style="font-size:9px">OPERACIONES LOGISTICAS HERNANDEZ S.A.C</h1>
             <label for="RUC"><b>RUC:<span id="RUC">20605597484</span></b> </label>
@@ -249,42 +249,61 @@
             <hr style="border: 0.5px dashed #000;">
         
             <b>DETALLE DEL MOVIMIENTO</b>
-        
+    
+
             <table style="width: 100%; font-size: 8px; border-collapse: collapse; margin-top: 5px;">
-                <tr>
-                    <th style="text-align: left;">Producto</th>
-                    <th style="text-align: center;">Cantidad</th>
-                    <th style="text-align: center;">Peso</th>
-                </tr>
-                <tr>
-                    <td style="text-align: left;">{{ $doc_carga->product->description ?? '-' }}</td>
-                    <td style="text-align: center;">{{ $doc_carga->quantity ?? '-' }}</td>
-                    <td style="text-align: center;">{{ $doc_carga->weight ?? '-' }} kg</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Producto</th>
+                        <th style="text-align: center;">Dirección</th>
+                        <th style="text-align: center;">Cantidad</th>
+                        <th style="text-align: center;">Comentario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($details as $detail)
+                        <tr>
+                            <td style="text-align: left;">{{ $detail->product->description ?? '-' }}</td>
+                            <td style="text-align: center;">
+                                {{ ($detail->almacen->name ?? '-') }} / {{ ($detail->seccion->name ?? '-') }}
+                            </td>
+                            <td style="text-align: center;">{{ $detail->quantity ?? '-' }}</td>
+                            <td style="text-align: center;">{{ $detail->comment ?? '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
             </table>
+            
         
             <hr style="border: 0.5px dashed #000;">
         
             <table style="width: 100%; font-size: 8px;">
-                <tr>
+                {{-- <tr>
                     <td style="text-align: left;"><b>Lote:</b></td>
                     <td style="text-align: right;">{{ $doc_carga->lote_doc ?? '-' }}</td>
-                </tr>
+                </tr> --}}
+                @if (!empty($doc_carga->date_expiration))
                 <tr>
                     <td style="text-align: left;"><b>Fecha Venc.:</b></td>
-                    <td style="text-align: right;">{{ $doc_carga->date_expiration ?? '-' }}</td>
+                    <td style="text-align: right;">{{ $doc_carga->date_expiration }}</td>
                 </tr>
+                @endif
+                
+                @if (!empty($doc_carga->num_anexo))
                 <tr>
                     <td style="text-align: left;"><b>N° Anexo:</b></td>
-                    <td style="text-align: right;">{{ $doc_carga->num_anexo ?? '-' }}</td>
+                    <td style="text-align: right;">{{ $doc_carga->num_anexo }}</td>
                 </tr>
+                <hr style="border: 0.5px dashed #000;">
+                @endif
+                
             </table>
         
-            <hr style="border: 0.5px dashed #000;">
+            
         
             <b>OBSERVACIONES:</b>
             <p style="text-align: left; font-size: 8px; word-wrap: break-word;">
-                {{ $doc_carga->comment ?? 'Sin comentarios.' }}
+                {{ $doc_carga->comment ?? '-' }}
             </p>
         
             <hr style="border: 0.5px dashed #000;">

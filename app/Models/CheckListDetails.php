@@ -1,21 +1,19 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CheckListItem extends Model
+class CheckListDetails extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
         'id',
-        'name',
-        'address',
-        'status',
+        'check_list_id',
+        'check_list_item_id',
         'created_at',
     ];
 
@@ -24,18 +22,23 @@ class CheckListItem extends Model
         'deleted_at',
     ];
     const filters = [
-        'name'   => 'like',
-        'status' => 'like',
-        'address' => 'like'
+        'check_list_id' => '=',
+        'check_list_item_id' => '=',
     ];
 
     const sorts = [
         'id' => 'desc',
     ];
 
-    public function checkLists()
+    public function checkList()
     {
-        return $this->belongsToMany(CheckList::class, 'check_list_details', 'check_list_item_id', 'check_list_id')
-                    ->withTimestamps();
+        return $this->belongsTo(CheckList::class, 'check_list_id');
     }
+
+    // Relación: CheckListDetails pertenece a un CheckListItem
+    public function checkListItem()
+    {
+        return $this->belongsTo(CheckListItem::class, 'check_list_item_id');
+    }
+  
 }

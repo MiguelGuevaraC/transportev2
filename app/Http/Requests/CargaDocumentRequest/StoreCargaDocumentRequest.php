@@ -53,7 +53,7 @@ class StoreCargaDocumentRequest extends StoreRequest
             'details.*.quantity'   => 'required|numeric|min:1',
             'details.*.product_id' => 'required|exists:products,id,deleted_at,NULL',
             'details.*.almacen_id' => 'required|exists:almacens,id,deleted_at,NULL',
-            'details.*.seccion_id' => 'nullable|exists:seccions,id,deleted_at,NULL',
+            'details.*.seccion_id' => 'required|exists:seccions,id,deleted_at,NULL',
             'details.*.comment'    => 'nullable|string|max:500',
         ];
     }
@@ -92,6 +92,8 @@ class StoreCargaDocumentRequest extends StoreRequest
 
             'details.*.almacen_id.required' => 'El almacén es obligatorio.',
             'details.*.almacen_id.exists'   => 'El almacén seleccionado no es válido o ha sido eliminado.',
+
+            'details.*.seccion_id.required' => 'La sección es obligatorio.',
 
             'details.*.seccion_id.exists'   => 'La sección seleccionada no es válida o ha sido eliminada.',
 

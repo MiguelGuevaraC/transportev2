@@ -9,6 +9,7 @@ use App\Http\Requests\CargaDocumentRequest\StoreCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\UpdateCargaDocumentRequest;
 use App\Http\Resources\CargaResource;
 use App\Models\CargaDocument;
+use App\Models\DocumentCargaDetail;
 use App\Models\Product;
 use App\Services\CargaDocumentService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -213,7 +214,7 @@ class CargarDocumentController extends Controller
         $proyect = $this->cargaDocumentService->destroyById($id);
 
         return response()->json([
-            'message' => 'Documento de Cargaeliminado exitosamente',
+            'message' => 'Documento de Carga eliminado exitosamente',
         ], 200);
     }
 /**
@@ -297,11 +298,12 @@ class CargarDocumentController extends Controller
 
         $data = [
             "doc_carga"    => $doc_carga,
+            "details"    => DocumentCargaDetail::where('document_carga_id',$doc_carga->id)->get()?? [],
             "branchoffice" => $doc_carga->branchOffice,
         ];
 
         $pdf = Pdf::loadView('carga-almacen-ticket', $data);
-        $pdf->setPaper([15, 5, 172, 400], 'portrait');
+        $pdf->setPaper([15, 5, 172, 450], 'portrait');
 
         $fileName = 'Ticket-carga-' . str_replace(' ', '_', $doc_carga->code_doc) . '.pdf';
 
