@@ -55,6 +55,8 @@ class StoreCargaDocumentRequest extends StoreRequest
             'details.*.almacen_id' => 'required|exists:almacens,id,deleted_at,NULL',
             'details.*.seccion_id' => 'required|exists:seccions,id,deleted_at,NULL',
             'details.*.comment'    => 'nullable|string|max:500',
+            'details.*.num_anexo'    => 'nullable|string|max:500',
+            'details.*.date_expiration'    => 'nullable|date',
         ];
     }
 
@@ -99,6 +101,14 @@ class StoreCargaDocumentRequest extends StoreRequest
 
             'details.*.comment.string'      => 'El comentario del detalle debe ser un texto.',
             'details.*.comment.max'         => 'El comentario del detalle no puede superar los 500 caracteres.',
+
+
+            'details.*.num_anexo.nullable' => 'El número de anexo es opcional.',
+        'details.*.num_anexo.string'   => 'El número de anexo debe ser una cadena de texto.',
+        'details.*.num_anexo.max'      => 'El número de anexo no puede tener más de 500 caracteres.',
+        
+        'details.*.date_expiration.nullable' => 'La fecha de expiración es opcional.',
+        'details.*.date_expiration.date'     => 'La fecha de expiración debe ser una fecha válida.',
         ];
     }
 }

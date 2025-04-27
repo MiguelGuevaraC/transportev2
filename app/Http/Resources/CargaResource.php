@@ -42,8 +42,8 @@ class CargaResource extends JsonResource
 
             // 'lote_doc'             => $this->lote_doc ?? null,
             // 'code_doc'             => $this->code_doc ?? null,
-            'date_expiration'   => $this->date_expiration ?? null,
-            'num_anexo'         => $this->num_anexo ?? null,
+            // 'date_expiration'   => $this->date_expiration ?? null,
+            // 'num_anexo'         => $this->num_anexo ?? null,
 
             'movement_type'     => $this->movement_type ?? null,
             // 'stock_balance_before' => $this->stock_balance_before ?? null,

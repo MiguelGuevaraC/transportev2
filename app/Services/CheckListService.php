@@ -51,7 +51,7 @@ class CheckListService
     {
         // Encontrar el checklist por ID
 
-        // Actualizar los datos básicos del checklist
+        // Actualizar los datos básicos del checkl ist
         $checkList->update([
             'branch_office_id' => $data['branch_office_id'] ?? $checkList->branch_office_id,
             'date_check_list'  => $data['date_check_list'] ?? $checkList->date_check_list,

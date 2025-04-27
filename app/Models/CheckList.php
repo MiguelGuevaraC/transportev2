@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,13 +26,13 @@ class CheckList extends Model
     ];
     const filters = [
 
-        'numero'=> 'like',
-        'date_check_list'=> 'like',
-        
-        'vehicle_id'=> 'like',
-        'observation'=> 'like',
+        'numero'          => 'like',
+        'date_check_list' => 'like',
 
-        'status'=> 'like',
+        'vehicle_id'      => 'like',
+        'observation'     => 'like',
+
+        'status'          => 'like',
     ];
 
     const sorts = [
@@ -41,11 +40,11 @@ class CheckList extends Model
     ];
     public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class,'vehicle_id');
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
     public function checkListItems()
     {
         return $this->belongsToMany(CheckListItem::class, 'check_list_details', 'check_list_id', 'check_list_item_id')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 }

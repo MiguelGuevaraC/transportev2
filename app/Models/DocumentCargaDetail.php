@@ -19,6 +19,7 @@ class DocumentCargaDetail extends Model
         'branchOffice_id',
         'comment',
         'num_anexo',
+        'date_expiration',
         'created_at',
     ];
     protected $hidden = [

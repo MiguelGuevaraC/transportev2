@@ -54,8 +54,9 @@ class CargaDocumentService
                     'seccion_id'        => $detail['seccion_id'],
                     'document_carga_id' => $cargaDocument->id,
                     'branchOffice_id'   => $data['branchOffice_id'],
-                    'comment'           => $detail['comment'] ?? null,
-                    'num_anexo'         => $detail['num_anexo'] ?? null,
+                    'comment'           => isset($detail['comment']) ? $detail['comment'] : null,  // Comentario opcional
+                    'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null, // Número de anexo opcional
+                    'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
                     'created_at'        => now(),
                 ]);
 

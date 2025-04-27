@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreignId('seccion_id')->nullable()->unsigned()->constrained('seccions');
             $table->foreignId('document_carga_id')->nullable()->unsigned()->constrained('carga_documents');
             $table->text('num_anexo')->nullable();
+            $table->date('date_expiration')->nullable();
             $table->text('comment')->nullable();
 
             $table->timestamps();
