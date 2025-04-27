@@ -26,6 +26,7 @@ class TallerResource extends JsonResource
             'id'         => $this->id ?? null,
             'name'       => $this->name ?? null,
             'address'       => $this->address ?? null,
+            'type'       => $this->type ?? null,
             'status'     => $this->status ?? null,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];

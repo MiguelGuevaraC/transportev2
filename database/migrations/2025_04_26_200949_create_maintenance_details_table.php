@@ -13,12 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('tallers', function (Blueprint $table) {
+        Schema::create('maintenance_details', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->string('address')->nullable();
             $table->string('type')->nullable();
-            $table->string('status')->nullable();
+            $table->decimal('price', 8, 2)->nullable();
+            $table->string('quantity')->nullable();
+            $table->decimal('price_total', 8, 2)->nullable();
+            
+            $table->foreignId('maintenance_id')->nullable()->unsigned()->constrained('maintenances');
+            $table->foreignId('repuesto_id')->nullable()->unsigned()->constrained('repuestos');
+           
 
             $table->timestamps();
             $table->softDeletes();
@@ -32,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tallers');
+        Schema::dropIfExists('maintenance_details');
     }
 };

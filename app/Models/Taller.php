@@ -14,6 +14,7 @@ class Taller extends Model
         'name',
         'address',
         'status',
+        'type',
         'created_at',
     ];
 
@@ -24,7 +25,8 @@ class Taller extends Model
     const filters = [
         'name'   => 'like',
         'status' => 'like',
-        'address' => 'like'
+        'address' => 'like',
+        'type' => 'like'
     ];
 
     const sorts = [

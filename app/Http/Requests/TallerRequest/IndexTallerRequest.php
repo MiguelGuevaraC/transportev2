@@ -25,6 +25,7 @@ class IndexTallerRequest extends IndexRequest
         return [
             'name'   => 'nullable|string',
             'status'   => 'nullable|string',
+            'type'   => 'nullable|string',
         ];
     }
     

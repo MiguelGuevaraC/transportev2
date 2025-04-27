@@ -42,6 +42,7 @@ class StoreTallerRequest extends StoreRequest
                 Rule::unique('tallers', 'name')->whereNull('deleted_at'),
             ],
             'address' => ['nullable','string'],
+            'type' => ['nullable', 'string', 'in:PINTURA,ELECTRICO,MECANICO'],
         ];
     }
 
@@ -50,6 +51,7 @@ class StoreTallerRequest extends StoreRequest
         return [
             'name.required' => 'Nombre del taller es obligatorio.',
             'name.unique'   => 'El nombre del taller ya está en uso.',
+            'type.in' => 'El tipo de mantenimiento debe ser uno de los siguientes: PINTURA, ELECTRICO, MECANICO.',
         ];
     }
 
