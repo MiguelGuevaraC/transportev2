@@ -208,9 +208,7 @@
             <label for="RUC"><b>RUC:<span id="RUC">20605597484</span></b> </label>
         </div>
 
-        <label for="direccion"><span style="font-size:7px" id="direccion">MZA. 38 LOTE. 4A INT. 302 P.J. CHOSICA
-                DEL NORTE LAMBAYEQUE CHICLAYO
-                LA VICTORIA</span></label>
+        <label for="direccion"><span style="font-size:7px" id="direccion">{{ $doc_carga->branchOffice->address ?? '-' }}</span></label>
 
 
         <hr>
@@ -232,6 +230,11 @@
                     <td style="text-align: left;"><b>Cliente:</b></td>
                     <td style="text-align: right;">{{ namePerson($doc_carga->person ?? null) ?? '-' }}</td>
                 </tr>
+
+                <tr>
+                    <td style="text-align: left;"><b>Distribuidor:</b></td>
+                    <td style="text-align: right;">{{ namePerson($doc_carga->distribuidor ?? null) ?? '-' }}</td>
+                </tr>
                 <tr>
                     <td style="text-align: left;"><b>RUC/DNI:</b></td>
                     <td style="text-align: right;">{{ $doc_carga?->person?->documentNumber ?? '-' }}</td>
@@ -244,6 +247,10 @@
                     <td style="text-align: left;"><b>Tipo Movimiento:</b></td>
                     <td style="text-align: right;">{{ $doc_carga->movement_type ?? '-' }}</td>
                 </tr>
+                <tr>
+                    <td style="text-align: left;"><b>Usuario Responsable:</b></td>
+                    <td style="text-align: right;">{{ $doc_carga?->user_created?->names_worker() ?? '-' }}</td>
+                </tr>
             </table>
         
             <hr style="border: 0.5px dashed #000;">
@@ -254,6 +261,7 @@
             <table style="width: 100%; font-size: 8px; border-collapse: collapse; margin-top: 5px;">
                 <thead>
                     <tr>
+                        <th style="text-align: left;">Nro Anexo</th>
                         <th style="text-align: left;">Producto</th>
                         <th style="text-align: center;">Dirección</th>
                         <th style="text-align: center;">Cantidad</th>
@@ -263,6 +271,7 @@
                 <tbody>
                     @foreach ($details as $detail)
                         <tr>
+                            <td style="text-align: center;">{{ $detail->num_anexo ?? '-' }}</td>
                             <td style="text-align: left;">{{ $detail->product->description ?? '-' }}</td>
                             <td style="text-align: center;">
                                 {{ ($detail->almacen->name ?? '-') }} / {{ ($detail->seccion->name ?? '-') }}

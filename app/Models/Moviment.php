@@ -196,6 +196,7 @@ class Moviment extends Model
         'value_ref',
         'percent_ref',
         'isValue_ref',
+        'observation',
 
         'isBankPayment',
         'numberVoucher',

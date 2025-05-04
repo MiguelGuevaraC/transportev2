@@ -71,7 +71,7 @@ class ExcelController extends Controller
                 'ESTADO'            => (string) ($document->status),
                 'VEHÍCULO'          => (string) (($document->vehicle->currentPlate) ?? ''),
                 'DESCRIPCIÓN'       => (string) ($document->description ?? ''),
-                'DOCUMENTO'         => (string) ("https://develop.garzasoft.com/transportedev/public" . $document->pathFile),
+                'DOCUMENTO'         => (string) ("https://develop.garzasoft.com/transporte/public" . $document->pathFile),
             ];
 
         }
@@ -799,7 +799,8 @@ class ExcelController extends Controller
 
             // Agregar el campo 'nombre' al nuevo request
             $newRequest->merge(['nombre' => $moviment->sequentialNumber]);
-            if ($moviment->getstatus_fact == null || $moviment->getstatus_fact != "DECLARADO Y ACTIVO") {
+
+            if ($moviment->getstatus_fact == null && substr($moviment->sequentialNumber, 0, 1) !== 'T') {
                 $condicion                            = $this->getStatusFacturacion($newRequest);
                 $condicion                            = $condicion == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicion;
                 $movimentupdatestatus                 = Moviment::find($moviment->id);
@@ -974,7 +975,7 @@ class ExcelController extends Controller
                     // Agregar el campo 'nombre' al nuevo request
                     $newRequest->merge(['nombre' => $moviment->creditNote->number]);
 
-                    if ($moviment->creditNote->getstatus_fact == null || $moviment->creditNote->getstatus_fact != "DECLARADO Y ACTIVO") {
+                    if ($moviment->creditNote->getstatus_fact == null ) {
                         $condicionNC                        = $this->getStatusFacturacion($newRequest);
                         $condicionNC                        = $condicionNC == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicionNC;
                         $creditupdatestatus                 = CreditNote::find($moviment->creditNote->id);

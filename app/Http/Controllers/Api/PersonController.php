@@ -192,7 +192,7 @@ class PersonController extends Controller
         $names = str_replace('%20%', ' ', $names);
 
         // Consulta de personas según los filtros aplicados
-        $persons = Person::with(['tarifas.unity', 'products.unity'])->when(! empty($names), function ($query) use ($names) {
+        $persons = Person::with(['tarifas.unity','tarifas', 'products.unity'])->when(! empty($names), function ($query) use ($names) {
             $query->where(function ($query) use ($names) {
                 $query->whereRaw('lower(concat_ws(" ", names, fatherSurname, motherSurname)) LIKE ?', ['%' . strtolower($names) . '%'])
                     ->orWhereRaw('lower(businessName) LIKE ?', ['%' . strtolower($names) . '%'])

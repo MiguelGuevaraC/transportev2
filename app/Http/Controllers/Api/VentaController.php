@@ -236,6 +236,7 @@ class VentaController extends Controller
             'typePayment'         => 'nullable|string',
             'typeSale'            => 'nullable|string',
             'codeDetraction'      => 'nullable|string',
+            'observation'      => 'nullable|string',
 
             'programming_id'      => 'nullable|exists:programmings,id',
 
@@ -357,6 +358,7 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
+            'observation'       => $request->input('observation'),
 
             'typePayment'         => $request->input('typePayment') ?? null,
             'typeSale'            => $request->input('typeSale') ?? '-',
@@ -984,6 +986,8 @@ class VentaController extends Controller
             'typeDocument'        => 'nullable|string|in:F,T,B',
             'typePayment'         => 'nullable|string',
             'typeSale'            => 'nullable|string',
+            'observation'            => 'nullable|string',
+
             'codeDetraction'      => 'nullable|string',
             'programming_id'      => 'nullable|exists:programmings,id',
             'isBankPayment'       => 'required|in:0,1',
@@ -1133,6 +1137,8 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
+            'observation'       => $request->input('observation'),
+
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
@@ -1663,6 +1669,8 @@ class VentaController extends Controller
             'typeDocument'           => 'nullable|string|in:F,T,B',
             'typePayment'            => 'nullable|string',
             'typeSale'               => 'nullable|string',
+            'observation'               => 'nullable|string',
+
             'codeDetraction'         => 'nullable|string',
             'programming_id'         => 'nullable|exists:programmings,id',
             'isBankPayment'          => 'required|in:0,1',
@@ -1764,6 +1772,7 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
+            'observation'         => $request->input('observation'),
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
@@ -2030,6 +2039,8 @@ class VentaController extends Controller
             'comment'             => 'nullable|string',
             'typeDocument'        => 'nullable|string|in:F,T,B',
             'typePayment'         => 'nullable|string',
+            'observation'         => 'nullable|string',
+
             'typeSale'            => 'nullable|string',
             'codeDetraction'      => 'nullable|string',
             'programming_id'      => 'nullable|exists:programmings,id',
@@ -2181,6 +2192,7 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
+            'observation'         => $request->input('observation'),
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),

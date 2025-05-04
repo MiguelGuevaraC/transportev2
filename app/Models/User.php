@@ -232,6 +232,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Worker::class, 'worker_id');
     }
+    public function names_worker()
+    {
+        if (!$this->worker || !$this->worker->person) {
+            return '';
+        }
+    
+        $person = $this->worker->person;
+    
+        return trim("{$person->names} {$person->fatherSurname}");
+    }
+    
     public function typeofUser()
     {
         return $this->belongsTo(Role::class, 'typeofUser_id');

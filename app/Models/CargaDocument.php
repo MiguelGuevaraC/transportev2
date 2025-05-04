@@ -31,6 +31,7 @@ class CargaDocument extends Model
         'product_id',
 
         'person_id',
+        'user_created_id',
         'created_at',
     ];
     protected $hidden = [
@@ -89,5 +90,9 @@ class CargaDocument extends Model
     public function details()
     {
         return $this->hasMany(DocumentCargaDetail::class,'document_carga_id');
+    }
+    public function user_created()
+    {
+        return $this->belongsTo(User::class,'user_created_id');
     }
 }

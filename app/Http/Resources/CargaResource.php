@@ -50,7 +50,7 @@ class CargaResource extends JsonResource
             // 'stock_balance_after'  => $this->stock_balance_after ?? null,
             'comment'           => $this->comment ?? null,
 
-            'details'           => $this->details ?? null,
+           'details' => CargaDetailResource::collection($this->details ?? []),
 
             // 'product_id'           => $this->product_id ?? null,
             'branchOffice_id'   => $this->branchOffice_id ?? null,
@@ -62,6 +62,9 @@ class CargaResource extends JsonResource
             'distribuidor_id'   => $this->distribuidor_id ?? null,
             'distribuidor'      => $this->distribuidor ? new PersonaResource($this->distribuidor) : null,
 
+            'user_created_id'           => $this->user_created_id ?? null,
+            'user_created_name'         => $this?->user_created?->username ?? null,
+            'user_created_person_name'  => $this?->user_created?->names_worker() ?? null,
             'created_at'        => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

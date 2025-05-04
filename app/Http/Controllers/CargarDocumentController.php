@@ -118,11 +118,14 @@ class CargarDocumentController extends Controller
  * )
  */
 
-    public function store(StoreCargaDocumentRequest $request)
-    {
-        $carga = $this->cargaDocumentService->createCargaDocument($request->validated());
-        return new CargaResource($carga);
-    }
+ public function store(StoreCargaDocumentRequest $request)
+ {
+     $data = $request->validated();
+     $data['user_created_id'] = auth()->id(); // o Auth::id()
+     $carga = $this->cargaDocumentService->createCargaDocument($data);
+     return new CargaResource($carga);
+ }
+ 
 
 /**
  * @OA\Put(

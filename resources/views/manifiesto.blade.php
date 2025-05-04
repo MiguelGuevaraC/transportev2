@@ -2,7 +2,7 @@
 <html lang="en">
 @php
     use App\Models\CarrierGuide;
-    header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
@@ -107,7 +107,7 @@
             background-color: rgb(243, 242, 240);
             width: 92%;
             text-align: center;
-            padding: 1rem;
+            padding: 0.8rem;
         }
 
         .border {
@@ -201,7 +201,7 @@
         <div class="bg-color">
             <div class="border">
                 <div class="header">
-                    <img src="{{ asset('storage/img/transportes.bmp') }}" width="150px" alt="alt" />
+                    <img src="{{ asset('storage/img/transportes.bmp') }}" width="130px" alt="alt" />
                     <h3 class="pt">{{ $titulo }}</h3>
                     <p class="" style="font-size: 11px">Fecha Impresión:
                         {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}</p>
@@ -210,10 +210,10 @@
                 <table class="dataInfo">
                     <tbody class="section">
                         <tr>
-                            <td class="font-14 tdInfo"><b>CÓDIGO VIAJE:</b></td>
+                            <td class="font-12 tdInfo"><b>CÓDIGO VIAJE:</b></td>
                             <td class="font-12 left">{{ $object['numero'] }}</td>
 
-                            <td class="font-14 tdInfo"><b>TRACTO:</b></td>
+                            <td class="font-12 tdInfo"><b>TRACTO:</b></td>
                             <td class="font-12 left">
                                 {{ str_replace([' ', '-'], '', strtoupper(data_get($object, 'tract.currentPlate', ''))) }}
                             </td>
@@ -221,7 +221,7 @@
 
 
 
-                            <td class="font-14 tdInfo"><b>FECHA VIAJE:</b></td>
+                            <td class="font-12 tdInfo"><b>FECHA VIAJE:</b></td>
                             <td class="font-12 left">
                                 {{ Carbon::parse($object['estimatedArrivalDate'])->format('d/m/Y H:i') }}</td>
 
@@ -231,21 +231,21 @@
                     </tbody>
                     <tbody class="section">
                         <tr>
-                            <td class="font-14 tdInfo"><b>CONDUCTOR:</b></td>
+                            <td class="font-12 tdInfo"><b>CONDUCTOR:</b></td>
                             <td class="font-12 left">{{ $conductorName }}</td>
 
-                            <td class="font-14 tdInfo"><b>PLATAFORMA:</b></td>
+                            <td class="font-12 tdInfo"><b>PLATAFORMA:</b></td>
                             <td class="font-12 left">
                                 {{ str_replace([' ', '-'], '', strtoupper(data_get($object, 'platform.currentPlate', ''))) }}
                             </td>
 
 
-                            <td class="font-14 tdInfo"><b>TOTAL GRT:</b></td>
+                            <td class="font-12 tdInfo"><b>TOTAL GRT:</b></td>
                             <td class="font-12 left">{{ count($object['carrierGuides']) }}</td>
                         </tr>
                     </tbody>
                 </table>
-                <br>
+
             </div>
         </div>
 
@@ -265,12 +265,12 @@
                     </tr>
                     <tr class="conBorde">
                         <th>N°</th>
-                        <th>CARGA MATERIAL</th>
+                        <th>C. MATERIAL</th>
                         <th>REMIT.</th>
                         <th>DESTI.</th>
                         <th>PUNTO PARTIDA</th>
                         <th>PUNTO LLEGADA</th>
-                        <th>DOCUMENTOS ANEXOS</th>
+                        <th>DOC. ANEXOS</th>
                         <th>GUÍA GRT</th>
                         <th>TOTAL PESO</th>
 
@@ -329,10 +329,14 @@
                             @endphp
                             <tr class="conBorde">
                                 <td width="1%">{{ $index++ }}</td>
-                                <td width="9%" style="text-align: center">
-                                    {{ $details ? implode(', ', $details) : ($titulo === 'MANIFIESTO DE CARGA CONDUCTOR' ? 'Manifiesto sin Detalles' : 'Sin detalles') }}
+                                <td class="col-detalles" style="max-width: 400px; word-break: break-word; font-size: 10px;text-align:center">
+                                    <span title="{{ $details ? implode(', ', $details) : ($titulo === 'MANIFIESTO DE CARGA CONDUCTOR' ? 'Manifiesto sin Detalles' : 'Sin detalles') }}">
+                                        {{ $details ? implode(', ', $details) : ($titulo === 'MANIFIESTO DE CARGA CONDUCTOR' ? 'Manifiesto sin Detalles' : 'Sin detalles') }}
+                                    </span>
                                 </td>
-                                <td width="15%" style="text-align: center">
+                                
+                                
+                                <td width="10%" style="text-align: center">
                                     {{ $guiagrt ? namePerson($guiagrt?->sender) : '-' }}</td>
                                 <td width="15%" style="text-align: center">
                                     {{ $guiagrt ? namePerson($guiagrt?->recipient) : '-' }}</td>

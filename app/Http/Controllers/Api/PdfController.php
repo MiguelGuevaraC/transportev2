@@ -928,6 +928,7 @@ class PdfController extends Controller
             'placa'           => $Movimiento->reception->id ?? '-',
             'typeSale'        => $Movimiento->typeSale ?? '-',
             'codeDetraction'  => $Movimiento->codeDetraction ?? '-',
+            'observation'  => $Movimiento->observation ?? '', 
         ];
         // Utiliza el método loadView() directamente en la fachada PDF
         $pdf    = PDF::loadView('documentoA4', $dataE);

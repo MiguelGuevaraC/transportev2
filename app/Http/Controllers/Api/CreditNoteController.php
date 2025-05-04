@@ -393,7 +393,8 @@ class CreditNoteController extends Controller
 
         $receptions = $moviment->receptions;
 
-        if ($object->total == $moviment->total && $request->input('reason')=="1") {
+        // if ($object->total == $moviment->total && $request->input('reason')=="1") {
+            if ($object->total == $moviment->total) {
             foreach ($receptions as $reception) {
                 $rececption = Reception::find($reception->id);
                 $rececption->moviment_id = null;

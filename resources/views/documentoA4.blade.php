@@ -479,6 +479,15 @@
                 </td>
             </tr>
 
+            <tr>
+                <th class="w20 blue">
+                    Observacion:
+                </th>
+                <td class="w20">
+                    {{ $observation }}
+                </td>
+            </tr>
+
             <tr colspan="1">
                 <th class="w20 blue">
                     Forma de Pago:
