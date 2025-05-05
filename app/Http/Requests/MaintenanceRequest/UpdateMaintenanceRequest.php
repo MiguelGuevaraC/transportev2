@@ -32,6 +32,7 @@ class UpdateMaintenanceRequest extends UpdateRequest
             'date_maintenance' => 'nullable|date',                            // Fecha debe ser una fecha válida
             'vehicle_id'       => 'nullable|integer|exists:vehicles,id',      // Debe ser un ID de vehículo válido
             'taller_id'        => 'nullable|integer|exists:tallers,id',      // Debe ser un ID de taller válido
+            'status'        => 'nullable|in:Finalizado,Pendiente',      // Debe ser un ID de taller válido
         ];
     }
 

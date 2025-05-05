@@ -98,7 +98,7 @@ class MaintananceController extends Controller
     public function store(StoreMaintenanceRequest $request)
     {
         $data= $request->validated();
-        $data['status']='ACTIVO';
+        $data['status']='Pendiente';
         $maintenance = $this->maintenanceService->createMaintenance($data);
         return new MaintenanceResource($maintenance);
     }

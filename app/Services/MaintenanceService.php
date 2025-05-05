@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Maintenance;
+use App\Models\Vehicle;
 
 class MaintenanceService
 {
@@ -19,14 +20,26 @@ class MaintenanceService
 
     public function createMaintenance(array $data): Maintenance
     {
-        $Maintenance = Maintenance::create($data);
-        return $Maintenance;
+        $maintenance = Maintenance::create($data);
+
+        if ($maintenance && $maintenance->vehicle_id) {
+            $vehicle = Vehicle::find($maintenance->vehicle_id);
+            if ($vehicle) {
+                $vehicle->update(['status' => 'Mantenimiento']);
+            }
+        }
+
+        return $maintenance;
     }
 
     public function updateMaintenance(Maintenance $Maintenance, array $data): Maintenance
     {
         $filteredData = array_intersect_key($data, $Maintenance->getAttributes());
         $Maintenance->update($filteredData);
+        if ($Maintenance->status == "Finalizado") {
+            $vehicle = Vehicle::find($Maintenance->vehicle_id);
+            $vehicle->update(['status' => 'Disponible']);
+        }
         return $Maintenance;
     }
 

@@ -3,6 +3,7 @@ namespace App\Http\Requests\MaintenanceRequest;
 
 use App\Http\Requests\StoreRequest;
 use App\Models\User;
+use App\Models\Vehicle;
 
 /**
  * @OA\Schema(
@@ -39,12 +40,22 @@ class StoreMaintenanceRequest extends StoreRequest
     public function rules(): array
     {
         return [
-            'type'             => 'required|string|in:PROPIO,EXTERNO',        // Solo puede ser 'PROPIO' o 'EXTERNO'
-            'mode'             => 'required|string|in:CORRECTIVO,PREVENTIVO', // Solo puede ser 'CORRECTIVO' o 'PREVENTIVO'
-            'km'               => 'required|integer|min:0',                   // Kilometraje debe ser un número positivo
-            'date_maintenance' => 'required|date',                            // Fecha debe ser una fecha válida
-            'vehicle_id'       => 'required|integer|exists:vehicles,id',      // Debe ser un ID de vehículo válido
-            'taller_id'        => 'required|integer|exists:tallers,id',      // Debe ser un ID de taller válido
+            'type'             => 'required|string|in:PROPIO,EXTERNO',
+            'mode'             => 'required|string|in:CORRECTIVO,PREVENTIVO',
+            'km'               => 'required|integer|min:0',
+            'date_maintenance' => 'required|date',
+            'vehicle_id'       => [
+                'required',
+                'integer',
+                'exists:vehicles,id',
+                function ($attribute, $value, $fail) {
+                    $vehicle = Vehicle::find($value);
+                    if ($vehicle && $vehicle->status === 'Mantenimiento') {
+                        $fail('El vehículo ya se encuentra en mantenimiento.');
+                    }
+                },
+            ],
+            'taller_id'        => 'required|integer|exists:tallers,id',
         ];
     }
 

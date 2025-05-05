@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('date_maintenance')->nullable();
             $table->string('mode')->nullable();
             $table->decimal('km', 8, 2)->nullable();
+            $table->string('status')->nullable()->default('Generado');
 
             $table->foreignId('vehicle_id')->nullable()->unsigned()->constrained('vehicles');
             $table->foreignId('taller_id')->nullable()->unsigned()->constrained('tallers');
