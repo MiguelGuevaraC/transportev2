@@ -64,6 +64,8 @@ class MaintananceDetailController extends Controller
                 'error' => 'Detalle Mantenimiento No Encontrado',
             ], 404);
         }
+      
+        
         return new MaintenanceDetailResource($maintenancedetail);
     }
 

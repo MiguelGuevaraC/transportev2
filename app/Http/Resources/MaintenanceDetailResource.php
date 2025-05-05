@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -31,11 +30,13 @@ class MaintenanceDetailResource extends JsonResource
             'name'           => $this->name ?? null,
             'type'           => $this->type ?? null,
             'price'          => $this->price ?? null,
-            'price_total'          => $this->price_total ?? null,
+            'price_total'    => $this->price_total ?? null,
             'quantity'       => $this->quantity ?? null,
             'maintenance_id' => $this->maintenance_id ?? null,
             'repuesto_id'    => $this->repuesto_id ?? null,
-            'repuesto_name'    => $this->repuesto->name ?? null,
+            'repuesto_name'  => $this?->repuesto?->name ?? null,
+            'service_id'     => $this->service_id ?? null,
+            'service_name'   => $this->name ?? null,
             'created_at'     => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

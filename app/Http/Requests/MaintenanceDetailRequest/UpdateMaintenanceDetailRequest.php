@@ -32,6 +32,7 @@ class UpdateMaintenanceDetailRequest extends UpdateRequest
              'quantity'       => 'nullable|integer|min:0',
              'maintenance_id' => 'nullable|integer|exists:maintenances,id', // Corrijo exist y typo
              'repuesto_id'    => 'nullable|integer|exists:repuestos,id',    // Corrijo exist y typo
+             'service_id'    => 'nullable|integer|exists:services,id',    // Corrijo exist y typo
          ];
      }
  
@@ -59,6 +60,11 @@ class UpdateMaintenanceDetailRequest extends UpdateRequest
              'repuesto_id.required'      => 'El ID del repuesto es obligatorio.',
              'repuesto_id.integer'       => 'El ID del repuesto debe ser un número entero.',
              'repuesto_id.exists'        => 'El repuesto seleccionado no existe.',
+
+             
+            'service_id.required'      => 'El ID del servicio es obligatorio.',
+            'service_id.integer'       => 'El ID del servicio debe ser un número entero.',
+            'service_id.exists'        => 'El servicio seleccionado no existe.',
          ];
      }
 

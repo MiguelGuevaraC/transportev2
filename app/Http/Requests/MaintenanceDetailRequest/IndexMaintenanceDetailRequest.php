@@ -29,6 +29,7 @@ class IndexMaintenanceDetailRequest extends IndexRequest
             'quantity'       => 'nullable|string',
             'maintenance_id' => 'nullable|string',
             'repuesto_id'    => 'nullable|string',
+            'service_id'    => 'nullable|string',
         ];
     }
 

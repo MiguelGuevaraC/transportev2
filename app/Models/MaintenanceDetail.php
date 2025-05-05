@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,6 +17,7 @@ class MaintenanceDetail extends Model
         'quantity',
         'maintenance_id',
         'repuesto_id',
+        'service_id',
         'created_at',
     ];
     protected $hidden = [
@@ -27,13 +26,14 @@ class MaintenanceDetail extends Model
         'deleted_at',
     ];
     const filters = [
-        'name'=> '=',
-        'type'=> '=',
-        'price'=> '=',
-        'price_total'=> '=',
-        'quantity'=> '=',
-        'maintenance_id'=> '=',
-        'repuesto_id'=> '=',
+        'name'           => '=',
+        'type'           => '=',
+        'price'          => '=',
+        'price_total'    => '=',
+        'quantity'       => '=',
+        'maintenance_id' => '=',
+        'repuesto_id'    => '=',
+        'service_id'     => '=',
     ];
 
     /**
@@ -50,5 +50,9 @@ class MaintenanceDetail extends Model
     public function repuesto()
     {
         return $this->belongsTo(Repuesto::class, 'repuesto_id');
+    }
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'service_id');
     }
 }
