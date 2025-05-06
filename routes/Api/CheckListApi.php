@@ -11,4 +11,5 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('checklist', [CheckListController::class, 'store']);
     Route::delete('checklist/{id}', [CheckListController::class, 'destroy']);
     Route::put('checklist/{id}', [CheckListController::class, 'update']);
+    Route::get('report-checklist/{id}', [CheckListController::class, 'report'])->name('report');
 });

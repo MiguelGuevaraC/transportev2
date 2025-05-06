@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Taller;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +8,7 @@ use App\Http\Requests\CheckListRequest\UpdateCheckListRequest;
 use App\Http\Resources\CheckListResource;
 use App\Models\CheckList;
 use App\Services\CheckListService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class CheckListController extends Controller
@@ -99,7 +99,7 @@ class CheckListController extends Controller
     {
         $data           = $request->validated();
         $data['status'] = 'ACTIVO';
-        $checklist       = $this->checklistService->createCheckList($data);
+        $checklist      = $this->checklistService->createCheckList($data);
         return new CheckListResource($checklist);
     }
 
@@ -154,7 +154,7 @@ class CheckListController extends Controller
     public function update(UpdateCheckListRequest $request, $id)
     {
         $validatedData = $request->validated();
-        $checklist      = $this->checklistService->getCheckListById($id);
+        $checklist     = $this->checklistService->getCheckListById($id);
         if (! $checklist) {
             return response()->json([
                 'error' => 'Check List a No Encontrado',
@@ -197,4 +197,18 @@ class CheckListController extends Controller
             'message' => 'Check List a eliminado exitosamente',
         ], 200);
     }
+
+    public function report(Request $request, $id = 0)
+    {
+        $checklist = CheckList::find($id);
+        if (! $checklist) {
+            abort(404);
+        }
+        $pdf    = Pdf::loadView('checklist-report', ['data' => $checklist]);
+        $canvas = $pdf->getDomPDF()->get_canvas();
+        $fileName = $checklist->numero . '-' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        $fileName = str_replace(' ', '_', $fileName); // Reemplazar espacios con guiones bajos
+        return $pdf->download($fileName);
+    }
+
 }

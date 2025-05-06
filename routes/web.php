@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\CargarDocumentController;
+use App\Http\Controllers\Taller\CheckListController;
 use App\Models\CargaDocument;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::get('ticketmov/{id}', [PdfController::class, 'ticketbox'])->name('ticketb
 Route::get('ticketbackbox/{id}', [PdfController::class, 'ticketbackbox'])->name('ticketbackbox');
 
 Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
+
 
 
 Route::get('/', function () {

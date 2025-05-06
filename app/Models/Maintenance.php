@@ -14,6 +14,7 @@ class Maintenance extends Model
         'km',
         'status',
         'date_maintenance',
+        'date_end',
         'vehicle_id',
         'taller_id',
         'created_at',
@@ -28,9 +29,10 @@ class Maintenance extends Model
         'mode'             => '=',
         'km'               => '=',
         'date_maintenance' => 'date',
+        'date_end'         => 'date',
         'vehicle_id'       => '=',
         'taller_id'        => '=',
-        'status'        => 'like',
+        'status'           => 'like',
     ];
 
     /**

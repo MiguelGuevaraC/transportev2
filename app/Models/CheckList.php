@@ -14,6 +14,7 @@ class CheckList extends Model
         'id',
         'numero',
         'date_check_list',
+        'date_end',
         'vehicle_id',
         'observation',
         'status',
@@ -27,7 +28,7 @@ class CheckList extends Model
     const filters = [
 
         'numero'          => 'like',
-        'date_check_list' => 'like',
+        'date_check_list' => 'date',
 
         'vehicle_id'      => 'like',
         'observation'     => 'like',
@@ -48,5 +49,5 @@ class CheckList extends Model
             ->withPivot('observation', 'is_selected') // NECESARIO
             ->withTimestamps();
     }
-    
+
 }
