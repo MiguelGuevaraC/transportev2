@@ -18,7 +18,7 @@ class CheckListResource extends JsonResource
      *     @OA\Property(property="checkListItems", type="array", @OA\Items(ref="#/components/schemas/CheckListItem"))
      * )
      */
-    
+
     public function toArray($request): array
     {
         return [
@@ -29,13 +29,18 @@ class CheckListResource extends JsonResource
             'observation'     => $this->observation ?? null,
             'status'          => $this->status ?? null,
             'created_at'      => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
-            // Relación con los ítems, solo 'id' y 'name'
+
+            // Relación con los ítems, incluyendo campos pivot
             'checkListItems'  => $this->checkListItems->map(function ($item) {
                 return [
-                    'id'   => $item->id,
-                    'name' => $item->name,
+                    'id'          => $item->id ?? null,
+                    'name'        => $item->name ?? null,
+                    'observation' => $item->pivot->observation ?? null,
+                    'is_selected' => (bool) ($item->pivot->is_selected ?? false),
                 ];
             }) ?? [],
+
         ];
+
     }
 }

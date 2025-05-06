@@ -131,6 +131,7 @@ class VehicleController extends Controller
         $mtc = $request->input('mtc');
         $marca = $request->input('marca');
         $modelo = $request->input('modelo');
+        $status = $request->input('status');
 
         // Validar Branch Office
         if ($branch_office_id && is_numeric($branch_office_id)) {
@@ -179,6 +180,9 @@ class VehicleController extends Controller
 
         if (!empty($marca)) {
             $vehiclesQuery->where('brand', 'LIKE', '%' . $marca . '%');
+        }
+        if (!empty($status)) {
+            $vehiclesQuery->where('status', 'LIKE', '%' . $status . '%');
         }
 
         // Validación de la paginación

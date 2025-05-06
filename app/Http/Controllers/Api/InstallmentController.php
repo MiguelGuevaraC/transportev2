@@ -132,6 +132,7 @@ class InstallmentController extends Controller
             'payInstallments.latest_bank_movement_anticipo',  // Relación real
             'payInstallments.latest_bank_movement_transaction', // Relación real
             'payInstallments.bank_account',
+            'payInstallments.movement'
 
         ]);
 

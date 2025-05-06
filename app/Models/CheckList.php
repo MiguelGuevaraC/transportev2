@@ -45,6 +45,8 @@ class CheckList extends Model
     public function checkListItems()
     {
         return $this->belongsToMany(CheckListItem::class, 'check_list_details', 'check_list_id', 'check_list_item_id')
+            ->withPivot('observation', 'is_selected') // NECESARIO
             ->withTimestamps();
     }
+    
 }

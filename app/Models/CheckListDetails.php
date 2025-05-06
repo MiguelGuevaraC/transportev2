@@ -14,6 +14,8 @@ class CheckListDetails extends Model
         'id',
         'check_list_id',
         'check_list_item_id',
+        'is_selected',
+        'observation',
         'created_at',
     ];
 
@@ -24,6 +26,8 @@ class CheckListDetails extends Model
     const filters = [
         'check_list_id' => '=',
         'check_list_item_id' => '=',
+        'is_selected'=> '=',
+        'observation'=> 'like',
     ];
 
     const sorts = [
