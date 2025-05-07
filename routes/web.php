@@ -38,8 +38,8 @@ Route::get('reporteReception/{id}', [PdfController::class, 'reporteReception'])-
 Route::get('ticketmov/{id}', [PdfController::class, 'ticketbox'])->name('ticketbox');
 Route::get('ticketbackbox/{id}', [PdfController::class, 'ticketbackbox'])->name('ticketbackbox');
 
-Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
-
+// Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
+// Route::get('report-seccion/{id}', [SeccionController::class, 'report']);
 
 
 Route::get('/', function () {

@@ -147,7 +147,7 @@
                         <td style="text-align: center;">
                             {{ $item->pivot->is_selected ? '✔ Aprobado' : '✘ No Aprobado' }}
                         </td>
-                        <td>{{ $item->pivot->observation ?? 'No se ha registrado observación' }}</td>
+                        <td>{{ $item->pivot->observation ?? '' }}</td>
                     </tr>
                 @endforeach
             </tbody>

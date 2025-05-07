@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\ExcelExport;
+use App\Exports\WorkerHistoryProgrammingsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WorkerRequest\IndexWorkerRequest;
 use App\Http\Resources\WorkerResource;
@@ -776,6 +777,10 @@ class WorkerController extends Controller
             'prev_page_url'  => $history->previousPageUrl(),
             'to'             => $history->lastItem(),
         ]);
+    }
+
+    public function report_history_programming_by_worker($workerId){
+        return Excel::download(new WorkerHistoryProgrammingsExport($workerId), 'worker_history.xlsx');
     }
 
     /**
