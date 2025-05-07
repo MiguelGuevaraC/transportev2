@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('export/kardex', [CargarDocumentController::class, 'exportKardex']);
 
+    Route::get('history-cargadocument', [CargarDocumentController::class, 'index_history']);
+    Route::get('history-cargadocument-excel', [CargarDocumentController::class, 'index_export_excel']);
+
     Route::get('cargadocument', [CargarDocumentController::class, 'index']);
     Route::post('cargadocument', [CargarDocumentController::class, 'store']);
     Route::get('cargadocument/{id}', [CargarDocumentController::class, 'show']);

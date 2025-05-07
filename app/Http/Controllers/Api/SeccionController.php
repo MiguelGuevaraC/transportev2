@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +8,7 @@ use App\Http\Requests\SeccionRequest\UpdateSeccionRequest;
 use App\Http\Resources\SeccionResource;
 use App\Models\Seccion;
 use App\Services\SeccionService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class SeccionController extends Controller
@@ -20,7 +20,6 @@ class SeccionController extends Controller
         $this->seccionService = $SeccionService;
     }
 
-   
 /**
  * @OA\Get(
  *     path="/transportedev/public/api/seccion",
@@ -31,7 +30,7 @@ class SeccionController extends Controller
  *     @OA\Parameter(name="name", in="query", description="Filtrar por name", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="address", in="query", description="Filtrar por address", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="status", in="query", description="Filtrar por status", required=false, @OA\Schema(type="string")),
- * 
+ *
  *     @OA\Response(response=200, description="Lista de Seccions", @OA\JsonContent(ref="#/components/schemas/Seccion")),
  *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
  * )
@@ -197,9 +196,29 @@ class SeccionController extends Controller
         }
         $seccion = $this->seccionService->destroyById($id);
 
-
         return response()->json([
             'message' => 'Seccion eliminado exitosamente',
         ], 200);
     }
+
+    public function report(Request $request, $seccion_id)
+    {
+        $seccion = Seccion::with(['products' => function ($query) {
+            $query->wherePivot('stock', '>', 0); // Solo productos con stock
+        }])->find($seccion_id);
+    
+        if (! $seccion) {
+            abort(404);
+        }
+    
+        $pdf = Pdf::loadView('seccion-report', [
+            'seccion'   => $seccion,
+            'productos' => $seccion->products,
+        ]);
+    
+        // Modificar stream() por download() para permitir la descarga del archivo PDF
+        return $pdf->download('seccion-' . $seccion->name . '-' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+    
+
 }

@@ -1,12 +1,14 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\ExcelExport;
 use App\Exports\KardexExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CargaDocumentRequest\IndexCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\KardexRequest;
 use App\Http\Requests\CargaDocumentRequest\StoreCargaDocumentRequest;
 use App\Http\Requests\CargaDocumentRequest\UpdateCargaDocumentRequest;
+use App\Http\Resources\CargaDetailResource;
 use App\Http\Resources\CargaResource;
 use App\Models\CargaDocument;
 use App\Models\DocumentCargaDetail;
@@ -64,6 +66,40 @@ class CargarDocumentController extends Controller
             CargaResource::class
         );
     }
+
+    public function index_history(IndexCargaDocumentRequest $request)
+    {
+        $query = DocumentCargaDetail::query();
+    
+        // Filtro por rango de fechas en la relación "document_carga"
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereHas('document_carga', function ($q) use ($request) {
+                $q->whereBetween('movement_date', [
+                    $request->input('from'),
+                    $request->input('to')
+                ]);
+            });
+        }
+    
+        return $this->getFilteredResults(
+            $query,
+            $request,
+            DocumentCargaDetail::filters,
+            DocumentCargaDetail::sorts,
+            CargaDetailResource::class
+        );
+    }
+
+    public function index_export_excel(IndexCargaDocumentRequest $request)
+    {
+        $request['all'] = "true";
+        $data           = $this->index_history($request);
+        $fileName       = 'Caja_Grande_' . now()->timestamp . '.xlsx';
+        $columns        = DocumentCargaDetail::fields_export;
+        return Excel::download(new ExcelExport($data, $columns, 0), $fileName);
+    }
+    
+    
 /**
  * @OA\Get(
  *     path="/transportedev/public/api/cargaDocument/{id}",

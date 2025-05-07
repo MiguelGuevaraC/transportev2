@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,7 +7,9 @@ use App\Http\Requests\AlmacenRequest\StoreAlmacenRequest;
 use App\Http\Requests\AlmacenRequest\UpdateAlmacenRequest;
 use App\Http\Resources\AlmacenResource;
 use App\Models\Almacen;
+use App\Models\Seccion;
 use App\Services\AlmacenService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class AlmacenController extends Controller
@@ -20,7 +21,6 @@ class AlmacenController extends Controller
         $this->almacenService = $AlmacenService;
     }
 
-   
 /**
  * @OA\Get(
  *     path="/transportedev/public/api/almacen",
@@ -31,7 +31,7 @@ class AlmacenController extends Controller
  *     @OA\Parameter(name="name", in="query", description="Filtrar por name", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="address", in="query", description="Filtrar por address", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="status", in="query", description="Filtrar por status", required=false, @OA\Schema(type="string")),
- * 
+ *
  *     @OA\Response(response=200, description="Lista de Almacens", @OA\JsonContent(ref="#/components/schemas/Almacen")),
  *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
  * )
@@ -207,4 +207,34 @@ class AlmacenController extends Controller
             'message' => 'Almacen eliminado exitosamente',
         ], 200);
     }
+
+
+
+    public function report(Request $request, $id = 0)
+    {
+        $almacen = Almacen::with('products')->find($id);
+        if (! $almacen) {
+            abort(404);
+        }
+    
+        // Agrupar productos por sección
+        $productosAgrupados = $almacen->products->groupBy(function ($product) {
+            return $product->pivot->seccion_id;
+        });
+    
+        // Traer nombres de secciones
+        $secciones = Seccion::whereIn('id', $productosAgrupados->keys())->pluck('name', 'id');
+        
+        $pdf = Pdf::loadView('almacen-report', [
+            'almacen' => $almacen,
+            'productosPorSeccion' => $productosAgrupados,
+            'secciones' => $secciones,
+        ]);
+    
+        // Cambié stream() por download() para permitir la descarga del archivo PDF
+        return $pdf->download($almacen->numero . '-' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+    
+    
+
 }

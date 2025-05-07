@@ -36,4 +36,12 @@ class Seccion extends Model
     {
         return $this->belongsTo(Almacen::class, 'almacen_id');
     }
+
+    public function products()
+{
+    return $this->belongsToMany(Product::class, 'product_stock_by_branches', 'seccion_id', 'product_id')
+        ->withPivot('stock', 'almacen_id', 'branchOffice_id')
+        ->wherePivot('stock', '>', 0)
+        ->withTimestamps();
+}
 }

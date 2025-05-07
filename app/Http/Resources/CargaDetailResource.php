@@ -44,6 +44,7 @@ class CargaDetailResource extends JsonResource
             'seccion'           => $this->seccion ?? null,
             'document_carga_id' => $this->document_carga_id ?? null,
             'document_carga_code_doc'    => $this?->document_carga?->code_doc ?? null,
+            'movement_date'    => $this?->document_carga?->movement_date ?? null,
             'branchOffice_id'   => $this->branchOffice_id ?? null,
             'branchOffice'      => $this->branchOffice ?? null,
             'comment'           => $this->comment ?? null,

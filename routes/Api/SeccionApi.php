@@ -1,9 +1,6 @@
 <?php
 
-
 use App\Http\Controllers\Api\SeccionController;
-use App\Http\Controllers\TarifarioController;
-use App\Http\Controllers\UnityController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["middleware" => ["auth:sanctum"]], function () {
@@ -14,4 +11,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('seccion', [SeccionController::class, 'store']);
     Route::delete('seccion/{id}', [SeccionController::class, 'destroy']);
     Route::put('seccion/{id}', [SeccionController::class, 'update']);
+
+    Route::get('report-seccion/{id}', [SeccionController::class, 'report']);
 });

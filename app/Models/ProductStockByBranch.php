@@ -46,5 +46,13 @@ class ProductStockByBranch extends Model
     {
         return $this->belongsTo(BranchOffice::class, 'branchOffice_id');
     }
+    public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'almacen_id');
+    }
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
 
 }

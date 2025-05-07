@@ -36,8 +36,10 @@ class ExcelExport implements FromCollection, WithHeadings, WithMapping, WithStyl
                 $columnName => is_array($columnPath)
                     ? implode(' ', array_filter(array_map(fn($key) => data_get($row, $key, ''), $columnPath)))
                     : strval(data_get($row, $columnPath, ''))
+                    
             ])->toArray()
         )->toArray();
+     
 
         if (!empty($this->sumColumns)) {
             $totalRow = collect($this->columns)->mapWithKeys(fn($_, $key) => [$key => ''])->toArray();
@@ -62,6 +64,7 @@ class ExcelExport implements FromCollection, WithHeadings, WithMapping, WithStyl
 
     public function map($movement): array
     {
+        
         return $movement;
     }
 

@@ -52,6 +52,6 @@ class Maintenance extends Model
     }
     public function details()
     {
-        return $this->belongsTo(MaintenanceDetail::class);
+        return $this->hasMany(MaintenanceDetail::class);
     }
 }

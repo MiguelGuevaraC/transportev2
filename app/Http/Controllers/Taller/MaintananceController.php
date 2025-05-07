@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Taller;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +8,7 @@ use App\Http\Requests\MaintenanceRequest\UpdateMaintenanceRequest;
 use App\Http\Resources\MaintenanceResource;
 use App\Models\Maintenance;
 use App\Services\MaintenanceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class MaintananceController extends Controller
@@ -97,9 +97,9 @@ class MaintananceController extends Controller
 
     public function store(StoreMaintenanceRequest $request)
     {
-        $data= $request->validated();
-        $data['status']='Pendiente';
-        $maintenance = $this->maintenanceService->createMaintenance($data);
+        $data           = $request->validated();
+        $data['status'] = 'Pendiente';
+        $maintenance    = $this->maintenanceService->createMaintenance($data);
         return new MaintenanceResource($maintenance);
     }
 
@@ -154,7 +154,7 @@ class MaintananceController extends Controller
     public function update(UpdateMaintenanceRequest $request, $id)
     {
         $validatedData = $request->validated();
-        $maintenance = $this->maintenanceService->getMaintenanceById($id);
+        $maintenance   = $this->maintenanceService->getMaintenanceById($id);
         if (! $maintenance) {
             return response()->json([
                 'error' => 'Mantenimiento No Encontrado',
@@ -190,4 +190,16 @@ class MaintananceController extends Controller
             'message' => 'Mantenimiento eliminado exitosamente',
         ], 200);
     }
+
+    public function report(Request $request, $id = 0)
+    {
+        $mantenimiento = Maintenance::findOrFail($id);       
+    
+        $pdf = Pdf::loadView('mantenimiento-report', [
+            'mantenimiento' => $mantenimiento,
+        ]);
+    
+        return $pdf->stream('mantenimiento-' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+
 }

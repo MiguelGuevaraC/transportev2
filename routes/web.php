@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AlmacenController;
 use App\Http\Controllers\Api\PdfController;
+use App\Http\Controllers\Api\SeccionController;
 use App\Http\Controllers\CargarDocumentController;
 use App\Http\Controllers\Taller\CheckListController;
+use App\Http\Controllers\Taller\MaintananceController;
 use App\Models\CargaDocument;
 use Illuminate\Support\Facades\Route;
 

@@ -56,6 +56,7 @@ class Product extends Model
             ->withPivot('stock', 'almacen_id', 'seccion_id') // Incluye las columnas 'almacen_id' y 'seccion_id'
             ->withTimestamps();
     }
-    
+
+ 
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,9 +22,9 @@ class Almacen extends Model
         'deleted_at',
     ];
     const filters = [
-        'name'=> 'like',
-        'address'=> 'like',
-        'status'=> '=',
+        'name'    => 'like',
+        'address' => 'like',
+        'status'  => '=',
     ];
 
     const sorts = [
@@ -34,5 +33,13 @@ class Almacen extends Model
     public function seccions()
     {
         return $this->hasMany(Seccion::class);
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_stock_by_branches', 'almacen_id', 'product_id')
+            ->withPivot('stock', 'branchOffice_id', 'seccion_id') // Incluye otros campos de la tabla pivote si los necesitas
+            ->wherePivot('stock', '>', 0)
+            ->withTimestamps();
     }
 }

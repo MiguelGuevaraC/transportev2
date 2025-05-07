@@ -10,8 +10,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // EXPENSES BANK
     Route::get('almacen', [AlmacenController::class, 'index']);
+    
     Route::get('almacen/{id}', [AlmacenController::class, 'show']);
     Route::post('almacen', [AlmacenController::class, 'store']);
     Route::delete('almacen/{id}', [AlmacenController::class, 'destroy']);
     Route::put('almacen/{id}', [AlmacenController::class, 'update']);
+
+    Route::get('report-almacen/{id}', [AlmacenController::class, 'report']);
+
 });

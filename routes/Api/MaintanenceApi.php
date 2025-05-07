@@ -11,4 +11,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('maintanence/{id}', [MaintananceController::class, 'show']);
     Route::put('maintanence/{id}', [MaintananceController::class, 'update']);
     Route::delete('maintanence/{id}', [MaintananceController::class, 'destroy']);
+    Route::get('report-mantenimiento/{id}', [MaintananceController::class, 'report']);
+
 });

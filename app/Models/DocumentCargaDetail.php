@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -35,6 +33,18 @@ class DocumentCargaDetail extends Model
         'document_carga_id' => '=',
         'branchOffice_id'   => '=',
         'comment'           => 'like',
+    ];
+
+    const fields_export = [
+        'Codigo Documento Carga' => 'document_carga_code_doc',
+        'Fecha Documento Carga' => 'movement_date',
+        'Producto'               => 'product.description',
+        'Sucursal'               => 'branchOffice.name',
+        'Almacen'                => 'almacen.name',
+        'Sección'                => 'seccion.name',
+        'Cantidad'               => 'quantity',
+        'Comentario'             => 'comment',
+  
     ];
 
     /**
