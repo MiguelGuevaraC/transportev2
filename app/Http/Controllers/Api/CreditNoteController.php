@@ -361,10 +361,11 @@ class CreditNoteController extends Controller
         ];
 
         // Crear la nota de crédito
-        $object           = CreditNote::create($data);
-        $moviment->status = "Anulada";
+        $object = CreditNote::create($data);
+        if ($request->input('reason') == '1') {
+            $moviment->status = "Anulada";
+        }
         $moviment->save();
-
         // Obtener la lista de productos y descripciones
         $descriptionString = '';
         $receptionDetails  = $object->moviment?->reception?->details() ?? [];
@@ -394,9 +395,9 @@ class CreditNoteController extends Controller
         $receptions = $moviment->receptions;
 
         // if ($object->total == $moviment->total && $request->input('reason')=="1") {
-            if ($object->total == $moviment->total) {
+        if ($object->total == $moviment->total) {
             foreach ($receptions as $reception) {
-                $rececption = Reception::find($reception->id);
+                $rececption              = Reception::find($reception->id);
                 $rececption->moviment_id = null;
                 $rececption->save();
 
@@ -536,7 +537,10 @@ class CreditNoteController extends Controller
         $object->save();
 
         // Cambiar el estado del movimiento a "Anulada"
-        $moviment->status = "Anulada";
+
+        if ($request->input('reason') == '1') {
+            $moviment->status = "Anulada";
+        }
         $moviment->save();
 
         // Obtener la lista de productos y descripciones

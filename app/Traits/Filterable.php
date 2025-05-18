@@ -91,6 +91,7 @@ trait Filterable
     {
         $sortField = $request->query('sort');
         $sortOrder = $request->query('direction', 'desc');
+  
         if ($sortField !== null && in_array($sortField, $sorts)) {
             $query->orderBy($sortField, $sortOrder);
         } else {

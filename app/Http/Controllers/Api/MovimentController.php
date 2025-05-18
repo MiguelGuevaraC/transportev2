@@ -8,13 +8,12 @@ use App\Models\Installment;
 use App\Models\Moviment;
 use App\Models\PaymentConcept;
 use App\Models\User;
-use App\Services\MovimentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
 class MovimentController extends Controller
 {
 
@@ -264,6 +263,28 @@ class MovimentController extends Controller
                            // Si el objetivo es eliminar el registro:
         $object->delete(); // Cambia esto si se necesita otra lógica
         return response()->json(['message' => 'Moviment deleted successfully'], 200);
+    }
+
+    public function destroy_venta_ticket($id)
+    {
+        $object = Moviment::find($id);
+
+        if (! $object) {
+            return response()->json(['message' => 'Movimiento no encontrado'], 404);
+        }
+
+        // Validar que sea un ticket (sequentialNumber empieza con "T")
+        if (! Str::startsWith($object->sequentialNumber, 'T')) {
+            return response()->json(['message' => 'No es un ticket'], 400);
+        }
+
+        $moviments = Moviment::where('sequentialNumber', $object->sequentialNumber)->get();
+
+        foreach ($moviments as $mov) {
+            $mov->delete();
+        }
+
+        return response()->json(['message' => 'Ticket Eliminado Exitosamente'], 200);
     }
 
     /**
@@ -1157,7 +1178,5 @@ class MovimentController extends Controller
 
         return $query->first();
     }
-
-
 
 }

@@ -426,17 +426,23 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/TypeDocumentApi.php'; //TYPE DOCUMENT
     require __DIR__ . '/Api/PayableApi.php';      //TYPE DOCUMENT
 
-    require __DIR__ . '/Api/TallerApi.php';   //TALLER
-    require __DIR__ . '/Api/CategoryApi.php'; //CATEGORY
-    require __DIR__ . '/Api/RepuestoApi.php'; //REPUESTO
+    require __DIR__ . '/Api/TallerApi.php';        //TALLER
+    require __DIR__ . '/Api/CategoryApi.php';      //CATEGORY
+    require __DIR__ . '/Api/RepuestoApi.php';      //REPUESTO
     require __DIR__ . '/Api/CheckListItemApi.php'; //CHECK LIST ITEM
 
-    require __DIR__ . '/Api/AlmacenApi.php'; //ALMACEN
-    require __DIR__ . '/Api/SeccionApi.php'; //SECCION
+    require __DIR__ . '/Api/AlmacenApi.php';   //ALMACEN
+    require __DIR__ . '/Api/SeccionApi.php';   //SECCION
     require __DIR__ . '/Api/CheckListApi.php'; //CHECK LIST
 
-    require __DIR__ . '/Api/MaintanenceApi.php'; //CHECK LIST
-    require __DIR__ . '/Api/MaintanenceDetailApi.php'; //CHECK LIST
-    require __DIR__ . '/Api/ServiceApi.php'; //SERVICE
-    require __DIR__ . '/Api/WorkerApi.php'; //WORKER
+    require __DIR__ . '/Api/MaintanenceApi.php';          //CHECK LIST
+    require __DIR__ . '/Api/MaintanenceDetailApi.php';    //CHECK LIST
+    require __DIR__ . '/Api/ServiceApi.php';              //SERVICE
+    require __DIR__ . '/Api/WorkerApi.php';               //WORKER
+    require __DIR__ . '/Api/MovimentApi.php';             //MOVIMENT
+    require __DIR__ . '/Api/OrderCompraApi.php';          //ORDER COMPRA
+    require __DIR__ . '/Api/OrderCompraDetailApi.php';    //ORDER COMPRA DETAIL
+    require __DIR__ . '/Api/MovimentCompraApi.php';       //MOVIMENT COMPRA
+    require __DIR__ . '/Api/MovimentCompraDetailApi.php'; //MOVIMENT COMPRA DETAIL
+
 });

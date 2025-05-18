@@ -779,7 +779,8 @@ class WorkerController extends Controller
         ]);
     }
 
-    public function report_history_programming_by_worker($workerId){
+    public function report_history_programming_by_worker($workerId)
+    {
         return Excel::download(new WorkerHistoryProgrammingsExport($workerId), 'worker_history.xlsx');
     }
 
