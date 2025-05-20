@@ -47,8 +47,11 @@ class CompraMovimentResource extends JsonResource
             'date_movement'     => $this->date_movement ?? null,
             'document_type'     => $this->document_type ?? null,
             'branchOffice_id'   => $this->branchOffice_id ?? null,
+            'branchOffice_name' => $this?->branchOffice?->name ?? null,
 
             'proveedor_id'      => $this->proveedor_id ?? null,
+            'proveedor_name'    => trim("{$this->proveedor?->names} {$this->proveedor?->fatherSurname} {$this->proveedor?->motherSurname} {$this->proveedor?->businessName}"),
+            
             'compra_order_id'   => $this->compra_order_id ?? null,
             'compra_order_code' => $this->compra_order->number ?? null,
             'payment_method'    => $this->payment_method ?? null,
