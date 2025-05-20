@@ -203,7 +203,7 @@ class CompraOrderController extends Controller
         $canvas   = $pdf->getDomPDF()->get_canvas();
         $fileName = $ordercompra->number . '-' . now()->format('Y-m-d_H-i-s') . '.pdf';
         $fileName = str_replace(' ', '_', $fileName); // Reemplazar espacios con guiones bajos
-        return $pdf->stream($fileName);
+        return $pdf->download($fileName);
     }
 
 }

@@ -42,7 +42,6 @@ Route::get('ticketbackbox/{id}', [PdfController::class, 'ticketbackbox'])->name(
 // Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
 // Route::get('report-seccion/{id}', [SeccionController::class, 'report']);
 
-    Route::get('ordercompra/{id}/reportpdf', [CompraOrderController::class, 'reportpdf']);
 
 
 Route::get('/', function () {

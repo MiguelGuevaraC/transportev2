@@ -9,6 +9,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('ordercompra', [CompraOrderController::class, 'store']);
     Route::put('ordercompra/{id}', [CompraOrderController::class, 'update']);
     Route::delete('ordercompra/{id}', [CompraOrderController::class, 'destroy']);
+    
+    Route::get('ordercompra/{id}/reportpdf', [CompraOrderController::class, 'reportpdf']);
 
 
 });
