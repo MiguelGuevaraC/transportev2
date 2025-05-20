@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Compra;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +8,7 @@ use App\Http\Requests\CompraOrderRequest\UpdateCompraOrderRequest;
 use App\Http\Resources\CompraOrderResource;
 use App\Models\CompraOrder;
 use App\Services\CompraOrderService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class CompraOrderController extends Controller
@@ -99,7 +99,7 @@ class CompraOrderController extends Controller
     {
         $data           = $request->validated();
         $data['status'] = 'ACTIVO';
-        $compraOrder      = $this->compraOrderService->createCompraOrder($data);
+        $compraOrder    = $this->compraOrderService->createCompraOrder($data);
         return new CompraOrderResource($compraOrder);
     }
 
@@ -154,7 +154,7 @@ class CompraOrderController extends Controller
     public function update(UpdateCompraOrderRequest $request, $id)
     {
         $validatedData = $request->validated();
-        $compraOrder     = $this->compraOrderService->getCompraOrderById($id);
+        $compraOrder   = $this->compraOrderService->getCompraOrderById($id);
         if (! $compraOrder) {
             return response()->json([
                 'error' => 'Orden Compra No Encontrado',
@@ -186,13 +186,24 @@ class CompraOrderController extends Controller
             ], 404);
         }
 
-
-
         $compraOrder = $this->compraOrderService->destroyById($id);
         return response()->json([
             'message' => 'Orden Compra eliminado exitosamente',
         ], 200);
     }
 
+    public function reportpdf(Request $request, $id = 0)
+    {
+        $ordercompra = CompraOrder::find($id);
+        if (! $ordercompra) {
+            abort(404);
+        }
+   
+        $pdf      = Pdf::loadView('ordercompra-report', ['data' => $ordercompra]);
+        $canvas   = $pdf->getDomPDF()->get_canvas();
+        $fileName = $ordercompra->number . '-' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        $fileName = str_replace(' ', '_', $fileName); // Reemplazar espacios con guiones bajos
+        return $pdf->stream($fileName);
+    }
 
 }

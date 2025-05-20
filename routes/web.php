@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AlmacenController;
 use App\Http\Controllers\Api\PdfController;
 use App\Http\Controllers\Api\SeccionController;
 use App\Http\Controllers\CargarDocumentController;
+use App\Http\Controllers\Compra\CompraOrderController;
 use App\Http\Controllers\Taller\CheckListController;
 use App\Http\Controllers\Taller\MaintananceController;
 use App\Models\CargaDocument;
@@ -40,6 +41,8 @@ Route::get('ticketbackbox/{id}', [PdfController::class, 'ticketbackbox'])->name(
 
 // Route::get('ticketrecepcion/{id}', [PdfController::class, 'ticketrecepcion'])->name('ticketrecepcion');
 // Route::get('report-seccion/{id}', [SeccionController::class, 'report']);
+
+    Route::get('ordercompra/{id}/reportpdf', [CompraOrderController::class, 'reportpdf']);
 
 
 Route::get('/', function () {
