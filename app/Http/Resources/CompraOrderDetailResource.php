@@ -28,14 +28,13 @@ class CompraOrderDetailResource extends JsonResource
     {
         return [
             'id'                  => $this->id,
-            'compra_order_id'     => $this->compra_order_id,
-            'compra_order_number' => $this->compra_order?->number,
+
             'repuesto_id'         => $this->repuesto_id,
             'repuesto_name'       => $this->repuesto?->name,
             'quantity'            => $this->quantity,
             'unit_price'          => $this->unit_price,
             'subtotal'            => $this->subtotal,
-            'comment'             => $this->comment,
+
             'created_at'          => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }

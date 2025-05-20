@@ -13,6 +13,12 @@ class CompraMoviment extends Model
     protected $fillable = [
         'id',
         'number',
+        'serie_doc',
+        'correlative_doc',
+        'monto_igv',
+        'is_igv_incluide',
+        'payment_condition',
+
         'date_movement',
         'document_type',
         'branchOffice_id',
@@ -66,5 +72,9 @@ class CompraMoviment extends Model
     public function details()
     {
         return $this->hasMany(CompraMovimentDetail::class);
+    }
+    public function payables()
+    {
+        return $this->hasMany(Payable::class);
     }
 }

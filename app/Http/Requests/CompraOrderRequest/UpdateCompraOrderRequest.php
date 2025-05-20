@@ -29,7 +29,7 @@ class UpdateCompraOrderRequest extends UpdateRequest
         return [
             'date_movement'         => 'nullable|date',
             'branchOffice_id'       => 'nullable|integer|exists:branch_offices,id',
-            'person_id'             => 'nullable|integer|exists:people,id',
+         
             'proveedor_id'          => 'nullable|integer|exists:people,id',
             'comment'               => 'nullable|string',
             'details'               => 'nullable|array|min:1',

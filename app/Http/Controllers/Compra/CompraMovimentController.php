@@ -47,12 +47,12 @@ class CompraMovimentController extends Controller
 /**
  * @OA\Get(
  *     path="/transportedev/public/api/compraorder/{id}",
- *     summary="Obtener detalles de un Orden Compra a por ID",
+ *     summary="Obtener detalles de un Movimineto Compra a por ID",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
  *     @OA\Parameter(name="id", in="path", description="ID del Order", required=true, @OA\Schema(type="integer", example=1)),
- *     @OA\Response(response=200, description="Orden Compra a encontrado", @OA\JsonContent(ref="#/components/schemas/Order")),
- *     @OA\Response(response=404, description="Orden Compra a no encontrada", @OA\JsonContent(type="object", @OA\Property(property="error", type="string", example="Orden Compra a no encontrada")))
+ *     @OA\Response(response=200, description="Movimineto Compra a encontrado", @OA\JsonContent(ref="#/components/schemas/Order")),
+ *     @OA\Response(response=404, description="Movimineto Compra a no encontrada", @OA\JsonContent(type="object", @OA\Property(property="error", type="string", example="Movimineto Compra a no encontrada")))
  * )
  */
 
@@ -61,7 +61,7 @@ class CompraMovimentController extends Controller
         $compraOrder = $this->compraOrderService->getCompraMovimentById($id);
         if (! $compraOrder) {
             return response()->json([
-                'error' => 'Orden Compra No Encontrada',
+                'error' => 'Movimineto Compra No Encontrada',
             ], 404);
         }
         return new CompraMovimentResource($compraOrder);
@@ -82,7 +82,7 @@ class CompraMovimentController extends Controller
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Orden Compra a creada exitosamente",
+ *         description="Movimineto Compra a creada exitosamente",
  *         @OA\JsonContent(ref="#/components/schemas/Order")
  *     ),
  *     @OA\Response(
@@ -124,7 +124,7 @@ class CompraMovimentController extends Controller
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Orden Compra a actualizada exitosamente",
+ *         description="Movimineto Compra a actualizada exitosamente",
  *         @OA\JsonContent(ref="#/components/schemas/Order")
  *     ),
  *     @OA\Response(
@@ -136,9 +136,9 @@ class CompraMovimentController extends Controller
  *     ),
  *     @OA\Response(
  *         response=404,
- *         description="Orden Compra a no encontrada",
+ *         description="Movimineto Compra a no encontrada",
  *         @OA\JsonContent(
- *             @OA\Property(property="error", type="string", example="Orden Compra a no encontrada")
+ *             @OA\Property(property="error", type="string", example="Movimineto Compra a no encontrada")
  *         )
  *     ),
  *     @OA\Response(
@@ -157,7 +157,7 @@ class CompraMovimentController extends Controller
         $compraOrder     = $this->compraOrderService->getCompraMovimentById($id);
         if (! $compraOrder) {
             return response()->json([
-                'error' => 'Orden Compra No Encontrado',
+                'error' => 'Movimineto Compra No Encontrado',
             ], 404);
         }
         $updatedcarga = $this->compraOrderService->updateCompraMoviment($compraOrder, $validatedData);
@@ -171,8 +171,8 @@ class CompraMovimentController extends Controller
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
  *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
- *     @OA\Response(response=200, description="Orden Compra a eliminado", @OA\JsonContent(@OA\Property(property="message", type="string", example="Orden Compra a eliminado exitosamente"))),
- *     @OA\Response(response=404, description="No encontrado", @OA\JsonContent(@OA\Property(property="error", type="string", example="Orden Compra a no encontrada"))),
+ *     @OA\Response(response=200, description="Movimineto Compra a eliminado", @OA\JsonContent(@OA\Property(property="message", type="string", example="Movimineto Compra a eliminado exitosamente"))),
+ *     @OA\Response(response=404, description="No encontrado", @OA\JsonContent(@OA\Property(property="error", type="string", example="Movimineto Compra a no encontrada"))),
 
  * )
  */
@@ -182,7 +182,7 @@ class CompraMovimentController extends Controller
         $compraOrder = $this->compraOrderService->getCompraMovimentById($id);
         if (! $compraOrder) {
             return response()->json([
-                'error' => 'Orden Compra No Encontrada.',
+                'error' => 'Movimineto Compra No Encontrada.',
             ], 404);
         }
 
@@ -190,7 +190,7 @@ class CompraMovimentController extends Controller
 
         $compraOrder = $this->compraOrderService->destroyById($id);
         return response()->json([
-            'message' => 'Orden Compra eliminado exitosamente',
+            'message' => 'Movimineto Compra eliminado exitosamente',
         ], 200);
     }
 

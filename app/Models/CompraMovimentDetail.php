@@ -19,6 +19,8 @@ class CompraMovimentDetail extends Model
         'unit_price',
         'subtotal',
         'comment',
+        'seccion_id',
+        'almacen_id',
         'created_at',
     ];
 
@@ -46,5 +48,13 @@ class CompraMovimentDetail extends Model
     public function repuesto()
     {
         return $this->belongsTo(Repuesto::class, 'repuesto_id');
+    }
+       public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'almacen_id');
+    }
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class, 'seccion_id');
     }
 }

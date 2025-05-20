@@ -51,6 +51,8 @@ class PayableResource extends JsonResource
                     'programming' => $this->driver_expense->programming ? $this->driver_expense->programming->toArray() : null,
                 ]
             ) : null,
+               'compra_moviment_id'  => $this->compra_moviment_id ?? null,
+               'compra_moviment_number'  => $this?->compra_moviment?->number ?? null,
             'created_at'         => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }

@@ -39,12 +39,25 @@ class PayableController extends Controller
 
     public function list(IndexPayableRequest $request)
     {
+        $query = Payable::query();
 
-        $query = Payable::whereHas('driver_expense.programming', function ($q) use ($request) {
-            if ($request->filled('programming_numero')) {
-                $q->where('numero', 'like', '%' . $request->programming_numero . '%');
-            }
-        });
+        // Filtro por numero de programación (programming_numero)
+        if ($request->filled('programming_numero')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('driver_expense.programming', function ($q2) use ($request) {
+                    $q2->where('numero', 'like', '%' . $request->programming_numero . '%');
+                })
+                    ->orWhereDoesntHave('driver_expense.programming');
+            });
+        }
+
+        // Filtro por número de compra_moviment (moviment_compra_number)
+        if ($request->filled('moviment_compra_number')) {
+            $query->whereHas('compra_moviment', function ($q) use ($request) {
+                $q->where('number', 'like', '%' . $request->moviment_compra_number . '%');
+            });
+        }
+
         return $this->getFilteredResults(
             $query,
             $request,
@@ -169,7 +182,7 @@ class PayableController extends Controller
             'type'             => 'Pago Amortizado',
             'nroOperacion'     => $nroOperacion,
             'comment'          => $comentario,
-            'payable_id'   => $payable->id,
+            'payable_id'       => $payable->id,
             'bank_id'          => isset($validatedData['bank_id']) ? $validatedData['bank_id'] : optional($bank_account)->bank_id,
             'bank_movement_id' => isset($validatedData['bank_movement_id']) ? $validatedData['bank_movement_id'] : null,
             'is_detraction'    => isset($validatedData['is_detraction']) ? $validatedData['is_detraction'] : 0,
@@ -185,7 +198,7 @@ class PayableController extends Controller
         } else {
             if ($bank_account) {
                 $data_movement_bank = [
-                    'pay_payable_id'     => isset($payable_pay->id) ? $payable_pay->id : null,
+                    'pay_payable_id'         => isset($payable_pay->id) ? $payable_pay->id : null,
                     'bank_id'                => isset($bank_account->bank_id) ? $bank_account->bank_id : null,
                     'bank_account_id'        => isset($bank_account->id) ? $bank_account->id : null,
                     'currency'               => isset($bank_account->currency) ? $bank_account->currency : null,
@@ -204,7 +217,7 @@ class PayableController extends Controller
         }
 
         return response()->json(
-            New PayPayableResource(PayPayable::find($payable_pay->id)),
+            new PayPayableResource(PayPayable::find($payable_pay->id)),
             200
         );
     }

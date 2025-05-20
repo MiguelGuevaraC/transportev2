@@ -42,7 +42,7 @@ class StoreCompraOrderRequest extends StoreRequest
         return [
             'date_movement'        => 'required|date',
             'branchOffice_id'      => 'required|integer|exists:branch_offices,id',
-            'person_id'            => 'required|integer|exists:people,id',
+           
             'proveedor_id'         => 'required|integer|exists:people,id',
             'comment'              => 'nullable|string',
             'details'              => 'required|array|min:1',
