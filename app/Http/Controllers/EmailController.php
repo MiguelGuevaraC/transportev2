@@ -21,7 +21,7 @@ class EmailController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/validatetoken",
+     *     path="/transporte/public/api/validatetoken",
      *     summary="Enviar código de verificación por correo",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
@@ -48,7 +48,7 @@ class EmailController extends Controller
          if (! $moviment) {
              return response()->json(['message' => 'Venta No Encontrado'], 422);
          }
-     
+
          $username   = Auth::user()->username ?? "AdminPost";
          $correoSend = "guevaracajusolmiguel@gmail.com";
          $correoSend2 = "alvarorent2001@gmail.com";
@@ -57,10 +57,10 @@ class EmailController extends Controller
          Mail::to([$correoSend, $correoSend2])->send(new ConfirmationMail($token, $moviment));
          return response()->json(['status' => 'success'], 200);
      }
-     
+
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/desvinculatesale",
+ *     path="/transporte/public/api/desvinculatesale",
  *     summary="Desvincular guía de venta",
  *     description="Desvincula una guía de una venta específica si cumple con las condiciones. Verifica el token y el estado de la venta antes de proceder.",
  *     tags={"Sale"},

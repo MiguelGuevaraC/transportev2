@@ -28,10 +28,10 @@ class CarrierGuideController extends Controller
     {
         $this->carrierGuideService = $CarrierGuideService;
     }
-    
+
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/carrierGuide",
+     *     path="/transporte/public/api/carrierGuide",
      *     summary="Get all carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Show all carrierGuide",
@@ -243,7 +243,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/carrierGuide",
+     *     path="/transporte/public/api/carrierGuide",
      *     summary="Create a new carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Create a new carrierGuide",
@@ -307,32 +307,32 @@ class CarrierGuideController extends Controller
             'addressStart'      => 'required',
             'addressEnd'        => 'required',
             'motive_id'         => 'required|exists:motives,id',
-        
+
             'tract_id' => 'nullable|sometimes|exists:vehicles,id|required_without:subcontract_id',
 
             'platform_id'       => 'nullable|exists:vehicles,id',
-        
+
             'origin_id'         => 'required|exists:places,id',
             'destination_id'    => 'required|exists:places,id',
-        
+
             'sender_id'         => 'required|exists:people,id',
             'recipient_id'      => 'required|exists:people,id',
-        
+
             'payResponsible_id' => 'required|exists:people,id',
             'reception_id'      => 'required|exists:receptions,id',
             'branch_office_id'  => 'nullable|exists:branch_offices,id',
-        
+
             'driver_id'         => 'nullable|sometimes|required_without:subcontract_id|exists:workers,id',
             'copilot_id'        => 'nullable|exists:workers,id',
-        
+
             'subcontract_id'    => 'nullable|exists:subcontracts,id',
-        
+
             'districtStart_id'  => 'required|exists:districts,id',
             'districtEnd_id'    => 'required|exists:districts,id',
         ]);
-        
-        
-        
+
+
+
 
         if ($validator->fails()) {
             Bitacora::create([
@@ -498,7 +498,7 @@ class CarrierGuideController extends Controller
 
         if ($object->subcontract_id != null) {
             $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
-            if ($validator->fails()) 
+            if ($validator->fails())
             {return response()->json(['errors' => $validator->errors()->first()], 422);}
             $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
@@ -558,7 +558,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Get a carrierGuide by ID",
      *     tags={"CarrierGuide"},
      *     description="Retrieve a carrierGuide by its ID",
@@ -610,7 +610,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Update an existing carrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Update an existing carrierGuide",
@@ -836,7 +836,7 @@ class CarrierGuideController extends Controller
             $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
         }
         $this->carrierGuideService->updatestockProduct($object->id);
-        
+
         $object = CarrierGuide::with('tract', 'platform', 'motive',
             'origin', 'destination',
             'sender', 'recipient',
@@ -860,7 +860,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/carrierGuide/{id}",
+     *     path="/transporte/public/api/carrierGuide/{id}",
      *     summary="Delete a CarrierGuide",
      *     tags={"CarrierGuide"},
      *     description="Delete a CarrierGuide by ID",
@@ -912,7 +912,7 @@ class CarrierGuideController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/carrierGuide/{id}/status",
+     *     path="/transporte/public/api/carrierGuide/{id}/status",
      *     summary="Update CarrierGuide status",
      *     tags={"CarrierGuide"},
      *     description="Update the status of a CarrierGuide to either 'Pendiente' or Entregado or 'En Transito'",

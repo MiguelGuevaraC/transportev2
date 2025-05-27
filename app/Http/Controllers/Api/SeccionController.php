@@ -22,7 +22,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/seccion",
+ *     path="/transporte/public/api/seccion",
  *     summary="Obtener información de Seccions con filtros y ordenamiento",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -49,7 +49,7 @@ class SeccionController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/seccion/{id}",
+ *     path="/transporte/public/api/seccion/{id}",
  *     summary="Obtener detalles de un Seccion por ID",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -75,7 +75,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/seccion",
+ *     path="/transporte/public/api/seccion",
  *     summary="Crear Seccion",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -109,7 +109,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/seccion/{id}",
+ *     path="/transporte/public/api/seccion/{id}",
  *     summary="Actualizar un Seccion",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -173,7 +173,7 @@ class SeccionController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/seccion/{id}",
+ *     path="/transporte/public/api/seccion/{id}",
  *     summary="Eliminar un Seccionpor ID",
  *     tags={"Seccion"},
  *     security={{"bearerAuth": {}}},
@@ -206,19 +206,19 @@ class SeccionController extends Controller
         $seccion = Seccion::with(['products' => function ($query) {
             $query->wherePivot('stock', '>', 0); // Solo productos con stock
         }])->find($seccion_id);
-    
+
         if (! $seccion) {
             abort(404);
         }
-    
+
         $pdf = Pdf::loadView('seccion-report', [
             'seccion'   => $seccion,
             'productos' => $seccion->products,
         ]);
-    
+
         // Modificar stream() por download() para permitir la descarga del archivo PDF
         return $pdf->download('seccion-' . $seccion->name . '-' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
-    
+
 
 }

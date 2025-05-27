@@ -11,7 +11,7 @@ class MotiveController extends Controller
     /**
      * Get all motives with pagination
      * @OA\Get (
-     *      path="/transportedev/public/api/motive",
+     *      path="/transporte/public/api/motive",
      *      tags={"Motive"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Response(
@@ -20,10 +20,10 @@ class MotiveController extends Controller
      *          @OA\JsonContent(
      *              @OA\Property(property="current_page", type="integer", example=1),
      *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Motive")),
-     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/motive?page=1"),
+     *              @OA\Property(property="first_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/motive?page=1"),
      *              @OA\Property(property="from", type="integer", example=1),
-     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transportedev/public/api/motive?page=2"),
-     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transportedev/public/api/motive"),
+     *              @OA\Property(property="next_page_url", type="string", example="http://develop.garzasoft.com/transporte/public/api/motive?page=2"),
+     *              @OA\Property(property="path", type="string", example="http://develop.garzasoft.com/transporte/public/api/motive"),
      *              @OA\Property(property="per_page", type="integer", example=15),
      *              @OA\Property(property="prev_page_url", type="string", example="null"),
      *              @OA\Property(property="to", type="integer", example=15)
@@ -43,10 +43,10 @@ class MotiveController extends Controller
         // Establecemos valores predeterminados para `page` y `per_page`
         $page = $request->get('page', 1);
         $perPage = $request->get('per_page', 15);
-    
+
         // Asegúrate de usar `simplePaginate` para obtener un paginador
         $motive = Motive::orderBy('name', 'asc')->paginate($perPage, ['*'], 'page', $page);
-    
+
         // Retornar los datos en un formato estructurado
         return response()->json([
             'total' => $motive->total(),
@@ -62,14 +62,14 @@ class MotiveController extends Controller
             'to' => $motive->lastItem(),
         ]);
     }
-    
-    
-    
+
+
+
 
      /**
      * Display the specified motive.
      * @OA\Get (
-     *      path="/transportedev/public/api/motive/{id}",
+     *      path="/transporte/public/api/motive/{id}",
      *      tags={"Motive"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(

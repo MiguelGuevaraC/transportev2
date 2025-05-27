@@ -19,17 +19,17 @@ class UnityController extends Controller
         $this->unityService = $UnityService;
     }
 
-    
+
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/unity",
+ *     path="/transporte/public/api/unity",
  *     summary="Obtener información de Unitys con filtros y ordenamiento",
  *     tags={"Unity"},
  *     security={{"bearerAuth": {}}},
  *     @OA\Parameter(name="id", in="query", description="Filtrar por ID", required=false, @OA\Schema(type="integer")),
  *     @OA\Parameter(name="name", in="query", description="Filtrar por name", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="code", in="query", description="Filtrar por codigo", required=false, @OA\Schema(type="string")),
- 
+
  *     @OA\Response(response=200, description="Lista de Unitys", @OA\JsonContent(ref="#/components/schemas/Unity")),
  *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
  * )
@@ -49,7 +49,7 @@ class UnityController extends Controller
  }
 /**
 * @OA\Get(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Obtener detalles de un Unity por ID",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},
@@ -75,10 +75,10 @@ class UnityController extends Controller
 
 /**
 * @OA\Post(
-*     path="/transportedev/public/api/unity",
+*     path="/transporte/public/api/unity",
 *     summary="Crear Unity",
 *     tags={"Unity"},
-*     security={{"bearerAuth": {}}},  
+*     security={{"bearerAuth": {}}},
 *     @OA\RequestBody(
 *         required=true,
 *         @OA\MediaType(
@@ -109,10 +109,10 @@ class UnityController extends Controller
 
 /**
 * @OA\Put(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Actualizar un Unity",
 *     tags={"Unity"},
-*     security={{"bearerAuth": {}}},  
+*     security={{"bearerAuth": {}}},
 *     @OA\Parameter(
 *         name="id",
 *         in="path",
@@ -173,7 +173,7 @@ class UnityController extends Controller
 
 /**
 * @OA\Delete(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Eliminar un Unitypor ID",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},

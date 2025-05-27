@@ -11,7 +11,7 @@ class BranchOfficeController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/branchOffice",
+     *     path="/transporte/public/api/branchOffice",
      *     summary="Get all branchOffice",
      *     tags={"BranchOffice"},
      *     description="Show all branchOffice",
@@ -41,7 +41,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/branchOffice",
+     *     path="/transporte/public/api/branchOffice",
      *     summary="Store a new branchOffice",
      *     tags={"BranchOffice"},
      *     description="Create a new branchOffice",
@@ -107,7 +107,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Get a branchOffice by ID",
      *     tags={"BranchOffice"},
      *     description="Retrieve a branchOffice by its ID",
@@ -157,7 +157,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Update an existing BranchOffice",
      *     tags={"BranchOffice"},
      *     description="Update an existing BranchOffice",
@@ -242,7 +242,7 @@ class BranchOfficeController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/branchOffice/{id}",
+     *     path="/transporte/public/api/branchOffice/{id}",
      *     summary="Delete a BranchOffice",
      *     tags={"BranchOffice"},
      *     description="Delete a BranchOffice by ID",
@@ -281,24 +281,24 @@ class BranchOfficeController extends Controller
      {
          // Encuentra la oficina de sucursal por ID
          $object = BranchOffice::find($id);
-     
+
          // Verifica si la sucursal no fue encontrada
          if (!$object) {
              return response()->json(['message' => 'Branch Office not found'], 422);
          }
-     
+
          // Verifica si hay al menos una persona asociada a esta sucursal
          $hasPeople = Person::where('branchOffice_id', $id)->exists();
-     
+
          if ($hasPeople) {
              return response()->json(['message' => 'Branch Office has people'], 409);
          }
-     
+
          // Si no hay personas asociadas, elimina la sucursal
          $object->delete();
-     
+
          // Devuelve una respuesta de éxito si la eliminación fue correcta
          return response()->json(['message' => 'Branch Office deleted successfully'], 200);
      }
-     
+
 }

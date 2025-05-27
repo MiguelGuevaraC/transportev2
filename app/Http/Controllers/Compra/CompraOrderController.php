@@ -22,7 +22,7 @@ class CompraOrderController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/compraorder",
+ *     path="/transporte/public/api/compraorder",
  *     summary="Obtener información de Orders con filtros y ordenamiento",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class CompraOrderController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/compraorder/{id}",
+ *     path="/transporte/public/api/compraorder/{id}",
  *     summary="Obtener detalles de un Orden Compra a por ID",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class CompraOrderController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/compraorder",
+ *     path="/transporte/public/api/compraorder",
  *     summary="Crear Order",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -105,7 +105,7 @@ class CompraOrderController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/compraorder/{id}",
+ *     path="/transporte/public/api/compraorder/{id}",
  *     summary="Actualizar un Order",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -166,7 +166,7 @@ class CompraOrderController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/compraorder/{id}",
+ *     path="/transporte/public/api/compraorder/{id}",
  *     summary="Eliminar un Orderpor ID",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -198,7 +198,7 @@ class CompraOrderController extends Controller
         if (! $ordercompra) {
             abort(404);
         }
-   
+
         $pdf      = Pdf::loadView('ordercompra-report', ['data' => $ordercompra]);
         $canvas   = $pdf->getDomPDF()->get_canvas();
         $fileName = $ordercompra->number . '-' . now()->format('Y-m-d_H-i-s') . '.pdf';

@@ -19,7 +19,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/detailReception",
+     *     path="/transporte/public/api/detailReception",
      *     summary="Get all detailReception",
      *     tags={"Detail Reception"},
      *     description="Show all detailReception",
@@ -49,7 +49,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/detailReception",
+     *     path="/transporte/public/api/detailReception",
      *     summary="Create a new detailReception",
      *     tags={"Detail Reception"},
      *     description="Create a new detailReception",
@@ -154,7 +154,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/detailReception/{id}",
+     *     path="/transporte/public/api/detailReception/{id}",
      *     summary="Get a detailReception by ID",
      *     tags={"Detail Reception"},
      *     description="Retrieve a detailReception by its ID",
@@ -205,7 +205,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/detailReceptionForReception/{id}",
+     *     path="/transporte/public/api/detailReceptionForReception/{id}",
      *     summary="Get a detailReception by ID",
      *     tags={"Detail Reception"},
      *     description="Retrieve a detailReception by its ID Reception",
@@ -259,7 +259,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/detailReception/{id}",
+     *     path="/transporte/public/api/detailReception/{id}",
      *     summary="Update an existing detailReception",
      *     tags={"Detail Reception"},
      *     description="Update an existing detailReception",
@@ -360,7 +360,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/detailReception/{id}",
+     *     path="/transporte/public/api/detailReception/{id}",
      *     summary="Delete a detailReception",
      *     tags={"Detail Reception"},
      *     description="Delete a detailReception by ID",
@@ -406,7 +406,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/detailReceptionWithoutProgramming",
+     *     path="/transporte/public/api/detailReceptionWithoutProgramming",
      *     summary="Get all detailReception Without Programming",
      *     tags={"Detail Reception"},
      *     description="Show all detailReception Without Programming",
@@ -454,7 +454,7 @@ class DetailReceptionController extends Controller
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
-        } 
+        }
         // else {
         //     $branch_office_id = auth()->user()->worker->branchOffice_id;
         //     $branchOffice = BranchOffice::find($branch_office_id);
@@ -562,7 +562,7 @@ class DetailReceptionController extends Controller
                 $query->where('currentPlate', 'LIKE', '%' . $placa . '%');
             });
         }
-        
+
         if (!empty($nombreClientePaga)) {
             $nombreClientePagaUpper = strtoupper($nombreClientePaga);
 
@@ -613,7 +613,7 @@ class DetailReceptionController extends Controller
         $page = $request->get('page', 1);
         $rawSql = vsprintf(str_replace(['?'], ['\'%s\''], $query->toSql()), $query->getBindings());
         //error_log($rawSql);
-        
+
         $receptions = $query->paginate($perPage, ['*'], 'page', $page);
 
         // Estructura de la respuesta

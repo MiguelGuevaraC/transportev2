@@ -12,7 +12,7 @@ class AddressController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/address",
+     *     path="/transporte/public/api/address",
      *     summary="Get all Address",
      *     tags={"Address"},
      *     description="Show all Address",
@@ -39,7 +39,7 @@ class AddressController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/addressForPerson/{idPersona}",
+     *     path="/transporte/public/api/addressForPerson/{idPersona}",
      *     summary="Get Address for Person",
      *     tags={"Address"},
      *     description="Show all Address",
@@ -75,7 +75,7 @@ class AddressController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/address",
+     *     path="/transporte/public/api/address",
      *     summary="Store a new address",
      *     tags={"Address"},
      *     description="Create a new address",
@@ -141,7 +141,7 @@ class AddressController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/address/{id}",
+     *     path="/transporte/public/api/address/{id}",
      *     summary="Get a address by ID",
      *     tags={"Address"},
      *     description="Retrieve a address by its ID",
@@ -191,7 +191,7 @@ class AddressController extends Controller
     }
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/address/{id}",
+     *     path="/transporte/public/api/address/{id}",
      *     summary="Update an existing address",
      *     tags={"Address"},
      *     description="Update an existing address",
@@ -275,7 +275,7 @@ class AddressController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/address/{id}",
+     *     path="/transporte/public/api/address/{id}",
      *     summary="Delete a address",
      *     tags={"Address"},
      *     description="Delete a address by ID",
@@ -314,23 +314,23 @@ class AddressController extends Controller
      {
          // Buscar la dirección
          $address = Address::find($id);
-     
+
          // Si no existe, devolver un error
          if (!$address) {
              return response()->json(['message' => 'Dirección No Encontrada'], 422);
          }
-     
+
          // Validar si la dirección está asociada como punto de envío o destino
          $hasReceptions = $address->receptionsAsSender()->exists() || $address->receptionsAsDestination()->exists();
-     
+
          if ($hasReceptions) {
              return response()->json(['message' => 'Dirección está asociada con recepciones'], 422);
          }
-     
+
          // Cambiar el estado de la dirección a 0 (deshabilitada)
          $address->state = 0;
          $address->save();
-     
+
          return response()->json(['data' =>$address], 200);
      }
 }

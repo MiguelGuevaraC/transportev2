@@ -19,13 +19,13 @@ class TarifarioController extends Controller
         $this->tarofarioService = $TarifarioService;
     }
 
-    
+
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/tarifario",
+ *     path="/transporte/public/api/tarifario",
  *     summary="Obtener información de Tarifarios con filtros y ordenamiento",
  *     tags={"Tarifario"},
- *     security={{"bearerAuth": {}}}, 
+ *     security={{"bearerAuth": {}}},
  *     @OA\Parameter(name="tarifa", in="query", description="Filtrar por tarifa", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="description", in="query", description="Filtrar por descripción", required=false, @OA\Schema(type="string")),
  *     @OA\Parameter(name="origin_id", in="query", description="Filtrar por ID de origen", required=false, @OA\Schema(type="string")),
@@ -55,7 +55,7 @@ class TarifarioController extends Controller
  }
 /**
 * @OA\Get(
-*     path="/transportedev/public/api/tarifario/{id}",
+*     path="/transporte/public/api/tarifario/{id}",
 *     summary="Obtener detalles de un Tarifario por ID",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},
@@ -81,10 +81,10 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Post(
-*     path="/transportedev/public/api/tarifario",
+*     path="/transporte/public/api/tarifario",
 *     summary="Crear Tarifario",
 *     tags={"Tarifario"},
-*     security={{"bearerAuth": {}}},  
+*     security={{"bearerAuth": {}}},
 *     @OA\RequestBody(
 *         required=true,
 *         @OA\MediaType(
@@ -115,10 +115,10 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Put(
-*     path="/transportedev/public/api/tarifario/{id}",
+*     path="/transporte/public/api/tarifario/{id}",
 *     summary="Actualizar un Tarifario",
 *     tags={"Tarifario"},
-*     security={{"bearerAuth": {}}},  
+*     security={{"bearerAuth": {}}},
 *     @OA\Parameter(
 *         name="id",
 *         in="path",
@@ -179,7 +179,7 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Delete(
-*     path="/transportedev/public/api/tarifario/{id}",
+*     path="/transporte/public/api/tarifario/{id}",
 *     summary="Eliminar un Tarifariopor ID",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},

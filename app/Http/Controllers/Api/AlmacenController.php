@@ -23,7 +23,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/almacen",
+ *     path="/transporte/public/api/almacen",
  *     summary="Obtener información de Almacens con filtros y ordenamiento",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -50,7 +50,7 @@ class AlmacenController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/almacen/{id}",
+ *     path="/transporte/public/api/almacen/{id}",
  *     summary="Obtener detalles de un Almacen por ID",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -76,7 +76,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/almacen",
+ *     path="/transporte/public/api/almacen",
  *     summary="Crear Almacen",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -110,7 +110,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/almacen/{id}",
+ *     path="/transporte/public/api/almacen/{id}",
  *     summary="Actualizar un Almacen",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -174,7 +174,7 @@ class AlmacenController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/almacen/{id}",
+ *     path="/transporte/public/api/almacen/{id}",
  *     summary="Eliminar un Almacenpor ID",
  *     tags={"Almacen"},
  *     security={{"bearerAuth": {}}},
@@ -216,25 +216,25 @@ class AlmacenController extends Controller
         if (! $almacen) {
             abort(404);
         }
-    
+
         // Agrupar productos por sección
         $productosAgrupados = $almacen->products->groupBy(function ($product) {
             return $product->pivot->seccion_id;
         });
-    
+
         // Traer nombres de secciones
         $secciones = Seccion::whereIn('id', $productosAgrupados->keys())->pluck('name', 'id');
-        
+
         $pdf = Pdf::loadView('almacen-report', [
             'almacen' => $almacen,
             'productosPorSeccion' => $productosAgrupados,
             'secciones' => $secciones,
         ]);
-    
+
         // Cambié stream() por download() para permitir la descarga del archivo PDF
         return $pdf->download($almacen->numero . '-' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
-    
-    
+
+
 
 }

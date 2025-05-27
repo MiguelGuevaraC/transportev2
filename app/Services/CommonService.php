@@ -10,7 +10,7 @@ class CommonService
     public function store_photo(array $data, Object $object, String $name_folder)
     {
 
-        $ruta = "https://develop.garzasoft.com/transportedev/public";
+        $ruta = "https://develop.garzasoft.com/transporte/public";
 
         // Verificar si se han subido imágenes y si es un array
         if (isset($data['imagesave']) && is_array($data['imagesave'])) {
@@ -41,24 +41,24 @@ class CommonService
 
     public function update_photo(array $data, Object $object, String $name_folder): string
     {
-        $ruta = "https://develop.garzasoft.com/transportedev/public";
-    
+        $ruta = "https://develop.garzasoft.com/transporte/public";
+
         // Verificar si existe una ruta de imágenes anteriores y eliminarlas
         if (! empty($object->images)) {
             // Obtener las rutas anteriores separadas por comas
             $oldPaths = explode(',', $object->images);
-    
+
             // Eliminar las imágenes previas
             foreach ($oldPaths as $oldPath) {
                 $oldPath = str_replace($ruta . '/storage/', '', $oldPath); // Limpiar la ruta
-    
+
                 // Verificar si el archivo existe y eliminarlo
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
             }
         }
-    
+
         // Verificar si se proporcionaron nuevas imágenes
         $imagePaths = []; // Un array para almacenar las rutas de las imágenes subidas
         if (isset($data['imagesave']) && is_array($data['imagesave'])) {
@@ -70,26 +70,26 @@ class CommonService
                     $fileName  = "{$object->id}_{$i}_{$timestamp}.{$extension}";
                     $filePath  = $image->storeAs($name_folder, $fileName, 'public');
                     $i++;
-    
+
                     // Guardar la ruta completa de la imagen
                     $imagePaths[] = $ruta . Storage::url($filePath);
                 }
             }
         }
-    
+
         // Si se subieron nuevas imágenes, actualizar las rutas
         if (!empty($imagePaths)) {
             // Convertir el array de rutas a una cadena separada por comas
             $imagePathsString = implode(',', $imagePaths);
-    
+
             // Devolver la cadena de rutas
             return $imagePathsString;
         }
-    
+
         // Si no se subieron nuevas imágenes, devolver lo anterior
         return $object->images;
     }
-    
+
 
     public function logActivity(
         string $action,

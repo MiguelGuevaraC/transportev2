@@ -112,7 +112,7 @@ class MejorasRutasPermission extends Seeder
                 'groupMenu_id' => 3,
             ],
 
-            
+
             [
                 'id'           => 40,
                 'name'         => 'Taller',
@@ -186,8 +186,15 @@ class MejorasRutasPermission extends Seeder
                 'guard_name'   => 'web',
                 'groupMenu_id' => 7,
             ],
+ [
+                'id'           => 49,
+                'name'         => 'Secciones Almacén',
+                'route'        => 'secciones',
+                'icon'         => 'dot',
+                'guard_name'   => 'web',
+                'groupMenu_id' => 7,
+            ],
 
-    
 
         ];
 
