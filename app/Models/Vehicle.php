@@ -219,7 +219,10 @@ class Vehicle extends Model
     {
         return $this->hasMany(Document::class)->where('state', 1);
     }
-    
+      public function all_documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 
     public function tractProgrammings()
     {

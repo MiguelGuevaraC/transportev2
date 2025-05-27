@@ -63,5 +63,9 @@ class Box extends Model
     {
         return $this->belongsTo(BranchOffice::class, 'branchOffice_id');
     }
+     public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 
 }

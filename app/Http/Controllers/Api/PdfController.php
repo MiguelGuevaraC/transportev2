@@ -1409,17 +1409,22 @@ class PdfController extends Controller
             });
         }
         if (! empty($start)) {
-            $query->where('date', '>=', $start);
+            // $query->where('date', '>=', $start);
+             $query->whereHas('moviment', function ($q) use ($start) {
+                $q->where('paymentDate', '>=',$start);
+            });
         }
         if (! empty($end)) {
-            $query->where('date', '<=', $end);
+            // $query->where('date', '<=', $end);
+              $query->whereHas('moviment', function ($q) use ($end) {
+                $q->where('paymentDate','<=', $end);
+            });
         }
-
         // Calcular la suma total de totalDebt
         $totalDebtSum = $query->sum('totalDebt');
 
         // Obtener los registros filtrados con paginación
-        $data = $query->orderBy('id', 'desc')->take(200)->get();
+        $data = $query->orderBy('id', 'desc')->take(500)->get();
 
         // Inicializar las variables de totales
         $total           = 0;
@@ -1507,6 +1512,11 @@ class PdfController extends Controller
 
                 'Fecha de Emision'     => isset($moviment->paymentDate) ? (string) Carbon::parse($moviment->paymentDate)->format('Y-m-d') : '',
                 'Fecha de Vencimiento' => $item->date ?? '',
+               'Dias Retraso'         => isset($item->date)
+        ? Carbon::createFromFormat('Y-m-d', Carbon::now()->format('Y-m-d'))
+            ->diffInDays(Carbon::createFromFormat('Y-m-d', Carbon::parse($item->date)->format('Y-m-d')), false) . ' dias'
+        : '',
+
                 'Documento'            => $moviment->sequentialNumber ?? '',
                 'Total'                => (string) $totalDetalle,     // Convertir a cadena
                 'Total Deuda'          => (string) $totalDetalleDebt, // Convertir a cadena
@@ -1526,6 +1536,7 @@ class PdfController extends Controller
 
             'Fecha de Emision'     => '',
             'Fecha de Vencimiento' => '',
+            'Dias Retraso' => '',
             'Documento'            => 'TOTAL',
             'Total'                => (string) $total,           // Convertir a cadena
             'Total Deuda'          => (string) $totalDebt,       // Convertir a cadena

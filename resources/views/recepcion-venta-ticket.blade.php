@@ -67,6 +67,7 @@
         }
     }
 @endphp
+
 <head>
     <title>TICKET DE RECEPCIÓN</title>
     <style>
@@ -236,14 +237,14 @@
         <section class="totales" style="font-size: 8px;">
             <b><span id="nombretipoElectronica">DATOS DE ENVÍO</span></b>
             <hr style="margin: 0; padding: 0; border: 0; border-top: 1px solid black;">
-        
+
             <table style="width: 100%;">
                 @foreach ([
-                    'Remitente' => (namePerson($reception->sender ?? null) ?? '-') . ' ' . ($reception->sender->documentNumber ?? '-'),
-                    'D. Partida' => ($reception->pointSender->name ?? '-') . ' ' . ($reception->origin->name ?? '-'),
-                    'Destinatario' => (namePerson($reception->recipient ?? null) ?? '-') . ' ' . ($reception->recipient->documentNumber ?? '-'),
-                    'D. Llegada' => ($reception->pointDestination->name ?? '-') . ' ' . ($reception->destination->name ?? '-')
-                ] as $label => $value)
+        'Remitente' => (namePerson($reception->sender ?? null) ?? '-') . ' ' . ($reception->sender->documentNumber ?? '-'),
+        'D. Partida' => ($reception->pointSender->name ?? '-') . ' ' . ($reception->origin->name ?? '-'),
+        'Destinatario' => (namePerson($reception->recipient ?? null) ?? '-') . ' ' . ($reception->recipient->documentNumber ?? '-'),
+        'D. Llegada' => ($reception->pointDestination->name ?? '-') . ' ' . ($reception->destination->name ?? '-'),
+    ] as $label => $value)
                     <tr>
                         <td style="text-align: left;"><b>{{ $label }}:</b></td>
                         <td style="text-align: right;">{{ $value }}</td>
@@ -251,20 +252,19 @@
                 @endforeach
             </table>
         </section>
-        
+
         <section class="totales" style="font-size: 8px;">
             <hr style="margin: 0; padding: 0; border: 0; border-top: 1px solid black;">
-        
+
             <table style="width: 100%;">
                 @foreach ([
-                    'T. Servicio' => $reception->typeService?? '',
-                    'Origen' => $reception?->origin?->name ?? '',
-                    'Destino' => $reception?->destination?->name ?? '',
-                    'Cond. Pago' => $reception->conditionPay?? '',
-                    'Srvicio' => $reception->typeDelivery?? '',
-                   'D. Anexos' => $reception?->firstCarrierGuide?->document ? ($reception?->comment ?? '-') : '-',
-
-                ] as $label => $value)
+        'T. Servicio' => $reception->typeService ?? '',
+        'Origen' => $reception?->origin?->name ?? '',
+        'Destino' => $reception?->destination?->name ?? '',
+        'Cond. Pago' => $reception->conditionPay ?? '',
+        'Srvicio' => $reception->typeDelivery ?? '',
+        'D. Anexos' => $reception?->firstCarrierGuide?->document ? $reception?->comment ?? '-' : '-',
+    ] as $label => $value)
                     <tr>
                         <td style="text-align: left;"><b>{{ $label }}:</b></td>
                         <td style="text-align: right;">{{ $value }}</td>
@@ -272,7 +272,7 @@
                 @endforeach
             </table>
         </section>
-<br>
+        <br>
         <section class="detalles">
             <table class="table">
                 <thead>
@@ -292,12 +292,12 @@
                     </tr>
                     <tr>
                         <td class="centroText"><strong>Total</strong></td>
-                        
-                        <td class="centroText"><?php echo $reception->netWeight;?></td>
+
+                        <td class="centroText"><?php echo $reception->netWeight; ?></td>
                         <td class="total"><?php echo number_format($reception->paymentAmount, 2); ?></td>
                     </tr>
 
-              
+
                 </tbody>
             </table>
 
@@ -313,14 +313,14 @@
                                 {{ getArchivosDocument($reception->moviment->id, 'venta') }}
                             @endif
                         </td>
-        
+
                         <!-- Factura y Guía en la segunda columna -->
                         <td style="width: 50%; text-align: left; vertical-align: top;">
                             <table style="font-size: 7px; width: 100%;">
                                 @foreach ([
-                                  'Documento Venta' => $reception?->moviment?->sequentialNumber ?? ($reception?->nro_sale ?? '-'),
-                                    'Guía Transporte' => $reception?->firstCarrierGuide?->numero ?? '-',
-                                ] as $label => $value)
+        'Documento Venta' => $reception?->moviment?->sequentialNumber ?? ($reception?->nro_sale ?? '-'),
+        'Guía Transporte' => $reception?->firstCarrierGuide?->numero ?? '-',
+    ] as $label => $value)
                                     <tr>
                                         <td colspan="2" style="text-align: left;"><b>{{ $label }}</b></td>
                                     </tr>
@@ -332,28 +332,39 @@
                         </td>
                     </tr>
                 </table>
-        
+                <tr>
+                    <td style="text-align: justify; font-size: 8px;">
+                        <strong>Observaciones:</strong><br>
+                        <strong>USTED NO CONTRATÓ EL SERVICIO DE GARANTÍA.</strong><br>
+                        Cuenta con una <strong>COBERTURA</strong> máxima hasta 10 veces el valor del flete sobre el
+                        envío afectado.<br>
+                        <em>(Cobertura no aplicable si el daño sufrido fue propio del mal embalaje)</em><br>
+                        <strong>Recibido sin verificación de contenido.</strong>
+                    </td>
+                </tr>
+
                 <!-- Total en palabras -->
                 <tr>
                     <td colspan="2" style="text-align: center;">
-                        <label for="total"><b>SON: 
-                            <?php
-                            $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
-                            $totalEnPalabras = strtoupper($formatter->format(floor($totalDetalle))); // Convertimos a mayúsculas
-                            if ($totalDetalle != floor($totalDetalle)) {
-                                $parteDecimal = round(($totalDetalle - floor($totalDetalle)) * 100); // Convertimos la parte decimal a centavos
-                                echo ucfirst($totalEnPalabras) . " CON $parteDecimal/100 SOLES";
-                            } else {
-                                echo ucfirst($totalEnPalabras) . ' CON 00/100 SOLES';
-                            }
-                            ?>
-                        </b></label>
+                        <label for="total"><b>SON:
+                                <?php
+                                $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
+                                $totalEnPalabras = strtoupper($formatter->format(floor($totalDetalle))); // Convertimos a mayúsculas
+                                if ($totalDetalle != floor($totalDetalle)) {
+                                    $parteDecimal = round(($totalDetalle - floor($totalDetalle)) * 100); // Convertimos la parte decimal a centavos
+                                    echo ucfirst($totalEnPalabras) . " CON $parteDecimal/100 SOLES";
+                                } else {
+                                    echo ucfirst($totalEnPalabras) . ' CON 00/100 SOLES';
+                                }
+                                ?>
+                            </b></label>
                     </td>
                 </tr>
+
             </table>
         </section>
-        
-        
+
+
         <br>
 
     </div>

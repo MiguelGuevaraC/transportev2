@@ -166,13 +166,18 @@ class InstallmentController extends Controller
                 $q->where('sequentialNumber', 'like', '%' . $sequentialNumber . '%');
             });
         }
-        if (! empty($start)) {
-            $query->where('date', '>=', $start);
+         if (! empty($start)) {
+            // $query->where('date', '>=', $start);
+             $query->whereHas('moviment', function ($q) use ($start) {
+                $q->where('paymentDate', '>=',$start);
+            });
         }
         if (! empty($end)) {
-            $query->where('date', '<=', $end);
+            // $query->where('date', '<=', $end);
+              $query->whereHas('moviment', function ($q) use ($end) {
+                $q->where('paymentDate','<=', $end);
+            });
         }
-
 // Calcular la suma total de totalDebt
         $totalDebtSum = $query->sum('totalDebt');
 

@@ -70,17 +70,17 @@ class CargarDocumentController extends Controller
     public function index_history(IndexCargaDocumentRequest $request)
     {
         $query = DocumentCargaDetail::query();
-    
+
         // Filtro por rango de fechas en la relación "document_carga"
         if ($request->filled('from') && $request->filled('to')) {
             $query->whereHas('document_carga', function ($q) use ($request) {
                 $q->whereBetween('movement_date', [
                     $request->input('from'),
-                    $request->input('to')
+                    $request->input('to'),
                 ]);
             });
         }
-    
+
         return $this->getFilteredResults(
             $query,
             $request,
@@ -98,8 +98,7 @@ class CargarDocumentController extends Controller
         $columns        = DocumentCargaDetail::fields_export;
         return Excel::download(new ExcelExport($data, $columns, 0), $fileName);
     }
-    
-    
+
 /**
  * @OA\Get(
  *     path="/transportedev/public/api/cargaDocument/{id}",
@@ -154,14 +153,13 @@ class CargarDocumentController extends Controller
  * )
  */
 
- public function store(StoreCargaDocumentRequest $request)
- {
-     $data = $request->validated();
-     $data['user_created_id'] = auth()->id(); // o Auth::id()
-     $carga = $this->cargaDocumentService->createCargaDocument($data);
-     return new CargaResource($carga);
- }
- 
+    public function store(StoreCargaDocumentRequest $request)
+    {
+        $data                    = $request->validated();
+        $data['user_created_id'] = auth()->id(); // o Auth::id()
+        $carga                   = $this->cargaDocumentService->createCargaDocument($data);
+        return new CargaResource($carga);
+    }
 
 /**
  * @OA\Put(
@@ -261,7 +259,7 @@ class CargarDocumentController extends Controller
  *     path="/transportedev/public/api/export-kardex",
  *     summary="Exportar Kardex",
  *     tags={"CargaDocument"},
-  *     security={{"bearerAuth": {}}},
+ *     security={{"bearerAuth": {}}},
  *     @OA\Response(
  *         response=200,
  *         description="Archivo exportado correctamente",
@@ -278,10 +276,9 @@ class CargarDocumentController extends Controller
     public function exportKardex(KardexRequest $request)
     {
         $validatedData = $request->validated();
-        $idproducto = isset($request->product_id) && $request->product_id !== "null"
+        $idproducto    = isset($request->product_id) && $request->product_id !== "null"
         ? (is_array($request->product_id) ? $request->product_id : [$request->product_id])
         : null;
-    
 
         $from      = $request->from ?? null;
         $to        = $request->to ?? null;
@@ -337,7 +334,7 @@ class CargarDocumentController extends Controller
 
         $data = [
             "doc_carga"    => $doc_carga,
-            "details"    => DocumentCargaDetail::where('document_carga_id',$doc_carga->id)->get()?? [],
+            "details"      => DocumentCargaDetail::where('document_carga_id', $doc_carga->id)->get() ?? [],
             "branchoffice" => $doc_carga->branchOffice,
         ];
 

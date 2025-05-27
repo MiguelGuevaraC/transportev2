@@ -11,6 +11,7 @@ use App\Models\BranchOffice;
 use App\Models\DetailWorker;
 use App\Models\Person;
 use App\Models\Worker;
+use App\Services\WorkerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WorkerController extends Controller
 {
+
+    protected $workerService;
+
+    public function __construct(WorkerService $wokerService)
+    {
+        $this->workerService = $wokerService;
+    }
 
 /**
  * @OA\Get(
@@ -856,4 +864,29 @@ class WorkerController extends Controller
 
         $worker->delete();
     }
+
+    public function change_status(Request $request, $id)
+    {
+        $worker = Worker::find($id);
+        if (! $worker) {
+            return response()->json(['message' => 'Trabajdor no encontrado'], 422);
+        }
+
+        $this->workerService->changeStatus($worker->id);
+
+        Bitacora::create([
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'record_id'   => $worker->id, // El ID del usuario afectado
+            'action'      => 'PUT',       // Acción realizada
+            'table_name'  => 'workers',   // Tabla afectada
+            'data'        => json_encode($worker),
+            'description' => 'Actualiza estado de Trabajador', // Descripción de la acción
+            'ip_address'  => $request->ip(),                   // Dirección IP del usuario
+            'user_agent'  => $request->userAgent(),            // Información sobre el navegador/dispositivo
+        ]);
+
+        return response()->json($worker, 200);
+
+    }
+
 }

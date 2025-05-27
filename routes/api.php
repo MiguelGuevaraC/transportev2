@@ -131,6 +131,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('worker/{id}', [WorkerController::class, 'show']);
     Route::post('worker', [WorkerController::class, 'store']);
     Route::delete('worker/{id}', [WorkerController::class, 'destroy']);
+    Route::put('worker/{id}/changestatus', [WorkerController::class, 'change_status']);
+
     Route::put('worker/{id}', [WorkerController::class, 'update']);
     Route::get('worker/{id}/historyProgramming', [WorkerController::class, 'getWorkerHistory']);
     Route::post('worker/{id}', [WorkerController::class, 'createOrUpdate']);
@@ -179,6 +181,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('vehicleAll', [VehicleController::class, 'showAll']);
     Route::get('vehicle', [VehicleController::class, 'index']);
     Route::get('vehicle/{id}', [VehicleController::class, 'show']);
+        Route::get('vehicle/{id}/docs', [VehicleController::class, 'getDocumentsByVehicleIdGrouped']);
     Route::post('vehicle', [VehicleController::class, 'store']);
     Route::delete('vehicle/{id}', [VehicleController::class, 'destroy']);
     Route::post('vehicle/{id}', [VehicleController::class, 'createOrUpdate']);
@@ -254,6 +257,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('boxByBranch/{id}', [BoxController::class, 'getBoxByBrandId']);
     // /Route::get('boxByBranch/{id}', [BoxController::class, 'indexNotAssigned']);
     Route::get('box/{id}', [BoxController::class, 'show']);
+    Route::put('box/{id}/updateuser', [BoxController::class, 'update_usuario']);
     Route::post('box', [BoxController::class, 'store']);
     Route::delete('box/{id}', [BoxController::class, 'destroy']);
     Route::put('box/{id}', [BoxController::class, 'update']);

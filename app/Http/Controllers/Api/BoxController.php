@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BoxRequest\UpdateBoxUserRequest;
 use App\Models\Box;
 use App\Models\BranchOffice;
 use App\Models\User;
@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class BoxController extends Controller
-
 {
     /**
      * Get all Boxes
@@ -48,7 +47,7 @@ class BoxController extends Controller
     public function indexNotAssigned()
     {
         $assignedBoxIds = User::whereNotNull('box_id')->pluck('box_id');
-        $list = Box::with(['branchOffice'])
+        $list           = Box::with(['branchOffice'])
             ->whereNotIn('id', $assignedBoxIds)->simplePaginate();
 
         return response()->json($list, 200);
@@ -88,7 +87,7 @@ class BoxController extends Controller
 
     public function index(Request $request)
     {
-        $user = Auth()->user();
+        $user    = Auth()->user();
         $user_id = $user->id ?? '';
 
         // Obtener el branch_office_id del request o del usuario autenticado
@@ -96,14 +95,14 @@ class BoxController extends Controller
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = $user->worker->branchOffice_id ?? null;
-            if (!$branch_office_id) {
+            if (! $branch_office_id) {
                 return response()->json([
                     "message" => "Branch Office Not Found for the user",
                 ], 404);
@@ -111,7 +110,7 @@ class BoxController extends Controller
         }
 
         // Construir la consulta base
-        $list = Box::with(['branchOffice'])
+        $list = Box::with(['branchOffice', 'user'])
             ->where('state', 1)
             ->orderBy('id', 'desc');
 
@@ -124,6 +123,70 @@ class BoxController extends Controller
         $paginatedList = $list->simplePaginate();
 
         return response()->json($paginatedList, 200);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/transportedev/public/api/box/{id}/updateuser",
+     *     summary="Assign or unassign a user to a box",
+     *     tags={"Box"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Box ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer", nullable=true, example=5, description="User ID to assign. Null to unassign.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Box updated",
+     *         @OA\JsonContent(ref="#/components/schemas/Box")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Box not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Box not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+    public function update_usuario(UpdateBoxUserRequest $request, $id)
+    {
+        $object = Box::with(['branchOffice', 'user'])->find($id);
+
+        if (! $object) {
+            return response()->json(['message' => 'Box not found'], 422);
+        }
+
+        $userId = $request->input('user_id');
+
+        if (is_null($userId)) {
+            // Desvincular a todos los usuarios que tengan asignada esta caja
+            User::where('box_id', $id)->update(['box_id' => null]);
+        } else {
+            // Asignar la caja al usuario especificado
+            $user = User::find($userId);
+            $user->update(["box_id" => $id]);
+        }
+
+        $object = Box::with(['branchOffice', 'user'])->find($id);
+
+        return response()->json($object, 200);
     }
 
 /**
@@ -165,26 +228,25 @@ class BoxController extends Controller
 
     public function getBoxByBrandId($idBranchOffice)
     {
+        // Obtener IDs de cajas ya asignadas a usuarios
         $assignedBoxIds = User::whereNotNull('box_id')->pluck('box_id');
 
-        $user = Auth()->user();
-        $user_id = $user->id ?? '';
+        // Construir la consulta base
+        $list = Box::with('branchOffice', 'user')
+            ->orderByDesc('id');
 
-        $list = Box::with(['branchOffice'])
-            ->orderBy('id', 'desc')
-            ->where('state', 1);
+        // Filtrar por sucursal si se proporciona
+        if ($idBranchOffice) {
+            $list->where('branchOffice_id', $idBranchOffice);
+        }
 
-        // Solo filtra por sucursal si el usuario no es el admin (user_id != 1)
-        // if ($user_id != 1) {
-        $list->where('branchOffice_id', $idBranchOffice);
-        // }
+        // Excluir cajas que ya están asignadas a usuarios
+        if ($assignedBoxIds->isNotEmpty()) {
+            $list->whereNotIn('id', $assignedBoxIds);
+        }
 
-        $list->whereNotIn('id', $assignedBoxIds);
-
-        // Ejecutar la consulta
-        $result = $list->get();
-
-        return response()->json($result, 200);
+        // Ejecutar y devolver resultado
+        return response()->json($list->get(), 200);
     }
 
     /**
@@ -231,17 +293,17 @@ class BoxController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'name' => [
+            'name'            => [
                 'required',
                 'string',
                 Rule::unique('boxes')->whereNull('deleted_at'),
             ],
             'branchOffice_id' => 'required|exists:branch_offices,id',
-            'serie' => [
+            'serie'           => [
                 'required',
                 'string',
-                'size:2', // Debe tener exactamente 2 caracteres
-                Rule::notIn(['10', '20', '30','40']), // Excluye las series específicas
+                'size:2',                                       // Debe tener exactamente 2 caracteres
+                Rule::notIn(['10', '20', '30', '40']),          // Excluye las series específicas
                 Rule::unique('boxes')->whereNull('deleted_at'), // Asegura unicidad
             ],
         ]);
@@ -250,13 +312,13 @@ class BoxController extends Controller
         }
 
         $data = [
-            'name' => $request->input('name'),
-            'serie' => $request->input('serie')?? null,
+            'name'            => $request->input('name'),
+            'serie'           => $request->input('serie') ?? null,
             'branchOffice_id' => $request->input('branchOffice_id'),
         ];
 
         $object = Box::create($data);
-        $object = Box::with(['branchOffice'])->find($object->id);
+        $object = Box::with(['branchOffice', 'user'])->find($object->id);
         return response()->json($object, 200);
 
     }
@@ -303,8 +365,8 @@ class BoxController extends Controller
      */
     public function show($id)
     {
-        $object = Box::with(['branchOffice'])->find($id);
-        if (!$object) {
+        $object = Box::with(['branchOffice', 'user'])->find($id);
+        if (! $object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
 
@@ -363,13 +425,13 @@ class BoxController extends Controller
     public function update(Request $request, $id)
     {
         $object = Box::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
-            'name' => [
+            'name'  => [
                 'required',
                 'string',
                 Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
@@ -377,8 +439,8 @@ class BoxController extends Controller
             'serie' => [
                 'required',
                 'string',
-                'size:2', // Debe tener exactamente 2 caracteres
-                Rule::notIn(['10', '20', '30','40']), // Excluye las series específicas
+                'size:2',                              // Debe tener exactamente 2 caracteres
+                Rule::notIn(['10', '20', '30', '40']), // Excluye las series específicas
                 Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
             ],
         ]);
@@ -388,14 +450,14 @@ class BoxController extends Controller
         }
 
         $routeData = [
-            'name' => $request->input('name'),
+            'name'  => $request->input('name'),
             'serie' => $request->input('serie') ?? null,
 
         ];
 
         $object->update($routeData);
 
-        $object = Box::with(['branchOffice'])->find($object->id);
+        $object = Box::with(['branchOffice', 'user'])->find($object->id);
 
         return response()->json($object, 200);
     }
@@ -440,7 +502,7 @@ class BoxController extends Controller
     public function destroy($id)
     {
         $object = Box::find($id);
-        if (!$object) {
+        if (! $object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
         $object->state = 0;

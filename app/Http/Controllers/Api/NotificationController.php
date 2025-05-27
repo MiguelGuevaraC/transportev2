@@ -13,7 +13,7 @@ class NotificationController extends Controller
     {
 
         $rangoadelante = 5; // Cantidad de días hacia adelante
-        $rangoatras    = 3; // Cantidad de días hacia atrás
+        $rangoatras    = 100; // Cantidad de días hacia atrás
 
                                                                    // Calcular el rango de fechas alrededor del día actual (3 días atrás hasta 3 días adelante)
         $fechaInicio = now()->subDays($rangoatras)->startOfDay();  // Fecha 3 días atrás

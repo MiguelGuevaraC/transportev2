@@ -814,4 +814,31 @@ class VehicleController extends Controller
         ]);
     }
 
+    
+    public function getDocumentsByVehicleIdGrouped($id)
+    {
+        $vehicle = Vehicle::find($id);
+        if (!$vehicle) {
+            return response()->json(['message' => 'Vehículo no encontrado'], 422);
+        }
+
+        // Obtener los documentos del vehículo filtrados por type del 1 al 12, ordenados por fecha de creación descendente
+        $documents = $vehicle->all_documents()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('type');
+
+        $result = [];
+        for ($type = 1; $type <= 12; $type++) {
+            $docs = $documents->get($type, collect());
+            if ($type == 2) {
+                $result[$type] = $docs->isNotEmpty() ? 'Documento Cargado' : 'Sin cargar Documento';
+            } else {
+                // Solo el documento más reciente por type, si no hay, poner mensaje
+                $result[$type] = $docs->isNotEmpty() ? $docs->first() : 'Sin cargar Documento';
+            }
+        }
+
+        return response()->json($result, 200);
+    }
 }

@@ -44,6 +44,7 @@ class CargaDocumentService
 
             $cargaDocument->code_doc = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
             $cargaDocument->save();
+            $movementType = $data['movement_type'] ?? 'ENTRADA'; // Por defecto ENTRADA
 
             // Procesar cada detalle y guardarlo
             foreach ($data['details'] as $detail) {
@@ -54,8 +55,8 @@ class CargaDocumentService
                     'seccion_id'        => $detail['seccion_id'],
                     'document_carga_id' => $cargaDocument->id,
                     'branchOffice_id'   => $data['branchOffice_id'],
-                    'comment'           => isset($detail['comment']) ? $detail['comment'] : null,  // Comentario opcional
-                    'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null, // Número de anexo opcional
+                    'comment'           => isset($detail['comment']) ? $detail['comment'] : null,                 // Comentario opcional
+                    'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
                     'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
                     'created_at'        => now(),
                 ]);
@@ -74,7 +75,12 @@ class CargaDocumentService
                 );
 
                 // Incrementar el stock
-                $productStock->increment('stock', $detail['quantity']);
+                // Incrementar o disminuir el stock según el tipo de movimiento
+                if (strtoupper($movementType) === 'SALIDA') {
+                    $productStock->decrement('stock', $detail['quantity']);
+                } else {
+                    $productStock->increment('stock', $detail['quantity']);
+                }
             }
 
             return $cargaDocument;
