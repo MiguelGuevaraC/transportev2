@@ -22,7 +22,7 @@ class TarifarioController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/tarifario",
+ *     path="/transportedev/public/api/tarifario",
  *     summary="Obtener información de Tarifarios con filtros y ordenamiento",
  *     tags={"Tarifario"},
  *     security={{"bearerAuth": {}}},
@@ -55,7 +55,7 @@ class TarifarioController extends Controller
  }
 /**
 * @OA\Get(
-*     path="/transporte/public/api/tarifario/{id}",
+*     path="/transportedev/public/api/tarifario/{id}",
 *     summary="Obtener detalles de un Tarifario por ID",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},
@@ -81,7 +81,7 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Post(
-*     path="/transporte/public/api/tarifario",
+*     path="/transportedev/public/api/tarifario",
 *     summary="Crear Tarifario",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},
@@ -115,7 +115,7 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Put(
-*     path="/transporte/public/api/tarifario/{id}",
+*     path="/transportedev/public/api/tarifario/{id}",
 *     summary="Actualizar un Tarifario",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},
@@ -179,7 +179,7 @@ class TarifarioController extends Controller
 
 /**
 * @OA\Delete(
-*     path="/transporte/public/api/tarifario/{id}",
+*     path="/transportedev/public/api/tarifario/{id}",
 *     summary="Eliminar un Tarifariopor ID",
 *     tags={"Tarifario"},
 *     security={{"bearerAuth": {}}},

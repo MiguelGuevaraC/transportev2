@@ -32,7 +32,7 @@ class VentaController extends Controller
     }
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/sale",
+     *     path="/transportedev/public/api/sale",
      *     summary="Store a new sale",
      *     tags={"Sale"},
      *     description="Create a new sale",
@@ -796,7 +796,7 @@ class VentaController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/saleWithReceptions",
+ *     path="/transportedev/public/api/saleWithReceptions",
  *     summary="Store a new sale",
  *     tags={"Sale1"},
  *     description="Create a new sale",
@@ -2575,7 +2575,7 @@ class VentaController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transporte/public/api/sale",
+     *     path="/transportedev/public/api/sale",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -2785,7 +2785,7 @@ class VentaController extends Controller
  * Get all Moviments without CreditNote
  *
  * @OA\Get (
- *     path="/transporte/public/api/saleWithoutCreditNote",
+ *     path="/transportedev/public/api/saleWithoutCreditNote",
  *     tags={"Sale"},
  *     summary="Get Sales Moviments without Credit Notes",
  *     description="Retrieve a list of sales movements that do not have an associated credit note. You can filter the results by branch office, document type, and sequential number.",
@@ -2952,7 +2952,7 @@ class VentaController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transporte/public/api/saleIdNumber",
+     *     path="/transportedev/public/api/saleIdNumber",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -3036,7 +3036,7 @@ class VentaController extends Controller
     /**
      * Get all Receptions without a Sale
      * @OA\Get (
-     *     path="/transporte/public/api/receptionWithoutSale",
+     *     path="/transportedev/public/api/receptionWithoutSale",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -3089,7 +3089,7 @@ class VentaController extends Controller
     public function getArchivosDocument($idventa, $typeDocument)
     {
                                                                                              // Habilitar CORS para un origen específico
-        header("Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app"); // Permitir solo este origen
+        header("Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app"); // Permitir solo este origen
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                          // Permitir métodos HTTP específicos
         header("Access-Control-Allow-Headers: Content-Type, Authorization");                 // Permitir tipos de encabezados específicos
 
@@ -3325,7 +3325,7 @@ class VentaController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/getSalesPendientesByPerson",
+     *     path="/transportedev/public/api/getSalesPendientesByPerson",
      *     summary="Obtener cuotas pendientes de pago por cliente",
      *     description="Obtiene las cuotas pendientes de pago de un cliente específico, filtrando por el nombre del cliente. Verifica el token de autorización antes de proceder.",
      *     tags={"Sale"},
@@ -3364,7 +3364,7 @@ class VentaController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/paymasive",
+     *     path="/transportedev/public/api/paymasive",
      *     summary="Realiza un pago masivo por cuotas pendientes",
      *     description="Este endpoint permite realizar un pago masivo para cuotas de un determinado cliente. Cada pago es validado para no superar el monto de deuda total de la cuota.",
      *     tags={"Sale"},

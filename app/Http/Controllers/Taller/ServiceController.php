@@ -21,7 +21,7 @@ class ServiceController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/service",
+ *     path="/transportedev/public/api/service",
  *     summary="Obtener información de Services con filtros y ordenamiento",
  *     tags={"Service"},
  *     security={{"bearerAuth": {}}},
@@ -45,7 +45,7 @@ class ServiceController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/service/{id}",
+ *     path="/transportedev/public/api/service/{id}",
  *     summary="Obtener detalles de un Service por ID",
  *     tags={"Service"},
  *     security={{"bearerAuth": {}}},
@@ -68,7 +68,7 @@ class ServiceController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/service",
+ *     path="/transportedev/public/api/service",
  *     summary="Crear Service",
  *     tags={"Service"},
  *     security={{"bearerAuth": {}}},
@@ -104,7 +104,7 @@ class ServiceController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/service/{id}",
+ *     path="/transportedev/public/api/service/{id}",
  *     summary="Actualizar un Service",
  *     tags={"Service"},
  *     security={{"bearerAuth": {}}},
@@ -165,7 +165,7 @@ class ServiceController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/service/{id}",
+ *     path="/transportedev/public/api/service/{id}",
  *     summary="Eliminar un Servicepor ID",
  *     tags={"Service"},
  *     security={{"bearerAuth": {}}},

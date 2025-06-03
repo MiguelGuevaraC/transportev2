@@ -21,7 +21,7 @@ class BankController extends Controller
     /**
      * Get all banks with pagination
      * @OA\Get (
-     *      path="/transporte/public/api/bank",
+     *      path="/transportedev/public/api/bank",
      *      tags={"Bank"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Response(
@@ -55,7 +55,7 @@ class BankController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/bank-list",
+ *     path="/transportedev/public/api/bank-list",
  *     summary="Obtener información de Banks con filtros y ordenamiento",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -80,7 +80,7 @@ class BankController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/bank/{id}",
+ *     path="/transportedev/public/api/bank/{id}",
  *     summary="Obtener detalles de un Bank por ID",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -106,7 +106,7 @@ class BankController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/bank",
+ *     path="/transportedev/public/api/bank",
  *     summary="Crear Bank",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -140,7 +140,7 @@ class BankController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/bank/{id}",
+ *     path="/transportedev/public/api/bank/{id}",
  *     summary="Actualizar un Bank",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},
@@ -204,7 +204,7 @@ class BankController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/bank/{id}",
+ *     path="/transportedev/public/api/bank/{id}",
  *     summary="Eliminar un Bankpor ID",
  *     tags={"Bank"},
  *     security={{"bearerAuth": {}}},

@@ -19,7 +19,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/detailReception",
+     *     path="/transportedev/public/api/detailReception",
      *     summary="Get all detailReception",
      *     tags={"Detail Reception"},
      *     description="Show all detailReception",
@@ -49,7 +49,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/detailReception",
+     *     path="/transportedev/public/api/detailReception",
      *     summary="Create a new detailReception",
      *     tags={"Detail Reception"},
      *     description="Create a new detailReception",
@@ -154,7 +154,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/detailReception/{id}",
+     *     path="/transportedev/public/api/detailReception/{id}",
      *     summary="Get a detailReception by ID",
      *     tags={"Detail Reception"},
      *     description="Retrieve a detailReception by its ID",
@@ -205,7 +205,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/detailReceptionForReception/{id}",
+     *     path="/transportedev/public/api/detailReceptionForReception/{id}",
      *     summary="Get a detailReception by ID",
      *     tags={"Detail Reception"},
      *     description="Retrieve a detailReception by its ID Reception",
@@ -259,7 +259,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/detailReception/{id}",
+     *     path="/transportedev/public/api/detailReception/{id}",
      *     summary="Update an existing detailReception",
      *     tags={"Detail Reception"},
      *     description="Update an existing detailReception",
@@ -360,7 +360,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/detailReception/{id}",
+     *     path="/transportedev/public/api/detailReception/{id}",
      *     summary="Delete a detailReception",
      *     tags={"Detail Reception"},
      *     description="Delete a detailReception by ID",
@@ -406,7 +406,7 @@ class DetailReceptionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/detailReceptionWithoutProgramming",
+     *     path="/transportedev/public/api/detailReceptionWithoutProgramming",
      *     summary="Get all detailReception Without Programming",
      *     tags={"Detail Reception"},
      *     description="Show all detailReception Without Programming",

@@ -31,7 +31,7 @@ class WorkerController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/worker",
+ *     path="/transportedev/public/api/worker",
  *     summary="Get all Worker",
  *     tags={"Worker"},
  *     description="Show all Worker",
@@ -195,7 +195,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/bank-account-export-excel",
+     *     path="/transportedev/public/api/bank-account-export-excel",
      *     summary="Exportar BankAccounts con filtros y ordenamiento",
      *     tags={"BankAccount"},
      *     security={{"bearerAuth": {}}},
@@ -221,7 +221,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/worker",
+     *     path="/transportedev/public/api/worker",
      *     summary="Store a new worker",
      *     tags={"Worker"},
      *     description="Create a new worker",
@@ -355,7 +355,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/worker/{id}",
+     *     path="/transportedev/public/api/worker/{id}",
      *     summary="Update an existing worker",
      *     tags={"Worker"},
      *     description="Update an existing worker",
@@ -496,7 +496,7 @@ class WorkerController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/worker/{id}",
+ *     path="/transportedev/public/api/worker/{id}",
  *     summary="Create or update a worker",
  *     tags={"Worker"},
  *     description="Create a new worker or update an existing one",
@@ -637,7 +637,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/worker/{id}",
+     *     path="/transportedev/public/api/worker/{id}",
      *     summary="Get a worker by ID",
      *     tags={"Worker"},
      *     description="Retrieve a worker by its ID",
@@ -688,7 +688,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/worker/{id}/historyProgramming",
+     *     path="/transportedev/public/api/worker/{id}/historyProgramming",
      *     summary="Get a worker's history by ID",
      *     tags={"Worker"},
      *     description="Retrieve the programming history of a worker by their ID",
@@ -794,7 +794,7 @@ class WorkerController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/worker/{id}",
+     *     path="/transportedev/public/api/worker/{id}",
      *     summary="Delete a worker",
      *     tags={"Worker"},
      *     description="Delete a worker by ID",

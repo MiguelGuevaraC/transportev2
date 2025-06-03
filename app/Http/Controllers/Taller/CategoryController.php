@@ -21,7 +21,7 @@ class CategoryController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/category",
+ *     path="/transportedev/public/api/category",
  *     summary="Obtener información de Categorys con filtros y ordenamiento",
  *     tags={"Category"},
  *     security={{"bearerAuth": {}}},
@@ -45,7 +45,7 @@ class CategoryController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/category/{id}",
+ *     path="/transportedev/public/api/category/{id}",
  *     summary="Obtener detalles de un Categoria por ID",
  *     tags={"Category"},
  *     security={{"bearerAuth": {}}},
@@ -68,7 +68,7 @@ class CategoryController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/category",
+ *     path="/transportedev/public/api/category",
  *     summary="Crear Category",
  *     tags={"Category"},
  *     security={{"bearerAuth": {}}},
@@ -104,7 +104,7 @@ class CategoryController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/category/{id}",
+ *     path="/transportedev/public/api/category/{id}",
  *     summary="Actualizar un Category",
  *     tags={"Category"},
  *     security={{"bearerAuth": {}}},
@@ -165,7 +165,7 @@ class CategoryController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/category/{id}",
+ *     path="/transportedev/public/api/category/{id}",
  *     summary="Eliminar un Categorypor ID",
  *     tags={"Category"},
  *     security={{"bearerAuth": {}}},

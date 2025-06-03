@@ -17,9 +17,9 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+   'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
-    'allowed_origins' => ['https://transportes-hernandez-mrsoft.vercel.app'],
+    'allowed_origins' => ['https://transportes-hernandez-dev.vercel.app'],
 
     'allowed_origins_patterns' => [],
 
