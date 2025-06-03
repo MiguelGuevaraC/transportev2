@@ -354,6 +354,8 @@ class VentaController extends Controller
             'bank_id'             => $bank_id,
             'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
 
+
+
             'isBankPayment'       => $request->input('isBankPayment'),
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
@@ -455,6 +457,7 @@ class VentaController extends Controller
                 'routeVoucher'        => $routeVoucher,
                 'numberVoucher'       => $numberVoucher,
                 'movType'             => 'Caja',
+                'observation'       => $request->input('observation'),
 
                 'typePayment'         => $request->input('typePayment') ?? null,
                 'typeSale'            => $request->input('typeSale') ?? '-',
@@ -1500,6 +1503,7 @@ class VentaController extends Controller
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
             'percentDetraction'   => $request->input('percentDetraction'),
+            'observation'       => $request->input('observation'),
 
             'status'              => 'Pendiente',
             'programming_id'      => $request->input('programming_id'),
@@ -1545,6 +1549,7 @@ class VentaController extends Controller
                 'routeVoucher'        => $routeVoucher,
                 'numberVoucher'       => $numberVoucher,
                 'movType'             => 'Caja',
+                'observation'       => $request->input('observation'),
 
                 'typePayment'         => $request->input('typePayment') ?? null,
                 'typeSale'            => $request->input('typeSale') ?? '-',
@@ -1772,7 +1777,7 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
-            'observation'         => $request->input('observation'),
+
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
@@ -1785,6 +1790,7 @@ class VentaController extends Controller
             // 'box_id' => $request->input('box_id'),
             'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
+            'observation'       => $request->input('observation'),
         ];
 
         // Actualiza el objeto
@@ -2192,7 +2198,7 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
-            'observation'         => $request->input('observation'),
+
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
@@ -2205,6 +2211,7 @@ class VentaController extends Controller
             // 'box_id' => $request->input('box_id'),
             'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
+            'observation'         => $request->input('observation'),
         ];
 
         // Actualiza el objeto

@@ -21,4 +21,5 @@ class Constants
         'November' => "Noviembre",
         'December' => "Diciembre",
     ];
+   const LIMIT_ALL=2000;
 }

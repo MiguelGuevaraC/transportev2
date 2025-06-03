@@ -25,6 +25,10 @@ class CarrierGuideResource extends JsonResource
             'transferStartDate'     => $this->transferStartDate ?? null,
             'transferDateEstimated' => $this->transferDateEstimated ?? null,
 
+            'date_recepcion_grt'    => $this->date_recepcion_grt ?? null,
+            'date_cargo'             => $this->date_cargo ?? null,
+            'date_est_facturacion'  => $this->date_est_facturacion ?? null,
+
             'tract_id'              => $this->tract_id ?? null,
             'tract'                 => $this->tract ?? null,
             'platform_id'           => $this->platform_id ?? null,

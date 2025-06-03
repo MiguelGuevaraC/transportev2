@@ -11,22 +11,22 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+  public function up()
     {
         Schema::table('moviments', function (Blueprint $table) {
-            $table->text('observation')->nullable();
+            if (!Schema::hasColumn('moviments', 'observation')) {
+                $table->text('observation')->nullable();
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
+        // No eliminamos la columna si ya existía previamente
         Schema::table('moviments', function (Blueprint $table) {
-            $table->dropColumn('observation');
+            if (Schema::hasColumn('moviments', 'observation')) {
+                $table->dropColumn('observation');
+            }
         });
     }
 };

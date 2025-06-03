@@ -12,6 +12,7 @@ use App\Models\Person;
 use App\Models\Vehicle;
 use App\Models\Worker;
 use App\Services\CarrierGuideService;
+use App\Utils\Constants;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,9 +103,9 @@ class CarrierGuideController extends Controller
 
         // Iniciar consulta base
         $carrierGuides = CarrierGuide::with('tract', 'platform', 'motive', 'origin', 'destination', 'sender', 'recipient', 'branchOffice',
-            'payResponsible', 'driver', 'copilot', 'districtStart.province.department',
-            'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception'
-        );
+            'payResponsible', 'driver', 'copilot', 'districtStart.province.department', 'user',
+            'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception', 'reception.moviment',
+            'reception.moviment.installments','reception.moviment.installments.payInstallments', 'reception.details', 'programming');
 
         // Aplicación de los filtros con comparaciones en minúsculas
         if (! empty($numero)) {
@@ -221,6 +222,22 @@ class CarrierGuideController extends Controller
             $carrierGuides->whereDate('transferStartDate', '<=', $endDate);
         }
 
+        // Si el parámetro "all" es true, no paginar
+        if ($request->boolean('all')) {
+            $results = $carrierGuides->take(Constants::LIMIT_ALL)->get();
+
+            return response()->json([
+                'total'        => $results->count(),
+                'data'         => $results,
+                'pagination'   => false,
+                'current_page' => 1,
+                'last_page'    => 1,
+                'per_page'     => $results->count(),
+                'from'         => 1,
+                'to'           => $results->count(),
+            ], 200);
+        }
+
         // Ordenar y paginar
         $carrierGuides = $carrierGuides->orderBy(DB::raw('CAST(SUBSTRING(numero, 6) AS UNSIGNED)'), 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
@@ -308,7 +325,7 @@ class CarrierGuideController extends Controller
             'addressEnd'        => 'required',
             'motive_id'         => 'required|exists:motives,id',
 
-            'tract_id' => 'nullable|sometimes|exists:vehicles,id|required_without:subcontract_id',
+            'tract_id'          => 'nullable|sometimes|exists:vehicles,id|required_without:subcontract_id',
 
             'platform_id'       => 'nullable|exists:vehicles,id',
 
@@ -330,9 +347,6 @@ class CarrierGuideController extends Controller
             'districtStart_id'  => 'required|exists:districts,id',
             'districtEnd_id'    => 'required|exists:districts,id',
         ]);
-
-
-
 
         if ($validator->fails()) {
             Bitacora::create([
@@ -451,7 +465,7 @@ class CarrierGuideController extends Controller
             'districtStart_id'      => $request->input('districtStart_id') ?? null,
             'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
 
-            'modalidad'                => '01',//PUBLICO
+            'modalidad'             => '01', //PUBLICO
             'motivo'                => $motivoNombre,
             'codemotivo'            => $motivoCode,
             'placa'                 => $vehicle->currentPlate ?? '-',
@@ -497,9 +511,8 @@ class CarrierGuideController extends Controller
         $object->save();
 
         if ($object->subcontract_id != null) {
-            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
-            if ($validator->fails())
-            {return response()->json(['errors' => $validator->errors()->first()], 422);}
+            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array', 'costsubcontract' => 'required|numeric|min:0']);
+            if ($validator->fails()) {return response()->json(['errors' => $validator->errors()->first()], 422);}
             $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
             $object = $this->carrierGuideService->updatedatasubcontrata($object->id, $request->costsubcontract, $request->datasubcontrata);
@@ -789,7 +802,7 @@ class CarrierGuideController extends Controller
 
             'districtStart_id'      => $request->input('districtStart_id') ?? null,
             'districtEnd_id'        => $request->input('districtEnd_id') ?? null,
-            'modalidad'                => '01',//PUBLICO
+            'modalidad'             => '01', //PUBLICO
             'motivo'                => $motivoNombre ?? null,
             'codemotivo'            => $motivoCode ?? null,
             'placa'                 => $vehicle->currentPlate ?? '-' ?? null,
@@ -829,7 +842,7 @@ class CarrierGuideController extends Controller
         $object->save();
 
         if ($object->subcontract_id != null) {
-            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array','costsubcontract' => 'required|numeric|min:0',]);
+            $validator = Validator::make($request->all(), ['datasubcontrata' => 'required|array', 'costsubcontract' => 'required|numeric|min:0']);
             if ($validator->fails()) {return response()->json(['errors' => $validator->errors()->first()], 422);}
             $validator = Validator::make($request->datasubcontrata ?? [], (new SubcontractDataRequest())->rules(), (new SubcontractDataRequest())->messages());
             if ($validator->fails()) {return response()->json(['errors' => "DATA: " . $validator->errors()->first()], 422);}
@@ -1317,6 +1330,47 @@ class CarrierGuideController extends Controller
         curl_close($ch);
 
         return response()->json($data, 200);
+    }
+
+    public function export_excel(Request $request)
+    {
+        $request->merge(['all' => true]);
+        $response = $this->index($request);
+        $data     = $response->getData()->data ?? [];
+        $total    = $response->getData()->total ?? 0;
+
+        if ($total == 0) {
+            return response()->json(['error' => 'No hay registros para exportar.'], 422);
+        }
+
+        return $this->carrierGuideService->export($data);
+    }
+
+    public function update_path(Request $request, $id)
+    {
+        $carrierGuide = CarrierGuide::find($id);
+
+        if (! $carrierGuide) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Guía de transporte no encontrada.',
+            ], 404);
+        }
+
+        $result = $this->carrierGuideService->update_path($request->all(), $carrierGuide);
+
+        if (! $result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la guía de transporte.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result['data'],
+            'message' => 'Guía de transporte actualizada correctamente.',
+        ]);
     }
 
 }

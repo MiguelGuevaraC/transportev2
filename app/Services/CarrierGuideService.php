@@ -1,12 +1,14 @@
 <?php
 namespace App\Services;
 
+use App\Exports\guides\GuidesIntegradoExport;
+use App\Http\Resources\CarrierGuideResource;
 use App\Models\CarrierGuide;
 use App\Models\Moviment;
 use App\Models\Product;
 use App\Models\Reception;
 use App\Models\ReceptionBySale;
-use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CarrierGuideService
 {
@@ -57,8 +59,8 @@ class CarrierGuideService
     }
     public function updatestockProduct($carrier_id)
     {
-        $carrier = CarrierGuide::findOrFail($carrier_id);
-         $id_branch = $carrier->reception->branchOffice_id;
+        $carrier   = CarrierGuide::findOrFail($carrier_id);
+        $id_branch = $carrier->reception->branchOffice_id;
         $carrier->reception->details->each(function ($detail) use ($id_branch) {
             if (isset($detail->product_id)) {
                 $product = Product::find($detail->product_id);
@@ -68,6 +70,23 @@ class CarrierGuideService
             }
         });
     }
-    
+
+    public function export(array $data, string $filename = 'guias_por_serie.xlsx')
+    {
+        return Excel::download(new GuidesIntegradoExport($data), $filename);
+    }
+
+    public function update_path(array $data, CarrierGuide $carrierGuide)
+    {
+        try {
+            $fillableData = array_intersect_key($data, array_flip($carrierGuide->getFillable()));
+            if ($carrierGuide->update($fillableData)) {
+                return ['success' => true, 'data' => new CarrierGuideResource($carrierGuide)];
+            }
+            return ['success' => false, 'data' => null];
+        } catch (\Exception $e) {
+            return ['success' => false, 'data' => null];
+        }
+    }
 
 }

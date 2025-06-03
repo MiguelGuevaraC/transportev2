@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,185 +8,51 @@ class CarrierGuide extends Model
 {
     use SoftDeletes;
 
-    /**
-     * @OA\Schema(
-     *     schema="CarrierGuide",
-     *     title="carrier_guide",
-     *     description="Carrier guide model",
-     *     required={"id","status","document","subContract","transferStartDate","tract_id","platform_id","origin_id","destination_id","sender_id","recipient_id","payResponsible_id","driver_id"},
-     *     @OA\Property(
-     *         property="id",
-     *         type="integer",
-     *         description="Carrier guide ID"
-     *     ),
-     *     @OA\Property(
-     *         property="status",
-     *         type="string",
-     *         description="Status of the carrier guide"
-     *     ),
-
-     *     @OA\Property(
-     *         property="numero",
-     *         type="string",
-     *         description="numero of the carrier guide"
-     *     ),
-     *     @OA\Property(
-     *         property="subContract",
-     *         type="string",
-     *         description="Subcontract of the carrier guide"
-     *     ),
-     *          @OA\Property(
-     *         property="motivo",
-     *         type="string",
-     *         description="Motivo of the carrier guide"
-     *     ),
-     *          @OA\Property(
-     *         property="codemotivo",
-     *         type="string",
-     *         description="Subcontract of the carrier guide"
-     *     ),
-     *     @OA\Property(
-     *         property="transferStartDate",
-     *         type="string",
-     *         format="date-time",
-     *         description="Transfer start date"
-     *     ), @OA\Property(
-     *         property="transferDateEstimated",
-     *         type="string",
-     *         format="date-time",
-     *         description="Transfer start date"
-     *     ),
-
-     *     @OA\Property(
-     *         property="tract_id",
-     *         type="integer",
-     *         description="ID of the tract"
-     *     ),
-     *     @OA\Property(
-     *         property="platform_id",
-     *         type="integer",
-     *         description="ID of the platform"
-     *     ),
-     *     @OA\Property(
-     *         property="origin_id",
-     *         type="integer",
-     *         description="ID of the origin"
-     *     ),
-     *     @OA\Property(
-     *         property="destination_id",
-     *         type="integer",
-     *         description="ID of the destination"
-     *     ),
-     *     @OA\Property(
-     *         property="sender_id",
-     *         type="integer",
-     *         description="ID of the sender"
-     *     ),
-     *     @OA\Property(
-     *         property="recipient_id",
-     *         type="integer",
-     *         description="ID of the recipient"
-     *     ),
-     *     @OA\Property(
-     *         property="payResponsible_id",
-     *         type="integer",
-     *         description="ID of the pay responsible"
-     *     ),
-     *     @OA\Property(
-     *         property="driver_id",
-     *         type="integer",
-     *         description="ID of the driver"
-     *     ),
-     *      @OA\Property(
-     *         property="copilot_id",
-     *         type="integer",
-     *         description="ID of the copilot"
-     *     ),
-     *      @OA\Property(
-     *         property="subcontract_id",
-     *         type="integer",
-     *         description="ID of Subcontract"
-     *     ),@OA\Property(
-     *         property="reception_id",
-     *         type="integer",
-     *         description="ID of Reception"
-     *     ),
-     * @OA\Property(
-     *         property="created_at",
-     *         type="integer",
-     *         description="created_at"
-     *     ),
-     * @OA\Property(
-     *         property="updated_at",
-     *         type="integer",
-     *         description="updated_at"
-     *     ),
-     * @OA\Property(
-     *         property="deleted_at",
-     *         type="integer",
-     *         description="deleted_at"
-     *     ),
-     *           @OA\Property(
-     *         property="origin",
-     *         ref="#/components/schemas/Place",
-     *         description="Place Origin"
-     *     ),
-     *           @OA\Property(
-     *         property="destination",
-     *         ref="#/components/schemas/Place",
-     *         description="Place Destination"
-     *     ),
-     *           @OA\Property(
-     *         property="tract",
-     *         ref="#/components/schemas/Vehicle",
-     *         description="Vehicle Tract"
-     *     ),
-     *           @OA\Property(
-     *         property="platform",
-     *         ref="#/components/schemas/Vehicle",
-     *         description="Vehicle Platform"
-     *     ),
-     *
-     *           @OA\Property(
-     *         property="sender",
-     *         ref="#/components/schemas/Person",
-     *         description="sender person"
-     *     ),
-     *           @OA\Property(
-     *         property="recipient",
-     *         ref="#/components/schemas/Person",
-     *         description="recipient person"
-     *     ),
-     *           @OA\Property(
-     *         property="payResponsible",
-     *         ref="#/components/schemas/Person",
-     *         description="payResponsible person"
-     *     ),
-     *           @OA\Property(
-     *         property="driver",
-     *         ref="#/components/schemas/Worker",
-     *         description="Worker driver"
-     *     ),     @OA\Property(
-     *         property="copilot",
-     *         ref="#/components/schemas/Worker",
-     *         description="Worker copilot"
-     *     ),   @OA\Property(
-     *         property="subcontract",
-     *         ref="#/components/schemas/Subcontract",
-     *         description="Subcontract"
-     *     ),
-     *              @OA\Property(
-     *         property="branch_office",
-     *          ref="#/components/schemas/BranchOffice",
-     *         description="BranchOffice"
-     *     ),
-     *          @OA\Property(
-     *         property="reception",
-     *          ref="#/components/schemas/Reception",
-     *         description="Reception"
-     *     ),
-     * )
-     */
+/**
+ * @OA\Schema(
+ *     schema="CarrierGuide",
+ *     title="carrier_guide",
+ *     description="Carrier guide model",
+ *     required={"id","status","document","subContract","transferStartDate","tract_id","platform_id","origin_id","destination_id","sender_id","recipient_id","payResponsible_id","driver_id"},
+ *     @OA\Property(property="id", type="integer", description="Carrier guide ID"),
+ *     @OA\Property(property="status", type="string", description="Status"),
+ *     @OA\Property(property="numero", type="string"),
+ *     @OA\Property(property="subContract", type="string"),
+ *     @OA\Property(property="motivo", type="string"),
+ *     @OA\Property(property="codemotivo", type="string"),
+ *     @OA\Property(property="transferStartDate", type="string", format="date-time"),
+ *     @OA\Property(property="transferDateEstimated", type="string", format="date-time"),
+ *     @OA\Property(property="date_recepcion_grt", type="string", format="date-time"),
+ *     @OA\Property(property="date_cargo", type="string", format="date-time"),
+ *     @OA\Property(property="date_est_facturacion", type="string", format="date-time"),
+ *     @OA\Property(property="tract_id", type="integer"),
+ *     @OA\Property(property="platform_id", type="integer"),
+ *     @OA\Property(property="origin_id", type="integer"),
+ *     @OA\Property(property="destination_id", type="integer"),
+ *     @OA\Property(property="sender_id", type="integer"),
+ *     @OA\Property(property="recipient_id", type="integer"),
+ *     @OA\Property(property="payResponsible_id", type="integer"),
+ *     @OA\Property(property="driver_id", type="integer"),
+ *     @OA\Property(property="copilot_id", type="integer"),
+ *     @OA\Property(property="subcontract_id", type="integer"),
+ *     @OA\Property(property="reception_id", type="integer"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time"),
+ *     @OA\Property(property="deleted_at", type="string", format="date-time"),
+ *     @OA\Property(property="origin", ref="#/components/schemas/Place"),
+ *     @OA\Property(property="destination", ref="#/components/schemas/Place"),
+ *     @OA\Property(property="tract", ref="#/components/schemas/Vehicle"),
+ *     @OA\Property(property="platform", ref="#/components/schemas/Vehicle"),
+ *     @OA\Property(property="sender", ref="#/components/schemas/Person"),
+ *     @OA\Property(property="recipient", ref="#/components/schemas/Person"),
+ *     @OA\Property(property="payResponsible", ref="#/components/schemas/Person"),
+ *     @OA\Property(property="driver", ref="#/components/schemas/Worker"),
+ *     @OA\Property(property="copilot", ref="#/components/schemas/Worker"),
+ *     @OA\Property(property="subcontract", ref="#/components/schemas/Subcontract"),
+ *     @OA\Property(property="branch_office", ref="#/components/schemas/BranchOffice"),
+ *     @OA\Property(property="reception", ref="#/components/schemas/Reception")
+ * )
+ */
 
     protected $fillable = [
         'id',
@@ -206,6 +71,10 @@ class CarrierGuide extends Model
 
         'transferStartDate',
         'transferDateEstimated',
+
+        'date_recepcion_grt',
+        'date_cargo',
+        'date_est_facturacion',
 
         'tract_id',
         'platform_id',
@@ -238,7 +107,7 @@ class CarrierGuide extends Model
         'user_deleted_id',
         'user_created_id',
         'user_factured_id',
-        
+
         'created_at',
         'updated_at',
         'deleted_at',
@@ -320,5 +189,9 @@ class CarrierGuide extends Model
     {
         return $this->belongsToMany(Programming::class, 'carrier_by_programmings', 'carrier_guide_id', 'programming_id');
     }
-    
+     public function user()
+    {
+        return $this->belongsTo(User::class, 'user_created_id');
+    }
+
 }

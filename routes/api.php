@@ -190,6 +190,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // CARRIER GUIDE
     Route::get('carrierGuide', [CarrierGuideController::class, 'index']);
+        Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
     Route::get('carrierGuide/{id}', [CarrierGuideController::class, 'show']);
     Route::post('carrierGuide', [CarrierGuideController::class, 'store']);
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);

@@ -390,7 +390,7 @@ class Reception extends Model
             ->when($id, function ($query) use ($id) {
                 return $query->where('id', $id); // Prioriza el ID si está presente
             })
-            ->latestOfMany()
+          
             ->with([
                 'districtStart.province.department',
                 'districtEnd.province.department',
