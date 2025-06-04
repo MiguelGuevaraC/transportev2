@@ -27,7 +27,7 @@ class InstallmentController extends Controller
  * Get all Installments
  *
  * @OA\Get (
- *     path="/transportedev/public/api/installment",
+ *     path="/transporte/public/api/installment",
  *     summary="Get all Installments",
  *     tags={"Installment"},
  *     description="Retrieve all installments with optional filters for 'status' and 'person_id'. Includes related 'moviment' and 'payInstallments' information. Results are paginated.",

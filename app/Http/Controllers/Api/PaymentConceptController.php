@@ -12,7 +12,7 @@ class PaymentConceptController extends Controller
     /**
      * Get all PaymentConcepts
      * @OA\Get (
-     *     path="/transportedev/public/api/paymentConcept",
+     *     path="/transporte/public/api/paymentConcept",
      *     tags={"PaymentConcept"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -73,7 +73,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/paymentConcept",
+     *     path="/transporte/public/api/paymentConcept",
      *     summary="Store a new paymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Create a new paymentConcept",
@@ -140,7 +140,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Get a paymentConcept by ID",
      *     tags={"PaymentConcept"},
      *     description="Retrieve a paymentConcept by its ID",
@@ -189,7 +189,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Update an existing PaymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Update an existing PaymentConcept",
@@ -276,7 +276,7 @@ class PaymentConceptController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/paymentConcept/{id}",
+     *     path="/transporte/public/api/paymentConcept/{id}",
      *     summary="Delete a PaymentConcept",
      *     tags={"PaymentConcept"},
      *     description="Delete a PaymentConcept by ID",

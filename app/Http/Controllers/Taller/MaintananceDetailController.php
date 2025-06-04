@@ -22,7 +22,7 @@ class MaintananceDetailController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/maintenancedetail",
+ *     path="/transporte/public/api/maintenancedetail",
  *     summary="Obtener información de MaintenanceDetails con filtros y ordenamiento",
  *     tags={"MaintenanceDetail"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class MaintananceDetailController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/maintenancedetail/{id}",
+ *     path="/transporte/public/api/maintenancedetail/{id}",
  *     summary="Obtener detalles de un MaintenanceDetail por ID",
  *     tags={"MaintenanceDetail"},
  *     security={{"bearerAuth": {}}},
@@ -71,7 +71,7 @@ class MaintananceDetailController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/maintenancedetail",
+ *     path="/transporte/public/api/maintenancedetail",
  *     summary="Crear MaintenanceDetail",
  *     tags={"MaintenanceDetail"},
  *     security={{"bearerAuth": {}}},
@@ -107,7 +107,7 @@ class MaintananceDetailController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/maintenancedetail/{id}",
+ *     path="/transporte/public/api/maintenancedetail/{id}",
  *     summary="Actualizar un MaintenanceDetail",
  *     tags={"MaintenanceDetail"},
  *     security={{"bearerAuth": {}}},
@@ -168,7 +168,7 @@ class MaintananceDetailController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/maintenancedetail/{id}",
+ *     path="/transporte/public/api/maintenancedetail/{id}",
  *     summary="Eliminar un MaintenanceDetailpor ID",
  *     tags={"MaintenanceDetail"},
  *     security={{"bearerAuth": {}}},

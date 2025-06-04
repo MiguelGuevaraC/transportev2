@@ -22,7 +22,7 @@ class ProductController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/product",
+ *     path="/transporte/public/api/product",
  *     summary="Obtener información de Productos con filtros y ordenamiento",
  *     tags={"Product"},
  *     security={{"bearerAuth": {}}},
@@ -74,7 +74,7 @@ class ProductController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/product/{id}",
+ *     path="/transporte/public/api/product/{id}",
  *     summary="Obtener detalles de un Product por ID",
  *     tags={"Product"},
  *     security={{"bearerAuth": {}}},
@@ -100,7 +100,7 @@ class ProductController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/product",
+ *     path="/transporte/public/api/product",
  *     summary="Crear Product",
  *     tags={"Product"},
  *     security={{"bearerAuth": {}}},
@@ -134,7 +134,7 @@ class ProductController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/product/{id}",
+ *     path="/transporte/public/api/product/{id}",
  *     summary="Actualizar un Product",
  *     tags={"Product"},
  *     security={{"bearerAuth": {}}},
@@ -198,7 +198,7 @@ class ProductController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/product/{id}",
+ *     path="/transporte/public/api/product/{id}",
  *     summary="Eliminar un Productpor ID",
  *     tags={"Product"},
  *     security={{"bearerAuth": {}}},

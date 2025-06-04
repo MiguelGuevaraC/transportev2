@@ -10,7 +10,7 @@ class TypeofUserController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/typeofUser",
+     *     path="/transporte/public/api/typeofUser",
      *     summary="Get all typeofUser",
      *     tags={"TypeofUser"},
      *     description="Show all typeofUser",
@@ -52,7 +52,7 @@ class TypeofUserController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/typeofUser",
+     *     path="/transporte/public/api/typeofUser",
      *     summary="Store a new typeofUser",
      *     tags={"TypeofUser"},
      *     description="Create a new typeofUser",
@@ -115,7 +115,7 @@ class TypeofUserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/typeofUser/{id}",
+     *     path="/transporte/public/api/typeofUser/{id}",
      *     summary="Get a typeofUser by ID",
      *     tags={"TypeofUser"},
      *     description="Retrieve a typeofUser by its ID",
@@ -177,7 +177,7 @@ class TypeofUserController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/typeofUser/{id}",
+     *     path="/transporte/public/api/typeofUser/{id}",
      *     summary="Update an existing type of User",
      *     tags={"TypeofUser"},
      *     description="Update an existing type of User",
@@ -258,7 +258,7 @@ class TypeofUserController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/typeofUser/{id}",
+     *     path="/transporte/public/api/typeofUser/{id}",
      *     summary="Delete a TypeofUser",
      *     tags={"TypeofUser"},
      *     description="Delete a TypeofUser by ID",
@@ -309,7 +309,7 @@ class TypeofUserController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/setAccess/{typeUserId}",
+ *     path="/transporte/public/api/setAccess/{typeUserId}",
  *     tags={"TypeofUser"},
  *     summary="Set access to type of User",
  *     description="Set access permissions for a specific type of user.",
@@ -392,7 +392,7 @@ class TypeofUserController extends Controller
      * @return \Illuminate\Http\Response
      *
      * @OA\Get(
-     *     path="/transportedev/public/api/getAccess/{typeUserId}",
+     *     path="/transporte/public/api/getAccess/{typeUserId}",
      *     tags={"TypeofUser"},
      *     summary="Get access to type of User",
      *     description="Get access to a specific user.",
