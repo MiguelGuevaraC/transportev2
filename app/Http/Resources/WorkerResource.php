@@ -30,9 +30,9 @@ class WorkerResource extends JsonResource
             'person_id'         => $this->person_id ?? null,
             'person'            => $this->person ?? null,
             'area_id'           => $this->area_id ?? null,
-            'area_name'         => $this?->area?->name ?? null,
+            'area'         => $this?->area ?? null,
             'branchOffice_id'   => $this->branchOffice_id ?? null,
-            'branchOffice_name' => $this?->branchOffice?->name ?? null,
+            'branchOffice' => $this?->branchOffice ?? null,
         ];
     }
 
