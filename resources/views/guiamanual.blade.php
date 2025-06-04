@@ -1,19 +1,19 @@
 @php
-use Carbon\Carbon;
+    use Carbon\Carbon;
 
-        header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
-        header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    header('Access-Control-Allow-Credentials: true');
 
-        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            exit();
-        }
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        exit();
+    }
 
-        // Aqu� contin�a tu l�gica para procesar la solicitud y generar la respuesta
-        // por ejemplo:
-        $data1 = ['mensaje' => 'Solicitud permitida por CORS'];
-        echo json_encode($data1);
+    // Aqu� contin�a tu l�gica para procesar la solicitud y generar la respuesta
+    // por ejemplo:
+    $data1 = ['mensaje' => 'Solicitud permitida por CORS'];
+    echo json_encode($data1);
 
 @endphp
 

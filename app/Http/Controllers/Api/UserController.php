@@ -467,7 +467,9 @@ class UserController extends Controller
     public function obtenerMenu()
     {
         $Grupos = GroupMenu::whereNull('groupMenu_id')
-            ->where('state', 1) ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")->get();
+            ->where('state', 1)
+            ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
+            ->get();
 
         $User        = User::find(Auth::id());
         $typeOfUser  = Role::find($User->typeofUser_id);
@@ -499,7 +501,6 @@ class UserController extends Controller
             foreach ($subgrupos as $subgrupo) {
                 $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
                     ->whereIn('name', $permis)
-                    // ->orderBy('created_at', 'asc')
                     ->get();
 
                 $subOptions = [];
@@ -514,15 +515,17 @@ class UserController extends Controller
                     ];
                 }
 
-                $group_menu['child'][] = [
-                    'id'    => $subgrupo->id,
-                    'title' => $subgrupo->name,
-                    'name'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                    'link'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                    'icon'  => 'dot',
-                    'child' => $subOptions,
-                ];
-
+                // Solo agregar el subgrupo si tiene opciones
+                if (count($subOptions) > 0) {
+                    $group_menu['child'][] = [
+                        'id'    => $subgrupo->id,
+                        'title' => $subgrupo->name,
+                        'name'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                        'link'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                        'icon'  => 'dot',
+                        'child' => $subOptions,
+                    ];
+                }
             }
 
             // Obtener opciones directas del grupo padre y ordenar por fecha de creación
@@ -541,7 +544,10 @@ class UserController extends Controller
                 ];
             }
 
-            $optionsByGroup[] = $group_menu;
+            // Solo agregar el grupo si tiene opciones (hijos)
+            if (count($group_menu['child']) > 0) {
+                $optionsByGroup[] = $group_menu;
+            }
         }
 
         return response()->json($optionsByGroup);
