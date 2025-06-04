@@ -112,6 +112,7 @@ class WorkerController extends Controller
         $occupation = $request->input('occupation') ?? '';
 
         $status      = $request->input('status') ?? '';
+         $state      = $request->input('state') ?? '';
         $namesCadena = $request->input('namesCadena') ?? '';
         $namesCadena = str_replace('%20', '', $namesCadena); // Elimina %20
         $namesCadena = strtolower($namesCadena);             // Convierte todo a minúsculas
@@ -141,6 +142,9 @@ class WorkerController extends Controller
 
             ->when($status != '', function ($query) use ($status) {
                 return $query->where('status', $status);
+            })
+                ->when($state != '', function ($query) use ($state) {
+                return $query->where('state', $state);
             })
             ->when($namesCadena != '', function ($query) use ($namesCadena) {
                 // Filtrar por nombres o apellidos en el modelo 'person'

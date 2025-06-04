@@ -452,6 +452,7 @@ class BoxController extends Controller
         $routeData = [
             'name'  => $request->input('name'),
             'serie' => $request->input('serie') ?? null,
+            'branchOffice_id' => $request->input('branchOffice_id') ?? $object->branchOffice_id,
 
         ];
 

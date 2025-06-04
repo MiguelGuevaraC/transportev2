@@ -5,7 +5,6 @@ use App\Http\Resources\CarrierGuideIntegradoResource;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithStyles;
-
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
@@ -26,12 +25,16 @@ class GuideSheetExport implements FromCollection, WithTitle, WithStyles
             return collect();
         }
 
-        // Mapear cada item usando el Resource y obtener el array
-        $mapped = $this->data->map(fn($item) => (new CarrierGuideIntegradoResource($item))->toArray());
-        // Solo si la guía empieza con 'V', agrega el dd con "GUIA" => "G003-00000020"
+        // Ordenar y mapear en una sola operación para reducir pasos innecesarios
+        $mapped = $this->data
+            ->sortByDesc('id')
+            ->map(fn($item) => (new CarrierGuideIntegradoResource($item))->toArray())
+            ->values(); // Reinicia los índices para evitar huecos
 
+        // Obtener los encabezados desde el primer elemento ya transformado
         $headers = array_keys($mapped->first());
 
+        // Concatenar encabezados con los valores mapeados
         return collect([$headers])->concat(
             $mapped->map(fn($row) => array_values($row))
         );
