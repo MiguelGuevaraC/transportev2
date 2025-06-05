@@ -236,7 +236,7 @@ class VentaController extends Controller
             'typePayment'         => 'nullable|string',
             'typeSale'            => 'nullable|string',
             'codeDetraction'      => 'nullable|string',
-            'observation'      => 'nullable|string',
+            'observation'         => 'nullable|string',
 
             'programming_id'      => 'nullable|exists:programmings,id',
 
@@ -354,13 +354,11 @@ class VentaController extends Controller
             'bank_id'             => $bank_id,
             'nroTransferencia'    => $request->input('nroTransferencia') ?? '',
 
-
-
             'isBankPayment'       => $request->input('isBankPayment'),
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
-            'observation'       => $request->input('observation'),
+            'observation'         => $request->input('observation'),
 
             'typePayment'         => $request->input('typePayment') ?? null,
             'typeSale'            => $request->input('typeSale') ?? '-',
@@ -457,7 +455,7 @@ class VentaController extends Controller
                 'routeVoucher'        => $routeVoucher,
                 'numberVoucher'       => $numberVoucher,
                 'movType'             => 'Caja',
-                'observation'       => $request->input('observation'),
+                'observation'         => $request->input('observation'),
 
                 'typePayment'         => $request->input('typePayment') ?? null,
                 'typeSale'            => $request->input('typeSale') ?? '-',
@@ -979,25 +977,25 @@ class VentaController extends Controller
     public function storeWithReceptions(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate'         => 'required|date',
-            'yape'                => 'nullable|numeric',
-            'deposit'             => 'nullable|numeric',
-            'cash'                => 'nullable|numeric',
-            'card'                => 'nullable|numeric',
-            'plin'                => 'nullable|numeric',
-            'comment'             => 'nullable|string',
-            'typeDocument'        => 'nullable|string|in:F,T,B',
-            'typePayment'         => 'nullable|string',
-            'typeSale'            => 'nullable|string',
-            'observation'            => 'nullable|string',
+            'paymentDate'              => 'required|date',
+            'yape'                     => 'nullable|numeric',
+            'deposit'                  => 'nullable|numeric',
+            'cash'                     => 'nullable|numeric',
+            'card'                     => 'nullable|numeric',
+            'plin'                     => 'nullable|numeric',
+            'comment'                  => 'nullable|string',
+            'typeDocument'             => 'nullable|string|in:F,T,B',
+            'typePayment'              => 'nullable|string',
+            'typeSale'                 => 'nullable|string',
+            'observation'              => 'nullable|string',
 
-            'codeDetraction'      => 'nullable|string',
-            'programming_id'      => 'nullable|exists:programmings,id',
-            'isBankPayment'       => 'required|in:0,1',
-            'bank_id'             => 'nullable|exists:banks,id',
-            'box_id'              => 'required|exists:boxes,id',
-            'branchOffice_id'     => 'required|exists:branch_offices,id',
-            'receptions.*'        => [
+            'codeDetraction'           => 'nullable|string',
+            'programming_id'           => 'nullable|exists:programmings,id',
+            'isBankPayment'            => 'required|in:0,1',
+            'bank_id'                  => 'nullable|exists:banks,id',
+            'box_id'                   => 'required|exists:boxes,id',
+            'branchOffice_id'          => 'required|exists:branch_offices,id',
+            'receptions.*'             => [
                 'exists:receptions,id',
                 function ($attribute, $value, $fail) {
                     if (DB::table('receptions')->where('id', $value)
@@ -1007,14 +1005,17 @@ class VentaController extends Controller
                     }
                 },
             ],
+            'is_consolidated'          => 'nullable|boolean',
+            'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
 
-            'person_id'           => 'required|exists:people,id',
-            'installments'        => 'nullable|array',
-            'details'             => 'nullable|array',
 
-            'data'                => 'nullable|array',
-            'data.*.reception_id' => 'nullable|exists:receptions,id',
-            'data.*.description'  => 'nullable|string',
+            'person_id'                => 'required|exists:people,id',
+            'installments'             => 'nullable|array',
+            'details'                  => 'nullable|array',
+
+            'data'                     => 'nullable|array',
+            'data.*.reception_id'      => 'nullable|exists:receptions,id',
+            'data.*.description'       => 'nullable|string',
 
         ])->after(function ($validator) use ($request) {
             // Sumar los paymentAmount de cada Reception asociada
@@ -1065,6 +1066,8 @@ class VentaController extends Controller
             $box_id = auth()->user()->box_id;
             $box    = Box::find($box_id);
         }
+
+        $is_consolidated = $request->input('is_consolidated', false);
 
         // Lógica de documento secuencial
         $branch_office_id = $request->input('branchOffice_id');
@@ -1140,7 +1143,8 @@ class VentaController extends Controller
             'routeVoucher'        => $routeVoucher,
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
-            'observation'       => $request->input('observation'),
+            'observation'         => $request->input('observation'),
+            'is_consolidated'         => $request->input('is_consolidated'),
 
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
@@ -1300,25 +1304,41 @@ class VentaController extends Controller
 
         if ($request->data != [] && $request->data) {
             $data = $request->data;
-
-            foreach ($data as $item) {
-                $reception = Reception::find($item['reception_id']);
-
+            if ($is_consolidated) {
                 $data = [
-                    'description'      => $item['description'] . ' - ' . $additionalText,
-
-                    'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
-                    'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
-                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                    'description'      => $request->input('description_consolidated', 'Venta Consolidada'),
+                    'placa'            => '-',
+                    'guia'             => '-',
+                    'os'               => '-',
                     'cantidad'         => 1,
-                    'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
-                    'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
-                    'precioVenta'      => $reception?->paymentAmount ?? 0,
+                    'tract_id'         => null,
+                    'carrier_guide_id' => null,
+                    'precioVenta'      =>$total,
                     'moviment_id'      => $object->id,
-                    'reception_id'     => $reception->id,
+                    'reception_id'     => null,
                 ];
                 DetalleMoviment::create($data);
 
+            } else {
+                foreach ($data as $item) {
+                    $reception = Reception::find($item['reception_id']);
+
+                    $data = [
+                        'description'      => $item['description'] . ' - ' . $additionalText,
+
+                        'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
+                        'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
+                        'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                        'cantidad'         => 1,
+                        'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
+                        'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
+                        'precioVenta'      => $reception?->paymentAmount ?? 0,
+                        'moviment_id'      => $object->id,
+                        'reception_id'     => $reception->id,
+                    ];
+                    DetalleMoviment::create($data);
+
+                }
             }
 
             $jsonData            = json_encode($request->data);
@@ -1503,7 +1523,7 @@ class VentaController extends Controller
             'typeSale'            => $request->input('typeSale'),
             'codeDetraction'      => $request->input('codeDetraction'),
             'percentDetraction'   => $request->input('percentDetraction'),
-            'observation'       => $request->input('observation'),
+            'observation'         => $request->input('observation'),
 
             'status'              => 'Pendiente',
             'programming_id'      => $request->input('programming_id'),
@@ -1549,7 +1569,7 @@ class VentaController extends Controller
                 'routeVoucher'        => $routeVoucher,
                 'numberVoucher'       => $numberVoucher,
                 'movType'             => 'Caja',
-                'observation'       => $request->input('observation'),
+                'observation'         => $request->input('observation'),
 
                 'typePayment'         => $request->input('typePayment') ?? null,
                 'typeSale'            => $request->input('typeSale') ?? '-',
@@ -1674,7 +1694,7 @@ class VentaController extends Controller
             'typeDocument'           => 'nullable|string|in:F,T,B',
             'typePayment'            => 'nullable|string',
             'typeSale'               => 'nullable|string',
-            'observation'               => 'nullable|string',
+            'observation'            => 'nullable|string',
 
             'codeDetraction'         => 'nullable|string',
             'programming_id'         => 'nullable|exists:programmings,id',
@@ -1684,6 +1704,10 @@ class VentaController extends Controller
             'branchOffice_id'        => 'required|exists:branch_offices,id',
             'receptions'             => 'nullable|array', // Array de recepciones
                                                           // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+
+            'is_consolidated'          => 'nullable|boolean',
+            'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
+
             'person_id'              => 'required|exists:people,id',
             'installments'           => 'nullable|array',
             // 'details' => 'nullable|array',
@@ -1790,7 +1814,7 @@ class VentaController extends Controller
             // 'box_id' => $request->input('box_id'),
             'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
-            'observation'       => $request->input('observation'),
+            'observation'         => $request->input('observation'),
         ];
 
         // Actualiza el objeto
@@ -2105,6 +2129,8 @@ class VentaController extends Controller
             }
         });
 
+        $is_consolidated = $request->input('is_consolidated', false);
+
         $object = Moviment::find($id);
         if (! $object) {
             return response()->json(['message' => 'Venta no Encontrada'], 404);
@@ -2274,7 +2300,23 @@ class VentaController extends Controller
                 $detalle->delete(); // Esto usará el soft delete
             }
 
-            // Procesar la creación o actualización de los detalles
+            if ($is_consolidated) {
+                $data = [
+                    'description'      => $request->input('description_consolidated', 'Venta Consolidada'),
+                    'placa'            => '-',
+                    'guia'             => '-',
+                    'os'               => '-',
+                    'cantidad'         => 1,
+                    'tract_id'         => null,
+                    'carrier_guide_id' => null,
+                    'precioVenta'      =>$total,
+                    'moviment_id'      => $object->id,
+                    'reception_id'     => null,
+                ];
+                DetalleMoviment::create($data);
+
+            }else{
+               // Procesar la creación o actualización de los detalles
             foreach ($data as $item) {
 
                 $reception = Reception::find($item['reception_id']);
@@ -2293,6 +2335,8 @@ class VentaController extends Controller
                 ];
                 DetalleMoviment::create($data);
             }
+            }
+
 
             // Actualizar la lista de productos
             $jsonData            = json_encode($request->data);
@@ -2741,16 +2785,17 @@ class VentaController extends Controller
             'totalSum'       => $totalDebtSum, // Total sin paginación
         ], 200);
     }
-    function calcularTotalDeuda($branch_office_id = null, $typeDocument = null, $box_id = null, $personId = null, $status = null, $start = null, $end = null, $sequentialNumber = null) {
+    public function calcularTotalDeuda($branch_office_id = null, $typeDocument = null, $box_id = null, $personId = null, $status = null, $start = null, $end = null, $sequentialNumber = null)
+    {
         $totalSumVentas = Moviment::query()
-            ->when(!empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
-            ->when(!empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
-            ->when(!empty($box_id), fn($query) => $query->where('box_id', $box_id))
-            ->when(!empty($personId), fn($query) => $query->where('person_id', $personId))
-            ->when(!empty($status), fn($query) => $query->where('status', $status))
-            ->when(!empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
-            ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
-            ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
+            ->when(! empty($branch_office_id), fn($query) => $query->where('branchOffice_id', $branch_office_id))
+            ->when(! empty($typeDocument), fn($query) => $query->where('typeDocument', $typeDocument))
+            ->when(! empty($box_id), fn($query) => $query->where('box_id', $box_id))
+            ->when(! empty($personId), fn($query) => $query->where('person_id', $personId))
+            ->when(! empty($status), fn($query) => $query->where('status', $status))
+            ->when(! empty($start), fn($query) => $query->where('paymentDate', '>=', $start))
+            ->when(! empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
+            ->when(! empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
             ->where('movType', 'Venta')
             ->with('creditNote')
             ->get()
@@ -2762,7 +2807,6 @@ class VentaController extends Controller
 
         return $totalSumVentas - $totalSumNC;
     }
-
 
     public function show($id)
     {
