@@ -21,7 +21,7 @@ class TallerController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/taller",
+ *     path="/transportedev/public/api/taller",
  *     summary="Obtener información de Tallers con filtros y ordenamiento",
  *     tags={"Taller"},
  *     security={{"bearerAuth": {}}},
@@ -45,7 +45,7 @@ class TallerController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/taller/{id}",
+ *     path="/transportedev/public/api/taller/{id}",
  *     summary="Obtener detalles de un Taller por ID",
  *     tags={"Taller"},
  *     security={{"bearerAuth": {}}},
@@ -68,7 +68,7 @@ class TallerController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/taller",
+ *     path="/transportedev/public/api/taller",
  *     summary="Crear Taller",
  *     tags={"Taller"},
  *     security={{"bearerAuth": {}}},
@@ -104,7 +104,7 @@ class TallerController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/taller/{id}",
+ *     path="/transportedev/public/api/taller/{id}",
  *     summary="Actualizar un Taller",
  *     tags={"Taller"},
  *     security={{"bearerAuth": {}}},
@@ -165,7 +165,7 @@ class TallerController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/taller/{id}",
+ *     path="/transportedev/public/api/taller/{id}",
  *     summary="Eliminar un Tallerpor ID",
  *     tags={"Taller"},
  *     security={{"bearerAuth": {}}},
