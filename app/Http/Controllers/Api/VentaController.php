@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaleRequest\PayMasiveSaleRequest;
+use App\Http\Resources\VentaResource;
 use App\Models\Bitacora;
 use App\Models\Box;
 use App\Models\BranchOffice;
@@ -1394,7 +1395,7 @@ class VentaController extends Controller
 
             ->sum('total');
 
-        return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
+        return response()->json(["venta" => new VentaResource($object), 'totalSum' => $totalDebtSum], 200);
     }
 
     public function storeManual(Request $request)
