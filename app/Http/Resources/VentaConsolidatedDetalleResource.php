@@ -1,4 +1,5 @@
 <?php
+namespace App\Http\Resources;
 
 use App\Models\Reception;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -7,7 +8,7 @@ class VentaConsolidatedDetalleResource extends JsonResource
 {
     public function toArray($request)
     {
-        // Asegúrate de que $this es un modelo Eloquent (ej. Reception::find($id))
+      // Asegúrate de que $this es un modelo Eloquent (ej. Reception::find($id))
         $reception = Reception::find($this->id); // Usar el ID para obtener el modelo
 
         // Evita error si no se encuentra el modelo
