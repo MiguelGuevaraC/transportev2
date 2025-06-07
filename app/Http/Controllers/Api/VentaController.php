@@ -2099,6 +2099,8 @@ class VentaController extends Controller
             'data'                => 'nullable|array',
             'data.*.reception_id' => 'nullable|exists:receptions,id',
             'data.*.description'  => 'nullable|string',
+
+            'is_consolidated'     => 'nullable|boolean',
         ])->after(function ($validator) use ($request) {
             // Sumar los paymentAmount de cada Reception asociada
             $totalReceptionPayments = collect($request->input('data', []))->sum(function ($item) {
@@ -2238,6 +2240,7 @@ class VentaController extends Controller
             'user_edited_id'      => Auth::user()->id,
             'person_reception_id' => $request->input('person_reception_id'),
             'observation'         => $request->input('observation'),
+            'is_consolidated'     => $object->is_consolidated,
         ];
 
         // Actualiza el objeto
@@ -2300,7 +2303,7 @@ class VentaController extends Controller
                 $detalle->delete(); // Esto usará el soft delete
             }
 
-            if ($is_consolidated) {
+            if ($object->is_consolidated) {
                 $data = [
                     'description'      => $request->input('description_consolidated', 'Venta Consolidada'),
                     'placa'            => '-',

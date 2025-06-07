@@ -73,11 +73,12 @@ class VentaResource extends JsonResource
             'box'                      => $this->box ?? null,
             'reception'                => $this->reception ?? null,
 
-            'description_consolidated' => $isConsolidated && $lastReception ? $lastReception['description'] : null,
-
+         'description_consolidated' => $this->is_consolidated == 1
+            ? collect($this->detalles)->last()['description'] ?? null
+            : null,
             'detalles'                 => $isConsolidated
-            ? []
-            : VentaConsolidatedDetalleResource::collection(collect($this->receptions ?? [])),
+            ? VentaConsolidatedDetalleResource::collection(collect($this->receptions ?? []))
+            : $this->detalles ?? [],
             'person'                   => $this->person ?? null,
             'bank'                     => $this->bank ?? null,
             'user'                     => $this->user ?? null,
