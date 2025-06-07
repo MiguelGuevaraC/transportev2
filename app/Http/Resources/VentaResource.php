@@ -7,6 +7,11 @@ class VentaResource extends JsonResource
 {
     public function toArray($request): array
     {
+        $isConsolidated = $this->is_consolidated ?? null;
+
+        // Obtener última recepción si existe
+        $lastReception = $this->receptions ? collect($this->receptions)->last() : null;
+
         return [
             'id'                       => $this->id ?? null,
             'sequentialNumber'         => $this->sequentialNumber ?? null,
@@ -68,12 +73,11 @@ class VentaResource extends JsonResource
             'box'                      => $this->box ?? null,
             'reception'                => $this->reception ?? null,
 
-            'description_consolidated' => $this->is_consolidated == 1 && ! empty($this->detalles)
-            ? collect($this->detalles)->last()['description'] ?? null
-            : null,
-            'detalles'                 => $this->is_consolidated == 1
+            'description_consolidated' => $isConsolidated && $lastReception ? $lastReception['description'] : null,
+
+            'detalles'                 => $isConsolidated
             ? []
-            : ($this->detalles ?? null),
+            : VentaConsolidatedDetalleResource::collection(collect($this->receptions ?? [])),
             'person'                   => $this->person ?? null,
             'bank'                     => $this->bank ?? null,
             'user'                     => $this->user ?? null,
