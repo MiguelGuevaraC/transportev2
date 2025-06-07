@@ -2498,7 +2498,7 @@ class VentaController extends Controller
             'user_agent'  => $request->userAgent(),     // Información sobre el navegador/dispositivo
         ]);
 
-        return response()->json(["venta" => $object, 'totalSum' => $totalDebtSum], 200);
+        return response()->json(["venta" => new VentaResource( $object), 'totalSum' => $totalDebtSum], 200);
     }
 
     public function updateMontos(Request $request, $id)
