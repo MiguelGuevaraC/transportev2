@@ -68,8 +68,8 @@ class VentaResource extends JsonResource
             'box'                      => $this->box ?? null,
             'reception'                => $this->reception ?? null,
 
-            'description_consolidated' => $this->is_consolidated == 1 && isset($this->detalles[0]['description'])
-            ? $this->detalles[0]['description']
+            'description_consolidated' => $this->is_consolidated == 1 && ! empty($this->detalles)
+            ? collect($this->detalles)->last()['description'] ?? null
             : null,
             'detalles'                 => $this->is_consolidated == 1
             ? []

@@ -1009,7 +1009,6 @@ class VentaController extends Controller
             'is_consolidated'          => 'nullable|boolean',
             'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
 
-
             'person_id'                => 'required|exists:people,id',
             'installments'             => 'nullable|array',
             'details'                  => 'nullable|array',
@@ -1145,7 +1144,7 @@ class VentaController extends Controller
             'numberVoucher'       => $numberVoucher,
             'movType'             => 'Venta',
             'observation'         => $request->input('observation'),
-            'is_consolidated'         => $request->input('is_consolidated'),
+            'is_consolidated'     => $request->input('is_consolidated'),
 
             'typePayment'         => $request->input('typePayment'),
             'typeSale'            => $request->input('typeSale'),
@@ -1314,7 +1313,7 @@ class VentaController extends Controller
                     'cantidad'         => 1,
                     'tract_id'         => null,
                     'carrier_guide_id' => null,
-                    'precioVenta'      =>$total,
+                    'precioVenta'      => $total,
                     'moviment_id'      => $object->id,
                     'reception_id'     => null,
                 ];
@@ -1685,37 +1684,37 @@ class VentaController extends Controller
     public function updateManual(Request $request, $id)
     {
         $validator = validator()->make($request->all(), [
-            'paymentDate'            => 'required|date',
-            'yape'                   => 'nullable|numeric',
-            'deposit'                => 'nullable|numeric',
-            'cash'                   => 'nullable|numeric',
-            'card'                   => 'nullable|numeric',
-            'plin'                   => 'nullable|numeric',
-            'comment'                => 'nullable|string',
-            'typeDocument'           => 'nullable|string|in:F,T,B',
-            'typePayment'            => 'nullable|string',
-            'typeSale'               => 'nullable|string',
-            'observation'            => 'nullable|string',
+            'paymentDate'              => 'required|date',
+            'yape'                     => 'nullable|numeric',
+            'deposit'                  => 'nullable|numeric',
+            'cash'                     => 'nullable|numeric',
+            'card'                     => 'nullable|numeric',
+            'plin'                     => 'nullable|numeric',
+            'comment'                  => 'nullable|string',
+            'typeDocument'             => 'nullable|string|in:F,T,B',
+            'typePayment'              => 'nullable|string',
+            'typeSale'                 => 'nullable|string',
+            'observation'              => 'nullable|string',
 
-            'codeDetraction'         => 'nullable|string',
-            'programming_id'         => 'nullable|exists:programmings,id',
-            'isBankPayment'          => 'required|in:0,1',
-            'bank_id'                => 'nullable|exists:banks,id',
-            'box_id'                 => 'required|exists:boxes,id',
-            'branchOffice_id'        => 'required|exists:branch_offices,id',
-            'receptions'             => 'nullable|array', // Array de recepciones
-                                                          // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
+            'codeDetraction'           => 'nullable|string',
+            'programming_id'           => 'nullable|exists:programmings,id',
+            'isBankPayment'            => 'required|in:0,1',
+            'bank_id'                  => 'nullable|exists:banks,id',
+            'box_id'                   => 'required|exists:boxes,id',
+            'branchOffice_id'          => 'required|exists:branch_offices,id',
+            'receptions'               => 'nullable|array', // Array de recepciones
+                                                            // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
 
             'is_consolidated'          => 'nullable|boolean',
             'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
 
-            'person_id'              => 'required|exists:people,id',
-            'installments'           => 'nullable|array',
+            'person_id'                => 'required|exists:people,id',
+            'installments'             => 'nullable|array',
             // 'details' => 'nullable|array',
 
-            'details'                => 'nullable|array',
-            'details.*.reception_id' => 'nullable|exists:receptions,id',
-            'details.*.description'  => 'nullable|string',
+            'details'                  => 'nullable|array',
+            'details.*.reception_id'   => 'nullable|exists:receptions,id',
+            'details.*.description'    => 'nullable|string',
         ]);
 
         $object = Moviment::find($id);
@@ -2310,34 +2309,33 @@ class VentaController extends Controller
                     'cantidad'         => 1,
                     'tract_id'         => null,
                     'carrier_guide_id' => null,
-                    'precioVenta'      =>$total,
+                    'precioVenta'      => $total,
                     'moviment_id'      => $object->id,
                     'reception_id'     => null,
                 ];
                 DetalleMoviment::create($data);
 
-            }else{
-               // Procesar la creación o actualización de los detalles
-            foreach ($data as $item) {
+            } else {
+                // Procesar la creación o actualización de los detalles
+                foreach ($data as $item) {
 
-                $reception = Reception::find($item['reception_id']);
+                    $reception = Reception::find($item['reception_id']);
 
-                $data = [
-                    'description'      => $item['description'],
-                    'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
-                    'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
-                    'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
-                    'cantidad'         => 1,
-                    'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
-                    'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
-                    'precioVenta'      => $reception?->paymentAmount ?? 0,
-                    'moviment_id'      => $object->id,
-                    'reception_id'     => $reception->id,
-                ];
-                DetalleMoviment::create($data);
+                    $data = [
+                        'description'      => $item['description'],
+                        'placa'            => $reception?->firstCarrierGuide?->tract?->currentPlate ?? '-',
+                        'guia'             => $reception?->firstCarrierGuide?->numero ?? '-',
+                        'os'               => (array_key_exists('os', $item) && ! is_null($item['os'])) ? $item['os'] : '-',
+                        'cantidad'         => 1,
+                        'tract_id'         => $reception?->firstCarrierGuide?->tract->id ?? null,
+                        'carrier_guide_id' => $reception?->firstCarrierGuide?->id ?? null,
+                        'precioVenta'      => $reception?->paymentAmount ?? 0,
+                        'moviment_id'      => $object->id,
+                        'reception_id'     => $reception->id,
+                    ];
+                    DetalleMoviment::create($data);
+                }
             }
-            }
-
 
             // Actualizar la lista de productos
             $jsonData            = json_encode($request->data);
@@ -2771,7 +2769,8 @@ class VentaController extends Controller
 
         return response()->json([
             'total'          => $movCaja->total(),
-            'data'           => $movCaja->items(),
+            'data'           => VentaResource::collection($movCaja->items()),
+
             'current_page'   => $movCaja->currentPage(),
             'last_page'      => $movCaja->lastPage(),
             'per_page'       => $perPage,
