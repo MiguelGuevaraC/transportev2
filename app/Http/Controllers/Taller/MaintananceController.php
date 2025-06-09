@@ -22,7 +22,7 @@ class MaintananceController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/maintenance",
+ *     path="/transporte/public/api/maintenance",
  *     summary="Obtener información de Maintenances con filtros y ordenamiento",
  *     tags={"Maintenance"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class MaintananceController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/maintenance/{id}",
+ *     path="/transporte/public/api/maintenance/{id}",
  *     summary="Obtener detalles de un Maintenance por ID",
  *     tags={"Maintenance"},
  *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class MaintananceController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/maintenance",
+ *     path="/transporte/public/api/maintenance",
  *     summary="Crear Maintenance",
  *     tags={"Maintenance"},
  *     security={{"bearerAuth": {}}},
@@ -105,7 +105,7 @@ class MaintananceController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/maintenance/{id}",
+ *     path="/transporte/public/api/maintenance/{id}",
  *     summary="Actualizar un Maintenance",
  *     tags={"Maintenance"},
  *     security={{"bearerAuth": {}}},
@@ -166,7 +166,7 @@ class MaintananceController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/maintenance/{id}",
+ *     path="/transporte/public/api/maintenance/{id}",
  *     summary="Eliminar un Maintenancepor ID",
  *     tags={"Maintenance"},
  *     security={{"bearerAuth": {}}},

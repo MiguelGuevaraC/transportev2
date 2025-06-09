@@ -13,7 +13,7 @@ class PlaceController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/place",
+     *     path="/transporte/public/api/place",
      *     summary="Get all Place",
      *     tags={"Place"},
      *     description="Show all Place",
@@ -40,7 +40,7 @@ class PlaceController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/place",
+     *     path="/transporte/public/api/place",
      *     summary="Store a new place",
      *     tags={"Place"},
      *     description="Create a new place",
@@ -110,7 +110,7 @@ class PlaceController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/place/{id}",
+     *     path="/transporte/public/api/place/{id}",
      *     summary="Get a place by ID",
      *     tags={"Place"},
      *     description="Retrieve a place by its ID",
@@ -162,7 +162,7 @@ class PlaceController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/place/{id}",
+     *     path="/transporte/public/api/place/{id}",
      *     summary="Update an existing place",
      *     tags={"Place"},
      *     description="Update an existing place",
@@ -255,7 +255,7 @@ class PlaceController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/place/{id}",
+     *     path="/transporte/public/api/place/{id}",
      *     summary="Delete a place",
      *     tags={"Place"},
      *     description="Delete a place by ID",

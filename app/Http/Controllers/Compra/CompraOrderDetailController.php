@@ -22,7 +22,7 @@ class CompraOrderDetailController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/compraorderdetail",
+ *     path="/transporte/public/api/compraorderdetail",
  *     summary="Obtener información de Orders con filtros y ordenamiento",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class CompraOrderDetailController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/compraorderdetail/{id}",
+ *     path="/transporte/public/api/compraorderdetail/{id}",
  *     summary="Obtener detalles de un Detalle Orden Compra a por ID",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class CompraOrderDetailController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/compraorderdetail",
+ *     path="/transporte/public/api/compraorderdetail",
  *     summary="Crear Order",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -104,7 +104,7 @@ class CompraOrderDetailController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/compraorderdetail/{id}",
+ *     path="/transporte/public/api/compraorderdetail/{id}",
  *     summary="Actualizar un Order",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},
@@ -165,7 +165,7 @@ class CompraOrderDetailController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/compraorderdetail/{id}",
+ *     path="/transporte/public/api/compraorderdetail/{id}",
  *     summary="Eliminar un Orderpor ID",
  *     tags={"Order"},
  *     security={{"bearerAuth": {}}},

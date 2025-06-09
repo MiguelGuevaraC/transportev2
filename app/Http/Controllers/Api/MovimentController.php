@@ -20,7 +20,7 @@ class MovimentController extends Controller
     /**
      * Get all Movimentes
      * @OA\Get (
-     *     path="/transportedev/public/api/moviment",
+     *     path="/transporte/public/api/moviment",
      *     tags={"Moviment"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -108,7 +108,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/moviment/{id}",
+     *     path="/transporte/public/api/moviment/{id}",
      *     summary="Get a moviment by ID",
      *     tags={"Moviment"},
      *     description="Retrieve a moviment by its ID",
@@ -159,7 +159,7 @@ class MovimentController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/moviment/last/{idBox}",
+ *     path="/transporte/public/api/moviment/last/{idBox}",
  *     summary="Get the last moviment with paymentConcept_id = 2",
  *     tags={"Moviment"},
  *     description="Retrieve the last moviment with paymentConcept_id = 2 for a specific box",
@@ -217,7 +217,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/moviment/{id}",
+     *     path="/transporte/public/api/moviment/{id}",
      *     summary="Delete a moviment",
      *     tags={"moviment"},
      *     description="Delete a moviment by ID",
@@ -289,7 +289,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/moviment",
+     *     path="/transporte/public/api/moviment",
      *     summary="Store a new moviment",
      *     tags={"Moviment"},
      *     description="Create a new moviment",
@@ -619,7 +619,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/movimentAperturaCierre",
+     *     path="/transporte/public/api/movimentAperturaCierre",
      *     summary="Store a new moviment",
      *     tags={"Moviment"},
      *     description="Create a new moviment Apertura/Cierre",
@@ -970,7 +970,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/validateBox/{id}",
+     *     path="/transporte/public/api/validateBox/{id}",
      *     summary="Get a Moviment",
      *     tags={"Moviment"},
      *     description="Get a Moviment by ID",
@@ -1042,7 +1042,7 @@ class MovimentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/showAperturaMovements",
+     *     path="/transporte/public/api/showAperturaMovements",
      *     summary="Listado de Aperturas",
      *     tags={"Moviment"},
      *     description="Por cada apertura, muestra su reporte con un filtro opcional por fechas basado en el campo created_at.",

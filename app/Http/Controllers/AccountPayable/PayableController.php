@@ -25,7 +25,7 @@ class PayableController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/payable",
+     *     path="/transporte/public/api/payable",
      *     summary="Obtener información de Banks con filtros y ordenamiento",
      *     tags={"Bank"},
      *     security={{"bearerAuth": {}}},

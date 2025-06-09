@@ -14,7 +14,7 @@ class UbigeoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/departments",
+     *     path="/transporte/public/api/departments",
      *     summary="Get all departments",
      *     tags={"Ubigeo"},
      *     description="Show all departments",
@@ -48,7 +48,7 @@ class UbigeoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/provinces/{departmentId}",
+     *     path="/transporte/public/api/provinces/{departmentId}",
      *     summary="Get provinces by department ID",
      *     tags={"Ubigeo"},
      *     description="Show all provinces for a given department ID",
@@ -90,7 +90,7 @@ class UbigeoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/districts/{provinceId}",
+     *     path="/transporte/public/api/districts/{provinceId}",
      *     summary="Get districts by province ID",
      *     tags={"Ubigeo"},
      *     description="Show all districts for a given province ID",
@@ -132,7 +132,7 @@ class UbigeoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/ubigeos",
+     *     path="/transporte/public/api/ubigeos",
      *     summary="Get ubigeo information",
      *     tags={"Ubigeo"},
      *     description="Show a specific ubigeo by combining the ID, province, and department.",
