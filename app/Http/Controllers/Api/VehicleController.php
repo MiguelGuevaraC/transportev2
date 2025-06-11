@@ -352,8 +352,9 @@ class VehicleController extends Controller
             );
             $worker = Worker::find($request->input('responsable_id'));
 
-            if ($worker) {
-                $vehicle->responsable_id = $worker->person->id;
+           if ($worker) {
+                $vehicle->responsable_id = $worker->person_id;
+                $vehicle->save();
             }
             // Procesar las fotos
             if ($request->has('photos')) {
