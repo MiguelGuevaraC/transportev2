@@ -12,7 +12,7 @@
             font-family: 'DejaVu Sans', sans-serif;
             font-size: 12px;
             color: #2c3e50;
-            margin: 20mm 15mm;
+
             line-height: 1.5;
         }
 
@@ -90,92 +90,153 @@
         }
 
         .tr-selected {
-            background-color: #eafaf1; /* verde claro */
+            background-color: #eafaf1;
+            /* verde claro */
         }
 
         .tr-unselected {
-            background-color: #fdfdfd; /* fondo blanco */
+            background-color: #fdfdfd;
+            /* fondo blanco */
+        }
+
+        .tableInfo {
+            margin-top: 5px;
+        }
+
+        .contentImage {
+            width: 100%;
+            text-align: right;
+        }
+
+        .logoImage {
+            width: auto;
+            height: 90px;
+        }
+
+        .titlePresupuesto {
+
+            font-size: 15px;
+            font-weight: bolder;
+            text-align: justify;
+            /*margin-top: 20px;*/
+            /*margin-bottom: 20px;*/
+            color: rgb(126, 0, 0);
+            ;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .tableInfo {
+            margin-top: 5px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header">
-        <div class="title">Informe Detallado de Revisión: Check List</div>
-        <div class="subtitle">Número de Informe: {{ $data->numero }}</div>
-        <div class="hora">Fecha de Generación: {{ now()->format('d/m/Y H:i:s') }}</div>
-    </div>
+    <table class="tableInfo">
+        <tr>
+            <div class="contentImage">
+                <img class="logoImage" src="{{$logoBase64}}" alt="logoTransporte">
+            </div>
 
-    <div class="section">
-        <table class="info-table">
-            <tr>
-                <td>Fecha de Revisión:</td>
-                <td>{{ Carbon::parse($data->date_check_list)->format('d/m/Y') }}</td>
-                <td>Hora de Revisión:</td>
-                <td>{{ Carbon::parse($data->date_check_list)->format('H:i') }}</td>
+
+
+            <td class="center">
+                <div style="border: 1px solid black; padding: 10px; display: inline-block; text-align: center;">
+                    <div class="titlePresupuesto">CHECK LIST</div>
+                    <div class="numberPresupuesto" style="font-weight: bolder;">{{ $data->numero }}</div>
+                </div>
+            </td>
+
+
+
+        </tr>
+
+    </table>
+
+
+
+  <div class="section">
+    <!-- INFORMACIÓN GENERAL -->
+    <div class="section-title">Información General del Informe</div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;">
+        <tbody>
+            <tr style="background-color: #f9f9f9;">
+                <td style="padding: 8px; font-weight: bold; width: 180px; border: 1px solid #ccc;">Fecha de Revisión:</td>
+                <td style="padding: 8px; border: 1px solid #ccc;">{{ Carbon::parse($data->date_check_list)->format('d/m/Y') }}</td>
+                <td style="padding: 8px; font-weight: bold; border: 1px solid #ccc;">Hora de Revisión:</td>
+                <td style="padding: 8px; border: 1px solid #ccc;">{{ Carbon::parse($data->date_check_list)->format('H:i') }}</td>
             </tr>
             <tr>
-                <td>Vehículo (Placa):</td>
-                <td>{{ $data->vehicle->currentPlate ?? 'No disponible' }}</td>
-                <td>Estado del Informe:</td>
-                <td>{{ $data->status }}</td>
+                <td style="padding: 8px; font-weight: bold; background-color: #f9f9f9; border: 1px solid #ccc;">Vehículo (Placa):</td>
+                <td style="padding: 8px; border: 1px solid #ccc;">{{ $data->vehicle->currentPlate ?? 'No disponible' }}</td>
+                <td style="padding: 8px; font-weight: bold; background-color: #f9f9f9; border: 1px solid #ccc;">Estado del Informe:</td>
+                <td style="padding: 8px; border: 1px solid #ccc;">{{ $data->status }}</td>
             </tr>
             <tr>
-                <td>Observación General:</td>
-                <td colspan="3">{{ $data->observation ?? 'Ninguna' }}</td>
+                <td style="padding: 8px; font-weight: bold; background-color: #f9f9f9; border: 1px solid #ccc;">Observación General:</td>
+                <td colspan="3" style="padding: 8px; border: 1px solid #ccc; font-style: italic;">{{ $data->observation ?? 'Ninguna' }}</td>
             </tr>
-        </table>
-    </div>
+        </tbody>
+    </table>
 
-    <div class="section">
-        <div class="section-title">Detalles de la Revisión del Vehículo</div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 30px;">#</th>
-                    <th>Ítem de Revisión</th>
-                    <th style="width: 100px;">Estado</th>
-                    <th>Observación</th>
+    <!-- DETALLES DE LA REVISIÓN -->
+    <div class="section-title" style="margin-top: 35px;">Detalles de la Revisión del Vehículo</div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;">
+        <thead>
+            <tr style="background-color: #e5e8ea; color: #2c3e50;">
+                <th style="padding: 8px; border: 1px solid #ccc; width: 30px;">#</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Ítem de Revisión</th>
+                <th style="padding: 8px; border: 1px solid #ccc; width: 110px;">Estado</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Observación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($data->checkListItems as $index => $item)
+                <tr style="background-color: {{ $index % 2 === 0 ? '#fdfdfd' : '#f5f8fa' }};">
+                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">{{ $index + 1 }}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">{{ $item->name }}</td>
+                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center; font-weight: bold; color: {{ $item->pivot->is_selected ? '#2e7d32' : '#c62828' }};">
+                        {{ $item->pivot->is_selected ? '✔ Aprobado' : '✘ No Aprobado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">{{ $item->pivot->observation ?? '—' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach ($data->checkListItems as $index => $item)
-                    <tr class="{{ $item->pivot->is_selected ? 'tr-selected' : 'tr-unselected' }}">
-                        <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td>{{ $item->name }}</td>
-                        <td style="text-align: center;">
-                            {{ $item->pivot->is_selected ? '✔ Aprobado' : '✘ No Aprobado' }}
-                        </td>
-                        <td>{{ $item->pivot->observation ?? '' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+            @endforeach
+        </tbody>
+    </table>
 
-    <div class="section">
-        <div class="section-title">Resumen del Estado de Revisión</div>
-        <p>El siguiente resumen indica el estado general del vehículo revisado según los ítems evaluados durante el check list. Cada ítem ha sido verificado bajo los criterios establecidos para garantizar que el vehículo se encuentra en condiciones óptimas para su operación.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Total de Ítems Evaluados</th>
-                    <th>Total Aprobados</th>
-                    <th>Total No Aprobados</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ count($data->checkListItems) }}</td>
-                    <td>{{ $data->checkListItems->where('pivot.is_selected', true)->count() }}</td>
-                    <td>{{ $data->checkListItems->where('pivot.is_selected', false)->count() }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <!-- RESUMEN -->
+    <div class="section-title" style="margin-top: 35px;">Resumen del Estado de Revisión</div>
+    <p style="margin-bottom: 10px; font-size: 12px;">
+        Este resumen refleja el estado general del vehículo revisado. Cada ítem fue verificado conforme a los criterios establecidos para su correcta operación.
+    </p>
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+            <tr style="background-color: #e5e8ea; color: #2c3e50;">
+                <th style="padding: 8px; border: 1px solid #ccc;">Total de Ítems Evaluados</th>
+                <th style="padding: 8px; border: 1px solid #ccc; color: #2e7d32;">Total Aprobados</th>
+                <th style="padding: 8px; border: 1px solid #ccc; color: #c62828;">Total No Aprobados</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: #fdfdfd;">
+                <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">{{ count($data->checkListItems) }}</td>
+                <td style="padding: 8px; border: 1px solid #ccc; text-align: center; font-weight: bold;">{{ $data->checkListItems->where('pivot.is_selected', true)->count() }}</td>
+                <td style="padding: 8px; border: 1px solid #ccc; text-align: center; font-weight: bold;">{{ $data->checkListItems->where('pivot.is_selected', false)->count() }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-  
+
+
 
 </body>
 

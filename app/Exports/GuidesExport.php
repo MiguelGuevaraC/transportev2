@@ -40,6 +40,7 @@ class GuidesExport implements FromCollection, WithStyles
             'SALDO',
             'COND. PAGO',
             'ESTADO ENTREGA',
+            'ESTADO FACTURACION',
             'CONDUCTOR 1',
             'LICENCIA 1',
             'CONDUCTOR 2',

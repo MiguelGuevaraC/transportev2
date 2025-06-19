@@ -21,6 +21,7 @@ class CarrierGuideIntegradoResource extends JsonResource
             'LLEGADA'                   => $this?->destination?->name ?? '',
             'CONDICIÓN DE PAGO'         => $this?->reception?->conditionPay ?? '',
             'ESTADO MERCADERIA'         => $this->status ?? '',
+            'ESTADO FACTURACION'           => $this->status_facturado ?? '',
             'DOCUMENTOS DE VENTA'       => $this?->reception?->moviment?->sequentialNumber ?? 'Sin Venta',
             'FECHA DOC'                 => $this?->reception?->moviment ? date('d/m/Y', strtotime($this?->reception?->moviment?->paymentDate)) : '',
             'MONTO TOTAL'               => $this?->reception?->moviment ? $this?->reception?->moviment->total : '0',

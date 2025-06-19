@@ -191,15 +191,21 @@ class MaintananceController extends Controller
         ], 200);
     }
 
-    public function report(Request $request, $id = 0)
-    {
-        $mantenimiento = Maintenance::findOrFail($id);
+public function report(Request $request, $id = 0)
+{
+    $mantenimiento = Maintenance::findOrFail($id);
 
-        $pdf = Pdf::loadView('mantenimiento-report', [
-            'mantenimiento' => $mantenimiento,
-        ]);
+    $logoPath = public_path('storage/img/logoTransportes.jpeg');
+    $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logoPath));
 
-        return $pdf->stream('mantenimiento-' . now()->format('Y-m-d_H-i-s') . '.pdf');
-    }
+    $pdf = Pdf::loadView('mantenimiento-report', [
+        'mantenimiento' => $mantenimiento, // ahora se llama "data"
+        'logoBase64' => $logoBase64
+    ]);
+
+    return $pdf->stream('mantenimiento-' . now()->format('Y-m-d_H-i-s') . '.pdf');
+}
+
+
 
 }

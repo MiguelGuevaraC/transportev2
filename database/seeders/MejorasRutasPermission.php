@@ -148,7 +148,7 @@ class MejorasRutasPermission extends Seeder
             [
                 'id'           => 44,
                 'name'         => 'Checklist',
-                'route'        => 'check-list',
+                'route'        => 'checklist',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
                 'groupMenu_id' => 8,
@@ -156,7 +156,7 @@ class MejorasRutasPermission extends Seeder
             [
                 'id'           => 45,
                 'name'         => 'Mantenimiento',
-                'route'        => 'detalle-mantenimiento',
+                'route'        => 'mantenimiento',
                 'icon'         => 'dot',
                 'guard_name'   => 'web',
                 'groupMenu_id' => 8,
