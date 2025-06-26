@@ -32,7 +32,7 @@ class PersonController extends Controller
  * @return \Illuminate\Http\Response
  *
  * @OA\Get(
- *     path="/transporte/public/api/clients",
+ *     path="/transportedev/public/api/clients",
  *     summary="Get all clients",
  *     tags={"Clients"},
  *     description="Show all clients",
@@ -192,7 +192,7 @@ class PersonController extends Controller
         $names = str_replace('%20%', ' ', $names);
 
         // Consulta de personas según los filtros aplicados
-        $persons = Person::with(['tarifas.unity','tarifas', 'products.unity'])->when(! empty($names), function ($query) use ($names) {
+        $persons = Person::with(['tarifas','tarifas.unity', 'products.unity'])->when(! empty($names), function ($query) use ($names) {
             $query->where(function ($query) use ($names) {
                 $query->whereRaw('lower(concat_ws(" ", names, fatherSurname, motherSurname)) LIKE ?', ['%' . strtolower($names) . '%'])
                     ->orWhereRaw('lower(businessName) LIKE ?', ['%' . strtolower($names) . '%'])
@@ -228,7 +228,7 @@ class PersonController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/naturalPerson",
+ *     path="/transportedev/public/api/naturalPerson",
  *     summary="Get all Natural People",
  *     tags={"Clients"},
  *     description="Show all Natural People",
@@ -260,7 +260,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/legalEntity",
+     *     path="/transportedev/public/api/legalEntity",
      *     summary="Get all Legal Entities",
      *     tags={"Clients"},
      *     description="Show all Legal Entities",
@@ -301,7 +301,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/clients",
+     *     path="/transportedev/public/api/clients",
      *     summary="Store a new client",
      *     tags={"Clients"},
      *     description="Create a new client",
@@ -435,7 +435,7 @@ class PersonController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/clients/{id}",
+     *     path="/transportedev/public/api/clients/{id}",
      *     summary="Get a client by ID",
      *     tags={"Clients"},
      *     description="Retrieve a client by its ID",
@@ -486,7 +486,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/clients/{id}",
+     *     path="/transportedev/public/api/clients/{id}",
      *     summary="Update an existing client",
      *     tags={"Clients"},
      *     description="Update an existing client",
@@ -618,7 +618,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/clients/{id}",
+     *     path="/transportedev/public/api/clients/{id}",
      *     summary="Delete a client",
      *     tags={"Clients"},
      *     description="Delete a client by ID",
@@ -664,7 +664,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/clients/{id}/changeState",
+     *     path="/transportedev/public/api/clients/{id}/changeState",
      *     summary="Change the state of a client",
      *     tags={"Clients"},
      *     description="Change the state (active/inactive) of a client by its ID",
@@ -721,7 +721,7 @@ class PersonController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/personsWithDebt",
+     *     path="/transportedev/public/api/personsWithDebt",
      *     summary="Get Persons with Debt",
      *     tags={"Clients"},
      *     description="Retrieve all Persons who have receptions with debt amounts greater than 0, optionally filtered by 'conditionPay'. Includes the related receptions.",

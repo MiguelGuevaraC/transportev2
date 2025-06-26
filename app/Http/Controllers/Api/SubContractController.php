@@ -11,7 +11,7 @@ class SubContractController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/subcontract",
+     *     path="/transportedev/public/api/subcontract",
      *     summary="Get all subcontract",
      *     tags={"Subcontract"},
      *     description="Show all subcontract",
@@ -157,7 +157,7 @@ class SubContractController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/subcontract/{id}",
+     *     path="/transportedev/public/api/subcontract/{id}",
      *     summary="Get a subcontract by ID",
      *     tags={"Subcontract"},
      *     description="Retrieve a subcontract by its ID",
@@ -284,7 +284,7 @@ class SubContractController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/subcontract/{id}",
+     *     path="/transportedev/public/api/subcontract/{id}",
      *     summary="Delete a Subcontract",
      *     tags={"Subcontract"},
      *     description="Delete a Subcontract by ID",

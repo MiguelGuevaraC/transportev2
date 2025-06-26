@@ -22,7 +22,7 @@ class RepuestoController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transporte/public/api/repuesto",
+ *     path="/transportedev/public/api/repuesto",
  *     summary="Obtener información de Repuestos con filtros y ordenamiento",
  *     tags={"Repuesto"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class RepuestoController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/repuesto/{id}",
+ *     path="/transportedev/public/api/repuesto/{id}",
  *     summary="Obtener detalles de un Repuesto por ID",
  *     tags={"Repuesto"},
  *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class RepuestoController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transporte/public/api/repuesto",
+ *     path="/transportedev/public/api/repuesto",
  *     summary="Crear Repuesto",
  *     tags={"Repuesto"},
  *     security={{"bearerAuth": {}}},
@@ -105,7 +105,7 @@ class RepuestoController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transporte/public/api/repuesto/{id}",
+ *     path="/transportedev/public/api/repuesto/{id}",
  *     summary="Actualizar un Repuesto",
  *     tags={"Repuesto"},
  *     security={{"bearerAuth": {}}},
@@ -166,7 +166,7 @@ class RepuestoController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transporte/public/api/repuesto/{id}",
+ *     path="/transportedev/public/api/repuesto/{id}",
  *     summary="Eliminar un Repuestopor ID",
  *     tags={"Repuesto"},
  *     security={{"bearerAuth": {}}},

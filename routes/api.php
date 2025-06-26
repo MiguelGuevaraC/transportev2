@@ -451,4 +451,6 @@ Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritm
     require __DIR__ . '/Api/MovimentCompraApi.php';       //MOVIMENT COMPRA
     require __DIR__ . '/Api/MovimentCompraDetailApi.php'; //MOVIMENT COMPRA DETAIL
 
+
+    
 });

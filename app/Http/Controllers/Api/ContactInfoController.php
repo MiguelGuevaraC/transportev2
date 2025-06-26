@@ -11,7 +11,7 @@ class ContactInfoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/contactInfo",
+     *     path="/transportedev/public/api/contactInfo",
      *     summary="Get all Contact Info",
      *     tags={"ContactInfo"},
      *     description="Show all Contact Info",
@@ -38,7 +38,7 @@ class ContactInfoController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/contactInfo",
+     *     path="/transportedev/public/api/contactInfo",
      *     summary="Store a new contactInfo",
      *     tags={"ContactInfo"},
      *     description="Create a new contactInfo",
@@ -124,7 +124,7 @@ class ContactInfoController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/contactInfo/{id}",
+     *     path="/transportedev/public/api/contactInfo/{id}",
      *     summary="Get a contactInfo by ID",
      *     tags={"ContactInfo"},
      *     description="Retrieve a contactInfo by its ID",
@@ -174,7 +174,7 @@ class ContactInfoController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transporte/public/api/contactsForPerson/{idPersona}",
+ *     path="/transportedev/public/api/contactsForPerson/{idPersona}",
  *     summary="Get Contacts for Person",
  *     tags={"ContactInfo"},
  *     description="Show all Contacts",
@@ -210,7 +210,7 @@ class ContactInfoController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/contactInfo/{id}",
+     *     path="/transportedev/public/api/contactInfo/{id}",
      *     summary="Update an existing contactInfo",
      *     tags={"ContactInfo"},
      *     description="Update an existing contactInfo",
@@ -312,7 +312,7 @@ class ContactInfoController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/contactInfo/{id}",
+     *     path="/transportedev/public/api/contactInfo/{id}",
      *     summary="Delete a contactInfo",
      *     tags={"ContactInfo"},
      *     description="Delete a contactInfo by ID",

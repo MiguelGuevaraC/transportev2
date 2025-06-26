@@ -2,7 +2,7 @@
 <html lang="en">
 @php
     use App\Models\CarrierGuide;
-    header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
@@ -44,6 +44,27 @@
         }
     }
 
+// Variables por defecto (no tercerizado)
+    $driverName = $conductorName;
+    $vehiclePlate = str_replace([' ', '-'], '', strtoupper(data_get($object, 'tract.currentPlate', '')));
+    $companyName = '-';
+    $monto = count($object['carrierGuides']);
+    $isIgv = '-';
+
+    // Si es tercerizado, sobrescribimos los valores
+    if (!empty($object['is_tercerizar_programming']) && $object['is_tercerizar_programming'] == 1) {
+        $dataTercerizada = $object['data_tercerizar_programming'] ?? null;
+
+        if (is_string($dataTercerizada)) {
+            $dataTercerizada = json_decode($dataTercerizada, true);
+        }
+
+        $driverName = $dataTercerizada['driver_names'] ?? $driverName;
+        $vehiclePlate = $dataTercerizada['vehicle_plate'] ?? $vehiclePlate;
+        $companyName = $dataTercerizada['company_names'] ?? '-';
+        $monto = $dataTercerizada['monto'] ?? null;
+        $isIgv = isset($dataTercerizada['is_igv']) ? ($dataTercerizada['is_igv'] ? 'Sí' : 'No') : '-';
+    }
 @endphp
 
 <head>
@@ -215,7 +236,7 @@
 
                             <td class="font-12 tdInfo"><b>TRACTO:</b></td>
                             <td class="font-12 left">
-                                {{ str_replace([' ', '-'], '', strtoupper(data_get($object, 'tract.currentPlate', ''))) }}
+                                {{ $vehiclePlate }}
                             </td>
 
 
@@ -241,7 +262,7 @@
 
 
                             <td class="font-12 tdInfo"><b>TOTAL GRT:</b></td>
-                            <td class="font-12 left">{{ count($object['carrierGuides']) }}</td>
+                            <td class="font-12 left"{{>$monto}}</td>
                         </tr>
                     </tbody>
                 </table>

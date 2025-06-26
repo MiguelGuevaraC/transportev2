@@ -14,7 +14,7 @@ class BoxController extends Controller
     /**
      * Get all Boxes
      * @OA\Get (
-     *     path="/transporte/public/api/box",
+     *     path="/transportedev/public/api/box",
      *     tags={"Box"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -55,7 +55,7 @@ class BoxController extends Controller
     /**
      * Get all Boxes
      * @OA\Get (
-     *     path="/transporte/public/api/boxAll",
+     *     path="/transportedev/public/api/boxAll",
      *     tags={"Box"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -127,7 +127,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/box/{id}/updateuser",
+     *     path="/transportedev/public/api/box/{id}/updateuser",
      *     summary="Assign or unassign a user to a box",
      *     tags={"Box"},
      *     security={{"bearerAuth":{}}},
@@ -194,7 +194,7 @@ class BoxController extends Controller
 
  *
  * @OA\Get(
- *     path="/transporte/public/api/boxByBranch/{id}",
+ *     path="/transportedev/public/api/boxByBranch/{id}",
  *     summary="Get all box by Branch Office",
  *     tags={"Box"},
  *     description="Show all box by Branch Office",
@@ -251,7 +251,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/box",
+     *     path="/transportedev/public/api/box",
      *     summary="Store a new box",
      *     tags={"Box"},
      *     description="Create a new box",
@@ -304,7 +304,7 @@ class BoxController extends Controller
                 'string',
                 'size:2',                                       // Debe tener exactamente 2 caracteres
                 Rule::notIn(['10', '20', '30', '40']),          // Excluye las series específicas
-                Rule::unique('boxes')->whereNull('deleted_at'), // Asegura unicidad
+               // Rule::unique('boxes')->whereNull('deleted_at'), // Asegura unicidad
             ],
         ]);
         if ($validator->fails()) {
@@ -325,7 +325,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Get a box by ID",
      *     tags={"Box"},
      *     description="Retrieve a box by its ID",
@@ -375,7 +375,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Update an existing Box",
      *     tags={"Box"},
      *     description="Update an existing Box",
@@ -441,7 +441,7 @@ class BoxController extends Controller
                 'string',
                 'size:2',                              // Debe tener exactamente 2 caracteres
                 Rule::notIn(['10', '20', '30', '40']), // Excluye las series específicas
-                Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
+             //   Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
             ],
         ]);
 
@@ -465,7 +465,7 @@ class BoxController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/box/{id}",
+     *     path="/transportedev/public/api/box/{id}",
      *     summary="Delete a Box",
      *     tags={"Box"},
      *     description="Delete a Box by ID",

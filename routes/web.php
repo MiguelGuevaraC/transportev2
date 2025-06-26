@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AlmacenController;
 use App\Http\Controllers\Api\PdfController;
+use App\Http\Controllers\Api\ReceptionController;
 use App\Http\Controllers\Api\SeccionController;
 use App\Http\Controllers\CargarDocumentController;
 use App\Http\Controllers\Compra\CompraOrderController;
@@ -50,3 +51,7 @@ Route::get('/', function () {
 Route::get('/login', function () {
     return response()->json(['message' => 'Unauthenticated'], 401);
 })->name('login');
+
+
+    Route::get('verifyDocAnexoAlreadyExist/{id}/{docs}/{ID}',
+     [ReceptionController::class, 'verifyDocAnexoAlreadyExist']);

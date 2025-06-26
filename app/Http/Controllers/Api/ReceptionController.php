@@ -10,6 +10,7 @@ use App\Models\DetailReception;
 use App\Models\Reception;
 use App\Models\Route;
 use App\Models\Worker;
+use App\Services\CommonService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,15 +22,19 @@ class ReceptionController extends Controller
 {
 
     private $excel;
-
-    public function __construct(Excel $excel)
+    protected $commonService;
+    public function __construct(Excel $excel, CommonService $commonService)
     {
         $this->excel = $excel;
+        $this->commonService = $commonService;
     }
+
+
+
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reception",
+     *     path="/transportedev/public/api/reception",
      *     summary="Get all reception",
      *     tags={"Reception"},
      *     description="Show all reception",
@@ -79,19 +84,19 @@ class ReceptionController extends Controller
      */
     public function index(Request $request)
     {
-        $startPlace       = $request->input('startPlace_id');
-        $endPlace         = $request->input('endPlace_id');
+        $startPlace = $request->input('startPlace_id');
+        $endPlace = $request->input('endPlace_id');
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice     = BranchOffice::find($branch_office_id);
+            $branchOffice = BranchOffice::find($branch_office_id);
         }
 
         $list = $this->filterReceptions($request, $branch_office_id);
@@ -103,7 +108,7 @@ class ReceptionController extends Controller
     public function filterReceptions(Request $request, $branch_office_id)
     {
         $startPlace = $request->input('startPlace_id');
-        $endPlace   = $request->input('endPlace_id');
+        $endPlace = $request->input('endPlace_id');
 
         // Buscar la ruta principal
         $route = Route::where('placeStart_id', $startPlace)
@@ -113,9 +118,24 @@ class ReceptionController extends Controller
         $subRoutes = $route ? $route->routes : [];
         $allRoutes = collect([$route])->merge($subRoutes)->filter(); // Incluye la ruta padre y las subrutas
 
-        $receptions = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
-            'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')
+        $receptions = Reception::with(
+            'user',
+            'origin',
+            'office',
+            'sender',
+            'destination',
+            'recipient',
+            'pickupResponsible',
+            'payResponsible',
+            'moviment',
+            'cargos',
+            'branchOffice',
+            'seller',
+            'pointDestination',
+            'pointSender',
+            'details',
+            'firstCarrierGuide'
+        )
             ->where(function ($query) use ($subRoutes) {
                 foreach ($subRoutes as $subRoute) {
                     $query->orWhere(function ($q) use ($subRoute) {
@@ -137,7 +157,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/reception",
+     *     path="/transportedev/public/api/reception",
      *     summary="Create a new reception",
      *     tags={"Reception"},
      *     description="Create a new reception",
@@ -210,146 +230,193 @@ class ReceptionController extends Controller
      *     )
      * )
      */
+    public function verifyDocAnexoAlreadyExist(int $senderId, string $doc_anexos, ?int $excludeReceptionId = null)
+    {
+        $docs = collect(explode(',', $doc_anexos))->map(fn($d) => trim($d));
+
+        $conflictsQuery = DB::table('receptions')
+            ->where('sender_id', $senderId)
+            ->whereNull('deleted_at');
+
+        if ($excludeReceptionId) {
+            $conflictsQuery->where('id', '!=', $excludeReceptionId);
+        }
+
+        $conflicts = $conflictsQuery
+            ->where(function ($q) use ($docs) {
+                $docs->each(fn($doc) => $q->orWhere('comment', 'LIKE', "%{$doc}%"));
+            })
+            ->pluck('comment')
+            ->flatMap(fn($c) => array_map('trim', explode(',', $c)))
+            ->intersect($docs);
+
+        if ($conflicts->isNotEmpty()) {
+            abort(response()->json([
+                'success' => false,
+                'message' => 'Ya existen los siguientes documentos en otra recepción del remitente.',
+                'conflictos' => $conflicts->values(),
+            ], 422));
+        }
+    }
+
+
+
+
+
 
     public function store(Request $request)
     {
 
         $validator = validator()->make($request->all(), [
 
-            'typeService'         => 'required',
-            'typeDelivery'        => 'required',
-            'conditionPay'        => 'required',
+            'typeService' => 'required',
+            'typeDelivery' => 'required',
+            'conditionPay' => 'required',
             // 'comment' => 'required',
 
-            'paymentAmount'       => 'required',
+            'paymentAmount' => 'required',
 
-            'receptionDate'       => 'required',
-            'transferLimitDate'   => 'required',
+            'receptionDate' => 'required',
+            'transferLimitDate' => 'required',
 
-            'origin_id'           => 'required|exists:places,id',
-            'destination_id'      => 'required|exists:places,id',
+            'origin_id' => 'required|exists:places,id',
+            'destination_id' => 'required|exists:places,id',
 
-            'sender_id'           => 'required|exists:people,id',
-            'recipient_id'        => 'required|exists:people,id',
+            'sender_id' => 'required|exists:people,id',
+            'recipient_id' => 'required|exists:people,id',
 
             // 'pickupResponsible_id' => 'nullable|exists:contact_infos,id',
-            'payResponsible_id'   => 'required|exists:people,id',
+            'payResponsible_id' => 'required|exists:people,id',
 
-            'seller_id'           => 'required|exists:workers,id',
+            'seller_id' => 'required|exists:workers,id',
 
             'pointDestination_id' => 'required|exists:addresses,id',
-            'pointSender_id'      => 'required|exists:addresses,id',
+            'pointSender_id' => 'required|exists:addresses,id',
 
-            'branch_office_id'    => 'nullable|exists:branch_offices,id',
-            'office_id'           => 'nullable|exists:branch_offices,id',
+            'branch_office_id' => 'nullable|exists:branch_offices,id',
+            'office_id' => 'nullable|exists:branch_offices,id',
 
-            'details'             => 'nullable|array',
+            'details' => 'nullable|array',
 
             // 'isload' => 'required|in:0,1',
 
         ]);
 
+
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        try {
+            $this->verifyDocAnexoAlreadyExist(
+                $request->input('seller_id'),
+                $request->input('comment'),
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validación de documentos anexos fallida: ',
+            ], 422);
         }
 
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice     = BranchOffice::find($branch_office_id);
+            $branchOffice = BranchOffice::find($branch_office_id);
         }
 
         $branchOffice = BranchOffice::find($branch_office_id);
 
         if ($branchOffice) {
-            $tipo        = 'R' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
+            $tipo = 'R' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
             $tipoDetalle = 'D' . str_pad($branchOffice->id, 3, '0', STR_PAD_LEFT);
         } else {
             return response()->json(['error' => 'Branch Office not found'], 422);
         }
 
-        $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(codeReception, LOCATE("-", codeReception) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM receptions WHERE SUBSTRING(codeReception, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+        $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(codeReception, LOCATE("-", codeReception) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM receptions WHERE SUBSTRING(codeReception, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
         $data = [
-            'codeReception'        => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-            'typeService'          => $request->input('typeService') ?? null,
-            'type_responsiblePay'  => $request->input('type_responsiblePay') ?? null,
-            'typeDelivery'         => $request->input('typeDelivery') ?? null,
-            'conditionPay'         => $request->input('conditionPay') ?? null,
-            'numberDays'           => $request->input('numberDays') ?? null,
-            'creditAmount'         => $request->input('creditAmount') ?? null,
-            'address'              => $request->input('address') ?? null,
-            'tokenResponsible'     => $request->input('tokenResponsible') ?? null,
+            'codeReception' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            'typeService' => $request->input('typeService') ?? null,
+            'type_responsiblePay' => $request->input('type_responsiblePay') ?? null,
+            'typeDelivery' => $request->input('typeDelivery') ?? null,
+            'conditionPay' => $request->input('conditionPay') ?? null,
+            'numberDays' => $request->input('numberDays') ?? null,
+            'creditAmount' => $request->input('creditAmount') ?? null,
+            'address' => $request->input('address') ?? null,
+            'tokenResponsible' => $request->input('tokenResponsible') ?? null,
 
-            'comment'              => $request->input('comment') ?? null,
-            'paymentAmount'        => $request->input('paymentAmount') ?? null,
-            'debtAmount'           => $request->input('paymentAmount') ?? null,
-            'bultosTicket'         => $request->input('bultosTicket') ?? null,
+            'comment' => $request->input('comment') ?? null,
+            'paymentAmount' => $request->input('paymentAmount') ?? null,
+            'debtAmount' => $request->input('paymentAmount') ?? null,
+            'bultosTicket' => $request->input('bultosTicket') ?? null,
 
-            'receptionDate'        => $request->input('receptionDate') ?? null,
-            'transferLimitDate'    => $request->input('transferLimitDate') ?? null,
-            'origin_id'            => $request->input('origin_id') ?? null,
-            'destination_id'       => $request->input('destination_id') ?? null,
-            'sender_id'            => $request->input('sender_id') ?? null,
-            'user_id'              => auth()->user()->id ?? '1',
-            'recipient_id'         => $request->input('recipient_id') ?? null,
+            'receptionDate' => $request->input('receptionDate') ?? null,
+            'transferLimitDate' => $request->input('transferLimitDate') ?? null,
+            'origin_id' => $request->input('origin_id') ?? null,
+            'destination_id' => $request->input('destination_id') ?? null,
+            'sender_id' => $request->input('sender_id') ?? null,
+            'user_id' => auth()->user()->id ?? '1',
+            'recipient_id' => $request->input('recipient_id') ?? null,
             'pickupResponsible_id' => $request->input('pickupResponsible_id') ?? null,
-            'payResponsible_id'    => $request->input('payResponsible_id') ?? null,
-            'seller_id'            => $request->input('seller_id') ?? null,
-            'pointDestination_id'  => $request->input('pointDestination_id') ?? null,
-            'pointSender_id'       => $request->input('pointSender_id') ?? null,
-            'branchOffice_id'      => $branch_office_id,
-            'office_id'            => $request->input('office_id'),
-            'amount_fundo'         => $request->input('amount_fundo'),
+            'payResponsible_id' => $request->input('payResponsible_id') ?? null,
+            'seller_id' => $request->input('seller_id') ?? null,
+            'pointDestination_id' => $request->input('pointDestination_id') ?? null,
+            'pointSender_id' => $request->input('pointSender_id') ?? null,
+            'branchOffice_id' => $branch_office_id,
+            'office_id' => $request->input('office_id'),
+            'amount_fundo' => $request->input('amount_fundo'),
         ];
 
         $object = Reception::create($data);
 
         if ($request->input('conditionPay') == "Crédito") {
-            $object->creditAmount  = $object->paymentAmount;
+            $object->creditAmount = $object->paymentAmount;
             $object->paymentAmount = 0;
             $object->save();
         }
 
         if ($object) {
             //ASIGNAR DETALLES
-            $details    = $request->input('details');
+            $details = $request->input('details');
             $idDetalles = [];
 
             foreach ($details as $detail) {
 
                 $tipo = $tipoDetalle;
 
-                $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+                $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
                 $siguienteNum = (int) $resultado;
 
                 $objectData = [
-                    'numero'            => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                    'description'       => $detail['description'] ?? '-',
-                    'weight'            => $detail['weight'] ?? 0.00,
-                    'cant'              => $detail['cant'] ?? 1,
-                    'unit'              => $detail['unit'] ?? 'NIU',
+                    'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                    'description' => $detail['description'] ?? '-',
+                    'weight' => $detail['weight'] ?? 0.00,
+                    'cant' => $detail['cant'] ?? 1,
+                    'unit' => $detail['unit'] ?? 'NIU',
 
-                    'paymentAmount'     => $detail['paymentAmount'] ?? 0.00,
-                    'debtAmount'        => $detail['debtAmount'] ?? 0.00,
-                    'costFreight'       => $detail['costFreight'] ?? 0.00,
-                    'comissionAmount'   => $detail['comissionAmount'] ?? 0.00,
-                    'costLoad'          => $detail['costLoad'] ?? 0.00,
-                    'costDownload'      => $detail['costDownload'] ?? 0.00,
-                    'comment'           => $detail['comment'] ?? '-',
-                    'status'            => 'Pendiente',
+                    'paymentAmount' => $detail['paymentAmount'] ?? 0.00,
+                    'debtAmount' => $detail['debtAmount'] ?? 0.00,
+                    'costFreight' => $detail['costFreight'] ?? 0.00,
+                    'comissionAmount' => $detail['comissionAmount'] ?? 0.00,
+                    'costLoad' => $detail['costLoad'] ?? 0.00,
+                    'costDownload' => $detail['costDownload'] ?? 0.00,
+                    'comment' => $detail['comment'] ?? '-',
+                    'status' => 'Pendiente',
                     'comissionAgent_id' => $detail['comissionAgent_id'] ?? null,
-                    'reception_id'      => $object->id,
-                    'product_id'        => isset($detail['product_id']) ? $detail['product_id'] : null,
-                    'tarifa_id'         => isset($detail['tarifa_id']) ? $detail['tarifa_id'] : null,
+                    'reception_id' => $object->id,
+                    'product_id' => isset($detail['product_id']) ? $detail['product_id'] : null,
+                    'tarifa_id' => isset($detail['tarifa_id']) ? $detail['tarifa_id'] : null,
                 ];
                 $idDetalles[] = DetailReception::create($objectData)->id;
 
@@ -358,26 +425,41 @@ class ReceptionController extends Controller
         }
         $object->storeWeight();
 
-        $object = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
-            'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')->find($object->id);
+        $object = Reception::with(
+            'user',
+            'origin',
+            'office',
+            'sender',
+            'destination',
+            'recipient',
+            'pickupResponsible',
+            'payResponsible',
+            'moviment',
+            'cargos',
+            'branchOffice',
+            'seller',
+            'pointDestination',
+            'pointSender',
+            'details',
+            'firstCarrierGuide'
+        )->find($object->id);
 
         Bitacora::create([
-            'user_id'     => Auth::id(),   // ID del usuario que realiza la acción
-            'record_id'   => $object->id,  // El ID del usuario afectado
-            'action'      => 'POST',       // Acción realizada
-            'table_name'  => 'receptions', // Tabla afectada
-            'data'        => json_encode($object),
+            'user_id' => Auth::id(),   // ID del usuario que realiza la acción
+            'record_id' => $object->id,  // El ID del usuario afectado
+            'action' => 'POST',       // Acción realizada
+            'table_name' => 'receptions', // Tabla afectada
+            'data' => json_encode($object),
             'description' => 'Guardar Recepción',  // Descripción de la acción
-            'ip_address'  => $request->ip(),        // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address' => $request->ip(),        // Dirección IP del usuario
+            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         return response()->json($object, 200);
     }
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportedev/public/api/reception/{id}",
      *     summary="Get a reception by ID",
      *     tags={"Reception"},
      *     description="Retrieve a reception by its ID",
@@ -417,23 +499,35 @@ class ReceptionController extends Controller
     {
         // Cargar la recepción junto con sus relaciones
         $object = Reception::with([
-            'user', 'origin', 'sender', 'destination', 'office',
-            'recipient', 'pickupResponsible', 'payResponsible',
-            'seller', 'pointDestination', 'pointSender', 'branchOffice',
-            'details', 'firstCarrierGuide', 'moviment', 'cargos',
+            'user',
+            'origin',
+            'sender',
+            'destination',
+            'office',
+            'recipient',
+            'pickupResponsible',
+            'payResponsible',
+            'seller',
+            'pointDestination',
+            'pointSender',
+            'branchOffice',
+            'details',
+            'firstCarrierGuide',
+            'moviment',
+            'cargos',
         ])->find($id);
 
         // Verificar si la recepción existe
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Reception not found'], 422);
         }
 
         try {
             // Verifica que la relación 'firstCarrierGuide' exista
-            if (! isset($object->firstCarrierGuide)) {
+            if (!isset($object->firstCarrierGuide)) {
                 $object->status = 'Sin Guia';
                 // Verifica que 'Programming' exista en 'firstCarrierGuide'
-            } elseif (isset($object->firstCarrierGuide) && ! isset($object->firstCarrierGuide->Programming)) {
+            } elseif (isset($object->firstCarrierGuide) && !isset($object->firstCarrierGuide->Programming)) {
                 $object->status = 'Sin Programar';
             } else {
                 $object->status = 'Programado';
@@ -449,7 +543,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportedev/public/api/reception/{id}",
      *     summary="Update an existing reception",
      *     tags={"Reception"},
      *     description="Update an existing reception",
@@ -533,36 +627,49 @@ class ReceptionController extends Controller
     public function update(Request $request, $id)
     {
         $object = Reception::find($id);
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Reception not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
 
-            'origin_id'            => 'nullable|exists:places,id',
-            'destination_id'       => 'nullable|exists:places,id',
+            'origin_id' => 'nullable|exists:places,id',
+            'destination_id' => 'nullable|exists:places,id',
 
-            'sender_id'            => 'nullable|exists:people,id',
-            'recipient_id'         => 'nullable|exists:people,id',
+            'sender_id' => 'nullable|exists:people,id',
+            'recipient_id' => 'nullable|exists:people,id',
 
             'pickupResponsible_id' => 'nullable|exists:contact_infos,id',
-            'payResponsible_id'    => 'nullable|exists:people,id',
+            'payResponsible_id' => 'nullable|exists:people,id',
 
-            'seller_id'            => 'nullable|exists:workers,id',
+            'seller_id' => 'nullable|exists:workers,id',
 
-            'pointDestination_id'  => 'nullable|exists:addresses,id',
-            'pointSender_id'       => 'nullable|exists:addresses,id',
-            'details'              => 'nullable|array',
-            'branch_office_id'     => 'nullable|exists:branch_offices,id',
+            'pointDestination_id' => 'nullable|exists:addresses,id',
+            'pointSender_id' => 'nullable|exists:addresses,id',
+            'details' => 'nullable|array',
+            'branch_office_id' => 'nullable|exists:branch_offices,id',
 
-            'office_id'            => 'nullable|exists:branch_offices,id',
+            'office_id' => 'nullable|exists:branch_offices,id',
             // 'isload' => 'required|in:0,1',
-            'paymentAmount'        => 'required',
+            'paymentAmount' => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        try {
+            $this->verifyDocAnexoAlreadyExist(
+                $request->input('seller_id'),
+                $request->input('comment'),
+                $request->input('id') // null si es nuevo, o el ID si se está editando
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validación de documentos anexos fallida: ',
+            ], 422);
         }
 
         $filterNullValues = function ($value) {
@@ -571,51 +678,51 @@ class ReceptionController extends Controller
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice     = BranchOffice::find($branch_office_id);
+            $branchOffice = BranchOffice::find($branch_office_id);
         }
 
         $Data = [
             // 'codeReception' => $request->input('codeReception'),
-            'typeService'          => $request->input('typeService'),
-            'type_responsiblePay'  => $request->input('type_responsiblePay'),
-            'typeDelivery'         => $request->input('typeDelivery'),
-            'conditionPay'         => $request->input('conditionPay'),
+            'typeService' => $request->input('typeService'),
+            'type_responsiblePay' => $request->input('type_responsiblePay'),
+            'typeDelivery' => $request->input('typeDelivery'),
+            'conditionPay' => $request->input('conditionPay'),
 
-            'numberDays'           => $request->input('numberDays'),
-            'creditAmount'         => $request->input('creditAmount'),
+            'numberDays' => $request->input('numberDays'),
+            'creditAmount' => $request->input('creditAmount'),
 
-            'address'              => $request->input('address'),
-            'tokenResponsible'     => $request->input('tokenResponsible'),
+            'address' => $request->input('address'),
+            'tokenResponsible' => $request->input('tokenResponsible'),
 
-            'comment'              => $request->input('comment'),
-            'paymentAmount'        => $request->input('paymentAmount'),
+            'comment' => $request->input('comment'),
+            'paymentAmount' => $request->input('paymentAmount'),
 
-            'receptionDate'        => $request->input('receptionDate'),
-            'transferLimitDate'    => $request->input('transferLimitDate'),
-            'origin_id'            => $request->input('origin_id'),
-            'destination_id'       => $request->input('destination_id'),
-            'bultosTicket'         => $request->input('bultosTicket'),
+            'receptionDate' => $request->input('receptionDate'),
+            'transferLimitDate' => $request->input('transferLimitDate'),
+            'origin_id' => $request->input('origin_id'),
+            'destination_id' => $request->input('destination_id'),
+            'bultosTicket' => $request->input('bultosTicket'),
 
-            'sender_id'            => $request->input('sender_id'),
+            'sender_id' => $request->input('sender_id'),
             // 'user_id' => auth()->user()->id ?? '1',
-            'recipient_id'         => $request->input('recipient_id'),
+            'recipient_id' => $request->input('recipient_id'),
             'pickupResponsible_id' => $request->input('pickupResponsible_id'),
-            'payResponsible_id'    => $request->input('payResponsible_id'),
-            'seller_id'            => $request->input('seller_id'),
+            'payResponsible_id' => $request->input('payResponsible_id'),
+            'seller_id' => $request->input('seller_id'),
 
-            'pointDestination_id'  => $request->input('pointDestination_id'),
-            'pointSender_id'       => $request->input('pointSender_id'),
+            'pointDestination_id' => $request->input('pointDestination_id'),
+            'pointSender_id' => $request->input('pointSender_id'),
             // 'branchOffice_id' => $request->input('branch_office_id'),
-            'office_id'            => $request->input('office_id'),
-            'user_edited_id'       => Auth::user()->id,
-            'amount_fundo'         => $request->input('amount_fundo'),
+            'office_id' => $request->input('office_id'),
+            'user_edited_id' => Auth::user()->id,
+            'amount_fundo' => $request->input('amount_fundo'),
 
         ];
 
@@ -630,11 +737,11 @@ class ReceptionController extends Controller
 
         if ($object) {
             $currentDetailIds = $object->details()->pluck('id')->toArray();
-            $detailsUpdate    = $request->input('details');
+            $detailsUpdate = $request->input('details');
 
             $newDetailIds = [];
-            $user         = Auth()->user();
-            $worker       = Worker::find($user->worker_id);
+            $user = Auth()->user();
+            $worker = Worker::find($user->worker_id);
 
             if ($worker) {
                 $branchOffice = BranchOffice::find($worker->branchOffice_id);
@@ -660,42 +767,42 @@ class ReceptionController extends Controller
                     if ($detail) {
 
                         $data = [
-                            'description'   => $detailData['description'] ?? '-',
-                            'weight'        => $detailData['weight'] ?? 0.00,
+                            'description' => $detailData['description'] ?? '-',
+                            'weight' => $detailData['weight'] ?? 0.00,
                             'paymentAmount' => $detailData['paymentAmount'] ?? 0.00,
                             //'reception_id'  => $id ?? null,
-                            'cant'          => $detailData['cant'] ?? 1,
-                            'unit'          => $detailData['unit'] ?? 'NIU',
-                            'product_id'    => isset($detailData['product_id']) ? $detailData['product_id'] : null,
-                            'tarifa_id'     => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
+                            'cant' => $detailData['cant'] ?? 1,
+                            'unit' => $detailData['unit'] ?? 'NIU',
+                            'product_id' => isset($detailData['product_id']) ? $detailData['product_id'] : null,
+                            'tarifa_id' => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
                         ];
                         $detail->update($data);
                     }
                 } else {
 
-                    $tipo         = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
-                    $resultado    = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
+                    $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
+                    $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM detail_receptions WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
                     $siguienteNum = (int) $resultado;
 
                     $data = [
-                        'numero'            => $detailData['numero'] ?? $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                        'description'       => $detailData['description'] ?? '-',
-                        'weight'            => $detailData['weight'] ?? 0.00,
-                        'paymentAmount'     => $detailData['paymentAmount'] ?? 0.00,
-                        'debtAmount'        => $detailData['debtAmount'] ?? 0.00,
-                        'costFreight'       => $detailData['costFreight'] ?? 0.00,
-                        'comissionAmount'   => $detailData['comissionAmount'] ?? 0.00,
-                        'costLoad'          => $detailData['costLoad'] ?? 0.00,
-                        'costDownload'      => $detailData['costDownload'] ?? 0.00,
-                        'comment'           => $detailData['comment'] ?? '-',
-                        'status'            => $detailData['status'] ?? 'Generada',
+                        'numero' => $detailData['numero'] ?? $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+                        'description' => $detailData['description'] ?? '-',
+                        'weight' => $detailData['weight'] ?? 0.00,
+                        'paymentAmount' => $detailData['paymentAmount'] ?? 0.00,
+                        'debtAmount' => $detailData['debtAmount'] ?? 0.00,
+                        'costFreight' => $detailData['costFreight'] ?? 0.00,
+                        'comissionAmount' => $detailData['comissionAmount'] ?? 0.00,
+                        'costLoad' => $detailData['costLoad'] ?? 0.00,
+                        'costDownload' => $detailData['costDownload'] ?? 0.00,
+                        'comment' => $detailData['comment'] ?? '-',
+                        'status' => $detailData['status'] ?? 'Generada',
                         'comissionAgent_id' => $detailData['comissionAgent_id'] ?? null,
-                        'reception_id'      => $object->id ?? null,
-                        'product_id'        => isset($detailData['product_id']) ? $detailData['product_id'] : null,
-                        'tarifa_id'         => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
+                        'reception_id' => $object->id ?? null,
+                        'product_id' => isset($detailData['product_id']) ? $detailData['product_id'] : null,
+                        'tarifa_id' => isset($detailData['tarifa_id']) ? $detailData['tarifa_id'] : null,
                     ];
 
-                    $newDetail      = $object->details()->create($data);
+                    $newDetail = $object->details()->create($data);
                     $newDetailIds[] = $newDetail->id;
                 }
             }
@@ -705,16 +812,31 @@ class ReceptionController extends Controller
 
         }
         $object->storeWeight();
-        $object = Reception::with('user', 'origin', 'office', 'sender', 'destination',
-            'recipient', 'pickupResponsible', 'payResponsible', 'moviment', 'cargos', 'branchOffice',
-            'seller', 'pointDestination', 'pointSender', 'details', 'firstCarrierGuide')->find($id);
+        $object = Reception::with(
+            'user',
+            'origin',
+            'office',
+            'sender',
+            'destination',
+            'recipient',
+            'pickupResponsible',
+            'payResponsible',
+            'moviment',
+            'cargos',
+            'branchOffice',
+            'seller',
+            'pointDestination',
+            'pointSender',
+            'details',
+            'firstCarrierGuide'
+        )->find($id);
 
         try {
             // Verifica que la relación 'firstCarrierGuide' exista
-            if (! isset($object->firstCarrierGuide)) {
+            if (!isset($object->firstCarrierGuide)) {
                 $object->status = 'Sin Guia';
                 // Verifica que 'Programming' exista en 'firstCarrierGuide'
-            } elseif (isset($object->firstCarrierGuide) && ! isset($object->firstCarrierGuide->Programming)) {
+            } elseif (isset($object->firstCarrierGuide) && !isset($object->firstCarrierGuide->Programming)) {
                 $object->status = 'Sin Programar';
             } else {
                 $object->status = 'Programado';
@@ -725,14 +847,14 @@ class ReceptionController extends Controller
         }
 
         Bitacora::create([
-            'user_id'     => Auth::id(),   // ID del usuario que realiza la acción
-            'record_id'   => $object->id,  // El ID del usuario afectado
-            'action'      => 'PUT',        // Acción realizada
-            'table_name'  => 'receptions', // Tabla afectada
-            'data'        => json_encode($object),
+            'user_id' => Auth::id(),   // ID del usuario que realiza la acción
+            'record_id' => $object->id,  // El ID del usuario afectado
+            'action' => 'PUT',        // Acción realizada
+            'table_name' => 'receptions', // Tabla afectada
+            'data' => json_encode($object),
             'description' => 'Editar Recepción',   // Descripción de la acción
-            'ip_address'  => $request->ip(),        // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address' => $request->ip(),        // Dirección IP del usuario
+            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
         // Retornar la recepción con el estado actualizado
         return response()->json($object, 200);
@@ -741,7 +863,7 @@ class ReceptionController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/reception/{id}",
+     *     path="/transportedev/public/api/reception/{id}",
      *     summary="Delete a reception",
      *     tags={"Reception"},
      *     description="Delete a reception by ID",
@@ -780,7 +902,7 @@ class ReceptionController extends Controller
     {
         $object = Reception::find($id);
 
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Reception not found'], 422);
         }
 
@@ -804,9 +926,9 @@ class ReceptionController extends Controller
         $filters = $this->extractReceptionFilters($request);
 
         // Validar branch_office_id si se proporciona
-        if (! empty($filters['branch_office_id'])) {
+        if (!empty($filters['branch_office_id'])) {
             $branchOffice = BranchOffice::find($filters['branch_office_id']);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
@@ -814,7 +936,7 @@ class ReceptionController extends Controller
         }
 
         // 2. Construir query base con solo las relaciones necesarias
-        $query = Reception:: select(
+        $query = Reception::select(
             'receptions.*',
             DB::raw('(
                 SELECT GROUP_CONCAT(description SEPARATOR ", ")
@@ -827,22 +949,22 @@ class ReceptionController extends Controller
             $join->on('receptions.id', '=', 'carrier_guides.reception_id')
                 ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
         })->with([
-            'user:id,username',
-            'origin:id,name',
-            'sender',
-            'destination:id,name',
-            'recipient',
-            'payResponsible',
-            // 'firstCarrierGuide' => function ($query) {
-            //     $query->select(
-            //         'carrier_guides.id',
-            //         'carrier_guides.reception_id',
-            //         'carrier_guides.numero',
-            //         'carrier_guides.programming_id'
-            //     );
-            // },
-            'moviment:id,reception_id,sequentialNumber',
-        ]);
+                    'user:id,username',
+                    'origin:id,name',
+                    'sender',
+                    'destination:id,name',
+                    'recipient',
+                    'payResponsible',
+                    // 'firstCarrierGuide' => function ($query) {
+                    //     $query->select(
+                    //         'carrier_guides.id',
+                    //         'carrier_guides.reception_id',
+                    //         'carrier_guides.numero',
+                    //         'carrier_guides.programming_id'
+                    //     );
+                    // },
+                    'moviment:id,reception_id,sequentialNumber',
+                ]);
 
         // 3. Aplicar filtros
         $this->applyReceptionFilters($query, $filters);
@@ -869,18 +991,18 @@ class ReceptionController extends Controller
     protected function extractReceptionFilters(Request $request)
     {
         return [
-            'branch_office_id'   => $request->input('branch_office_id'),
-            'codeReception'      => $request->input('codeReception'),
-            'dateStart'          => $request->input('dateStart'),
-            'dateEnd'            => $request->input('dateEnd'),
-            'nombreClientePaga'  => $request->input('nombreClientePaga') ? strtoupper($request->input('nombreClientePaga')) : null,
-            'nombreRemitente'    => $request->input('nombreRemitente') ? strtoupper($request->input('nombreRemitente')) : null,
+            'branch_office_id' => $request->input('branch_office_id'),
+            'codeReception' => $request->input('codeReception'),
+            'dateStart' => $request->input('dateStart'),
+            'dateEnd' => $request->input('dateEnd'),
+            'nombreClientePaga' => $request->input('nombreClientePaga') ? strtoupper($request->input('nombreClientePaga')) : null,
+            'nombreRemitente' => $request->input('nombreRemitente') ? strtoupper($request->input('nombreRemitente')) : null,
             'nombreDestinatario' => $request->input('nombreDestinatario') ? strtoupper($request->input('nombreDestinatario')) : null,
-            'numberVenta'        => $request->input('numberVenta'),
-            'numberGuia'         => $request->input('numberGuia'),
-            'origenOrDestino'    => $request->input('origenOrDestino') ? strtoupper($request->input('origenOrDestino')) : null,
-            'isCargos'           => $request->input('isCargos'),
-            'statusReception'    => $request->input('statusReception'),
+            'numberVenta' => $request->input('numberVenta'),
+            'numberGuia' => $request->input('numberGuia'),
+            'origenOrDestino' => $request->input('origenOrDestino') ? strtoupper($request->input('origenOrDestino')) : null,
+            'isCargos' => $request->input('isCargos'),
+            'statusReception' => $request->input('statusReception'),
         ];
     }
 
@@ -890,21 +1012,21 @@ class ReceptionController extends Controller
     protected function applyReceptionFilters($query, $filters)
     {
         // Filtro por sucursal
-        if (! empty($filters['branch_office_id'])) {
+        if (!empty($filters['branch_office_id'])) {
             $query->where('receptions.branchOffice_id', $filters['branch_office_id']);
         }
 
         // Filtro por código recepción
-        if (! empty($filters['codeReception'])) {
+        if (!empty($filters['codeReception'])) {
             $query->where('receptions.codeReception', 'LIKE', '%' . $filters['codeReception'] . '%');
         }
 
         // Filtros por fechas
-        if (! empty($filters['dateStart'])) {
+        if (!empty($filters['dateStart'])) {
             $query->whereDate('receptions.receptionDate', '>=', $filters['dateStart']);
         }
 
-        if (! empty($filters['dateEnd'])) {
+        if (!empty($filters['dateEnd'])) {
             $query->whereDate('receptions.receptionDate', '<=', $filters['dateEnd']);
         }
 
@@ -914,7 +1036,7 @@ class ReceptionController extends Controller
         //         $q->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
         //     });
         // }
-        if (! empty($filters['numberGuia'])) {
+        if (!empty($filters['numberGuia'])) {
             $query->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
         }
 
@@ -922,7 +1044,7 @@ class ReceptionController extends Controller
         $this->applyNameFiltersToQuery($query, $filters);
 
         // Filtro por origen o destino
-        if (! empty($filters['origenOrDestino'])) {
+        if (!empty($filters['origenOrDestino'])) {
             $query->where(function ($q) use ($filters) {
                 $q->whereHas('origin', function ($subq) use ($filters) {
                     $subq->where(DB::raw('UPPER(name)'), 'LIKE', '%' . $filters['origenOrDestino'] . '%');
@@ -933,7 +1055,7 @@ class ReceptionController extends Controller
         }
 
         // Filtro por número de venta
-        if (! empty($filters['numberVenta'])) {
+        if (!empty($filters['numberVenta'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('receptions.nro_sale', $filters['numberVenta'])
                     ->orWhere(function ($sq) use ($filters) {
@@ -946,7 +1068,7 @@ class ReceptionController extends Controller
         }
 
         // Filtro por cargos
-        if (! empty($filters['isCargos'])) {
+        if (!empty($filters['isCargos'])) {
             if ($filters['isCargos'] == "true") {
                 $query->whereHas('cargos');
             } else {
@@ -955,7 +1077,7 @@ class ReceptionController extends Controller
         }
 
         // Filtro por estado
-        if (! empty($filters['statusReception'])) {
+        if (!empty($filters['statusReception'])) {
             $query->where(function ($q) use ($filters) {
                 if ($filters['statusReception'] === 'Sin Guia') {
                     $q->whereDoesntHave('firstCarrierGuide');
@@ -978,21 +1100,21 @@ class ReceptionController extends Controller
     protected function applyNameFiltersToQuery($query, $filters)
     {
         // Filtro por remitente
-        if (! empty($filters['nombreRemitente'])) {
+        if (!empty($filters['nombreRemitente'])) {
             $query->whereHas('sender', function ($q) use ($filters) {
                 $this->applyNameFilter($q, $filters['nombreRemitente']);
             });
         }
 
         // Filtro por destinatario
-        if (! empty($filters['nombreDestinatario'])) {
+        if (!empty($filters['nombreDestinatario'])) {
             $query->whereHas('recipient', function ($q) use ($filters) {
                 $this->applyNameFilter($q, $filters['nombreDestinatario']);
             });
         }
 
         // Filtro por cliente que paga
-        if (! empty($filters['nombreClientePaga'])) {
+        if (!empty($filters['nombreClientePaga'])) {
             $query->whereHas('payResponsible', function ($q) use ($filters) {
                 $this->applyNameFilter($q, $filters['nombreClientePaga']);
             });
@@ -1022,7 +1144,7 @@ class ReceptionController extends Controller
             return '-'; // Si $person es nulo, retornamos un valor predeterminado
         }
 
-        $typeD  = $person->typeofDocument ?? 'dni';
+        $typeD = $person->typeofDocument ?? 'dni';
         $cadena = '';
 
         if (strtolower($typeD) === 'ruc') {
@@ -1058,12 +1180,12 @@ class ReceptionController extends Controller
     protected function processReceptionData($receptions, $detailsMap)
     {
         $exportData = [];
-        $totals     = ['flete' => 0, 'deuda' => 0, 'peso' => 0];
+        $totals = ['flete' => 0, 'deuda' => 0, 'peso' => 0];
 
         foreach ($receptions as $reception) {
             // Determinar estado
             $status = 'No asignado';
-            if (! $reception->firstCarrierGuide) {
+            if (!$reception->firstCarrierGuide) {
                 $status = 'Sin Guia';
             } elseif ($reception->firstCarrierGuide && empty($reception->firstCarrierGuide->programming_id)) {
                 $status = 'Sin Programar';
@@ -1073,13 +1195,16 @@ class ReceptionController extends Controller
 
             // Obtener descripción de carga
             $carga = isset($detailsMap[$reception->id])
-            ? $detailsMap[$reception->id]->pluck('description')->implode(', ')
-            : '-';
+                ? $detailsMap[$reception->id]->pluck('description')->implode(', ')
+                : '-';
 
-            $reception->firstCarrierGuide= CarrierGuide::with([
+            $reception->firstCarrierGuide = CarrierGuide::with([
                 'districtStart.province.department',
                 'districtEnd.province.department',
-                'motive', 'sender', 'recipient', 'payResponsible',
+                'motive',
+                'sender',
+                'recipient',
+                'payResponsible',
                 'programming',
                 'programming.tract',
                 'programming.platform',
@@ -1089,25 +1214,25 @@ class ReceptionController extends Controller
 
             // Preparar datos para exportación
             $exportData[] = [
-                'COD RECEPCION'     => (string) ($reception->codeReception ?? ''),
-                'FECHA SOLIC.'      => $reception->receptionDate
-                ? Carbon::parse($reception->receptionDate)->format('Y-m-d')
-                : '',
-                'REMITENTE'         => (string) ($this->namePerson($reception->sender) ?? ''),
-                'DESTINATARIO.'     => (string) $this->namePerson($reception->recipient),
-                'ORIGEN'            => (string) ($reception->origin->name ?? ''),
-                'DESTINO'           => (string) ($reception->destination->name ?? ''),
-                'CLIENTE PAGA'      => (string) $this->namePerson($reception->payResponsible),
+                'COD RECEPCION' => (string) ($reception->codeReception ?? ''),
+                'FECHA SOLIC.' => $reception->receptionDate
+                    ? Carbon::parse($reception->receptionDate)->format('Y-m-d')
+                    : '',
+                'REMITENTE' => (string) ($this->namePerson($reception->sender) ?? ''),
+                'DESTINATARIO.' => (string) $this->namePerson($reception->recipient),
+                'ORIGEN' => (string) ($reception->origin->name ?? ''),
+                'DESTINO' => (string) ($reception->destination->name ?? ''),
+                'CLIENTE PAGA' => (string) $this->namePerson($reception->payResponsible),
                 'DOCUMENTOS ANEXOS' => (string) ($reception->comment ?? ''),
-                'FLETE'             => (string) ($reception->paymentAmount ?? 0),
-                'DEUDA'             => (string) ($reception->debtAmount ?? 0),
-                'CARGA'             => (string) $carga,
-                'PESO'              => (string) ($reception->netWeight ?? 0),
-                'GUIA'              => (string) ($reception->firstCarrierGuide->numero ?? 'Sin Guia'),
-                'DOC. VENTA'        => (string) ($reception->nro_sale ??
+                'FLETE' => (string) ($reception->paymentAmount ?? 0),
+                'DEUDA' => (string) ($reception->debtAmount ?? 0),
+                'CARGA' => (string) $carga,
+                'PESO' => (string) ($reception->netWeight ?? 0),
+                'GUIA' => (string) ($reception->firstCarrierGuide->numero ?? 'Sin Guia'),
+                'DOC. VENTA' => (string) ($reception->nro_sale ??
                     ($reception->moviment->sequentialNumber ?? 'Sin Venta')),
-                'ESTADO RECEPCIÓN'  => $status,
-                'USUARIO'           => (string) ($reception->user->username ?? 'No asignado'),
+                'ESTADO RECEPCIÓN' => $status,
+                'USUARIO' => (string) ($reception->user->username ?? 'No asignado'),
             ];
 
             // Acumular totales
@@ -1118,26 +1243,26 @@ class ReceptionController extends Controller
 
         // Añadir fila de totales
         $exportData[] = [
-            'COD RECEPCION'     => '',
-            'FECHA SOLIC.'      => '',
-            'REMITENTE'         => '',
-            'DESTINATARIO.'     => '',
-            'ORIGEN'            => '',
-            'DESTINO'           => '',
-            'CLIENTE PAGA'      => '',
+            'COD RECEPCION' => '',
+            'FECHA SOLIC.' => '',
+            'REMITENTE' => '',
+            'DESTINATARIO.' => '',
+            'ORIGEN' => '',
+            'DESTINO' => '',
+            'CLIENTE PAGA' => '',
             'DOCUMENTOS ANEXOS' => 'TOTAL',
-            'FLETE'             => (string) $totals['flete'],
-            'DEUDA'             => (string) $totals['deuda'],
-            'CARGA'             => '',
-            'PESO'              => (string) $totals['peso'],
-            'GUIA'              => '',
-            'DOC. VENTA'        => '',
-            'ESTADO RECEPCIÓN'  => '',
-            'USUARIO'           => '',
+            'FLETE' => (string) $totals['flete'],
+            'DEUDA' => (string) $totals['deuda'],
+            'CARGA' => '',
+            'PESO' => (string) $totals['peso'],
+            'GUIA' => '',
+            'DOC. VENTA' => '',
+            'ESTADO RECEPCIÓN' => '',
+            'USUARIO' => '',
         ];
 
         return [
-            'data'   => $exportData,
+            'data' => $exportData,
             'totals' => $totals,
         ];
     }

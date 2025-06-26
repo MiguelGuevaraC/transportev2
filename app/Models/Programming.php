@@ -197,6 +197,9 @@ class Programming extends Model
         'programming_id',
         'status',
 
+        'data_tercerizar_programming',
+        'is_tercerizar_programming',
+
         'user_edited_id',
         'user_deleted_id',
         'user_created_id',

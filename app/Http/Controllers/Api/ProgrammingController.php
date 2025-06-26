@@ -26,7 +26,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/programming",
+     *     path="/transportedev/public/api/programming",
      *     summary="Get all programming",
      *     tags={"Programming"},
      *     description="Show all programming",
@@ -265,7 +265,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/programming",
+     *     path="/transportedev/public/api/programming",
      *     summary="Create a new programming",
      *     tags={"Programming"},
      *     description="Create a new programming",
@@ -347,11 +347,25 @@ class ProgrammingController extends Controller
             'assistant4_id' => 'nullable|exists:workers,id',
             'detailsReceptions' => 'nullable|array',
             'isload' => 'nullable|boolean',
+
+            // Campos del JSON data_tercerizar_programming
+            'is_tercerizar_programming' => 'required|boolean',
+            'data_tercerizar_programming.driver_names' => 'required_if:is_tercerizar_programming,1|string|max:255',
+            'data_tercerizar_programming.vehicle_plate' => 'required_if:is_tercerizar_programming,1|string|max:20',
+            'data_tercerizar_programming.company_names' => 'required_if:is_tercerizar_programming,1|string|max:255',
+            'data_tercerizar_programming.is_igv' => 'required_if:is_tercerizar_programming,1|boolean',
+            'data_tercerizar_programming.monto' => 'required_if:is_tercerizar_programming,1|numeric|min:0',
         ], [
             'tract_id.exists' => 'El tracto seleccionado está ocupado.',
             'platform_id.exists' => 'La plataforma seleccionada está ocupada.',
             'driver_id.exists' => 'El conductor seleccionado está ocupado.',
             'copilot_id.exists' => 'El copiloto seleccionado está ocupado.',
+
+            'data_tercerizar_programming.driver_names.required_if' => 'El nombre del conductor es obligatorio en programación tercerizada.',
+            'data_tercerizar_programming.vehicle_plate.required_if' => 'La placa del vehículo es obligatoria en programación tercerizada.',
+            'data_tercerizar_programming.company_names.required_if' => 'El nombre de la empresa es obligatorio en programación tercerizada.',
+            'data_tercerizar_programming.is_igv.required_if' => 'Debe indicar si incluye IGV en programación tercerizada.',
+            'data_tercerizar_programming.monto.required_if' => 'El monto es obligatorio en programación tercerizada.',
         ]);
 
         // Manejo de la sucursal
@@ -384,6 +398,11 @@ class ProgrammingController extends Controller
             'branchOffice_id' => $branch_office_id,
             'isload' => $request->input('isload', 0),
             'user_created_id' => Auth::user()->id,
+
+            'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
+            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
+
+
         ];
 
         // Creación del objeto Programming
@@ -501,7 +520,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transporte/public/api/programming/{id}",
+     *     path="/transportedev/public/api/programming/{id}",
      *     summary="Get a programming by ID",
      *     tags={"Programming"},
      *     description="Retrieve a programming by its ID",
@@ -559,7 +578,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transporte/public/api/programming/{id}",
+     *     path="/transportedev/public/api/programming/{id}",
      *     summary="Update an existing programming",
      *     tags={"Programming"},
      *     description="Update an existing programming",
@@ -644,6 +663,20 @@ class ProgrammingController extends Controller
             'detailsReceptions' => 'nullable|array',
             'branch_office_id' => 'nullable|exists:branch_offices,id',
             'isload' => 'nullable|boolean',
+
+            // Validación opcional de campos internos del JSON en update
+            'is_tercerizar_programming' => 'nullable|boolean',
+            'data_tercerizar_programming.driver_names' => 'nullable|string|max:255',
+            'data_tercerizar_programming.vehicle_plate' => 'nullable|string|max:20',
+            'data_tercerizar_programming.company_names' => 'nullable|string|max:255',
+            'data_tercerizar_programming.is_igv' => 'nullable|boolean',
+            'data_tercerizar_programming.monto' => 'nullable|numeric|min:0',
+        ], [
+            // Mensajes personalizados (opcional)
+            'tract_id.exists' => 'El tracto seleccionado no existe.',
+            'platform_id.exists' => 'La plataforma seleccionada no existe.',
+            'driver_id.exists' => 'El conductor seleccionado no existe.',
+            'copilot_id.exists' => 'El copiloto seleccionado no existe.',
         ]);
 
         if ($validator->fails()) {
@@ -684,6 +717,9 @@ class ProgrammingController extends Controller
             'branch_office_id' => $request->input('branch_office_id') ?? null,
             'isload' => $request->input('isload') ?? null,
             'user_edited_id' => Auth::user()->id,
+            'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
+            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
+
         ];
 
         $object->update($data);
@@ -882,7 +918,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transporte/public/api/reprogramming/{id}",
+     *     path="/transportedev/public/api/reprogramming/{id}",
      *     summary="reprogram an existing programming",
      *     tags={"Programming"},
      *     description="reprogram an existing programming",
@@ -1047,7 +1083,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transporte/public/api/programming/{id}",
+     *     path="/transportedev/public/api/programming/{id}",
      *     summary="Delete a Programming",
      *     tags={"Programming"},
      *     description="Delete a Programming by ID",
@@ -1150,7 +1186,7 @@ class ProgrammingController extends Controller
 
     /**
      * @OA\PUT(
-     *     path="/transporte/public/api/finishProgramming/{id}",
+     *     path="/transportedev/public/api/finishProgramming/{id}",
      *     summary="Get a programming by ID",
      *     tags={"Programming"},
      *     description="Retrieve a programming by its ID and mark it as finished",

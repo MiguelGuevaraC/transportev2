@@ -11,7 +11,7 @@ class AccessController extends Controller
     /**
      * Get all Access
      * @OA\Get (
-     *     path="/transporte/public/api/access",
+     *     path="/transportedev/public/api/access",
      *     tags={"Access"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
