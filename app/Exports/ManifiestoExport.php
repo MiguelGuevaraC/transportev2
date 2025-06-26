@@ -30,12 +30,14 @@ class ManifiestoExport implements FromCollection, WithStyles
             'F. VIAJE',
             'ORIGEN',
             'DESTINO',
+            "CONDUCTOR",
             'TRACTO',
             'CARRETA',
             'TOTAL PESO',
             'ESTADO',
             'ESTADO DE GASTO',
             'LIQUIDACIÓN',
+            
         ];
         foreach ($this->data1 as $row) {
             $result[] = $row;
@@ -86,10 +88,10 @@ class ManifiestoExport implements FromCollection, WithStyles
         }
 
         // Estilos para el encabezado de la primera tabla (fila 2)
-        $sheet->getStyle('A2:J2')->getFont()->setBold(true);
-        $sheet->getStyle('A2:J2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A2:J2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A2:J2')->getFill()->getStartColor()->setARGB('FFCCCCCC'); // Gris claro
+        $sheet->getStyle('A2:K2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:K2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:K2')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('A2:K2')->getFill()->getStartColor()->setARGB('FFCCCCCC'); // Gris claro
 
         // Estilos para el encabezado de la segunda tabla
         // Buscar la fila en la que comienza la segunda tabla

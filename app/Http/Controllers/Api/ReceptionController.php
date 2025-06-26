@@ -12,10 +12,12 @@ use App\Models\Route;
 use App\Models\Worker;
 use App\Services\CommonService;
 use Carbon\Carbon;
+use Carbon\Traits\ToStringFormat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Excel;
 
 class ReceptionController extends Controller
@@ -230,34 +232,40 @@ class ReceptionController extends Controller
      *     )
      * )
      */
-    public function verifyDocAnexoAlreadyExist(int $senderId, string $doc_anexos, ?int $excludeReceptionId = null)
-    {
-        $docs = collect(explode(',', $doc_anexos))->map(fn($d) => trim($d));
+   public function verifyDocAnexoAlreadyExist(string $senderId, string $doc_anexos, ?int $excludeReceptionId = null)
+{
+    $docs = collect(explode(',', $doc_anexos))->map(fn($d) => trim($d));
 
-        $conflictsQuery = DB::table('receptions')
-            ->where('sender_id', $senderId)
-            ->whereNull('deleted_at');
+    $conflictsQuery = DB::table('receptions')
+        ->select('id', 'comment', 'codeReception')
+        ->where('sender_id', $senderId)
+        ->whereNull('deleted_at');
 
-        if ($excludeReceptionId) {
-            $conflictsQuery->where('id', '!=', $excludeReceptionId);
-        }
+    if ($excludeReceptionId) {
+        $conflictsQuery->where('id', '!=', $excludeReceptionId);
+    }
 
-        $conflicts = $conflictsQuery
-            ->where(function ($q) use ($docs) {
-                $docs->each(fn($doc) => $q->orWhere('comment', 'LIKE', "%{$doc}%"));
-            })
-            ->pluck('comment')
-            ->flatMap(fn($c) => array_map('trim', explode(',', $c)))
-            ->intersect($docs);
+    $conflictsRaw = $conflictsQuery->get();
 
-        if ($conflicts->isNotEmpty()) {
-            abort(response()->json([
-                'success' => false,
-                'message' => 'Ya existen los siguientes documentos en otra recepción del remitente.',
-                'conflictos' => $conflicts->values(),
-            ], 422));
+    $conflicts = collect();
+
+    foreach ($conflictsRaw as $row) {
+        $documentos = collect(explode(',', $row->comment))->map(fn($doc) => trim($doc));
+        $duplicados = $documentos->intersect($docs);
+
+        foreach ($duplicados as $dup) {
+            $conflicts->push("• {$dup} (Recepción: {$row->codeReception})");
         }
     }
+
+    if ($conflicts->isNotEmpty()) {
+        $mensaje = "Ya existen los siguientes documentos en otra recepción del remitente:\n\n" . $conflicts->implode("\n");
+
+        throw ValidationException::withMessages([
+            'message' => [$mensaje],
+        ]);
+    }
+}
 
 
 
@@ -310,13 +318,13 @@ class ReceptionController extends Controller
 
         try {
             $this->verifyDocAnexoAlreadyExist(
-                $request->input('seller_id'),
-                $request->input('comment'),
+                $request->input('sender_id'),
+                $request->input('comment')
             );
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validación de documentos anexos fallida: ',
+                'message' => $e->getMessage(),
             ], 422);
         }
 
@@ -661,14 +669,14 @@ class ReceptionController extends Controller
 
         try {
             $this->verifyDocAnexoAlreadyExist(
-                $request->input('seller_id'),
+                $request->input('sender_id'),
                 $request->input('comment'),
-                $request->input('id') // null si es nuevo, o el ID si se está editando
+                $id // null si es nuevo, o el ID si se está editando
             );
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validación de documentos anexos fallida: ',
+                'message' => $e->getMessage(),
             ], 422);
         }
 

@@ -58,7 +58,6 @@
         if (is_string($dataTercerizada)) {
             $dataTercerizada = json_decode($dataTercerizada, true);
         }
-
         $driverName = $dataTercerizada['driver_names'] ?? $driverName;
         $vehiclePlate = $dataTercerizada['vehicle_plate'] ?? $vehiclePlate;
         $companyName = $dataTercerizada['company_names'] ?? '-';
@@ -253,7 +252,7 @@
                     <tbody class="section">
                         <tr>
                             <td class="font-12 tdInfo"><b>CONDUCTOR:</b></td>
-                            <td class="font-12 left">{{ $conductorName }}</td>
+                            <td class="font-12 left">{{ $driverName }}</td>
 
                             <td class="font-12 tdInfo"><b>PLATAFORMA:</b></td>
                             <td class="font-12 left">
@@ -262,7 +261,7 @@
 
 
                             <td class="font-12 tdInfo"><b>TOTAL GRT:</b></td>
-                            <td class="font-12 left"{{>$monto}}</td>
+                            <td class="font-12 left"{{$monto}}</td>
                         </tr>
                     </tbody>
                 </table>
