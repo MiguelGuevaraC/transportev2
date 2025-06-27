@@ -101,6 +101,10 @@ class ProgrammingController extends Controller
 
         // Construir la consulta de programación
         $programmingQuery = Programming::with([
+            'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
@@ -204,12 +208,9 @@ class ProgrammingController extends Controller
         $list->getCollection()->each(function ($programming) {
             // Año de la programación
             $year = Carbon::parse($programming->created_at)->year;
-            if (!$programming->tract) {
-                return; // Saltamos esta iteración
-            }
-            // ID del vehículo
-            $vehicleId = $programming?->tract?->serie;
 
+            // ID del vehículo
+            $vehicleId = $programming->tract->serie;
 
             // ID de la oficina (branchOffice_id) que se usará como parte del número de programación
             $branchOfficeId = str_pad($programming->branchOffice_id, 3, '0', STR_PAD_LEFT); // Aseguramos que tenga 3 dígitos
@@ -403,7 +404,7 @@ class ProgrammingController extends Controller
             'user_created_id' => Auth::user()->id,
 
             'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
-            'data_tercerizar_programming' => json_encode($request->input('data_tercerizar_programming')),
+            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
 
 
         ];
@@ -488,6 +489,10 @@ class ProgrammingController extends Controller
 
         // Retornar la respuesta con la información relacionada
         $object = Programming::with([
+            'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
@@ -561,6 +566,10 @@ class ProgrammingController extends Controller
     public function show($id)
     {
         $object = Programming::with(
+            'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
@@ -721,7 +730,7 @@ class ProgrammingController extends Controller
             'isload' => $request->input('isload') ?? null,
             'user_edited_id' => Auth::user()->id,
             'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
-            'data_tercerizar_programming' => json_encode($request->input('data_tercerizar_programming')),
+            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
 
         ];
 
@@ -887,6 +896,10 @@ class ProgrammingController extends Controller
 
         // Devolver la respuesta con la información relacionada
         $object = Programming::with([
+           'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
@@ -1155,8 +1168,12 @@ class ProgrammingController extends Controller
 
             $object->save();
             $object2 = Programming::with(
-                'tract.photos',
-                'platform.photos',
+                'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
+            'tract.photos',
+            'platform.photos',
                 'origin',
                 'destination',
                 'detailsWorkers',
@@ -1263,6 +1280,10 @@ class ProgrammingController extends Controller
         $object->carrierGuides()->update(['status' => 'Entregado']); // O el estado que desees
 
         $object = Programming::with([
+           'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
@@ -1337,6 +1358,10 @@ class ProgrammingController extends Controller
         $object->statusLiquidacion = 'Liquidada';
         $object->save();
         $object = Programming::with(
+        'tract',
+            'platform',
+            'tract.typeCarroceria',
+            'tract.typeCarroceria.typeCompany',
             'tract.photos',
             'platform.photos',
             'origin',
