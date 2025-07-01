@@ -100,7 +100,7 @@ class MaintananceController extends Controller
         $data           = $request->validated();
         $data['status'] = 'Pendiente';
         $maintenance    = $this->maintenanceService->createMaintenance($data);
-        return new MaintenanceResource($maintenance);
+        return new MaintenanceResource(Maintenance::find($maintenance->id));
     }
 
 /**

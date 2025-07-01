@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Http\Requests\MaintenanceRequest;
 
 use App\Http\Requests\StoreRequest;
-use App\Models\User;
 use App\Models\Vehicle;
 
 /**
@@ -17,9 +17,19 @@ use App\Models\Vehicle;
  *     @OA\Property(property="date_maintenance", type="string", format="date", description="Fecha de mantenimiento"),
  *     @OA\Property(property="vehicle_id", type="integer", description="ID del vehículo"),
  *     @OA\Property(property="taller_id", type="integer", description="ID del taller"),
+ *     @OA\Property(
+ *         property="maintenance_operations",
+ *         type="array",
+ *         description="Detalle opcional de operaciones de mantenimiento",
+ *         @OA\Items(
+ *             @OA\Property(property="type_moviment", type="string", description="Tipo de movimiento (CORRECTIVO o PREVENTIVO)"),
+ *             @OA\Property(property="name", type="string", description="Nombre del insumo o tarea"),
+ *             @OA\Property(property="quantity", type="number", format="float", description="Cantidad"),
+ *             @OA\Property(property="unity", type="string", description="Unidad de medida")
+ *         )
+ *     )
  * )
  */
-
 class StoreMaintenanceRequest extends StoreRequest
 {
     /**
@@ -56,6 +66,13 @@ class StoreMaintenanceRequest extends StoreRequest
                 },
             ],
             'taller_id'        => 'required|integer|exists:tallers,id',
+
+            // Campo opcional de operaciones
+            'maintenance_operations'               => 'nullable|array',
+            'maintenance_operations.*.type_moviment' => 'required_with:maintenance_operations|string|in:CORRECTIVO,PREVENTIVO',
+            'maintenance_operations.*.name'        => 'required_with:maintenance_operations|string|max:255',
+            'maintenance_operations.*.quantity'    => 'required_with:maintenance_operations|numeric|min:0',
+            'maintenance_operations.*.unity'       => 'required_with:maintenance_operations|string|max:100',
         ];
     }
 
@@ -84,6 +101,14 @@ class StoreMaintenanceRequest extends StoreRequest
             'taller_id.required'        => 'El taller es obligatorio.',
             'taller_id.integer'         => 'El ID del taller debe ser un número entero.',
             'taller_id.exists'          => 'El taller seleccionado no existe.',
+
+            'maintenance_operations.array'                        => 'El campo de operaciones debe ser un arreglo.',
+            'maintenance_operations.*.type_moviment.required_with'=> 'El tipo de movimiento es obligatorio para cada operación.',
+            'maintenance_operations.*.type_moviment.in'           => 'El tipo de movimiento debe ser "CORRECTIVO" o "PREVENTIVO".',
+            'maintenance_operations.*.name.required_with'         => 'El nombre del insumo o tarea es obligatorio.',
+            'maintenance_operations.*.quantity.required_with'     => 'La cantidad es obligatoria.',
+            'maintenance_operations.*.quantity.numeric'           => 'La cantidad debe ser un número.',
+            'maintenance_operations.*.unity.required_with'        => 'La unidad de medida es obligatoria.',
         ];
     }
 }

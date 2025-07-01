@@ -1,11 +1,10 @@
 <?php
+
 namespace App\Http\Requests\MaintenanceRequest;
 
 use App\Http\Requests\UpdateRequest;
 use App\Models\Maintenance;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Validation\Rule;
 
 class UpdateMaintenanceRequest extends UpdateRequest
 {
@@ -24,26 +23,33 @@ class UpdateMaintenanceRequest extends UpdateRequest
      *
      * @return array
      */
-
     public function rules(): array
     {
         return [
-            'type'             => 'nullable|string|in:PROPIO,EXTERNO',        // Solo puede ser 'PROPIO' o 'EXTERNO'
-            'mode'             => 'nullable|string|in:CORRECTIVO,PREVENTIVO', // Solo puede ser 'CORRECTIVO' o 'PREVENTIVO'
-            'km'               => 'nullable|integer|min:0',                   // Kilometraje debe ser un número positivo
-            'date_maintenance' => 'nullable|date',                            // Fecha debe ser una fecha válida
-            'vehicle_id'       => 'nullable|integer|exists:vehicles,id',      // Debe ser un ID de vehículo válido
-            'taller_id'        => 'nullable|integer|exists:tallers,id',       // Debe ser un ID de taller válido
+            'type'             => 'nullable|string|in:PROPIO,EXTERNO',
+            'mode'             => 'nullable|string|in:CORRECTIVO,PREVENTIVO',
+            'km'               => 'nullable|integer|min:0',
+            'date_maintenance' => 'nullable|date',
+            'vehicle_id'       => 'nullable|integer|exists:vehicles,id',
+            'taller_id'        => 'nullable|integer|exists:tallers,id',
             'status'           => 'nullable|in:Finalizado,Pendiente',
             'date_end'         => 'required_if:status,Finalizado|date|nullable',
 
+            // Operaciones opcionales
+            'maintenance_operations'                   => 'nullable|array',
+            'maintenance_operations.*.id'              => 'nullable|integer|exists:maintenance_operations,id',
+            'maintenance_operations.*.type_moviment'   => 'required_with:maintenance_operations|string|in:CORRECTIVO,PREVENTIVO',
+            'maintenance_operations.*.name'            => 'required_with:maintenance_operations|string|max:255',
+            'maintenance_operations.*.quantity'        => 'required_with:maintenance_operations|numeric|min:0',
+            'maintenance_operations.*.unity'           => 'required_with:maintenance_operations|string|max:100',
         ];
     }
+
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             $maintenance = Maintenance::find($this->id);
-    
+
             if ($maintenance && $this->date_end && Carbon::parse($this->date_end)->lt(Carbon::parse($maintenance->date_maintenance))) {
                 $validator->errors()->add(
                     'date_end',
@@ -78,10 +84,18 @@ class UpdateMaintenanceRequest extends UpdateRequest
             'taller_id.required'        => 'El taller es obligatorio.',
             'taller_id.integer'         => 'El ID del taller debe ser un número entero.',
             'taller_id.exists'          => 'El taller seleccionado no existe.',
-
             'date_end.required_if'      => 'La fecha de finalización es obligatoria cuando el estado es Finalizado.',
             'date_end.date'             => 'La fecha de finalización debe ser una fecha válida.',
+
+            'maintenance_operations.array'                          => 'Las operaciones deben estar en formato de arreglo.',
+            'maintenance_operations.*.id.integer'                   => 'El ID de la operación debe ser un número entero.',
+            'maintenance_operations.*.id.exists'                    => 'El ID de la operación no existe.',
+            'maintenance_operations.*.type_moviment.required_with'  => 'El tipo de movimiento es obligatorio.',
+            'maintenance_operations.*.type_moviment.in'             => 'El tipo de movimiento debe ser "CORRECTIVO" o "PREVENTIVO".',
+            'maintenance_operations.*.name.required_with'           => 'El nombre del ítem es obligatorio.',
+            'maintenance_operations.*.quantity.required_with'       => 'La cantidad es obligatoria.',
+            'maintenance_operations.*.quantity.numeric'             => 'La cantidad debe ser un número.',
+            'maintenance_operations.*.unity.required_with'          => 'La unidad de medida es obligatoria.',
         ];
     }
-
 }

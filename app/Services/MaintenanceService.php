@@ -6,12 +6,13 @@ use App\Models\Vehicle;
 
 class MaintenanceService
 {
-    protected $commonService;
+    protected MaintenanceOperationService $operationService;
 
-    public function __construct(CommonService $commonService)
+    public function __construct(MaintenanceOperationService $operationService)
     {
-        $this->commonService = $commonService;
+        $this->operationService = $operationService;
     }
+
 
     public function getMaintenanceById(int $id): ?Maintenance
     {
@@ -20,6 +21,7 @@ class MaintenanceService
 
     public function createMaintenance(array $data): Maintenance
     {
+
         $maintenance = Maintenance::create($data);
 
         if ($maintenance && $maintenance->vehicle_id) {
@@ -29,19 +31,35 @@ class MaintenanceService
             }
         }
 
+        // Crear operaciones si existen
+        if (!empty($data['operations'])) {
+            $this->operationService->createMaintenanceOperation($maintenance->id, $data['operations']);
+        }
         return $maintenance;
     }
 
-    public function updateMaintenance(Maintenance $Maintenance, array $data): Maintenance
+    public function updateMaintenance(Maintenance $maintenance, array $data): Maintenance
     {
-        $filteredData = array_intersect_key($data, $Maintenance->getAttributes());
-        $Maintenance->update($filteredData);
-        if ($Maintenance->status == "Finalizado") {
-            $vehicle = Vehicle::find($Maintenance->vehicle_id);
-            $vehicle->update(['status' => 'Disponible']);
+        // 1. Actualizar datos base del mantenimiento
+        $filteredData = array_intersect_key($data, $maintenance->getAttributes());
+        $maintenance->update($filteredData);
+
+        // 2. Actualizar estado del vehículo si finalizado
+        if ($maintenance->status === "Finalizado" && $maintenance->vehicle_id) {
+            $vehicle = Vehicle::find($maintenance->vehicle_id);
+            if ($vehicle) {
+                $vehicle->update(['status' => 'Disponible']);
+            }
         }
-        return $Maintenance;
+
+        // 3. Sincronizar operaciones
+        if (!empty($data['operations'])) {
+            $this->operationService->syncMaintenanceOperations($maintenance, $data['operations']);
+        }
+
+        return $maintenance;
     }
+
 
     public function destroyById($id)
     {

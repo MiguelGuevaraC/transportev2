@@ -54,4 +54,9 @@ class Maintenance extends Model
     {
         return $this->hasMany(MaintenanceDetail::class);
     }
+
+    public function maintenance_operations()
+    {
+        return $this->hasMany(MaintenanceOperation::class);
+    }
 }

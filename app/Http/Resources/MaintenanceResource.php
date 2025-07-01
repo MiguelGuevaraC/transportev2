@@ -27,19 +27,22 @@ class MaintenanceResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'               => $this->id ?? null,
-            'type'             => $this->type ?? null,
-            'mode'             => $this->mode ?? null, // Assuming "mode" is similar to "type"
-            'km'               => $this->km ?? null,
+            'id' => $this->id ?? null,
+            'type' => $this->type ?? null,
+            'mode' => $this->mode ?? null, // Assuming "mode" is similar to "type"
+            'km' => $this->km ?? null,
             'date_maintenance' => $this->date_maintenance ?? null,
-            'date_end'         => $this->date_end ?? null,
-            'status'           => $this->status ?? null,
-            'vehicle_id'       => $this->vehicle_id ?? null,
-            'vehicle'          => $this->vehicle ?? null,
-            'taller_id'        => $this->taller_id ?? null,
-            'taller_name'      => $this?->taller?->name ?? null,
-            'details'          => $this->details() ?? null,
-            'created_at'       => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
+            'date_end' => $this->date_end ?? null,
+            'status' => $this->status ?? null,
+            'vehicle_id' => $this->vehicle_id ?? null,
+            'vehicle' => $this->vehicle ?? null,
+            'taller_id' => $this->taller_id ?? null,
+            'taller_name' => $this?->taller?->name ?? null,
+            'details' => $this->details
+                ? MaintenanceDetailResource::collection($this->details)
+                : null,
+            'maintenance_operations' => $this->maintenance_operations ? $this->maintenance_operations : null,
+            'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }
 
