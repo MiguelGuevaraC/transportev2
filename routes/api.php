@@ -65,11 +65,11 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('logout', [UserController::class, 'logout']);
     Route::get('authenticate', [UserController::class, 'authenticate']);
 
-// SEARCH
+    // SEARCH
     Route::get('searchByDni/{dni}', [UserController::class, 'searchByDni']);
     Route::get('searchByRuc/{ruc}', [UserController::class, 'searchByRuc']);
 
-//CLIENTS
+    //CLIENTS
     Route::get('clients', [PersonController::class, 'index']);
     Route::get('legalEntity', [PersonController::class, 'legalEntity']);
     Route::get('naturalPerson', [PersonController::class, 'naturalPerson']);
@@ -148,8 +148,10 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // DETAIL RECEPTION
     Route::get('detailReception', [DetailReceptionController::class, 'index']);
-    Route::get('detailReceptionWithoutProgramming', [DetailReceptionController::class,
-        'indexWithoutProgramming']);
+    Route::get('detailReceptionWithoutProgramming', [
+        DetailReceptionController::class,
+        'indexWithoutProgramming'
+    ]);
     Route::get('detailReception/{id}', [DetailReceptionController::class, 'show']);
     Route::get('detailReceptionForReception/{id}', [DetailReceptionController::class, 'showForReception']);
     Route::post('detailReception', [DetailReceptionController::class, 'store']);
@@ -181,7 +183,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('vehicleAll', [VehicleController::class, 'showAll']);
     Route::get('vehicle', [VehicleController::class, 'index']);
     Route::get('vehicle/{id}', [VehicleController::class, 'show']);
-        Route::get('vehicle/{id}/docs', [VehicleController::class, 'getDocumentsByVehicleIdGrouped']);
+    Route::get('vehicle/{id}/docs', [VehicleController::class, 'getDocumentsByVehicleIdGrouped']);
     Route::post('vehicle', [VehicleController::class, 'store']);
     Route::delete('vehicle/{id}', [VehicleController::class, 'destroy']);
     Route::post('vehicle/{id}', [VehicleController::class, 'createOrUpdate']);
@@ -190,13 +192,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // CARRIER GUIDE
     Route::get('carrierGuide', [CarrierGuideController::class, 'index']);
-        Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
+    Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
     Route::get('carrierGuide/{id}', [CarrierGuideController::class, 'show']);
     Route::post('carrierGuide', [CarrierGuideController::class, 'store']);
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
+    Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
 
     // PROGRAMMING
@@ -333,7 +335,7 @@ Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritm
     Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
     Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
     Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
-    
+
 
 
     Route::get('saleWithoutCreditNote', [VentaController::class, 'saleWithoutCreditNote']);
@@ -450,7 +452,7 @@ Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritm
     require __DIR__ . '/Api/OrderCompraDetailApi.php';    //ORDER COMPRA DETAIL
     require __DIR__ . '/Api/MovimentCompraApi.php';       //MOVIMENT COMPRA
     require __DIR__ . '/Api/MovimentCompraDetailApi.php'; //MOVIMENT COMPRA DETAIL
+    require __DIR__ . '/Api/TireApi.php'; //TIRE
 
 
-    
 });

@@ -678,7 +678,8 @@ class ReceptionController extends Controller
             if (!empty($docAnexos)) {
                 $this->verifyDocAnexoAlreadyExist(
                     $request->input('sender_id'),
-                    $docAnexos
+                    $docAnexos,
+                    $id
                 );
             }
         } catch (\Exception $e) {
