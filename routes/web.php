@@ -53,7 +53,7 @@ Route::get('/login', function () {
 })->name('login');
 
 
-Route::get(
-    'verifyDocAnexoAlreadyExist/{id}/{docs}/{id_exclude?}',
-    [ReceptionController::class, 'verifyDocAnexoAlreadyExist']
-);
+// Route::get(
+//     'verifyDocAnexoAlreadyExist/{id}/{docs}/{id_exclude?}',
+//     [ReceptionController::class, 'verifyDocAnexoAlreadyExist']
+// );

@@ -232,40 +232,40 @@ class ReceptionController extends Controller
      *     )
      * )
      */
-   public function verifyDocAnexoAlreadyExist(string $senderId, string $doc_anexos, ?int $excludeReceptionId = null)
-{
-    $docs = collect(explode(',', $doc_anexos))->map(fn($d) => trim($d));
+    public function verifyDocAnexoAlreadyExist(string $senderId, string $doc_anexos, ?int $excludeReceptionId = null)
+    {
+        $docs = collect(explode(',', $doc_anexos))->map(fn($d) => trim($d));
 
-    $conflictsQuery = DB::table('receptions')
-        ->select('id', 'comment', 'codeReception')
-        ->where('sender_id', $senderId)
-        ->whereNull('deleted_at');
+        $conflictsQuery = DB::table('receptions')
+            ->select('id', 'comment', 'codeReception')
+            ->where('sender_id', $senderId)
+            ->whereNull('deleted_at');
 
-    if ($excludeReceptionId) {
-        $conflictsQuery->where('id', '!=', $excludeReceptionId);
-    }
+        if ($excludeReceptionId) {
+            $conflictsQuery->where('id', '!=', $excludeReceptionId);
+        }
 
-    $conflictsRaw = $conflictsQuery->get();
+        $conflictsRaw = $conflictsQuery->get();
 
-    $conflicts = collect();
+        $conflicts = collect();
 
-    foreach ($conflictsRaw as $row) {
-        $documentos = collect(explode(',', $row->comment))->map(fn($doc) => trim($doc));
-        $duplicados = $documentos->intersect($docs);
+        foreach ($conflictsRaw as $row) {
+            $documentos = collect(explode(',', $row->comment))->map(fn($doc) => trim($doc));
+            $duplicados = $documentos->intersect($docs);
 
-        foreach ($duplicados as $dup) {
-            $conflicts->push("• {$dup} (Recepción: {$row->codeReception})");
+            foreach ($duplicados as $dup) {
+                $conflicts->push("• {$dup} (Recepción: {$row->codeReception})");
+            }
+        }
+
+        if ($conflicts->isNotEmpty()) {
+            $mensaje = "Ya existen los siguientes documentos en otra recepción del remitente:\n\n" . $conflicts->implode("\n");
+
+            throw ValidationException::withMessages([
+                'message' => [$mensaje],
+            ]);
         }
     }
-
-    if ($conflicts->isNotEmpty()) {
-        $mensaje = "Ya existen los siguientes documentos en otra recepción del remitente:\n\n" . $conflicts->implode("\n");
-
-        throw ValidationException::withMessages([
-            'message' => [$mensaje],
-        ]);
-    }
-}
 
 
 
@@ -317,16 +317,21 @@ class ReceptionController extends Controller
         }
 
         try {
-            $this->verifyDocAnexoAlreadyExist(
-                $request->input('sender_id'),
-                $request->input('comment')
-            );
+            $docAnexos = $request->input('comment');
+
+            if (!empty($docAnexos)) {
+                $this->verifyDocAnexoAlreadyExist(
+                    $request->input('sender_id'),
+                    $docAnexos
+                );
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 422);
         }
+
 
         $branch_office_id = $request->input('branch_office_id');
         if ($branch_office_id && is_numeric($branch_office_id)) {
@@ -668,17 +673,21 @@ class ReceptionController extends Controller
         }
 
         try {
-            $this->verifyDocAnexoAlreadyExist(
-                $request->input('sender_id'),
-                $request->input('comment'),
-                $id // null si es nuevo, o el ID si se está editando
-            );
+            $docAnexos = $request->input('comment');
+
+            if (!empty($docAnexos)) {
+                $this->verifyDocAnexoAlreadyExist(
+                    $request->input('sender_id'),
+                    $docAnexos
+                );
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 422);
         }
+
 
         $filterNullValues = function ($value) {
             return $value !== null || $value === false;
