@@ -50,6 +50,7 @@ class StoreTireRequest extends StoreRequest
             'retread_number' => ['nullable', 'integer'],
             'entry_date' => ['required', 'date'],
             'supplier_id' => ['nullable', 'integer', 'exists:people,id'],
+            'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
             'material' => ['nullable', 'string'],
             'brand' => ['nullable', 'string'],
             'design' => ['nullable', 'string'],
@@ -84,6 +85,10 @@ class StoreTireRequest extends StoreRequest
             'shoulder1.numeric' => 'El ribete 1 debe ser un número.',
             'shoulder2.numeric' => 'El ribete 2 debe ser un número.',
             'shoulder3.numeric' => 'El ribete 3 debe ser un número.',
+
+            'vehicle_id.integer' => 'El ID del vehículo debe ser un número entero.',
+            'vehicle_id.exists' => 'El vehículo seleccionado no existe.',
+
         ];
     }
 }

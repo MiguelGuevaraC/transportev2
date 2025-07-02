@@ -50,6 +50,7 @@ class UpdateTireRequest extends UpdateRequest
             'shoulder1' => ['nullable', 'numeric'],
             'shoulder2' => ['nullable', 'numeric'],
             'shoulder3' => ['nullable', 'numeric'],
+            'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
         ];
     }
 
@@ -71,6 +72,10 @@ class UpdateTireRequest extends UpdateRequest
             'shoulder1.numeric' => 'El ribete 1 debe ser un número.',
             'shoulder2.numeric' => 'El ribete 2 debe ser un número.',
             'shoulder3.numeric' => 'El ribete 3 debe ser un número.',
+
+            'vehicle_id.integer' => 'El ID del vehículo debe ser un número entero.',
+            'vehicle_id.exists' => 'El vehículo seleccionado no existe.',
+
         ];
     }
 

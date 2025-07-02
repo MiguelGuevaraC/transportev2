@@ -17,6 +17,7 @@ class Tire extends Model
         'retread_number', // Número de reencauche
         'entry_date',     // Fecha de ingreso
         'supplier_id',    // ID del proveedor
+        'vehicle_id',    // ID del neumatico
         'material',       // Material del neumático
         'brand',          // Marca del neumático
         'design',         // Diseño del neumático
@@ -48,6 +49,7 @@ class Tire extends Model
         'retread_number' => '=',
         'entry_date' => 'date',
         'supplier_id' => '=',
+        'vehicle_id' => '=',
         'material' => 'like',
         'brand' => 'like',
         'design' => 'like',

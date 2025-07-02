@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->integer('retread_number')->nullable(); // Número de reencauche
             $table->date('entry_date'); // Fecha de ingreso
             $table->foreignId('supplier_id')->nullable()->unsigned()->constrained('people');// ID del proveedor
+            $table->foreignId('vehicle_id')->nullable()->unsigned()->constrained('vehicles');// ID del proveedor
             $table->string('material')->nullable(); // Material del neumático
             $table->string('brand')->nullable(); // Marca del neumático
             $table->string('design')->nullable(); // Diseño del neumático
