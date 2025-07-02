@@ -49,7 +49,7 @@ class TireResource extends JsonResource
             'supplier_id' => $this->supplier_id ?? null,
             'supplier' => $this->supplier ?? new PersonaResource($this->supplier),
             'vehicle_id' => $this->vehicle_id ?? null,
-            'vehicle' => $this->vehicle ?? new PersonaResource($this->vehicle),
+            'vehicle' => $this->vehicle ? $this->vehicle : null,
             'material' => $this->material ?? null,
             'brand' => $this->brand ?? null,
             'design' => $this->design ?? null,
