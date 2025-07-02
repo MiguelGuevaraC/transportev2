@@ -39,7 +39,7 @@ class StoreTireOperationRequest extends StoreRequest
             'vehicle_km' => ['nullable', 'numeric'],
             'operation_date' => ['required', 'date'],
             'comment' => ['nullable', 'string'],
-            'driver_id' => ['nullable', 'integer', 'exists:people,id'],
+            'driver_id' => ['nullable', 'integer', 'exists:workers,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'tire_id' => ['required', 'integer', 'exists:tires,id'],
         ];

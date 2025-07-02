@@ -206,11 +206,18 @@ class ProgrammingController extends Controller
         $list = $programmingQuery->paginate($perPage);
 
         $list->getCollection()->each(function ($programming) {
+
+            $programming->updateTotalDriversExpenses();
+            
+            if (!$programming->tract) {
+                return; // o puedes usar "continue;" si estás en un bucle normal
+            }
+
             // Año de la programación
             $year = Carbon::parse($programming->created_at)->year;
 
             // ID del vehículo
-            $vehicleId = $programming->tract->serie;
+            $vehicleId = $programming?->tract?->serie;
 
             // ID de la oficina (branchOffice_id) que se usará como parte del número de programación
             $branchOfficeId = str_pad($programming->branchOffice_id, 3, '0', STR_PAD_LEFT); // Aseguramos que tenga 3 dígitos
@@ -223,7 +230,7 @@ class ProgrammingController extends Controller
             // Formatear el número de programación con el año, ID del vehículo y el contador
             $programming->numero = 'P' . str_pad($branchOfficeId, 3, '0', STR_PAD_LEFT) . '-' . $year . '-' . str_pad($vehicleId, 2, '0', STR_PAD_LEFT) . '-' . $ultimo6Caracteres = substr($programming->numero, -8);
             ;
-            $programming->updateTotalDriversExpenses();
+            
         });
 
         return response()->json([
@@ -896,7 +903,7 @@ class ProgrammingController extends Controller
 
         // Devolver la respuesta con la información relacionada
         $object = Programming::with([
-           'tract',
+            'tract',
             'platform',
             'tract.typeCarroceria',
             'tract.typeCarroceria.typeCompany',
@@ -1169,11 +1176,11 @@ class ProgrammingController extends Controller
             $object->save();
             $object2 = Programming::with(
                 'tract',
-            'platform',
-            'tract.typeCarroceria',
-            'tract.typeCarroceria.typeCompany',
-            'tract.photos',
-            'platform.photos',
+                'platform',
+                'tract.typeCarroceria',
+                'tract.typeCarroceria.typeCompany',
+                'tract.photos',
+                'platform.photos',
                 'origin',
                 'destination',
                 'detailsWorkers',
@@ -1280,7 +1287,7 @@ class ProgrammingController extends Controller
         $object->carrierGuides()->update(['status' => 'Entregado']); // O el estado que desees
 
         $object = Programming::with([
-           'tract',
+            'tract',
             'platform',
             'tract.typeCarroceria',
             'tract.typeCarroceria.typeCompany',
@@ -1358,7 +1365,7 @@ class ProgrammingController extends Controller
         $object->statusLiquidacion = 'Liquidada';
         $object->save();
         $object = Programming::with(
-        'tract',
+            'tract',
             'platform',
             'tract.typeCarroceria',
             'tract.typeCarroceria.typeCompany',

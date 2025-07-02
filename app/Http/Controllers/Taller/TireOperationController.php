@@ -8,7 +8,7 @@ use App\Http\Requests\TireOperationRequest\StoreTireOperationRequest;
 use App\Http\Requests\TireOperationRequest\UpdateTireOperationRequest;
 use App\Http\Resources\TireOperationResource;
 use App\Models\TireOperation;
-use App\Services\TireoperationService;
+use App\Services\TireOperationService;
 use Illuminate\Http\Request;
 
 class TireOperationController extends Controller
