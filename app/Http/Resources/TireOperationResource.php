@@ -48,7 +48,7 @@ class TireOperationResource extends JsonResource
 
             'vehicle_id' => $this->vehicle_id ?? null,
             'vehicle' => $this->vehicle ? $this->vehicle : null,
-            'driver_id' => $this->supplier_id ?? null,
+            'driver_id' => $this->driver_id ?? null,
             'driver' => $this->driver ? new WorkerResource($this->driver) : null,
             'user_id' => $this->user_id ?? null,
             'user_name' => $this?->user?->username ?? null,

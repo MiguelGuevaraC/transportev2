@@ -20,7 +20,7 @@ class TireOperation extends Model
         'driver_id',      // Conductor asignado
         'user_id',        // Usuario responsable
         'tire_id',        // Neumático relacionado
-         'created_at',
+        'created_at',
         'updated_at',
         'deleted_at',
     ];
@@ -33,20 +33,20 @@ class TireOperation extends Model
 
     const filters = [
         'operation_type' => 'like',
-        'vehicle_id'     => '=',
-        'position'       => '=',
-        'vehicle_km'     => '=',
+        'vehicle_id' => '=',
+        'position' => '=',
+        'vehicle_km' => '=',
         'operation_date' => 'date',
-        'driver_id'      => '=',
-        'user_id'        => '=',
-        'tire_id'        => '=',
-        'created_at'     => 'date',
+        'driver_id' => '=',
+        'user_id' => '=',
+        'tire_id' => '=',
+        'created_at' => 'date',
     ];
 
     const sorts = [
-        'id'             => 'desc',
+        'id' => 'desc',
         'operation_date' => 'desc',
-        'vehicle_km'     => 'desc',
+        'vehicle_km' => 'desc',
     ];
 
     // Relaciones
@@ -57,7 +57,7 @@ class TireOperation extends Model
 
     public function driver()
     {
-        return $this->belongsTo(Person::class, 'driver_id');
+        return $this->belongsTo(Worker::class, 'driver_id');
     }
 
     public function user()
