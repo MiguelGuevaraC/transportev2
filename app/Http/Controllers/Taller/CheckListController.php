@@ -22,7 +22,7 @@ class CheckListController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/checklist",
+     *     path="/transporte/public/api/checklist",
      *     summary="Obtener información de CheckLists con filtros y ordenamiento",
      *     tags={"CheckList"},
      *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class CheckListController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/checklist/{id}",
+     *     path="/transporte/public/api/checklist/{id}",
      *     summary="Obtener detalles de un Check List a por ID",
      *     tags={"CheckList"},
      *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class CheckListController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/checklist",
+     *     path="/transporte/public/api/checklist",
      *     summary="Crear CheckList",
      *     tags={"CheckList"},
      *     security={{"bearerAuth": {}}},
@@ -105,7 +105,7 @@ class CheckListController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/checklist/{id}",
+     *     path="/transporte/public/api/checklist/{id}",
      *     summary="Actualizar un CheckList",
      *     tags={"CheckList"},
      *     security={{"bearerAuth": {}}},
@@ -166,7 +166,7 @@ class CheckListController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/checklist/{id}",
+     *     path="/transporte/public/api/checklist/{id}",
      *     summary="Eliminar un CheckListpor ID",
      *     tags={"CheckList"},
      *     security={{"bearerAuth": {}}},

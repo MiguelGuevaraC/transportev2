@@ -21,7 +21,7 @@ class CreditNoteController extends Controller
     /**
      * Get all Moviments
      * @OA\Get (
-     *     path="/transportedev/public/api/creditNote",
+     *     path="/transporte/public/api/creditNote",
      *     tags={"CreditNote"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -145,7 +145,7 @@ class CreditNoteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/creditNote",
+     *     path="/transporte/public/api/creditNote",
      *     summary="Store a new credit note",
      *     tags={"CreditNote"},
      *     description="Create a new credit note",

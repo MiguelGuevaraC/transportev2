@@ -22,7 +22,7 @@ class TireController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/tire",
+ *     path="/transporte/public/api/tire",
  *     summary="Obtener información de Tires con filtros y ordenamiento",
  *     tags={"Tire"},
  *     security={{"bearerAuth": {}}},
@@ -46,7 +46,7 @@ class TireController extends Controller
     }
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/tire/{id}",
+ *     path="/transporte/public/api/tire/{id}",
  *     summary="Obtener detalles de un Tire por ID",
  *     tags={"Tire"},
  *     security={{"bearerAuth": {}}},
@@ -69,7 +69,7 @@ class TireController extends Controller
 
 /**
  * @OA\Post(
- *     path="/transportedev/public/api/tire",
+ *     path="/transporte/public/api/tire",
  *     summary="Crear Tire",
  *     tags={"Tire"},
  *     security={{"bearerAuth": {}}},
@@ -104,7 +104,7 @@ class TireController extends Controller
 
 /**
  * @OA\Put(
- *     path="/transportedev/public/api/tire/{id}",
+ *     path="/transporte/public/api/tire/{id}",
  *     summary="Actualizar un Tire",
  *     tags={"Tire"},
  *     security={{"bearerAuth": {}}},
@@ -165,7 +165,7 @@ class TireController extends Controller
 
 /**
  * @OA\Delete(
- *     path="/transportedev/public/api/tire/{id}",
+ *     path="/transporte/public/api/tire/{id}",
  *     summary="Eliminar un Tirepor ID",
  *     tags={"Tire"},
  *     security={{"bearerAuth": {}}},

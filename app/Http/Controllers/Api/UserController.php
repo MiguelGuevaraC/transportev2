@@ -27,7 +27,7 @@ class UserController extends Controller
     /**
      * Get all Users
      * @OA\Get (
-     *     path="/transportedev/public/api/user",
+     *     path="/transporte/public/api/user",
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -98,7 +98,7 @@ class UserController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/login",
+     *     path="/transporte/public/api/login",
      *     summary="Login user",
      *     tags={"Authentication"},
      *     description="Authenticate user and generate access token",
@@ -229,7 +229,7 @@ class UserController extends Controller
     /**
      * Show the specified Users
      * @OA\Get (
-     *     path="/transportedev/public/api/user/{id}",
+     *     path="/transporte/public/api/user/{id}",
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -286,7 +286,7 @@ class UserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/authenticate",
+     *     path="/transporte/public/api/authenticate",
      *     summary="Get Profile user",
      *     tags={"Authentication"},
      *     security={{"bearerAuth":{}}},
@@ -555,7 +555,7 @@ class UserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/logout",
+     *     path="/transporte/public/api/logout",
      *     tags={"Authentication"},
      *     summary="Logout",
      *     description="Log out user.",
@@ -611,7 +611,7 @@ class UserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/searchByDni/{dni}",
+     *     path="/transporte/public/api/searchByDni/{dni}",
      *     tags={"Search"},
      *     summary="Search information by DNI",
      *     description="Search information about a person by their DNI number.",
@@ -687,7 +687,7 @@ class UserController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/searchByRuc/{ruc}",
+     *     path="/transporte/public/api/searchByRuc/{ruc}",
      *     tags={"Search"},
      *     summary="Search information by RUC",
      *     description="Search information about a person by their RUC number.",
@@ -755,7 +755,7 @@ class UserController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/user",
+     *     path="/transporte/public/api/user",
      *     summary="Store a new user",
      *     tags={"User"},
      *     description="Create a new user",
@@ -836,7 +836,7 @@ class UserController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/user/{id}",
+     *     path="/transporte/public/api/user/{id}",
      *     summary="Update an existing user",
      *     tags={"User"},
      *     description="Update an existing user",
@@ -927,7 +927,7 @@ class UserController extends Controller
     /**
      * Remove the specified User
      * @OA\Delete (
-     *     path="/transportedev/public/api/user/{id}",
+     *     path="/transporte/public/api/user/{id}",
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(

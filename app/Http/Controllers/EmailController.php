@@ -21,7 +21,7 @@ class EmailController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/validatetoken",
+     *     path="/transporte/public/api/validatetoken",
      *     summary="Enviar código de verificación por correo",
      *     tags={"Sale"},
      *     security={{"bearerAuth":{}}},
@@ -61,7 +61,7 @@ class EmailController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/desvinculatesale",
+     *     path="/transporte/public/api/desvinculatesale",
      *     summary="Desvincular guía de venta",
      *     description="Desvincula una guía de una venta específica si cumple con las condiciones. Verifica el token y el estado de la venta antes de proceder.",
      *     tags={"Sale"},

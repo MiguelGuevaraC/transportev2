@@ -22,7 +22,7 @@ class UnityController extends Controller
 
 /**
  * @OA\Get(
- *     path="/transportedev/public/api/unity",
+ *     path="/transporte/public/api/unity",
  *     summary="Obtener información de Unitys con filtros y ordenamiento",
  *     tags={"Unity"},
  *     security={{"bearerAuth": {}}},
@@ -49,7 +49,7 @@ class UnityController extends Controller
  }
 /**
 * @OA\Get(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Obtener detalles de un Unity por ID",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},
@@ -75,7 +75,7 @@ class UnityController extends Controller
 
 /**
 * @OA\Post(
-*     path="/transportedev/public/api/unity",
+*     path="/transporte/public/api/unity",
 *     summary="Crear Unity",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},
@@ -109,7 +109,7 @@ class UnityController extends Controller
 
 /**
 * @OA\Put(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Actualizar un Unity",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},
@@ -173,7 +173,7 @@ class UnityController extends Controller
 
 /**
 * @OA\Delete(
-*     path="/transportedev/public/api/unity/{id}",
+*     path="/transporte/public/api/unity/{id}",
 *     summary="Eliminar un Unitypor ID",
 *     tags={"Unity"},
 *     security={{"bearerAuth": {}}},

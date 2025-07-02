@@ -11,7 +11,7 @@ class MotiveController extends Controller
     /**
      * Get all motives with pagination
      * @OA\Get (
-     *      path="/transportedev/public/api/motive",
+     *      path="/transporte/public/api/motive",
      *      tags={"Motive"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Response(
@@ -69,7 +69,7 @@ class MotiveController extends Controller
      /**
      * Display the specified motive.
      * @OA\Get (
-     *      path="/transportedev/public/api/motive/{id}",
+     *      path="/transporte/public/api/motive/{id}",
      *      tags={"Motive"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(

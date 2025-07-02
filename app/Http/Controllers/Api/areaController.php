@@ -10,7 +10,7 @@ class areaController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/area",
+     *     path="/transporte/public/api/area",
      *     summary="Get all area",
      *     tags={"Area"},
      *     description="Show all area",
@@ -53,7 +53,7 @@ class areaController extends Controller
      */
     /**
      * @OA\Post(
-     *     path="/transportedev/public/api/area",
+     *     path="/transporte/public/api/area",
      *     summary="Create a new area",
      *     tags={"Area"},
      *     description="Create a new area",
@@ -104,7 +104,7 @@ class areaController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/transportedev/public/api/area/{id}",
+     *     path="/transporte/public/api/area/{id}",
      *     summary="Get a area by ID",
      *     tags={"Area"},
      *     description="Retrieve a area by its ID",
@@ -172,7 +172,7 @@ class areaController extends Controller
      */
     /**
      * @OA\Put(
-     *     path="/transportedev/public/api/area/{id}",
+     *     path="/transporte/public/api/area/{id}",
      *     summary="Update an existing area",
      *     tags={"Area"},
      *     description="Update an existing area",
@@ -244,7 +244,7 @@ class areaController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/transportedev/public/api/area/{id}",
+     *     path="/transporte/public/api/area/{id}",
      *     summary="Delete a Area",
      *     tags={"Area"},
      *     description="Delete a Area by ID",
