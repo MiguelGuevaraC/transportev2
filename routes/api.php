@@ -65,11 +65,11 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('logout', [UserController::class, 'logout']);
     Route::get('authenticate', [UserController::class, 'authenticate']);
 
-    // SEARCH
+// SEARCH
     Route::get('searchByDni/{dni}', [UserController::class, 'searchByDni']);
     Route::get('searchByRuc/{ruc}', [UserController::class, 'searchByRuc']);
 
-    //CLIENTS
+//CLIENTS
     Route::get('clients', [PersonController::class, 'index']);
     Route::get('legalEntity', [PersonController::class, 'legalEntity']);
     Route::get('naturalPerson', [PersonController::class, 'naturalPerson']);
@@ -148,10 +148,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // DETAIL RECEPTION
     Route::get('detailReception', [DetailReceptionController::class, 'index']);
-    Route::get('detailReceptionWithoutProgramming', [
-        DetailReceptionController::class,
-        'indexWithoutProgramming'
-    ]);
+    Route::get('detailReceptionWithoutProgramming', [DetailReceptionController::class,
+        'indexWithoutProgramming']);
     Route::get('detailReception/{id}', [DetailReceptionController::class, 'show']);
     Route::get('detailReceptionForReception/{id}', [DetailReceptionController::class, 'showForReception']);
     Route::post('detailReception', [DetailReceptionController::class, 'store']);
@@ -183,7 +181,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('vehicleAll', [VehicleController::class, 'showAll']);
     Route::get('vehicle', [VehicleController::class, 'index']);
     Route::get('vehicle/{id}', [VehicleController::class, 'show']);
-    Route::get('vehicle/{id}/docs', [VehicleController::class, 'getDocumentsByVehicleIdGrouped']);
+        Route::get('vehicle/{id}/docs', [VehicleController::class, 'getDocumentsByVehicleIdGrouped']);
     Route::post('vehicle', [VehicleController::class, 'store']);
     Route::delete('vehicle/{id}', [VehicleController::class, 'destroy']);
     Route::post('vehicle/{id}', [VehicleController::class, 'createOrUpdate']);
@@ -192,13 +190,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // CARRIER GUIDE
     Route::get('carrierGuide', [CarrierGuideController::class, 'index']);
-    Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
+        Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
     Route::get('carrierGuide/{id}', [CarrierGuideController::class, 'show']);
     Route::post('carrierGuide', [CarrierGuideController::class, 'store']);
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
-    Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
+Route::get('algoritmoanexos/{cadena}', [CarrierGuideController::class, 'algoritmoanexos']);
     Route::post('consultarstatus', [CarrierGuideController::class, 'getStatusFacturacion']);
 
     // PROGRAMMING
@@ -298,8 +296,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('manifiesto/{id}', [PdfController::class, 'manifiesto'])->name('manifiesto');
     Route::get('manifiestoConductor/{id}', [PdfController::class, 'manifiestoConductor'])->name('manifiestoConductor');
 
-    Route::get('reportCaja', [PdfController::class, 'reportCaja'])->name('reportCaja');
-    Route::get('reportCajaExcel', [PdfController::class, 'reporteIngresosExcel'])->name('reportCajaExcel');
+    Route::get('reportCaja', [MovimentController::class, 'reportCaja'])->name('reportCaja');
+    Route::get('reportCajaExcel', [MovimentController::class, 'reporteIngresosExcel'])->name('reportCajaExcel');
 
     Route::get('reporteCuentasPorCobrarExcel', [PdfController::class, 'reporteCuentasPorCobrarExcel'])->name('reportCajaExcel');
     Route::get('salesExcel', [ExcelController::class, 'reporteVentasExcel'])->name('reportVentasExcel');
@@ -328,14 +326,14 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('receptionWithoutSale', [VentaController::class, 'receptionWithoutSale']);
     Route::get('getArchivosDocument/{id}/{tipodocumento}', [VentaController::class, 'getArchivosDocument']);
 
-    // Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
-    // Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
-    // Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
-    // Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
-    // Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
-    // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
-    // Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
-
+    Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
+    Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
+    Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
+    Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
+    Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+    Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
+    
 
 
     Route::get('saleWithoutCreditNote', [VentaController::class, 'saleWithoutCreditNote']);
@@ -452,7 +450,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/OrderCompraDetailApi.php';    //ORDER COMPRA DETAIL
     require __DIR__ . '/Api/MovimentCompraApi.php';       //MOVIMENT COMPRA
     require __DIR__ . '/Api/MovimentCompraDetailApi.php'; //MOVIMENT COMPRA DETAIL
-    require __DIR__ . '/Api/TireApi.php'; //TIRE
 
 
+    
 });

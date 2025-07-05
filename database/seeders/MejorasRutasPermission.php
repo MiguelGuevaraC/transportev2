@@ -205,7 +205,7 @@ class MejorasRutasPermission extends Seeder
             [
                 'id' => 51,
                 'name' => 'Operaciones e Inspecciones',
-                'route' => 'tire_opearation',
+                'route' => 'tire_operation',
                 'icon' => 'dot',
                 'guard_name' => 'web',
                 'groupMenu_id' => 8,

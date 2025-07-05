@@ -316,21 +316,21 @@ class ReceptionController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        try {
-            $docAnexos = $request->input('comment');
+        // try {
+        //     $docAnexos = $request->input('comment');
 
-            if (!empty($docAnexos)) {
-                $this->verifyDocAnexoAlreadyExist(
-                    $request->input('sender_id'),
-                    $docAnexos
-                );
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
-        }
+        //     if (!empty($docAnexos)) {
+        //         $this->verifyDocAnexoAlreadyExist(
+        //             $request->input('sender_id'),
+        //             $docAnexos
+        //         );
+        //     }
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $e->getMessage(),
+        //     ], 422);
+        // }
 
 
         $branch_office_id = $request->input('branch_office_id');
@@ -672,22 +672,22 @@ class ReceptionController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        try {
-            $docAnexos = $request->input('comment');
+        // try {
+        //     $docAnexos = $request->input('comment');
 
-            if (!empty($docAnexos)) {
-                $this->verifyDocAnexoAlreadyExist(
-                    $request->input('sender_id'),
-                    $docAnexos,
-                    $id
-                );
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
-        }
+        //     if (!empty($docAnexos)) {
+        //         $this->verifyDocAnexoAlreadyExist(
+        //             $request->input('sender_id'),
+        //             $docAnexos,
+        //             $id
+        //         );
+        //     }
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $e->getMessage(),
+        //     ], 422);
+        // }
 
 
         $filterNullValues = function ($value) {

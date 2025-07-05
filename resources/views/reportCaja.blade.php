@@ -1,6 +1,6 @@
 @php
     use Carbon\Carbon;
-    header('Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
@@ -10,18 +10,18 @@
     }
 
     function namePerson($person)
-{
-    $nombre = '';
-    $tipoDocumento = strtoupper($person->typeofDocument); // Convertir a mayúsculas
+    {
+        $nombre = '';
+        $tipoDocumento = strtoupper($person->typeofDocument); // Convertir a mayúsculas
 
-    if ($tipoDocumento == 'DNI') {
-        $nombre = $person->names . ' ' . $person->fatherSurname . ' ' . $person->motherSurname;
-    } elseif ($tipoDocumento == 'RUC') {
-        $nombre = $person->businessName;
+        if ($tipoDocumento == 'DNI') {
+            $nombre = $person->names . ' ' . $person->fatherSurname . ' ' . $person->motherSurname;
+        } elseif ($tipoDocumento == 'RUC') {
+            $nombre = $person->businessName;
+        }
+
+        return $nombre;
     }
-    
-    return $nombre;
-}
 
 
     // Aqu� contin�a tu l�gica para procesar la solicitud y generar la respuesta
@@ -327,19 +327,19 @@
                 </div>
                 <td class="right">
                     <div class="titlePresupuesto">REPORTE DE CAJA</div>
-                    <div class="numberPresupuesto">{{ $data['MovCajaApertura']->sequentialNumber }}</div>
+                    <div class="numberPresupuesto">{{ $data->MovCajaApertura->sequentialNumber }}</div>
                 </td>
             </tr>
             <tr>
-                <td class="center gray w40">
-
-                </td>
+                <td class="center gray w40"></td>
                 <td class="right">
-                    <div><strong>{{ Carbon::parse($data['MovCajaApertura']->created_at)->format('d-m-Y') }}</strong>
+                    <div>
+                        <strong>{{ \Carbon\Carbon::parse($data->MovCajaApertura->created_at)->format('d-m-Y') }}</strong>
                     </div>
                 </td>
             </tr>
         </table>
+
 
         <table class="tablePeople font-14">
             <tr>
@@ -347,8 +347,9 @@
                     Usuario
                 </th>
 
+
                 <td class="w50">
-                    {{ namePerson($data['MovCajaApertura']->user->worker->person) }}
+                    {{ namePerson($data->MovCajaApertura->user->worker->person) }}
 
                 </td>
                 <th class="w20 blue">
@@ -364,13 +365,13 @@
                     T. Apertura
                 </th>
                 <td class="w20">
-                    {{ $data['MovCajaApertura']->total }}
+                    {{ $data->MovCajaApertura->total }}
                 </td>
                 <th class="w10 blue">
                     Fecha Apertura
                 </th>
                 <td class="w50">
-                    {{ $data['MovCajaApertura']->created_at }}
+                    {{ $data->MovCajaApertura->created_at }}
                 </td>
 
             </tr>
@@ -381,13 +382,13 @@
                     T. Cierre
                 </th>
                 <td class="w20">
-                    {{ $data['MovCajaCierre'] ? $data['MovCajaCierre']->total : '-' }}
+                    {{ $data->MovCajaCierre ? $data->MovCajaCierre->total : '-' }}
                 </td>
                 <th class="w10 blue">
                     Fecha Cierre
                 </th>
                 <td class="w50">
-                    {{ $data['MovCajaCierre'] ? \Carbon\Carbon::parse($data['MovCajaCierre']->created_at)->format('d-m-Y') : '-' }}
+                    {{ $data->MovCajaCierre ? \Carbon\Carbon::parse($data->MovCajaCierre->created_at)->format('d-m-Y') : '-' }}
                 </td>
             </tr>
 
@@ -414,9 +415,9 @@
             </tr>
 
 
-            @if (isset($data['MovCajaInternos']) && is_array($data['MovCajaInternos']))
+            @if (isset($data->MovCajaInternos))
 
-                @foreach ($data['MovCajaInternos']['data'] as $movCajaInterno)
+                @foreach ($data?->MovCajaInternos?->data as $movCajaInterno)
                     <tr>
                         <td class="id">
                             {{ $movCajaInterno->paymentDate ? \Carbon\Carbon::parse($movCajaInterno->paymentDate)->format('d-m-Y') : '-' }}
@@ -450,83 +451,62 @@
         </table>
 
 
-        <div style="page-break-before: always;" class="tableDetail font-12">
-            <h2>Resumen de Caja</h2>
-            <br>
-            @php
-                $resumenCaja = $data['resumenCaja'];
-                $totalIngresos =
-                    $resumenCaja['efectivo_ingresos'] +
-                    $resumenCaja['yape_ingresos'] +
-                    $resumenCaja['plin_ingresos'] +
-                    $resumenCaja['tarjeta_ingresos'] +
-                    $resumenCaja['deposito_ingresos'];
-                $totalEgresos =
-                    $resumenCaja['efectivo_egresos'] +
-                    $resumenCaja['yape_egresos'] +
-                    $resumenCaja['plin_egresos'] +
-                    $resumenCaja['tarjeta_egresos'] +
-                    $resumenCaja['deposito_egresos'];
+     <div style="page-break-before: always;" class="tableDetail font-12">
+    <h2>Resumen de Caja</h2>
+    <br>
+    @php
+        $resumenCaja = $data->resumenCaja;
 
-            @endphp
-            <table class="fondoNegro">
-                <tr>
-                    <th>Método de Pago</th>
-                    <th>Total Ingresos</th>
-                    <th>Total Egresos</th>
-                    <th>Saldo Final</th>
-                </tr>
-                <tr>
-                    <td>Efectivo</td>
-                    <td>S/. {{ number_format($resumenCaja['efectivo_ingresos'], 2) ?? '0.00' }}</td>
-                    <td>S/. {{ number_format($resumenCaja['efectivo_egresos'], 2) ?? '0.00' }}</td>
-                    <td><b>S/.
-                            {{ number_format($resumenCaja['efectivo_ingresos'] - $resumenCaja['efectivo_egresos'], 2) ?? '0.00' }}
-                        </b></td>
-                </tr>
-                <tr>
-                    <td>Yape</td>
-                    <td>S/. {{ number_format($resumenCaja['yape_ingresos'], 2) ?? '0.00' }}</td>
-                    <td>S/. {{ number_format($resumenCaja['yape_egresos'], 2) ?? '0.00' }}</td>
-                    <td><b>S/.
-                            {{ number_format($resumenCaja['yape_ingresos'] - $resumenCaja['yape_egresos'], 2) ?? '0.00' }}
-                        </b></td>
-                </tr>
-                <tr>
-                    <td>Plin</td>
-                    <td>S/. {{ number_format($resumenCaja['plin_ingresos'], 2) ?? '0.00' }}</td>
-                    <td>S/. {{ number_format($resumenCaja['plin_egresos'], 2) ?? '0.00' }}</td>
-                    <td><b>S/.
-                            {{ number_format($resumenCaja['plin_ingresos'] - $resumenCaja['plin_egresos'], 2) ?? '0.00' }}
-                        </b></td>
-                </tr>
-                <tr>
-                    <td>Tarjeta</td>
-                    <td>S/. {{ number_format($resumenCaja['tarjeta_ingresos'], 2) ?? '0.00' }}</td>
-                    <td>S/. {{ number_format($resumenCaja['tarjeta_egresos'], 2) ?? '0.00' }}</td>
-                    <td><b>S/.
-                            {{ number_format($resumenCaja['tarjeta_ingresos'] - $resumenCaja['tarjeta_egresos'], 2) ?? '0.00' }}
-                        </b></td>
-                </tr>
-                <tr>
-                    <td>Depósito</td>
-                    <td>S/. {{ number_format($resumenCaja['deposito_ingresos'], 2) ?? '0.00' }}</td>
-                    <td>S/. {{ number_format($resumenCaja['deposito_egresos'], 2) ?? '0.00' }}</td>
-                    <td><b>S/.
-                            {{ number_format($resumenCaja['deposito_ingresos'] - $resumenCaja['deposito_egresos'], 2) ?? '0.00' }}
-                        </b></td>
-                </tr>
-                <!-- Otros métodos de pago aquí -->
+        $totalIngresos =
+            (float) $resumenCaja->efectivo_ingresos +
+            (float) $resumenCaja->yape_ingresos +
+            (float) $resumenCaja->plin_ingresos +
+            (float) $resumenCaja->tarjeta_ingresos +
+            (float) $resumenCaja->deposito_ingresos;
 
-                <!-- Fila de sumatoria -->
-                <tr>
-                    <td><b>Total General</b></td>
-                    <td><b>S/. {{ number_format($totalIngresos, 2) }}</b></td>
-                    <td><b>S/. {{ number_format($totalEgresos, 2) }}</b></td>
-                    <td><b>S/. {{ number_format($totalIngresos - $totalEgresos, 2) }}</b></td>
-                </tr>
-            </table>
-        </div>
+        $totalEgresos =
+            (float) $resumenCaja->efectivo_egresos +
+            (float) $resumenCaja->yape_egresos +
+            (float) $resumenCaja->plin_egresos +
+            (float) $resumenCaja->tarjeta_egresos +
+            (float) $resumenCaja->deposito_egresos;
+    @endphp
+
+    <table class="fondoNegro">
+        <tr>
+            <th>Método de Pago</th>
+            <th>Total Ingresos</th>
+            <th>Total Egresos</th>
+            <th>Saldo Final</th>
+        </tr>
+        @php
+            $metodos = ['efectivo', 'yape', 'plin', 'tarjeta', 'deposito'];
+        @endphp
+
+        @foreach ($metodos as $metodo)
+            <tr>
+                <td>{{ ucfirst($metodo) }}</td>
+                <td>S/. {{ number_format((float) $resumenCaja->{$metodo . '_ingresos'}, 2) }}</td>
+                <td>S/. {{ number_format((float) $resumenCaja->{$metodo . '_egresos'}, 2) }}</td>
+                <td><b>S/. {{
+                    number_format(
+                        (float) $resumenCaja->{$metodo . '_ingresos'} - (float) $resumenCaja->{$metodo . '_egresos'},
+                        2
+                    )
+                }}</b></td>
+            </tr>
+        @endforeach
+
+        <!-- Fila de sumatoria -->
+        <tr>
+            <td><b>Total General</b></td>
+            <td><b>S/. {{ number_format($totalIngresos, 2) }}</b></td>
+            <td><b>S/. {{ number_format($totalEgresos, 2) }}</b></td>
+            <td><b>S/. {{ number_format($totalIngresos - $totalEgresos, 2) }}</b></td>
+        </tr>
+    </table>
+</div>
+
 
     </div>
 

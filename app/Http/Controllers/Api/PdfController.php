@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-use App\Exports\CajaExport;
+
 use App\Exports\CuentasPorCobrarExport;
 use App\Exports\ReceptionsExport;
 use App\Exports\SalesExport;
@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
+use App\Exports\CajaExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PdfController extends Controller
