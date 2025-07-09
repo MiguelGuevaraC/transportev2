@@ -264,9 +264,9 @@ class VentaController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
 
-        if (Auth()->user()->box_id == null) {
-            return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
-        }
+        // if (Auth()->user()->box_id == null) {
+        //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
+        // }
         if (Auth()->user()->box->serie == null) {
             return response()->json(['error' => 'Caja No tiene Serie'], 422);
         }
@@ -1029,7 +1029,7 @@ class VentaController extends Controller
                 },
             ],
             'is_consolidated' => 'nullable|boolean',
-            'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
+            'description_consolidated' => 'required_if:is_consolidated,1|max:1000',
 
             'person_id' => 'required|exists:people,id',
             'installments' => 'nullable|array',
@@ -1052,29 +1052,31 @@ class VentaController extends Controller
             if ($typePayment === 'Créditos') {
                 // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
                 $totalPayments = collect($request->input('installments', []))->sum('importe');
-            } else {
-                // Si no es crédito, sumamos los métodos de pago normalmente
-                $totalPayments =
-                    ($request->input('cash', 0) ?: 0) +
-                    ($request->input('yape', 0) ?: 0) +
-                    ($request->input('plin', 0) ?: 0) +
-                    ($request->input('card', 0) ?: 0) +
-                    ($request->input('deposit', 0) ?: 0);
+                // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+                if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
+                    $difference = $totalReceptionPayments - $totalPayments;
+                    $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
+                }
             }
+            // else {
+            //     // Si no es crédito, sumamos los métodos de pago normalmente
+            //     $totalPayments =
+            //         ($request->input('cash', 0) ?: 0) +
+            //         ($request->input('yape', 0) ?: 0) +
+            //         ($request->input('plin', 0) ?: 0) +
+            //         ($request->input('card', 0) ?: 0) +
+            //         ($request->input('deposit', 0) ?: 0);
+            // }
 
-            // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
-            if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
-                $difference = $totalReceptionPayments - $totalPayments;
-                $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
-            }
+
         });
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
-        if (Auth()->user()->box_id == null) {
-            return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
-        }
+        // if (Auth()->user()->box_id == null) {
+        //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
+        // }
 
         $box_id = $request->input('box_id');
         if ($box_id && is_numeric($box_id)) {
@@ -1131,7 +1133,13 @@ class VentaController extends Controller
         $tarjeta = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        // $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+
+        $total = collect($request->input('data', []))->sum(function ($item) {
+            $reception = Reception::find($item['reception_id'] ?? null);
+            return $reception?->paymentAmount ?? 0;
+        });
+
         $routeVoucher = null;
         $numberVoucher = null;
         $bank_id = null;
@@ -1180,7 +1188,6 @@ class VentaController extends Controller
             'person_reception_id' => $request->input('person_reception_id'),
         ];
 
-        // Lógica para múltiples recepciones
         // Lógica para múltiples recepciones
         $receptions = $request->input('receptions', 'personreception', []);
         if (($receptions) != []) {
@@ -1235,57 +1242,67 @@ class VentaController extends Controller
         }
         $installments = $request->input('installments') ?? [];
 
+        if ($request->input('typePayment') != 'Créditos') {
+            $installments = [];
+            $installments = [
+                [
+                    'date' => 1, // 1 día después
+                    'importe' => $object->total,
+                ]
+            ];
+        }
+
         // if ($request->input('typePayment') == 'Contado') {
         if (empty($installments) && $installments == []) {
-            $tipo = 'M001';
-            $resultado = DB::select(
-                'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
-                 FROM moviments
-                 WHERE movType = "Caja"
-                 AND SUBSTRING_INDEX(correlative, "-", 1) = ?',
-                [$tipo]
-            );
+            // $tipo = 'M001';
+            // $resultado = DB::select(
+            //     'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
+            //      FROM moviments
+            //      WHERE movType = "Caja"
+            //      AND SUBSTRING_INDEX(correlative, "-", 1) = ?',
+            //     [$tipo]
+            // );
 
-            $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
+            // $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
 
-            $data = [
-                'sequentialNumber' => $object->sequentialNumber,
-                'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate' => $request->input('paymentDate'),
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
-                'typeDocument' => 'Ingreso',
-                'bank_id' => $bank_id,
+            // $data = [
+            //     'sequentialNumber' => $object->sequentialNumber,
+            //     'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            //     'paymentDate' => $request->input('paymentDate'),
+            //     'total' => $total ?? 0,
+            //     'yape' => $request->input('yape') ?? 0,
+            //     'deposit' => $depositAmount ?? 0,
+            //     'cash' => $request->input('cash') ?? 0,
+            //     'card' => $request->input('card') ?? 0,
+            //     'plin' => $request->input('plin') ?? 0,
+            //     'comment' => $request->input('comment') ?? '-',
+            //     'typeDocument' => 'Ingreso',
+            //     'bank_id' => $bank_id,
 
-                'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
-                'numberVoucher' => $numberVoucher,
-                'movType' => 'Caja',
+            //     'isBankPayment' => $request->input('isBankPayment'),
+            //     'routeVoucher' => $routeVoucher,
+            //     'numberVoucher' => $numberVoucher,
+            //     'movType' => 'Caja',
 
-                'typePayment' => $request->input('typePayment') ?? null,
-                'typeSale' => $request->input('typeSale') ?? '-',
-                'codeDetraction' => $request->input('codeDetraction'),
-                'status' => 'Pagado',
-                'programming_id' => $request->input('programming_id'),
-                'paymentConcept_id' => 3, //venta
-                'branchOffice_id' => $request->input('branchOffice_id'),
-                'reception_id' => $request->input('reception_id'),
-                'person_id' => $request->input('person_id'),
-                'user_id' => auth()->id(),
-                'box_id' => $request->input('box_id'),
-                'mov_id' => $object->id,
-                'person_reception_id' => $request->input('person_reception_id'),
-            ];
+            //     'typePayment' => $request->input('typePayment') ?? null,
+            //     'typeSale' => $request->input('typeSale') ?? '-',
+            //     'codeDetraction' => $request->input('codeDetraction'),
+            //     'status' => 'Pagado',
+            //     'programming_id' => $request->input('programming_id'),
+            //     'paymentConcept_id' => 3, //venta
+            //     'branchOffice_id' => $request->input('branchOffice_id'),
+            //     'reception_id' => $request->input('reception_id'),
+            //     'person_id' => $request->input('person_id'),
+            //     'user_id' => auth()->id(),
+            //     'box_id' => $request->input('box_id'),
+            //     'mov_id' => $object->id,
+            //     'person_reception_id' => $request->input('person_reception_id'),
+            // ];
 
-            $object2 = Moviment::create($data);
-            //SE PAGA LA VENTA
-            $object->status = 'Pagado';
-            $object->save();
+            // $object2 = Moviment::create($data);
+            // //SE PAGA LA VENTA
+            // $object->status = 'Pagado';
+            // $object->save();
         } else {
 
             if (!empty($installments)) {
@@ -1462,14 +1479,33 @@ class VentaController extends Controller
             'details' => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description' => 'nullable|string',
-        ]);
+        ])->after(function ($validator) use ($request) {
+            // Sumar los paymentAmount de cada Reception asociada
+            $total = array_sum(array_map(fn($item) => $item['cantidad'] * $item['precio'], $request->details));
+
+
+            // Verificar el tipo de pago
+            $typePayment = $request->input('typePayment');
+
+            if ($typePayment === 'Créditos') {
+                // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
+                $totalPayments = collect($request->input('installments', []))->sum('importe');
+                // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+                if (abs($total - $totalPayments) > 0.0001) {
+                    $difference = $total - $totalPayments;
+                    $validator->errors()->add('reception_payment_mismatch', "La suma de los montos de las detalles ($total) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
+                }
+            }
+
+
+        });
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
-        if (Auth()->user()->box_id == null) {
-            return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
-        }
+        // if (Auth()->user()->box_id == null) {
+        //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
+        // }
         if (Auth()->user()->box->serie == null) {
             return response()->json(['error' => 'Caja No tiene Serie'], 422);
         }
@@ -1523,7 +1559,8 @@ class VentaController extends Controller
         $tarjeta = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        // $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $total = array_sum(array_map(fn($item) => $item['cantidad'] * $item['precio'], $request->details));
         $routeVoucher = null;
         $numberVoucher = null;
         $bank_id = null;
@@ -1576,57 +1613,67 @@ class VentaController extends Controller
         $object = Moviment::create($data);
         $installments = $request->input('installments') ?? [];
 
-        if (empty($installments) && $installments == []) {
-            $tipo = 'M001';
-            $resultado = DB::select(
-                'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
-                 FROM moviments
-                 WHERE movType = "Caja"
-                 AND SUBSTRING_INDEX(correlative, "-", 1) = ?',
-                [$tipo]
-            );
-
-            $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
-
-            $data = [
-                'sequentialNumber' => $object->sequentialNumber,
-                'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
-                'paymentDate' => $request->input('paymentDate'),
-                'total' => $total ?? 0,
-                'yape' => $request->input('yape') ?? 0,
-                'deposit' => $depositAmount ?? 0,
-                'cash' => $request->input('cash') ?? 0,
-                'card' => $request->input('card') ?? 0,
-                'plin' => $request->input('plin') ?? 0,
-                'comment' => $request->input('comment') ?? '-',
-                'typeDocument' => 'Ingreso',
-                'bank_id' => $bank_id,
-
-                'isBankPayment' => $request->input('isBankPayment'),
-                'routeVoucher' => $routeVoucher,
-                'numberVoucher' => $numberVoucher,
-                'movType' => 'Caja',
-                'observation' => $request->input('observation'),
-
-                'typePayment' => $request->input('typePayment') ?? null,
-                'typeSale' => $request->input('typeSale') ?? '-',
-                'codeDetraction' => $request->input('codeDetraction'),
-                'status' => 'Pagado',
-                'programming_id' => $request->input('programming_id'),
-                'paymentConcept_id' => 3, //venta
-                'branchOffice_id' => $request->input('branchOffice_id'),
-                'reception_id' => $request->input('reception_id'),
-                'person_id' => $request->input('person_id'),
-                'user_id' => auth()->id(),
-                'box_id' => $request->input('box_id'),
-                'mov_id' => $object->id,
-                'person_reception_id' => $request->input('person_reception_id'),
+        if ($request->input('typePayment') != 'Créditos') {
+            $installments = [];
+            $installments = [
+                [
+                    'date' => 1, // 1 día después
+                    'importe' => $object->total,
+                ]
             ];
+        }
 
-            $object2 = Moviment::create($data);
-            //SE PAGA LA VENTA
-            $object->status = 'Pagado';
-            $object->save();
+        if (empty($installments) && $installments == []) {
+            // $tipo = 'M001';
+            // $resultado = DB::select(
+            //     'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(correlative, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
+            //      FROM moviments
+            //      WHERE movType = "Caja"
+            //      AND SUBSTRING_INDEX(correlative, "-", 1) = ?',
+            //     [$tipo]
+            // );
+
+            // $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
+
+            // $data = [
+            //     'sequentialNumber' => $object->sequentialNumber,
+            //     'correlative' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
+            //     'paymentDate' => $request->input('paymentDate'),
+            //     'total' => $total ?? 0,
+            //     'yape' => $request->input('yape') ?? 0,
+            //     'deposit' => $depositAmount ?? 0,
+            //     'cash' => $request->input('cash') ?? 0,
+            //     'card' => $request->input('card') ?? 0,
+            //     'plin' => $request->input('plin') ?? 0,
+            //     'comment' => $request->input('comment') ?? '-',
+            //     'typeDocument' => 'Ingreso',
+            //     'bank_id' => $bank_id,
+
+            //     'isBankPayment' => $request->input('isBankPayment'),
+            //     'routeVoucher' => $routeVoucher,
+            //     'numberVoucher' => $numberVoucher,
+            //     'movType' => 'Caja',
+            //     'observation' => $request->input('observation'),
+
+            //     'typePayment' => $request->input('typePayment') ?? null,
+            //     'typeSale' => $request->input('typeSale') ?? '-',
+            //     'codeDetraction' => $request->input('codeDetraction'),
+            //     'status' => 'Pagado',
+            //     'programming_id' => $request->input('programming_id'),
+            //     'paymentConcept_id' => 3, //venta
+            //     'branchOffice_id' => $request->input('branchOffice_id'),
+            //     'reception_id' => $request->input('reception_id'),
+            //     'person_id' => $request->input('person_id'),
+            //     'user_id' => auth()->id(),
+            //     'box_id' => $request->input('box_id'),
+            //     'mov_id' => $object->id,
+            //     'person_reception_id' => $request->input('person_reception_id'),
+            // ];
+
+            // $object2 = Moviment::create($data);
+            // //SE PAGA LA VENTA
+            // $object->status = 'Pagado';
+            // $object->save();
         } else {
 
             if (!empty($installments)) {
@@ -1755,7 +1802,7 @@ class VentaController extends Controller
             // 'receptions.*' => 'exists:receptions,id', // Cada recepción debe existir
 
             'is_consolidated' => 'nullable|boolean',
-            'description_consolidated' => 'required_if:is_consolidated,1|string|max:1000',
+            'description_consolidated' => 'required_if:is_consolidated,1|max:1000',
 
             'person_id' => 'required|exists:people,id',
             'installments' => 'nullable|array',
@@ -1764,7 +1811,24 @@ class VentaController extends Controller
             'details' => 'nullable|array',
             'details.*.reception_id' => 'nullable|exists:receptions,id',
             'details.*.description' => 'nullable|string',
-        ]);
+        ])->after(function ($validator) use ($request) {
+
+            $total = array_sum(array_map(fn($item) => $item['cantidad'] * $item['precio'], $request->details));
+
+            // Verificar el tipo de pago
+            $typePayment = $request->input('typePayment');
+
+            if ($typePayment === 'Créditos') {
+                // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
+                $totalPayments = collect($request->input('installments', []))->sum('importe');
+                // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+                if (abs($total - $totalPayments) > 0.0001) {
+                    $difference = $total - $totalPayments;
+                    $validator->errors()->add('reception_payment_mismatch', "La suma de los montos de las detalles ($total) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
+                }
+            }
+
+        });
 
         $object = Moviment::find($id);
         if (!$object) {
@@ -1774,9 +1838,9 @@ class VentaController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
-        if (Auth()->user()->box_id == null) {
-            return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
-        }
+        // if (Auth()->user()->box_id == null) {
+        //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
+        // }
         if ($object->installments->isNotEmpty() && $object->installments->first()->payInstallments->isNotEmpty()) {
             return response()->json(['error' => 'Se encontraron Amortizaciones en esta venta'], 422);
         }
@@ -1820,8 +1884,9 @@ class VentaController extends Controller
         $plin = $request->input('plin') ?? 0;
         $tarjeta = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
+        $total = array_sum(array_map(fn($item) => $item['cantidad'] * $item['precio'], $request->details));
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        // $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
         $routeVoucher = null;
         $numberVoucher = null;
         $bank_id = null;
@@ -1917,64 +1982,75 @@ class VentaController extends Controller
         }
         $installments = $request->input('installments') ?? [];
 
+        
+        if ($request->input('typePayment') != 'Créditos') {
+            $installments = [];
+            $installments = [
+                [
+                    'date' => 1, // 1 día después
+                    'importe' => $object->total,
+                ]
+            ];
+        }
+
         // if ($request->input('typePayment') == 'Contado') {
         if (empty($installments) && $installments == []) {
             // Preparar los datos para el movimiento
             // Asegúrate de que el objeto exista antes de intentar actualizar
-            $object2 = Moviment::withTrashed()->where('mov_id', $object->id)->first();
+            // $object2 = Moviment::withTrashed()->where('mov_id', $object->id)->first();
 
-            if ($object2) {
-                $data = [
-                    'paymentDate' => $request->input('paymentDate'),
-                    'total' => $total ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $depositAmount ?? 0,
-                    'cash' => $request->input('cash') ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Ingreso',
-                    'bank_id' => $bank_id,
-                    'isBankPayment' => $request->input('isBankPayment'),
-                    'routeVoucher' => $routeVoucher,
-                    'numberVoucher' => $numberVoucher,
-                    'movType' => 'Caja',
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'codeDetraction' => $request->input('codeDetraction'),
-                    'status' => 'Pagado',
-                    'programming_id' => $request->input('programming_id'),
-                    'paymentConcept_id' => 3, // venta
-                    'branchOffice_id' => $request->input('branchOffice_id'),
-                    'reception_id' => $request->input('reception_id'),
-                    'person_id' => $request->input('person_id'),
-                    // 'user_id' => auth()->id(),
-                    // 'box_id' => $request->input('box_id'),
-                    'deleted_at' => null,
-                ];
-                if ($object2->trashed()) {
-                    $object2->restore(); // Restore the soft-deleted record
-                }
-                // Actualiza el movimiento existente
-                $object2->update($data);
-            }
+            // if ($object2) {
+            //     $data = [
+            //         'paymentDate' => $request->input('paymentDate'),
+            //         'total' => $total ?? 0,
+            //         'yape' => $request->input('yape') ?? 0,
+            //         'deposit' => $depositAmount ?? 0,
+            //         'cash' => $request->input('cash') ?? 0,
+            //         'card' => $request->input('card') ?? 0,
+            //         'plin' => $request->input('plin') ?? 0,
+            //         'comment' => $request->input('comment') ?? '-',
+            //         'typeDocument' => 'Ingreso',
+            //         'bank_id' => $bank_id,
+            //         'isBankPayment' => $request->input('isBankPayment'),
+            //         'routeVoucher' => $routeVoucher,
+            //         'numberVoucher' => $numberVoucher,
+            //         'movType' => 'Caja',
+            //         'typePayment' => $request->input('typePayment') ?? null,
+            //         'typeSale' => $request->input('typeSale') ?? '-',
+            //         'codeDetraction' => $request->input('codeDetraction'),
+            //         'status' => 'Pagado',
+            //         'programming_id' => $request->input('programming_id'),
+            //         'paymentConcept_id' => 3, // venta
+            //         'branchOffice_id' => $request->input('branchOffice_id'),
+            //         'reception_id' => $request->input('reception_id'),
+            //         'person_id' => $request->input('person_id'),
+            //         // 'user_id' => auth()->id(),
+            //         // 'box_id' => $request->input('box_id'),
+            //         'deleted_at' => null,
+            //     ];
+            //     if ($object2->trashed()) {
+            //         $object2->restore(); // Restore the soft-deleted record
+            //     }
+            //     // Actualiza el movimiento existente
+            //     $object2->update($data);
+            // }
 
-            // Actualizar el estado del objeto original
-            $object->saldo = 0;
-            $object->status = 'Pagado';
-            $object->save();
+            // // Actualizar el estado del objeto original
+            // $object->saldo = 0;
+            // $object->status = 'Pagado';
+            // $object->save();
 
-            // Aquí se asume que necesitas eliminar el movimiento de caja del contado
-            $installments = Installment::where('moviment_id', $object->id)
-                ->whereNull('deleted_at')->get();
+            // // Aquí se asume que necesitas eliminar el movimiento de caja del contado
+            // $installments = Installment::where('moviment_id', $object->id)
+            //     ->whereNull('deleted_at')->get();
 
-            if ($installments->isNotEmpty()) {
-                foreach ($installments as $installment) {
-                    // Asignar null a los installments relacionados
-                    $installment->deleted_at = now(); // Marca como eliminado
-                    $installment->save();
-                }
-            }
+            // if ($installments->isNotEmpty()) {
+            //     foreach ($installments as $installment) {
+            //         // Asignar null a los installments relacionados
+            //         $installment->deleted_at = now(); // Marca como eliminado
+            //         $installment->save();
+            //     }
+            // }
 
         } else {
 
@@ -2026,14 +2102,14 @@ class VentaController extends Controller
                 $object->status = 'Pendiente';
                 $object->save();
 
-                $movCaja = Moviment::
-                    where('movType', 'Caja')
-                    ->where('mov_id', $object->id)
-                    ->first();
-                if ($movCaja) {
-                    //ELIMINAR MOVIMIENTO DE CAJA
-                    $movCaja->delete();
-                }
+                // $movCaja = Moviment::
+                //     where('movType', 'Caja')
+                //     ->where('mov_id', $object->id)
+                //     ->first();
+                // if ($movCaja) {
+                //     //ELIMINAR MOVIMIENTO DE CAJA
+                //     $movCaja->delete();
+                // }
             }
         }
 
@@ -2177,21 +2253,23 @@ class VentaController extends Controller
             if ($typePayment === 'Créditos') {
                 // Si es crédito, sumamos los importes de installments en lugar de los métodos de pago
                 $totalPayments = collect($request->input('installments', []))->sum('importe');
-            } else {
-                // Si no es crédito, sumamos los métodos de pago normalmente
-                $totalPayments =
-                    ($request->input('cash', 0) ?: 0) +
-                    ($request->input('yape', 0) ?: 0) +
-                    ($request->input('plin', 0) ?: 0) +
-                    ($request->input('card', 0) ?: 0) +
-                    ($request->input('deposit', 0) ?: 0);
+                // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
+                if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
+                    $difference = $totalReceptionPayments - $totalPayments;
+                    $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
+                }
             }
+            // else {
+            //     // Si no es crédito, sumamos los métodos de pago normalmente
+            //     $totalPayments =
+            //         ($request->input('cash', 0) ?: 0) +
+            //         ($request->input('yape', 0) ?: 0) +
+            //         ($request->input('plin', 0) ?: 0) +
+            //         ($request->input('card', 0) ?: 0) +
+            //         ($request->input('deposit', 0) ?: 0);
+            // }
 
-            // Validar que la suma de paymentAmount en Reception sea igual a los pagos o importes
-            if (abs($totalReceptionPayments - $totalPayments) > 0.0001) {
-                $difference = $totalReceptionPayments - $totalPayments;
-                $validator->errors()->add('reception_payment_mismatch', "La suma de los pagos de las recepciones ($totalReceptionPayments) no coincide con la suma de los valores de pago ($totalPayments). Diferencia: $difference.");
-            }
+
         });
 
 
@@ -2205,9 +2283,9 @@ class VentaController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
-        if (Auth()->user()->box_id == null) {
-            return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
-        }
+        // if (Auth()->user()->box_id == null) {
+        //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
+        // }
         if ($object->installments && $object->installments->isNotEmpty()) {
             // Obtener la primera cuota
             $firstInstallment = $object->installments->first();
@@ -2265,7 +2343,12 @@ class VentaController extends Controller
         $tarjeta = $request->input('card') ?? 0;
         $deposito = $request->input('deposit') ?? 0;
 
-        $total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+        $total = collect($request->input('data', []))->sum(function ($item) {
+            $reception = Reception::find($item['reception_id'] ?? null);
+            return $reception?->paymentAmount ?? 0;
+        });
+        //$total = $efectivo + $yape + $plin + $tarjeta + $deposito;
+
         $routeVoucher = null;
         $numberVoucher = null;
         $bank_id = null;
@@ -2415,63 +2498,75 @@ class VentaController extends Controller
             $object->save();
         }
         $installments = $request->input('installments') ?? [];
+
+
+        if ($request->input('typePayment') != 'Créditos') {
+            $installments = [];
+            $installments = [
+                [
+                    'date' => 1, // 1 día después
+                    'importe' => $object->total,
+                ]
+            ];
+        }
+
         // if ($request->input('typePayment') == 'Contado') {
         if (empty($installments) && $installments == []) {
 
-            // Preparar los datos para el movimiento
-            // Asegúrate de que el objeto exista antes de intentar actualizar
-            $object2 = Moviment::withTrashed()->where('mov_id', $object->id)->first();
+            // // Preparar los datos para el movimiento
+            // // Asegúrate de que el objeto exista antes de intentar actualizar
+            // $object2 = Moviment::withTrashed()->where('mov_id', $object->id)->first();
 
-            if ($object2) {
-                $data = [
-                    'paymentDate' => $request->input('paymentDate'),
-                    'total' => $total ?? 0,
-                    'yape' => $request->input('yape') ?? 0,
-                    'deposit' => $depositAmount ?? 0,
-                    'cash' => $request->input('cash') ?? 0,
-                    'card' => $request->input('card') ?? 0,
-                    'plin' => $request->input('plin') ?? 0,
-                    'comment' => $request->input('comment') ?? '-',
-                    'typeDocument' => 'Ingreso',
-                    'bank_id' => $bank_id,
-                    'isBankPayment' => $request->input('isBankPayment'),
-                    'routeVoucher' => $routeVoucher,
-                    'numberVoucher' => $numberVoucher,
-                    'movType' => 'Caja',
-                    'typePayment' => $request->input('typePayment') ?? null,
-                    'typeSale' => $request->input('typeSale') ?? '-',
-                    'codeDetraction' => $request->input('codeDetraction'),
-                    'status' => 'Pagado',
-                    'programming_id' => $request->input('programming_id'),
-                    'paymentConcept_id' => 3, // venta
-                    'branchOffice_id' => $request->input('branchOffice_id'),
-                    'reception_id' => $request->input('reception_id'),
-                    'person_id' => $request->input('person_id'),
-                    // 'user_id' => auth()->id(),
-                    // 'box_id' => $request->input('box_id'),
-                    'deleted_at' => null,
-                ];
+            // if ($object2) {
+            //     $data = [
+            //         'paymentDate' => $request->input('paymentDate'),
+            //         'total' => $total ?? 0,
+            //         'yape' => $request->input('yape') ?? 0,
+            //         'deposit' => $depositAmount ?? 0,
+            //         'cash' => $request->input('cash') ?? 0,
+            //         'card' => $request->input('card') ?? 0,
+            //         'plin' => $request->input('plin') ?? 0,
+            //         'comment' => $request->input('comment') ?? '-',
+            //         'typeDocument' => 'Ingreso',
+            //         'bank_id' => $bank_id,
+            //         'isBankPayment' => $request->input('isBankPayment'),
+            //         'routeVoucher' => $routeVoucher,
+            //         'numberVoucher' => $numberVoucher,
+            //         'movType' => 'Caja',
+            //         'typePayment' => $request->input('typePayment') ?? null,
+            //         'typeSale' => $request->input('typeSale') ?? '-',
+            //         'codeDetraction' => $request->input('codeDetraction'),
+            //         'status' => 'Pagado',
+            //         'programming_id' => $request->input('programming_id'),
+            //         'paymentConcept_id' => 3, // venta
+            //         'branchOffice_id' => $request->input('branchOffice_id'),
+            //         'reception_id' => $request->input('reception_id'),
+            //         'person_id' => $request->input('person_id'),
+            //         // 'user_id' => auth()->id(),
+            //         // 'box_id' => $request->input('box_id'),
+            //         'deleted_at' => null,
+            //     ];
 
-                // Actualiza el movimiento existente
-                $object2->update($data);
-            }
+            //     // Actualiza el movimiento existente
+            //     $object2->update($data);
+            // }
 
-            if ($request->input('typePayment') == 'Contado') {
-                // Aquí se asume que necesitas eliminar el movimiento de caja del contado
-                $installments = Installment::where('moviment_id', $object->id)
-                    ->whereNull('deleted_at')->get();
+            // if ($request->input('typePayment') == 'Contado') {
+            //     // Aquí se asume que necesitas eliminar el movimiento de caja del contado
+            //     $installments = Installment::where('moviment_id', $object->id)
+            //         ->whereNull('deleted_at')->get();
 
-                if ($installments->isNotEmpty()) {
-                    foreach ($installments as $installment) {
-                        // Asignar null a los installments relacionados
-                        $installment->deleted_at = now(); // Marca como eliminado
-                        $installment->save();
-                    }
-                }
-                // Actualizar el estado del objeto original
-                $object->status = 'Pagado';
-                $object->save();
-            }
+            //     if ($installments->isNotEmpty()) {
+            //         foreach ($installments as $installment) {
+            //             // Asignar null a los installments relacionados
+            //             $installment->deleted_at = now(); // Marca como eliminado
+            //             $installment->save();
+            //         }
+            //     }
+            //     // Actualizar el estado del objeto original
+            //     $object->status = 'Pagado';
+            //     $object->save();
+            // }
 
         } else {
 
@@ -2524,14 +2619,14 @@ class VentaController extends Controller
                 $object->status = 'Pendiente';
                 $object->save();
 
-                $movCaja = Moviment::
-                    where('movType', 'Caja')
-                    ->where('mov_id', $object->id)
-                    ->first();
-                if ($movCaja) {
-                    //ELIMINAR MOVIMIENTO DE CAJA
-                    $movCaja->delete();
-                }
+                // $movCaja = Moviment::
+                //     where('movType', 'Caja')
+                //     ->where('mov_id', $object->id)
+                //     ->first();
+                // if ($movCaja) {
+                //     //ELIMINAR MOVIMIENTO DE CAJA
+                //     $movCaja->delete();
+                // }
             }
 
         }
