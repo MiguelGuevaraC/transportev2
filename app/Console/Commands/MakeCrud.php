@@ -13,7 +13,7 @@ class MakeCrud extends Command
     protected $signature = 'make:crud {name} {fields*}';
     protected $description = 'Genera CRUD completo con Swagger: modelo, controlador, requests, service, resource, ruta, migración y seeder';
 
-    protected $group = "taller";
+    protected $group = "Taller";
     public function handle()
     {
 
