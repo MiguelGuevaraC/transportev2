@@ -23,14 +23,14 @@ class AlmacenResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'      => $this->id ?? null,
+            'id' => $this->id ?? null,
 
-            'name'    => $this->name ?? null,
+            'name' => $this->name ?? null,
             'address' => $this->address ?? null,
-            'status'  => $this->status ?? null,
-           'seccions' => isset($this->seccions)
-    ? SeccionResource::collection($this->seccions)
-    : null,
+            'status' => $this->status ?? null,
+            'seccions' => isset($this->seccions)
+                ? SeccionResource::collection($this->seccions)
+                : null,
 
 
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
