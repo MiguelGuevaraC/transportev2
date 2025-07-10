@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\taller\MaterialController;
+use App\Http\Controllers\Taller\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
