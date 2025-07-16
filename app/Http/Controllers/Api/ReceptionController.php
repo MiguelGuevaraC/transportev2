@@ -389,6 +389,7 @@ class ReceptionController extends Controller
             'branchOffice_id' => $branch_office_id,
             'office_id' => $request->input('office_id'),
             'amount_fundo' => $request->input('amount_fundo'),
+            'is_address_recipient' => $request->input('is_address_recipient'),
         ];
 
         $object = Reception::create($data);
@@ -741,6 +742,7 @@ class ReceptionController extends Controller
             'office_id' => $request->input('office_id'),
             'user_edited_id' => Auth::user()->id,
             'amount_fundo' => $request->input('amount_fundo'),
+            'is_address_recipient' => $request->input('is_address_recipient'),
 
         ];
 

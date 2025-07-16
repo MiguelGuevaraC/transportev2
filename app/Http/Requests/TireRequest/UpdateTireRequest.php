@@ -51,6 +51,12 @@ class UpdateTireRequest extends UpdateRequest
             'shoulder2' => ['nullable', 'numeric'],
             'shoulder3' => ['nullable', 'numeric'],
             'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
+
+
+            'material_id' => ['nullable', 'integer', 'exists:materials,id'],
+            'design_id' => ['nullable', 'integer', 'exists:designs,id'],
+            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
+
         ];
     }
 
@@ -75,6 +81,12 @@ class UpdateTireRequest extends UpdateRequest
 
             'vehicle_id.integer' => 'El ID del vehículo debe ser un número entero.',
             'vehicle_id.exists' => 'El vehículo seleccionado no existe.',
+            'material_id.integer' => 'El campo material debe ser un número entero.',
+            'material_id.exists' => 'El material seleccionado no es válido.',
+            'design_id.integer' => 'El campo diseño debe ser un número entero.',
+            'design_id.exists' => 'El diseño seleccionado no es válido.',
+            'brand_id.integer' => 'El campo marca debe ser un número entero.',
+            'brand_id.exists' => 'La marca seleccionada no es válida.',
 
         ];
     }

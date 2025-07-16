@@ -18,9 +18,7 @@ class Tire extends Model
         'entry_date',     // Fecha de ingreso
         'supplier_id',    // ID del proveedor
         'vehicle_id',    // ID del neumatico
-        'material',       // Material del neumático
-        'brand',          // Marca del neumático
-        'design',         // Diseño del neumático
+
         'type',           // Tipo de neumático
         'size',           // Medida del neumático
         'dot',            // Fecha de fabricación (DOT)
@@ -31,6 +29,10 @@ class Tire extends Model
         'shoulder1',      // Ribete 1
         'shoulder2',      // Ribete 2
         'shoulder3',      // Ribete 3
+        'material_id',
+        'design_id',
+        'brand_id',
+
         'created_at',
         'updated_at',
         'deleted_at',
@@ -66,6 +68,9 @@ class Tire extends Model
         'created_at' => 'date',
         'updated_at' => 'date',
         'deleted_at' => 'date',
+        'material_id' => '=',
+        'design_id' => '=',
+        'brand_id' => '=',
     ];
 
 
@@ -85,4 +90,18 @@ class Tire extends Model
     {
         return $this->belongsTo(Person::class, 'supplier_id');
     }
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id');
+    }
+    public function design()
+    {
+        return $this->belongsTo(Design::class, 'design_id');
+    }
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
 }

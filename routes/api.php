@@ -453,6 +453,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/MovimentCompraApi.php';       //MOVIMENT COMPRA
     require __DIR__ . '/Api/MovimentCompraDetailApi.php'; //MOVIMENT COMPRA DETAIL
 
+    require __DIR__ . '/Api/TireApi.php'; //TIRE
     require __DIR__ . '/Api/BrandApi.php'; //BRAND
     require __DIR__ . '/Api/DesignApi.php'; //DESIGN
     require __DIR__ . '/Api/MaterialApi.php'; //MATERIAL

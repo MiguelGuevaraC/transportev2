@@ -33,7 +33,7 @@ class DesignController extends Controller
     public function show($id)
     {
         $item = $this->service->getDesignById($id);
-        if (!$item) return response()->json(['error' => 'Design no encontrado'], 404);
+        if (!$item) return response()->json(['error' => 'Diseño no encontrado'], 404);
         return new DesignResource($item);
     }
 
@@ -46,7 +46,7 @@ class DesignController extends Controller
     public function update(UpdateDesignRequest $request, $id)
     {
         $item = $this->service->getDesignById($id);
-        if (!$item) return response()->json(['error' => 'Design no encontrado'], 404);
+        if (!$item) return response()->json(['error' => 'Diseño no encontrado'], 404);
         $item = $this->service->updateDesign($item, $request->validated());
         return new DesignResource($item);
     }
@@ -54,7 +54,7 @@ class DesignController extends Controller
     public function destroy($id)
     {
         $item = $this->service->getDesignById($id);
-        if (!$item) return response()->json(['error' => 'Design no encontrado'], 404);
+        if (!$item) return response()->json(['error' => 'Diseño no encontrado'], 404);
         $this->service->destroyById($id);
         return response()->json(['message' => 'Design eliminado'], 200);
     }

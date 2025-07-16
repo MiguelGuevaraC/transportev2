@@ -33,7 +33,8 @@ class MaterialController extends Controller
     public function show($id)
     {
         $item = $this->service->getMaterialById($id);
-        if (!$item) return response()->json(['error' => 'Material no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Material no encontrado'], 404);
         return new MaterialResource($item);
     }
 
@@ -46,7 +47,8 @@ class MaterialController extends Controller
     public function update(UpdateMaterialRequest $request, $id)
     {
         $item = $this->service->getMaterialById($id);
-        if (!$item) return response()->json(['error' => 'Material no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Material no encontrado'], 404);
         $item = $this->service->updateMaterial($item, $request->validated());
         return new MaterialResource($item);
     }
@@ -54,7 +56,8 @@ class MaterialController extends Controller
     public function destroy($id)
     {
         $item = $this->service->getMaterialById($id);
-        if (!$item) return response()->json(['error' => 'Material no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Material no encontrado'], 404);
         $this->service->destroyById($id);
         return response()->json(['message' => 'Material eliminado'], 200);
     }

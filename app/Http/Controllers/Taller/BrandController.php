@@ -33,7 +33,8 @@ class BrandController extends Controller
     public function show($id)
     {
         $item = $this->service->getBrandById($id);
-        if (!$item) return response()->json(['error' => 'Brand no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Marca no Encontrado'], 404);
         return new BrandResource($item);
     }
 
@@ -46,7 +47,8 @@ class BrandController extends Controller
     public function update(UpdateBrandRequest $request, $id)
     {
         $item = $this->service->getBrandById($id);
-        if (!$item) return response()->json(['error' => 'Brand no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Marca no Encontrado'], 404);
         $item = $this->service->updateBrand($item, $request->validated());
         return new BrandResource($item);
     }
@@ -54,7 +56,8 @@ class BrandController extends Controller
     public function destroy($id)
     {
         $item = $this->service->getBrandById($id);
-        if (!$item) return response()->json(['error' => 'Brand no encontrado'], 404);
+        if (!$item)
+            return response()->json(['error' => 'Marca no Encontrado'], 404);
         $this->service->destroyById($id);
         return response()->json(['message' => 'Brand eliminado'], 200);
     }

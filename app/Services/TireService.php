@@ -19,15 +19,15 @@ class TireService
 
     public function createTire(array $data): Tire
     {
-        $taller = Tire::create($data);
-        return $taller;
+        $tire = Tire::create($data);
+        return $tire;
     }
 
-    public function updateTire(Tire $taller, array $data): Tire
+    public function updateTire(Tire $tire, array $data): Tire
     {
-        $filteredData = array_intersect_key($data, $taller->getAttributes());
-        $taller->update($filteredData);
-        return $taller;
+        $filteredData = array_intersect_key($data, $tire->getAttributes());
+        $tire->update($filteredData);
+        return Tire::find($tire->id);
     }
     public function destroyById($id)
     {

@@ -4,6 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\PersonResource;
+use App\Models\Brand;
+use App\Models\Design;
+use App\Models\Material;
 
 class TireResource extends JsonResource
 {
@@ -38,33 +41,45 @@ class TireResource extends JsonResource
      * )
      */
 
-    public function toArray($request): array
-    {
-        return [
-            'id' => $this->id ?? null,
-            'code' => $this->code ?? null,
-            'condition' => $this->condition ?? null,
-            'retread_number' => $this->retread_number ?? null,
-            'entry_date' => $this->entry_date ?? null,
-            'supplier_id' => $this->supplier_id ?? null,
-            'supplier' => $this->supplier ?? new PersonaResource($this->supplier),
-            'vehicle_id' => $this->vehicle_id ?? null,
-            'vehicle' => $this->vehicle ? $this->vehicle : null,
-            'material' => $this->material ?? null,
-            'brand' => $this->brand ?? null,
-            'design' => $this->design ?? null,
-            'type' => $this->type ?? null,
-            'size' => $this->size ?? null,
-            'dot' => $this->dot ?? null,
-            'tread_type' => $this->tread_type ?? null,
-            'current_tread' => $this->current_tread ?? null,
-            'minimum_tread' => $this->minimum_tread ?? null,
-            'tread' => $this->tread ?? null,
-            'shoulder1' => $this->shoulder1 ?? null,
-            'shoulder2' => $this->shoulder2 ?? null,
-            'shoulder3' => $this->shoulder3 ?? null,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s') ?? null,
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s') ?? null,
-        ];
-    }
+
+
+public function toArray($request): array
+{
+    return [
+        'id' => $this->id ?? null,
+        'code' => $this->code ?? null,
+        'condition' => $this->condition ?? null,
+        'retread_number' => $this->retread_number ?? null,
+        'entry_date' => $this->entry_date ?? null,
+
+        'supplier_id' => $this->supplier_id ?? null,
+        'supplier' => $this->supplier ?? new PersonaResource($this->supplier),
+'material_id' => $this->material_id ?? null,
+'material' => $this->material ? new MaterialResource($this->material) : null,
+
+'design_id' => $this->design_id ?? null,
+'design' => $this->design ? new DesignResource($this->design) : null,
+
+'brand_id' => $this->brand_id ?? null,
+'brand' => $this->brand ? new BrandResource($this->brand) : null,
+
+        'vehicle_id' => $this->vehicle_id ?? null,
+        'vehicle' => $this->vehicle ? $this->vehicle : null,
+
+        'type' => $this->type ?? null,
+        'size' => $this->size ?? null,
+        'dot' => $this->dot ?? null,
+        'tread_type' => $this->tread_type ?? null,
+        'current_tread' => $this->current_tread ?? null,
+        'minimum_tread' => $this->minimum_tread ?? null,
+        'tread' => $this->tread ?? null,
+        'shoulder1' => $this->shoulder1 ?? null,
+        'shoulder2' => $this->shoulder2 ?? null,
+        'shoulder3' => $this->shoulder3 ?? null,
+
+        'created_at' => $this->created_at?->format('Y-m-d H:i:s') ?? null,
+        'updated_at' => $this->updated_at?->format('Y-m-d H:i:s') ?? null,
+    ];
+}
+
 }

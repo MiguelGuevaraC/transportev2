@@ -261,6 +261,7 @@ class Reception extends Model
         'conditionPay',
         'typeService',
         'type_responsiblePay',
+        'is_address_recipient',
 
         'numberDays',
         'creditAmount',

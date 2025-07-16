@@ -160,6 +160,7 @@ class TireController extends Controller
             ], 404);
         }
         $updatedcarga = $this->tireService->updateTire($tire, $validatedData);
+
         return new TireResource($updatedcarga);
     }
 

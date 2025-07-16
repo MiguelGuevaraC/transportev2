@@ -51,9 +51,14 @@ class StoreTireRequest extends StoreRequest
             'entry_date' => ['required', 'date'],
             'supplier_id' => ['nullable', 'integer', 'exists:people,id'],
             'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
-            'material' => ['nullable', 'string'],
-            'brand' => ['nullable', 'string'],
-            'design' => ['nullable', 'string'],
+
+            'material_id' => ['required', 'integer', 'exists:materials,id'],
+            'design_id' => ['required', 'integer', 'exists:designs,id'],
+            'brand_id' => ['required', 'integer', 'exists:brands,id'],
+
+            // 'material' => ['nullable', 'string'],
+            // 'brand' => ['nullable', 'string'],
+            // 'design' => ['nullable', 'string'],
             'type' => ['nullable', 'string'],
             'size' => ['nullable', 'string'],
             'dot' => ['nullable', 'string'],
@@ -88,6 +93,16 @@ class StoreTireRequest extends StoreRequest
 
             'vehicle_id.integer' => 'El ID del vehículo debe ser un número entero.',
             'vehicle_id.exists' => 'El vehículo seleccionado no existe.',
+
+            'material_id.required' => 'El campo material es obligatorio.',
+            'material_id.integer' => 'El campo material debe ser un número entero.',
+            'material_id.exists' => 'El material seleccionado no es válido.',
+            'design_id.required' => 'El campo diseño es obligatorio.',
+            'design_id.integer' => 'El campo diseño debe ser un número entero.',
+            'design_id.exists' => 'El diseño seleccionado no es válido.',
+            'brand_id.required' => 'El campo marca es obligatorio.',
+            'brand_id.integer' => 'El campo marca debe ser un número entero.',
+            'brand_id.exists' => 'La marca seleccionada no es válida.',
 
         ];
     }
