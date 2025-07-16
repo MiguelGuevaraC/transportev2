@@ -41,7 +41,7 @@ class MaintenanceResource extends JsonResource
             'details' => $this->details
                 ? MaintenanceDetailResource::collection($this->details)
                 : null,
-            'maintenance_operations' => $this->maintenance_operations ? $this->maintenance_operations : null,
+            'operations' => $this->maintenance_operations ? $this->maintenance_operations : null,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];
     }
