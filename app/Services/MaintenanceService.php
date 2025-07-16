@@ -30,10 +30,10 @@ class MaintenanceService
                 $vehicle->update(['status' => 'Mantenimiento']);
             }
         }
-
         // Crear operaciones si existen
-        if (!empty($data['operations'])) {
-            $this->operationService->createMaintenanceOperation($maintenance->id, $data['operations']);
+        if (!empty($data['maintenance_operations'])) {
+            
+            $this->operationService->createMaintenanceOperation($maintenance->id, $data['maintenance_operations']);
         }
         return $maintenance;
     }
@@ -53,8 +53,8 @@ class MaintenanceService
         }
 
         // 3. Sincronizar operaciones
-        if (!empty($data['operations'])) {
-            $this->operationService->syncMaintenanceOperations($maintenance, $data['operations']);
+        if (!empty($data['maintenance_operations'])) {
+            $this->operationService->syncMaintenanceOperations($maintenance, $data['maintenance_operations']);
         }
 
         return $maintenance;
