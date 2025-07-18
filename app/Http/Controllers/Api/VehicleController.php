@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\VehicleTiresResource;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
 use App\Models\Person;
@@ -65,62 +66,62 @@ class VehicleController extends Controller
         return response()->json($persons, 200);
     }
 
-/**
- * Retrieve a list of vehicles.
- *
- * @return \Illuminate\Http\Response
- *
- * @OA\Get(
- *     path="/transporte/public/api/vehicle",
- *     summary="Get all Vehicles",
- *     tags={"Vehicle"},
- *     description="Retrieve a paginated list of vehicles, optionally filtered by branch office or type of vehicle (e.g., Tracto, Carreta).",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="branch_office_id",
- *         in="query",
- *         description="ID of the branch office to filter vehicles by",
- *         required=false,
- *         @OA\Schema(
- *             type="integer",
- *             example=1
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="typeCar",
- *         in="query",
- *         description="Type of vehicle to filter by (e.g., Tracto, Carreta)",
- *         required=false,
- *         @OA\Schema(
- *             type="string",
- *             enum={"Tracto", "Carreta"},
- *             example="Tracto"
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of Vehicles",
- *         @OA\JsonContent(
- *             type="array",
- *             @OA\Items(ref="#/components/schemas/Vehicle")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated.",
- *         @OA\JsonContent(
- *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Branch Office Not Found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Branch Office Not Found")
- *         )
- *     ),
- * )
- */
+    /**
+     * Retrieve a list of vehicles.
+     *
+     * @return \Illuminate\Http\Response
+     *
+     * @OA\Get(
+     *     path="/transporte/public/api/vehicle",
+     *     summary="Get all Vehicles",
+     *     tags={"Vehicle"},
+     *     description="Retrieve a paginated list of vehicles, optionally filtered by branch office or type of vehicle (e.g., Tracto, Carreta).",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="branch_office_id",
+     *         in="query",
+     *         description="ID of the branch office to filter vehicles by",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=1
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="typeCar",
+     *         in="query",
+     *         description="Type of vehicle to filter by (e.g., Tracto, Carreta)",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             enum={"Tracto", "Carreta"},
+     *             example="Tracto"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of Vehicles",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Vehicle")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Branch Office Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Branch Office Not Found")
+     *         )
+     *     ),
+     * )
+     */
     public function index(Request $request)
     {
         // Parámetros de entrada
@@ -211,80 +212,80 @@ class VehicleController extends Controller
         ], 200);
     }
 
-/**
- * @OA\Post(
- *     path="/transporte/public/api/vehicle",
- *     summary="Create a new vehicle",
- *     tags={"Vehicle"},
- *     description="Create a new vehicle and upload associated photos.",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         description="Vehicle data",
- *         @OA\JsonContent(
+    /**
+     * @OA\Post(
+     *     path="/transporte/public/api/vehicle",
+     *     summary="Create a new vehicle",
+     *     tags={"Vehicle"},
+     *     description="Create a new vehicle and upload associated photos.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Vehicle data",
+     *         @OA\JsonContent(
 
- *             @OA\Property(property="oldPlate", type="string", example="ABC123"),
- *             @OA\Property(property="currentPlate", type="string", example="XYZ789"),
- *             @OA\Property(property="numberMtc", type="string", example="123456789"),
- *             @OA\Property(property="brand", type="string", example="Toyota"),
- *             @OA\Property(property="numberModel", type="string", example="Corolla"),
- *             @OA\Property(property="tara", type="number", example=1500.5),
- *             @OA\Property(property="netWeight", type="number", example=2000.75),
- *             @OA\Property(property="usefulLoad", type="number", example=500.25),
- *             @OA\Property(property="ownerCompany", type="string", example="Transportes S.A."),
- *             @OA\Property(property="length", type="number", example=5.2),
- *             @OA\Property(property="width", type="number", example=2.0),
- *             @OA\Property(property="height", type="number", example=1.8),
- *             @OA\Property(property="ejes", type="integer", example=2),
- *             @OA\Property(property="wheels", type="integer", example=4),
- *             @OA\Property(property="color", type="string", example="Red"),
- *             @OA\Property(property="typeCar", type="string", example="Tracto"),
- *             @OA\Property(property="year", type="integer", example=2020),
- *             @OA\Property(property="tireType", type="string", example="Type A"),
- *             @OA\Property(property="tiresuspension", type="string", example="Suspension B"),
- *             @OA\Property(property="modelVehicle_id", type="integer", example=1),
- *             @OA\Property(property="branchOffice_id", type="integer", example=1),
- *             @OA\Property(property="bonus", type="number", example=1000.0),
- *             @OA\Property(property="isConection", type="boolean", example=true),
- *             @OA\Property(property="companyGps_id", type="integer", example=1),
- *             @OA\Property(property="mode", type="string", example="Standard"),
- *             @OA\Property(property="responsable_id", type="integer", example=1),
- *             @OA\Property(
- *                 property="photos",
- *                 type="array",
- *                 @OA\Items(
- *                     type="object",
- *                     @OA\Property(property="file", type="string", format="binary", description="Photo file"),
- *                     @OA\Property(property="type", type="string", description="Type of the photo", example="Documento/Imagen")
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Vehicle created successfully",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="message", type="string", example="Vehicle created successfully"),
- *             @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Validation error: The given data was invalid.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     )
- * )
- */
+     *             @OA\Property(property="oldPlate", type="string", example="ABC123"),
+     *             @OA\Property(property="currentPlate", type="string", example="XYZ789"),
+     *             @OA\Property(property="numberMtc", type="string", example="123456789"),
+     *             @OA\Property(property="brand", type="string", example="Toyota"),
+     *             @OA\Property(property="numberModel", type="string", example="Corolla"),
+     *             @OA\Property(property="tara", type="number", example=1500.5),
+     *             @OA\Property(property="netWeight", type="number", example=2000.75),
+     *             @OA\Property(property="usefulLoad", type="number", example=500.25),
+     *             @OA\Property(property="ownerCompany", type="string", example="Transportes S.A."),
+     *             @OA\Property(property="length", type="number", example=5.2),
+     *             @OA\Property(property="width", type="number", example=2.0),
+     *             @OA\Property(property="height", type="number", example=1.8),
+     *             @OA\Property(property="ejes", type="integer", example=2),
+     *             @OA\Property(property="wheels", type="integer", example=4),
+     *             @OA\Property(property="color", type="string", example="Red"),
+     *             @OA\Property(property="typeCar", type="string", example="Tracto"),
+     *             @OA\Property(property="year", type="integer", example=2020),
+     *             @OA\Property(property="tireType", type="string", example="Type A"),
+     *             @OA\Property(property="tiresuspension", type="string", example="Suspension B"),
+     *             @OA\Property(property="modelVehicle_id", type="integer", example=1),
+     *             @OA\Property(property="branchOffice_id", type="integer", example=1),
+     *             @OA\Property(property="bonus", type="number", example=1000.0),
+     *             @OA\Property(property="isConection", type="boolean", example=true),
+     *             @OA\Property(property="companyGps_id", type="integer", example=1),
+     *             @OA\Property(property="mode", type="string", example="Standard"),
+     *             @OA\Property(property="responsable_id", type="integer", example=1),
+     *             @OA\Property(
+     *                 property="photos",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="file", type="string", format="binary", description="Photo file"),
+     *                     @OA\Property(property="type", type="string", description="Type of the photo", example="Documento/Imagen")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicle created successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Vehicle created successfully"),
+     *             @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error: The given data was invalid.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
 
     public function createOrUpdate(Request $request, $id = null)
     {
@@ -352,7 +353,7 @@ class VehicleController extends Controller
             );
             $worker = Worker::find($request->input('responsable_id'));
 
-           if ($worker) {
+            if ($worker) {
                 $vehicle->responsable_id = $worker->person_id;
                 $vehicle->save();
             }
@@ -396,9 +397,15 @@ class VehicleController extends Controller
             }
 
             // Cargar las relaciones
-            $vehicle = Vehicle::with(["modelFunctional", "photos",
-                "documents", "typeCarroceria.typeCompany", "responsable.worker",
-                "companyGps", 'branchOffice'])->find($vehicle->id);
+            $vehicle = Vehicle::with([
+                "modelFunctional",
+                "photos",
+                "documents",
+                "typeCarroceria.typeCompany",
+                "responsable.worker",
+                "companyGps",
+                'branchOffice'
+            ])->find($vehicle->id);
 
             Bitacora::create([
                 'user_id' => Auth::id(), // ID del usuario que realiza la acción
@@ -469,89 +476,104 @@ class VehicleController extends Controller
         }
         return response()->json($vehicle, 200);
     }
-/**
- * @OA\Post(
- *     path="/transporte/public/api/vehicle/{id}",
- *     summary="Create or update a vehicle",
- *     tags={"Vehicle"},
- *     description="Create a new vehicle or update an existing one and optionally upload associated photos.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         required=true,
- *         description="ID of the vehicle. Leave empty to create a new vehicle.",
- *         @OA\Schema(type="integer", nullable=true)
- *     ),
- *     @OA\RequestBody(
- *         required=true,
- *         description="Vehicle data",
- *         @OA\MediaType(
- *             mediaType="multipart/form-data",
- *             @OA\Schema(
- *                 @OA\Property(property="oldPlate", type="string", example="ABC123"),
- *                 @OA\Property(property="currentPlate", type="string", example="XYZ789"),
- *                 @OA\Property(property="numberMtc", type="string", example="123456789"),
- *                 @OA\Property(property="brand", type="string", example="Toyota"),
- *                 @OA\Property(property="numberModel", type="string", example="Corolla"),
- *                 @OA\Property(property="tara", type="number", example=1500.5),
- *                 @OA\Property(property="netWeight", type="number", example=2000.75),
- *                 @OA\Property(property="usefulLoad", type="number", example=500.25),
- *                 @OA\Property(property="ownerCompany", type="string", example="Transportes S.A."),
- *                 @OA\Property(property="length", type="number", example=5.2),
- *                 @OA\Property(property="width", type="number", example=2.0),
- *                 @OA\Property(property="height", type="number", example=1.8),
- *                 @OA\Property(property="ejes", type="integer", example=2),
- *                 @OA\Property(property="wheels", type="integer", example=4),
- *                 @OA\Property(property="color", type="string", example="Red"),
- *                 @OA\Property(property="typeCar", type="string", example="Tracto"),
- *                 @OA\Property(property="year", type="integer", example=2020),
- *                 @OA\Property(property="tireType", type="string", example="Type A"),
- *                 @OA\Property(property="tiresuspension", type="string", example="Suspension B"),
- *                 @OA\Property(property="modelVehicle_id", type="integer", example=1),
- *                 @OA\Property(property="branchOffice_id", type="integer", example=1),
- *                 @OA\Property(property="bonus", type="number", example=1000.0),
- *                 @OA\Property(property="isConection", type="boolean", example=true),
- *                 @OA\Property(property="companyGps_id", type="integer", example=1),
- *                 @OA\Property(property="mode", type="string", example="Standard"),
- *                 @OA\Property(property="responsable_id", type="integer", example=1),
- *                 @OA\Property(
- *                     property="photos",
- *                     type="array",
- *                     @OA\Items(
- *                         type="object",
- *                         @OA\Property(property="file", type="string", format="binary", description="Photo file"),
- *                         @OA\Property(property="type", type="string", description="Type of the photo", example="Documento/Imagen")
- *                     )
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Vehicle created or updated successfully",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="message", type="string", example="Vehicle created or updated successfully"),
- *             @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Validation error: The given data was invalid.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     )
- * )
- */
+
+    /** @OA\Get(path="/vehicle/{id}/tires", tags={"Tires"}, @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")), @OA\Response(response=200, description="OK")) */
+
+    public function tires($id)
+    {
+        $vehicle = Vehicle::find($id);
+
+        if (!$vehicle) {
+            return response()->json(['message' => 'Vehicle not found'], 422);
+        }
+
+        return new VehicleTiresResource($vehicle);
+    }
+
+
+    /**
+     * @OA\Post(
+     *     path="/transporte/public/api/vehicle/{id}",
+     *     summary="Create or update a vehicle",
+     *     tags={"Vehicle"},
+     *     description="Create a new vehicle or update an existing one and optionally upload associated photos.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the vehicle. Leave empty to create a new vehicle.",
+     *         @OA\Schema(type="integer", nullable=true)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Vehicle data",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="oldPlate", type="string", example="ABC123"),
+     *                 @OA\Property(property="currentPlate", type="string", example="XYZ789"),
+     *                 @OA\Property(property="numberMtc", type="string", example="123456789"),
+     *                 @OA\Property(property="brand", type="string", example="Toyota"),
+     *                 @OA\Property(property="numberModel", type="string", example="Corolla"),
+     *                 @OA\Property(property="tara", type="number", example=1500.5),
+     *                 @OA\Property(property="netWeight", type="number", example=2000.75),
+     *                 @OA\Property(property="usefulLoad", type="number", example=500.25),
+     *                 @OA\Property(property="ownerCompany", type="string", example="Transportes S.A."),
+     *                 @OA\Property(property="length", type="number", example=5.2),
+     *                 @OA\Property(property="width", type="number", example=2.0),
+     *                 @OA\Property(property="height", type="number", example=1.8),
+     *                 @OA\Property(property="ejes", type="integer", example=2),
+     *                 @OA\Property(property="wheels", type="integer", example=4),
+     *                 @OA\Property(property="color", type="string", example="Red"),
+     *                 @OA\Property(property="typeCar", type="string", example="Tracto"),
+     *                 @OA\Property(property="year", type="integer", example=2020),
+     *                 @OA\Property(property="tireType", type="string", example="Type A"),
+     *                 @OA\Property(property="tiresuspension", type="string", example="Suspension B"),
+     *                 @OA\Property(property="modelVehicle_id", type="integer", example=1),
+     *                 @OA\Property(property="branchOffice_id", type="integer", example=1),
+     *                 @OA\Property(property="bonus", type="number", example=1000.0),
+     *                 @OA\Property(property="isConection", type="boolean", example=true),
+     *                 @OA\Property(property="companyGps_id", type="integer", example=1),
+     *                 @OA\Property(property="mode", type="string", example="Standard"),
+     *                 @OA\Property(property="responsable_id", type="integer", example=1),
+     *                 @OA\Property(
+     *                     property="photos",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="file", type="string", format="binary", description="Photo file"),
+     *                         @OA\Property(property="type", type="string", description="Type of the photo", example="Documento/Imagen")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vehicle created or updated successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Vehicle created or updated successfully"),
+     *             @OA\Property(property="vehicle", ref="#/components/schemas/Vehicle")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error: The given data was invalid.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
     public function update(Request $request, $id = null)
     {
         // Validar los datos de entrada
@@ -682,9 +704,15 @@ class VehicleController extends Controller
             return response()->json(['message' => 'Vehicle not found'], 422);
         }
 
-        $vehicle1 = Vehicle::with(["modelFunctional", "photos",
-            "documents", "typeCarroceria.typeCompany", "responsable.worker",
-            "companyGps", 'branchOffice'])->find($id);
+        $vehicle1 = Vehicle::with([
+            "modelFunctional",
+            "photos",
+            "documents",
+            "typeCarroceria.typeCompany",
+            "responsable.worker",
+            "companyGps",
+            'branchOffice'
+        ])->find($id);
 
         Bitacora::create([
             'user_id' => Auth::id(), // ID del usuario que realiza la acción

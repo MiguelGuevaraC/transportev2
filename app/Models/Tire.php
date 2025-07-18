@@ -18,6 +18,7 @@ class Tire extends Model
         'entry_date',     // Fecha de ingreso
         'supplier_id',    // ID del proveedor
         'vehicle_id',    // ID del neumatico
+        'position_vehicle',
 
         'type',           // Tipo de neumático
         'size',           // Medida del neumático
@@ -71,6 +72,7 @@ class Tire extends Model
         'material_id' => '=',
         'design_id' => '=',
         'brand_id' => '=',
+        'position_vehicle' => '=',
     ];
 
 

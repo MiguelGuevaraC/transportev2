@@ -17,20 +17,24 @@ class TireOperationService
         return TireOperation::find($id);
     }
 
- public function createTireOperation(array $data): TireOperation
+public function createTireOperation(array $data): TireOperation
 {
     $operation = TireOperation::create($data);
 
-    // Si es asignación y tiene un vehicle_id, actualiza el tire
+    // Si es asignación y tiene vehicle_id, tire_id y position_vehicle
     if (
         isset($data['operation_type'], $data['vehicle_id'], $data['tire_id']) &&
         strtolower($data['operation_type']) === 'asignacion'
     ) {
-        $operation->tire?->update(['vehicle_id' => $data['vehicle_id']]);
+        $operation->tire?->update([
+            'vehicle_id' => $data['vehicle_id'],
+            'position_vehicle' => $data['position'], // Asegúrate de que el campo se llame 'position' en el modelo Tire
+        ]);
     }
 
     return $operation;
 }
+
 
 
    public function updateTireOperation(TireOperation $taller, array $data): TireOperation

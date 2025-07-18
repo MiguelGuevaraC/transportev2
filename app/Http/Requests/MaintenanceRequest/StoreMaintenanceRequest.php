@@ -69,7 +69,7 @@ class StoreMaintenanceRequest extends StoreRequest
 
             // Campo opcional de operaciones
             'maintenance_operations'               => 'nullable|array',
-            'maintenance_operations.*.type_moviment' => 'required_with:maintenance_operations|string|in:CORRECTIVO,PREVENTIVO',
+            'maintenance_operations.*.type_moviment' => 'nullable|string|in:CORRECTIVO,PREVENTIVO',
             'maintenance_operations.*.name'        => 'required_with:maintenance_operations|string|max:255',
             'maintenance_operations.*.quantity'    => 'required_with:maintenance_operations|numeric|min:0',
             'maintenance_operations.*.unity'       => 'required_with:maintenance_operations|string|max:100',

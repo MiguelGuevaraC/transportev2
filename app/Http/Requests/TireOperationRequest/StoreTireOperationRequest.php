@@ -4,6 +4,7 @@ namespace App\Http\Requests\TireOperationRequest;
 
 use Illuminate\Validation\Validator;
 use App\Http\Requests\StoreRequest;
+use App\Models\Vehicle;
 
 /**
  * @OA\Schema(
@@ -35,7 +36,7 @@ class StoreTireOperationRequest extends StoreRequest
         return [
             'operation_type' => ['required', 'string'],
             'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
-            'position' => ['required', 'integer', 'between:1,12'],
+            'position' => ['required', 'integer', 'min:0'],
             'vehicle_km' => ['nullable', 'numeric'],
             'operation_date' => ['required', 'date'],
             'comment' => ['nullable', 'string'],
@@ -66,27 +67,49 @@ class StoreTireOperationRequest extends StoreRequest
             'user_id.exists' => 'El usuario no existe.',
         ];
     }
-public function withValidator(Validator $validator)
-{
-    $validator->after(function ($validator) {
-        if (
-            strtolower($this->operation_type) === 'asignacion' &&
-            $this->tire_id &&
-            $this->vehicle_id
-        ) {
-            $tire = \App\Models\Tire::withTrashed()->find($this->tire_id);
+    public function withValidator(Validator $validator)
+    {
+        $validator->after(function ($validator) {
 
-            if ($tire && $tire->vehicle_id && $tire->vehicle_id != $this->vehicle_id) {
-                $otherVehicle = \App\Models\Vehicle::withTrashed()->find($tire->vehicle_id);
+            if (strtolower($this->operation_type) === 'asignacion') {
+                $tire = \App\Models\Tire::withTrashed()->find($this->tire_id);
 
-                if (!$otherVehicle || $otherVehicle->deleted_at === null) {
-                    $plate = $otherVehicle->plate ?? 'desconocida';
-                    $validator->errors()->add('tire_id', "Este neumático ya está asignado a otro vehículo con placa {$plate}.");
+                if ($tire) {
+                    // Verifica si está asignado a otro vehículo activo
+                    if ($tire->vehicle_id && $tire->vehicle_id != $this->vehicle_id) {
+                        $otherVehicle = \App\Models\Vehicle::withTrashed()->find($tire->vehicle_id);
+                        if ($otherVehicle && is_null($otherVehicle->deleted_at)) {
+                            $plate = $otherVehicle->plate ?? 'desconocida';
+                            $validator->errors()->add('tire_id', "Este neumático ya está asignado a otro vehículo con placa {$plate}.");
+                        }
+                    }
+
+                    // Verifica si ya está asignado al mismo vehículo en alguna posición
+                    if ($tire->vehicle_id == $this->vehicle_id && $tire->position_vehicle) {
+                        $validator->errors()->add('tire_id', "Este neumático ya está asignado en la posición {$tire->position_vehicle} de este mismo vehículo.");
+                    }
+                    $vehicle = Vehicle::find($this->vehicle_id);
+
+                    // 🚫 Validar que la posición esté dentro del rango permitido por los ejes del vehículo
+                    if ($vehicle->ejes > 0) {
+                       
+
+                        if ($vehicle->ejes) {
+                            $maxPosition = $vehicle->ejes * 4;
+                            if ( $this->position> $maxPosition) {
+                                $validator->errors()->add('position', "Este vehículo tiene {$vehicle->ejes} ejes, por lo tanto solo permite posiciones de 1 a {$maxPosition}.");
+                            }
+
+                        } else {
+                            $validator->errors()->add('position', "Este vehículo no tiene ejes registrado");
+                        }
+                    }
                 }
             }
-        }
-    });
-}
+        });
+    }
+
+
 
 
 }
