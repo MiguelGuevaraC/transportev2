@@ -168,26 +168,26 @@ PHP;
         File::put(database_path("seeders/{$name}Seeder.php"), $seederContent);
     }
 
-protected function generateResource($name, $fields)
-{
-    $propertiesArray = collect($fields)->map(function ($field) {
-        $nameField = explode(':', $field)[0];
-        return "'$nameField' => \$this->$nameField ?? null";
-    });
+    protected function generateResource($name, $fields)
+    {
+        $propertiesArray = collect($fields)->map(function ($field) {
+            $nameField = explode(':', $field)[0];
+            return "'$nameField' => \$this->$nameField ?? null";
+        });
 
-    $docProps = collect($fields)->map(function ($field) {
-        [$nameField, $type] = explode(':', $field);
-        return " *     @OA\\Property(property=\"$nameField\", type=\"$type\")";
-    })->implode("\n");
+        $docProps = collect($fields)->map(function ($field) {
+            [$nameField, $type] = explode(':', $field);
+            return " *     @OA\\Property(property=\"$nameField\", type=\"$type\")";
+        })->implode("\n");
 
-    // Construcción segura del array
-    $arrayItems = collect([
-        "'id' => \$this->id ?? null",
-        ...$propertiesArray,
-        "'created_at' => \$this->created_at?->format('Y-m-d H:i:s')"
-    ])->implode(",\n            ");
+        // Construcción segura del array
+        $arrayItems = collect([
+            "'id' => \$this->id ?? null",
+            ...$propertiesArray,
+            "'created_at' => \$this->created_at?->format('Y-m-d H:i:s')"
+        ])->implode(",\n            ");
 
-    $content = <<<PHP
+        $content = <<<PHP
 <?php
 
 namespace App\Http\Resources;
@@ -211,8 +211,8 @@ class {$name}Resource extends JsonResource
 }
 PHP;
 
-    File::put(app_path("Http/Resources/{$name}Resource.php"), $content);
-}
+        File::put(app_path("Http/Resources/{$name}Resource.php"), $content);
+    }
 
 
 
@@ -237,9 +237,10 @@ class {$name}Service
         return $name::create(\$data);
     }
 
-    public function update{$name}($name \$instance, array \$data): $name
+     public function update{$name}($name \$instance, array \$data): $name
     {
-        \$instance->update(\$data);
+        \$filteredData = array_intersect_key(\$data, \$instance->getAttributes());
+        \$instance->update(\$filteredData);
         return \$instance;
     }
 
@@ -295,7 +296,10 @@ use App\Http\Requests\StoreRequest;
  */
 class Store{$name}Request extends StoreRequest
 {
-    public function authorize() { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules()
     {
@@ -328,7 +332,10 @@ use App\Http\Requests\UpdateRequest;
  */
 class Update{$name}Request extends UpdateRequest
 {
-    public function authorize() { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules()
     {
@@ -355,7 +362,10 @@ use App\Http\Requests\IndexRequest;
 
 class Index{$name}Request extends IndexRequest
 {
-    public function authorize() { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules(): array
     {

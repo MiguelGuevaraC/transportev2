@@ -210,7 +210,30 @@ class MejorasRutasPermission extends Seeder
                 'guard_name' => 'web',
                 'groupMenu_id' => 8,
             ],
-
+            [
+                'id' => 52,
+                'name' => 'Materiales',
+                'route' => 'material',
+                'icon' => 'dot',
+                'guard_name' => 'web',
+                'groupMenu_id' => 8,
+            ],
+            [
+                'id' => 53,
+                'name' => 'Marcas',
+                'route' => 'brand',
+                'icon' => 'dot',
+                'guard_name' => 'web',
+                'groupMenu_id' => 8,
+            ],
+[
+                'id' => 54,
+                'name' => 'Diseño',
+                'route' => 'design',
+                'icon' => 'dot',
+                'guard_name' => 'web',
+                'groupMenu_id' => 8,
+            ],
 
         ];
 
