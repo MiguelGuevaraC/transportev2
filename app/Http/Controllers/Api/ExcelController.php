@@ -71,7 +71,7 @@ class ExcelController extends Controller
                 'ESTADO' => (string) ($document->status),
                 'VEHÍCULO' => (string) (($document->vehicle->currentPlate) ?? ''),
                 'DESCRIPCIÓN' => (string) ($document->description ?? ''),
-                'DOCUMENTO' => (string) ("https://develop.garzasoft.com/transporte/public" . $document->pathFile),
+                'DOCUMENTO' => (string) ("https://develop.garzasoft.com/transportedev/public" . $document->pathFile),
             ];
 
         }

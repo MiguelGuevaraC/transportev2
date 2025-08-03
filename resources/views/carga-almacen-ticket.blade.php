@@ -202,7 +202,7 @@
 <body>
     <div class="ticket">
         <div style="text-align: center;margin:auto">
-            <img width="180px" height="auto" class="logoImage" src="https://develop.garzasoft.com/transporte/public/storage/app/public/img/logoTransportes.jpeg" alt="logoTransporte">
+            <img width="180px" height="auto" class="logoImage" src="https://develop.garzasoft.com/transportedev/public/storage/app/public/img/logoTransportes.jpeg" alt="logoTransporte">
 
             <h1 style="font-size:9px">OPERACIONES LOGISTICAS HERNANDEZ S.A.C</h1>
             <label for="RUC"><b>RUC:<span id="RUC">20605597484</span></b> </label>

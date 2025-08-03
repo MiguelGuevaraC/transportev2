@@ -328,13 +328,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('receptionWithoutSale', [VentaController::class, 'receptionWithoutSale']);
     Route::get('getArchivosDocument/{id}/{tipodocumento}', [VentaController::class, 'getArchivosDocument']);
 
-    Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
-    Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
-    Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
-    Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
-    Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
-    Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
-    Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
+    // Route::get('declararBoletaFactura/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFactura']);
+    // Route::get('declararBoletaFacturaById/{id}/{idtipodocumento}', [VentaController::class, 'declararBoletaFacturaById']);
+    // Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
+    // Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
+    // Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+    // Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
+    // Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
 
 
 
