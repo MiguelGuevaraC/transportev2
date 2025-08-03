@@ -41,11 +41,11 @@ class StoreTireRequest extends StoreRequest
     public function rules(): array
     {
         return [
-            // 'code' => [
-            //     'required',
-            //     'string',
-            //     Rule::unique('tires', 'code')->whereNull('deleted_at'),
-            // ],
+            'code' => [
+                'nullable',
+                'string',
+                Rule::unique('tires', 'code')->whereNull('deleted_at'),
+            ],
             'condition' => ['nullable', 'string'],
             'retread_number' => ['nullable', 'integer'],
             'entry_date' => ['required', 'date'],
