@@ -25,11 +25,15 @@ class UpdateTireRequest extends UpdateRequest
 
     public function rules(): array
     {
+        $tireId = $this->route('id'); // o simplemente: $this->tire->id;
+
         return [
             'code' => [
                 'nullable',
                 'string',
-                Rule::unique('tires', 'code')->whereNull('deleted_at'),
+                Rule::unique('tires', 'code')
+                ->ignore($tireId)
+                ->whereNull('deleted_at'),
             ],
             'condition' => ['nullable', 'string'],
             'retread_number' => ['nullable', 'integer'],

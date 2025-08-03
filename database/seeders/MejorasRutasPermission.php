@@ -221,7 +221,7 @@ class MejorasRutasPermission extends Seeder
             [
                 'id' => 53,
                 'name' => 'Marcas',
-                'route' => 'brand',
+                'route' => 'marca_neumatico',
                 'icon' => 'dot',
                 'guard_name' => 'web',
                 'groupMenu_id' => 8,
@@ -229,7 +229,7 @@ class MejorasRutasPermission extends Seeder
 [
                 'id' => 54,
                 'name' => 'Diseño',
-                'route' => 'design',
+                'route' => 'diseño',
                 'icon' => 'dot',
                 'guard_name' => 'web',
                 'groupMenu_id' => 8,
