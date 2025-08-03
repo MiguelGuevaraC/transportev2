@@ -36,7 +36,7 @@ class TireOperation extends Model
         'vehicle_id' => '=',
         'position' => '=',
         'vehicle_km' => '=',
-        'operation_date' => 'date',
+        'operation_date' => 'between',
         'driver_id' => '=',
         'user_id' => '=',
         'tire_id' => '=',

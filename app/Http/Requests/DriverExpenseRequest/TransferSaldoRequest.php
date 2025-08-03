@@ -53,7 +53,7 @@ class TransferSaldoRequest extends StoreRequest
                 Rule::exists('programmings', 'id')->whereNull('deleted_at'),
                 'different:programming_out_id',
             ],
-            'amount'             => 'required|numeric|min:1',
+            'amount'             => 'required|numeric|min:0',
         ];
     }
 
