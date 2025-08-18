@@ -267,7 +267,7 @@ class ProgrammingController extends Controller
                     $q->where('worker_id', $driverId)->whereIn('function', ['driver']);
                 })->exists()
             ) {
-                $query->where('id', '>', $programmingId);
+                // $query->where('id', '>', $programmingId);
             }
         }
 

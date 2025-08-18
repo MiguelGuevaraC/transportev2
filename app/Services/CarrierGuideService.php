@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Exports\guides\GuidesIntegradoExport;
 use App\Http\Resources\CarrierGuideResource;
 use App\Models\CarrierGuide;
+use App\Models\Installment;
 use App\Models\Moviment;
 use App\Models\Product;
 use App\Models\Reception;
@@ -43,6 +44,9 @@ class CarrierGuideService
         $moviment->status           = "Anulado";
         $moviment->status_facturado = "Anulada";
         $moviment->save();
+
+        //eliminar las installments de ese movimientos
+        Installment::where('moviment_id', $moviment->id)->delete();
         return $moviment;
     }
 

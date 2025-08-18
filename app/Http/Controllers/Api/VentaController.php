@@ -220,6 +220,38 @@ class VentaController extends Controller
      *     )
      * )
      */
+
+    function validarFechaPago($fecha)
+    {
+        // Convertir a Carbon y extraer solo la fecha (sin hora)
+        $fechaSoloDia = Carbon::parse($fecha)->toDateString();
+
+        if (!in_array($fechaSoloDia, [Carbon::today()->toDateString(), Carbon::tomorrow()->toDateString()])) {
+            return response()->json([
+                'error' => 'La fecha de pago debe ser hoy (' . Carbon::today()->toDateString() . ') o mañana (' . Carbon::tomorrow()->toDateString() . ').'
+            ], 422);
+        }
+
+        return null; // Si todo está bien
+    }
+    function validarFechaPagoEditar($fecha, $id)
+    {
+        $registro = Moviment::findOrFail($id);
+
+        $fechaActual = Carbon::parse($registro->paymentDate)->toDateString();
+        $fechaNueva = Carbon::parse($fecha)->toDateString();
+
+        if ($fechaNueva !== $fechaActual) {
+            if (!in_array($fechaNueva, [Carbon::today()->toDateString(), Carbon::tomorrow()->toDateString()])) {
+                return response()->json([
+                    'error' => 'La fecha de pago debe ser hoy (' . Carbon::today()->toDateString() . ') o mañana (' . Carbon::tomorrow()->toDateString() . ').'
+                ], 422);
+            }
+        }
+
+        return null;
+    }
+
     public function store(Request $request)
     {
 
@@ -263,6 +295,10 @@ class VentaController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
+        if ($resp = $this->validarFechaPago($request->paymentDate)) {
+            return $resp;
+        }
+
 
         // if (Auth()->user()->box_id == null) {
         //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
@@ -479,13 +515,16 @@ class VentaController extends Controller
             if (!empty($installments)) {
                 // Variables para acumular el total
                 $totalAcumulado = 0;
+                $paymentDate = $request->input('paymentDate');
+                $baseDate = Carbon::parse($paymentDate); // lanza excepción si es inválida
 
                 foreach ($installments as $installment) {
                     $dias = $installment['date'];
 
+
                     // Datos para crear una cuota
                     $data = [
-                        'date' => now()->addDays($dias),
+                        'date' => $baseDate->copy()->addDays($dias),
                         'days' => $dias,
                         'total' => $installment['importe'],
                         'totalDebt' => $installment['importe'],
@@ -1071,6 +1110,10 @@ class VentaController extends Controller
 
         });
 
+        if ($resp = $this->validarFechaPago($request->paymentDate)) {
+            return $resp;
+        }
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
@@ -1307,12 +1350,16 @@ class VentaController extends Controller
 
             if (!empty($installments)) {
 
+                $paymentDate = $request->input('paymentDate');
+                $baseDate = Carbon::parse($paymentDate);
+
+
                 foreach ($installments as $installment) {
 
                     $dias = $installment['date'];
 
                     $data = [
-                        'date' => now()->addDays($dias),
+                        'date' => $baseDate->copy()->addDays($dias),
                         'days' => $dias,
                         'total' => $installment['importe'],
                         'totalDebt' => $installment['importe'],
@@ -1503,6 +1550,12 @@ class VentaController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
         }
+
+        if ($resp = $this->validarFechaPago($request->paymentDate)) {
+            return $resp;
+        }
+
+
         // if (Auth()->user()->box_id == null) {
         //     return response()->json(['error' => 'Usuario Sin caja Asginada'], 422);
         // }
@@ -1678,12 +1731,15 @@ class VentaController extends Controller
 
             if (!empty($installments)) {
 
+                $paymentDate = $request->input('paymentDate');
+                $baseDate = Carbon::parse($paymentDate);
+
                 foreach ($installments as $installment) {
 
                     $dias = $installment['date'];
 
                     $data = [
-                        'date' => now()->addDays($dias),
+                        'date' => $baseDate->copy()->addDays($dias),
                         'days' => $dias,
                         'total' => $installment['importe'],
                         'totalDebt' => $installment['importe'],
@@ -1829,6 +1885,9 @@ class VentaController extends Controller
             }
 
         });
+        if ($resp = $this->validarFechaPagoEditar($request->paymentDate, $id)) {
+            return $resp;
+        }
 
         $object = Moviment::find($id);
         if (!$object) {
@@ -1982,7 +2041,7 @@ class VentaController extends Controller
         }
         $installments = $request->input('installments') ?? [];
 
-        
+
         if ($request->input('typePayment') != 'Créditos') {
             $installments = [];
             $installments = [
@@ -2057,7 +2116,9 @@ class VentaController extends Controller
             if (!empty($installments)) {
                 $monto = 0;
                 $installmentsActually = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
-                $processedInstallments = [];                                            // Mantendrá los IDs procesados para verificar luego cuáles eliminar
+                $processedInstallments = [];
+                $paymentDate = $request->input('paymentDate');
+                $baseDate = Carbon::parse($paymentDate);                                     // Mantendrá los IDs procesados para verificar luego cuáles eliminar
 
                 foreach ($installments as $installment) {
                     $dias = $installment['date'];
@@ -2065,8 +2126,10 @@ class VentaController extends Controller
                         // Actualizar la cuota existente si se encuentra el ID
                         $existingInstallment = Installment::find($installment['id']);
                         if ($existingInstallment) {
+
+
                             $existingInstallment->days = $dias;
-                            $existingInstallment->date = now()->addDays($dias);
+                            $existingInstallment->date = $baseDate->copy()->addDays($dias);
                             $existingInstallment->total = $installment['importe'];
                             $existingInstallment->totalDebt = $installment['importe'];
                             $existingInstallment->save();
@@ -2077,7 +2140,7 @@ class VentaController extends Controller
                     } else {
                         // Datos para crear una cuota
                         $data = [
-                            'date' => now()->addDays($dias),
+                            'date' => $baseDate->copy()->addDays($dias),
                             'days' => $dias,
                             'total' => $installment['importe'],
                             'totalDebt' => $installment['importe'],
@@ -2271,6 +2334,10 @@ class VentaController extends Controller
 
 
         });
+
+        if ($resp = $this->validarFechaPagoEditar($request->paymentDate, $id)) {
+            return $resp;
+        }
 
 
 
@@ -2576,6 +2643,9 @@ class VentaController extends Controller
                 $installmentsActually = $object->installments->pluck('id')->toArray(); // Obtiene los IDs actuales de installments
                 $processedInstallments = [];                                            // Mantendrá los IDs procesados para verificar luego cuáles eliminar
 
+                $paymentDate = $request->input('paymentDate');
+                $baseDate = Carbon::parse($paymentDate);
+
                 foreach ($installments as $installment) {
                     $dias = $installment['date'];
                     if (isset($installment['id'])) {
@@ -2583,7 +2653,7 @@ class VentaController extends Controller
                         $existingInstallment = Installment::find($installment['id']);
                         if ($existingInstallment) {
                             $existingInstallment->days = $dias;
-                            $existingInstallment->date = now()->addDays($dias);
+                            $existingInstallment->date = $baseDate->copy()->addDays($dias);
                             $existingInstallment->total = $installment['importe'];
                             $existingInstallment->totalDebt = $installment['importe'];
                             $existingInstallment->save();
@@ -2594,7 +2664,7 @@ class VentaController extends Controller
                     } else {
                         // Datos para crear una cuota
                         $data = [
-                            'date' => now()->addDays($dias),
+                            'date' => $baseDate->copy()->addDays($dias),
                             'days' => $dias,
                             'total' => $installment['importe'],
                             'totalDebt' => $installment['importe'],
