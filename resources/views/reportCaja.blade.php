@@ -1,6 +1,6 @@
 @php
     use Carbon\Carbon;
-    header('Access-Control-Allow-Origin: https://transportes-hernandez.vercel.app');
+    header('Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
