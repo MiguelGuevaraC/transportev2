@@ -3435,7 +3435,7 @@ class VentaController extends Controller
     public function getArchivosDocument($idventa, $typeDocument)
     {
         // Habilitar CORS para un origen específico
-        header("Access-Control-Allow-Origin: https://transportes-hernandez-mrsoft.vercel.app"); // Permitir solo este origen
+        header("Access-Control-Allow-Origin: https://transportes-hernandez-dev.vercel.app"); // Permitir solo este origen
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS");                          // Permitir métodos HTTP específicos
         header("Access-Control-Allow-Headers: Content-Type, Authorization");                 // Permitir tipos de encabezados específicos
 
