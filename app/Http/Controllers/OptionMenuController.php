@@ -40,6 +40,47 @@ class OptionMenuController extends Controller
     }
 
 
+
+    public function destroy(int $id)
+    {
+        $permission = Permission::find($id);
+
+        if (!$permission) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El permiso no existe.'
+            ], 404);
+        }
+
+        // Verificar roles asignados
+        $roles = $permission->roles()->pluck('name');
+
+        if ($roles->count() > 0) {
+            $rolesList = implode(', ', $roles->toArray());
+            return response()->json([
+                'success' => false,
+                'message' => "No se puede eliminar: el permiso está asignado a los roles: {$rolesList}"
+            ], 422);
+        }
+
+        // Eliminar si no está en ningún rol
+        if (!$permission->delete()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo eliminar el permiso.'
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permiso eliminado correctamente.'
+        ]);
+    }
+
+
+
+
+
     public function getAccessAll(Request $request)
     {
         $name = $request->input('name');

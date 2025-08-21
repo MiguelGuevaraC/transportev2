@@ -8,6 +8,18 @@ use Exception;
 
 class PermissionService
 {
+
+    public function delete(int $id): bool
+    {
+        $permission = Permission::find($id);
+
+        if (!$permission) {
+            return false;
+        }
+
+        return (bool) $permission->delete();
+    }
+
     /**
      * Crea o actualiza un permiso según name + action.
      *

@@ -91,7 +91,9 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::put('setAccess/{typeUserId}', [TypeofUserController::class, 'setAccess']);
     Route::get('getAccess/{id}', [TypeofUserController::class, 'getAccess']);
     Route::get('getAccessAll', [OptionMenuController::class, 'getAccessAll']);
- Route::post('optionmenu', [OptionMenuController::class, 'store']);
+
+    Route::post('optionmenu', [OptionMenuController::class, 'store']);
+    Route::delete('optionmenu/{id}', [OptionMenuController::class, 'destroy']);
 
     // COMISSION_AGENT
     Route::get('comissionAgent', [ComissionAgentController::class, 'index']);
@@ -461,6 +463,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/DesignApi.php'; //DESIGN
     require __DIR__ . '/Api/MaterialApi.php'; //MATERIAL
 
-     require __DIR__ . '/Api/VehicleApi.php'; //VEHICLE
+    require __DIR__ . '/Api/VehicleApi.php'; //VEHICLE
 
 });

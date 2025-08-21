@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OptionMenuRequest\SetAccessRequest;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -364,30 +365,51 @@ class TypeofUserController extends Controller
      * )
      */
 
-    public function setAccess(Request $request)
-    {
-        $typeUserId = $request->route('typeUserId');
 
-        $validator = validator()->make(array_merge($request->all(), ['typeUserId' => $typeUserId]), [
-            'typeUserId' => 'required|exists:typeof_Users,id',
-            'optionsMenu' => 'required|array',
-        ]);
+ 
+public function setAccess(SetAccessRequest $request, $typeUserId)
+{
+    $role = Role::findOrFail($typeUserId);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
+    $toAdd = [];
+    $toRemove = [];
+
+    foreach ($request->input('optionsMenu') as $option) {
+        $permission = Permission::find($option['id']);
+
+        if (!$permission) {
+            continue;
         }
 
-        $role = Role::find($typeUserId);
-        $role->syncPermissions($request->input('optionsMenu'));
-
-        $permissions = Role::find($role->id)->permissions()
-            ->with('groupMenu')
-            ->get();
-
-        return response()->json([
-            "Option_Menu" => $permissions,
-        ]);
+        if ($option['state'] === true) {
+            $toAdd[] = $permission->name;
+        } else {
+            $toRemove[] = $permission->name;
+        }
     }
+
+    if (!empty($toAdd)) {
+        $role->givePermissionTo($toAdd);
+    }
+    if (!empty($toRemove)) {
+        $role->revokePermissionTo($toRemove);
+    }
+
+    // traer solo los que vinieron en el request con true
+    $selectedIds = collect($request->input('optionsMenu'))
+        ->where('state', true)
+        ->pluck('id')
+        ->all();
+
+    $permissions = Permission::whereIn('id', $selectedIds)->get();
+
+    return response()->json([
+        "Option_Menu" => $permissions,
+    ]);
+}
+
+
+
 
     /**
      * Assign permissions to a specific type of user.
@@ -433,6 +455,8 @@ class TypeofUserController extends Controller
      *     ),
      * )
      */
+
+
 
     public function getAccess(Request $request, $id)
     {
