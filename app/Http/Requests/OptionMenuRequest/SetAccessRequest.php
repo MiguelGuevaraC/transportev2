@@ -31,7 +31,7 @@ class SetAccessRequest extends UpdateRequest
         return [
             'typeUserId' => 'prohibited', // evitamos que venga en body
             'optionsMenu' => 'required|array',
-            'optionsMenu.*.id' => 'required|string|exists:option_menus,id',
+            'optionsMenu.*.id' => 'required|string|exists:option_Menus,id',
             'optionsMenu.*.state' => 'required|boolean',
         ];
     }
@@ -44,7 +44,7 @@ class SetAccessRequest extends UpdateRequest
             'optionsMenu.required' => 'Debe enviar al menos un permiso.',
             'optionsMenu.array' => 'El campo optionsMenu debe ser un array.',
             'optionsMenu.*.id.required' => 'Cada permiso debe tener un ID.',
-            'optionsMenu.*.id.exists' => 'Alguno de los permisos no existe en option_menus.',
+            'optionsMenu.*.id.exists' => 'Alguno de los permisos no existe en option_Menus.',
             'optionsMenu.*.state.required' => 'Cada permiso debe incluir el estado.',
             'optionsMenu.*.state.boolean' => 'El campo state debe ser true o false.',
         ];
