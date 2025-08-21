@@ -471,14 +471,11 @@ public function obtenerMenu()
         ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
         ->get();
 
-    $User = User::find(Auth::id());
-    $typeOfUser = Role::find($User->typeofUser_id);
-    $Permissions = $typeOfUser == null ? [] : $typeOfUser->permissions;
+    $user = Auth::user();
 
-    $permis = [];
-    foreach ($Permissions as $Permissio) {
-        $permis[] = $Permissio->name;
-    }
+    // Traemos el rol con permisos ya cargados
+    $role = Role::with('permissions')->find($user->typeofUser_id);
+    $permis = $role ? $role->permissions->pluck('name')->toArray() : [];
 
     $optionsByGroup = [];
 
@@ -493,21 +490,21 @@ public function obtenerMenu()
             'child'  => [],
         ];
 
-        // Subgrupos del grupo padre
+        // SUBGRUPOS
         $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
             ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
             ->get();
 
         foreach ($subgrupos as $subgrupo) {
             $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
-                ->whereIn('name', $permis)
+                ->whereIn('name', $permis) // 🔑 solo permisos del rol
                 ->orderBy('created_at', 'asc')
                 ->get()
-                ->groupBy('name'); // 🔑 agrupamos por nombre
+                ->groupBy('name');
 
             $subOptions = [];
             foreach ($subgroupOptions as $name => $options) {
-                $actions = $options->pluck('action')->unique()->implode(','); // 🔑 concatenar acciones
+                $actions = $options->pluck('action')->unique()->values()->all();
                 $first   = $options->first();
 
                 $subOptions[] = [
@@ -515,12 +512,12 @@ public function obtenerMenu()
                     'title'  => $first->name,
                     'name'   => strtolower(str_replace(' ', '_', $first->name)),
                     'link'   => $first->route,
-                    'action' => $actions, // 👈 todas las acciones de ese name
+                    'action' => $actions, // 👈 ahora es array limpio de acciones
                     'icon'   => 'dot',
                 ];
             }
 
-            if (count($subOptions) > 0) {
+            if (!empty($subOptions)) {
                 $group_menu['child'][] = [
                     'id'    => $subgrupo->id,
                     'title' => $subgrupo->name,
@@ -532,15 +529,15 @@ public function obtenerMenu()
             }
         }
 
-        // Opciones directas del grupo padre
+        // OPCIONES DIRECTAS DEL GRUPO PADRE
         $directOptions = Permission::where('groupMenu_id', $grupo->id)
-            ->whereIn('name', $permis)
+            ->whereIn('name', $permis) // 🔑 solo permisos del rol
             ->orderBy('created_at', 'asc')
             ->get()
-            ->groupBy('name'); // 🔑 agrupamos por nombre
+            ->groupBy('name');
 
         foreach ($directOptions as $name => $options) {
-            $actions = $options->pluck('action')->unique()->implode(',');
+            $actions = implode(',', $options->pluck('action')->unique()->values()->all());
             $first   = $options->first();
 
             $group_menu['child'][] = [
@@ -553,7 +550,7 @@ public function obtenerMenu()
             ];
         }
 
-        if (count($group_menu['child']) > 0) {
+        if (!empty($group_menu['child'])) {
             $optionsByGroup[] = $group_menu;
         }
     }
