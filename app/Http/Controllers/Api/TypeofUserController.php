@@ -375,33 +375,30 @@ public function setAccess(SetAccessRequest $request, $typeUserId)
     $toRemove = [];
 
     foreach ($request->input('optionsMenu') as $option) {
-        $permission = Permission::find($option['id']);
-
+        $permission = Permission::find($option['id']); // ✅ buscamos por id
         if (!$permission) {
             continue;
         }
 
         if ($option['state'] === true) {
-            $toAdd[] = $permission->name;
+            $toAdd[] = $permission; // guardamos el permiso
         } else {
-            $toRemove[] = $permission->name;
+            $toRemove[] = $permission;
         }
     }
 
+    // Asignar permisos
     if (!empty($toAdd)) {
-        $role->givePermissionTo($toAdd);
+        $role->givePermissionTo($toAdd);  // ✅ admite colecciones/arrays de permisos
     }
+
+    // Revocar permisos
     if (!empty($toRemove)) {
         $role->revokePermissionTo($toRemove);
     }
 
-    // traer solo los que vinieron en el request con true
-    $selectedIds = collect($request->input('optionsMenu'))
-        ->where('state', true)
-        ->pluck('id')
-        ->all();
-
-    $permissions = Permission::whereIn('id', $selectedIds)->get();
+    // Devuelve los permisos que quedaron asignados al rol
+    $permissions = $role->permissions()->get();
 
     return response()->json([
         "Option_Menu" => $permissions,

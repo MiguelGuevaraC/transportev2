@@ -473,9 +473,20 @@ public function obtenerMenu()
 
     $user = Auth::user();
 
-    // Traemos el rol con permisos ya cargados
+    // 🔑 Permisos del rol en minúscula
     $role = Role::with('permissions')->find($user->typeofUser_id);
-    $permis = $role ? $role->permissions->pluck('name')->toArray() : [];
+    $permis = $role
+        ? $role->permissions
+            ->map(fn($p) => [
+                'id'           => $p->id,
+                'title'        => $p->name,
+                'name'         => strtolower(str_replace(' ', '_', $p->name)),
+                'link'         => $p->route ?? '#',
+                'action'       => strtolower($p->action),
+                'groupMenu_id' => $p->groupMenu_id,
+            ])
+            ->toArray()
+        : [];
 
     $optionsByGroup = [];
 
@@ -490,69 +501,48 @@ public function obtenerMenu()
             'child'  => [],
         ];
 
-        // SUBGRUPOS
-        $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
-            ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
-            ->get();
+        // 📌 Permisos SOLO de este grupo
+        $filtered = array_filter($permis, function ($perm) use ($grupo) {
+            return isset($perm['groupMenu_id']) && $perm['groupMenu_id'] == $grupo->id;
+        });
 
-        foreach ($subgrupos as $subgrupo) {
-            $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
-                ->whereIn('name', $permis) // 🔑 solo permisos del rol
-                ->orderBy('created_at', 'asc')
-                ->get()
-                ->groupBy('name');
+        // 📌 Agrupamos por "name" pero buscamos TODAS las acciones de ese nombre en TODOS los permisos
+        $grouped = [];
+        foreach ($filtered as $perm) {
+            $keyName = $perm['name'];
 
-            $subOptions = [];
-            foreach ($subgroupOptions as $name => $options) {
-                $actions = $options->pluck('action')->unique()->values()->all();
-                $first   = $options->first();
-
-                $subOptions[] = [
-                    'id'     => $first->id,
-                    'title'  => $first->name,
-                    'name'   => strtolower(str_replace(' ', '_', $first->name)),
-                    'link'   => $first->route,
-                    'action' => $actions, // 👈 ahora es array limpio de acciones
-                    'icon'   => 'dot',
+            if (!isset($grouped[$keyName])) {
+                $grouped[$keyName] = [
+                    'id'      => $perm['id'],
+                    'title'   => $perm['title'],
+                    'name'    => $keyName,
+                    'link'    => $perm['link'],
+                    'actions' => [],
+                    'icon'    => 'dot',
                 ];
             }
 
-            if (!empty($subOptions)) {
-                $group_menu['child'][] = [
-                    'id'    => $subgrupo->id,
-                    'title' => $subgrupo->name,
-                    'name'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                    'link'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                    'icon'  => 'dot',
-                    'child' => $subOptions,
-                ];
+            // 👇 aquí juntamos TODAS las acciones del mismo nombre sin importar el groupMenu_id
+            foreach ($permis as $p2) {
+                if ($p2['name'] === $keyName && !in_array($p2['action'], $grouped[$keyName]['actions'])) {
+                    $grouped[$keyName]['actions'][] = $p2['action'];
+                }
             }
         }
 
-        // OPCIONES DIRECTAS DEL GRUPO PADRE
-        $directOptions = Permission::where('groupMenu_id', $grupo->id)
-            ->whereIn('name', $permis) // 🔑 solo permisos del rol
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->groupBy('name');
-
-        foreach ($directOptions as $name => $options) {
-            $actions = implode(',', $options->pluck('action')->unique()->values()->all());
-            $first   = $options->first();
-
+        // 📌 Convertimos las acciones en string
+        foreach ($grouped as $item) {
             $group_menu['child'][] = [
-                'id'     => $first->id,
-                'title'  => $first->name,
-                'name'   => strtolower(str_replace(' ', '_', $first->name)),
-                'link'   => $first->route,
-                'action' => $actions,
-                'icon'   => 'dot',
+                'id'     => $item['id'],
+                'title'  => $item['title'],
+                'name'   => $item['name'],
+                'link'   => $item['link'],
+                'action' => implode(',', $item['actions']), // 👈 ahora sí: "list,create"
+                'icon'   => $item['icon'],
             ];
         }
 
-        if (!empty($group_menu['child'])) {
-            $optionsByGroup[] = $group_menu;
-        }
+        $optionsByGroup[] = $group_menu;
     }
 
     return response()->json($optionsByGroup);
