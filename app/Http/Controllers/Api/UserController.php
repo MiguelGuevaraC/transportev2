@@ -464,97 +464,105 @@ class UserController extends Controller
 
     //     return $optionsByGroup;
     // }
+public function obtenerMenu()
+{
+    $Grupos = GroupMenu::whereNull('groupMenu_id')
+        ->where('state', 1)
+        ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
+        ->get();
 
-    public function obtenerMenu()
-    {
-        $Grupos = GroupMenu::whereNull('groupMenu_id')
-            ->where('state', 1)
-            ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
+    $User = User::find(Auth::id());
+    $typeOfUser = Role::find($User->typeofUser_id);
+    $Permissions = $typeOfUser == null ? [] : $typeOfUser->permissions;
+
+    $permis = [];
+    foreach ($Permissions as $Permissio) {
+        $permis[] = $Permissio->name;
+    }
+
+    $optionsByGroup = [];
+
+    foreach ($Grupos as $grupo) {
+        $group_menu = [
+            'id'     => $grupo->id,
+            'title'  => $grupo->name,
+            'name'   => strtolower(str_replace(' ', '_', $grupo->name)),
+            'parent' => true,
+            'icon'   => $grupo->icon,
+            'link'   => strtolower(str_replace(' ', '_', $grupo->name)),
+            'child'  => [],
+        ];
+
+        // Subgrupos del grupo padre
+        $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
+            ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
             ->get();
 
-        $User = User::find(Auth::id());
-        $typeOfUser = Role::find($User->typeofUser_id);
-        $Permissions = $typeOfUser == null ? [] : $typeOfUser->permissions;
-
-        $permis = [];
-        foreach ($Permissions as $Permissio) {
-            $permis[] = $Permissio->name;
-        }
-
-        $optionsByGroup = [];
-
-        foreach ($Grupos as $grupo) {
-            $group_menu = [
-                'id' => $grupo->id,
-                'title' => $grupo->name,
-                'name' => strtolower(str_replace(' ', '_', $grupo->name)),
-                'parent' => true,
-                'icon' => $grupo->icon,
-                'link' => strtolower(str_replace(' ', '_', $grupo->name)),
-                'child' => [],
-            ];
-
-            // Subgrupos del grupo padre
-            $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
-                ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
-                ->get();
-
-            foreach ($subgrupos as $subgrupo) {
-                $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
-                    ->whereIn('name', $permis)
-                    ->orderBy('created_at', 'asc')
-                    ->get()
-                    ->unique('name'); // 🔑 solo names únicos
-
-                $subOptions = [];
-                foreach ($subgroupOptions as $option) {
-                    $subOptions[] = [
-                        'id' => $option->id,
-                        'title' => $option->name,
-                        'name' => strtolower(str_replace(' ', '_', $option->name)),
-                        'link' => $option->route,
-                        'action' => $option->action,
-                        'icon' => 'dot',
-                    ];
-                }
-
-                if (count($subOptions) > 0) {
-                    $group_menu['child'][] = [
-                        'id' => $subgrupo->id,
-                        'title' => $subgrupo->name,
-                        'name' => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                        'link' => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                        'icon' => 'dot',
-                        'child' => $subOptions,
-                    ];
-                }
-            }
-
-            // Opciones directas del grupo padre
-            $directOptions = Permission::where('groupMenu_id', $grupo->id)
+        foreach ($subgrupos as $subgrupo) {
+            $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
                 ->whereIn('name', $permis)
                 ->orderBy('created_at', 'asc')
                 ->get()
-                ->unique('name'); // 🔑 solo names únicos
+                ->groupBy('name'); // 🔑 agrupamos por nombre
 
-            foreach ($directOptions as $option) {
-                $group_menu['child'][] = [
-                    'id' => $option->id,
-                    'title' => $option->name,
-                    'name' => strtolower(str_replace(' ', '_', $option->name)),
-                    'link' => $option->route,
-                    'action' => $option->action,
-                    'icon' => 'dot',
+            $subOptions = [];
+            foreach ($subgroupOptions as $name => $options) {
+                $actions = $options->pluck('action')->unique()->implode(','); // 🔑 concatenar acciones
+                $first   = $options->first();
+
+                $subOptions[] = [
+                    'id'     => $first->id,
+                    'title'  => $first->name,
+                    'name'   => strtolower(str_replace(' ', '_', $first->name)),
+                    'link'   => $first->route,
+                    'action' => $actions, // 👈 todas las acciones de ese name
+                    'icon'   => 'dot',
                 ];
             }
 
-            if (count($group_menu['child']) > 0) {
-                $optionsByGroup[] = $group_menu;
+            if (count($subOptions) > 0) {
+                $group_menu['child'][] = [
+                    'id'    => $subgrupo->id,
+                    'title' => $subgrupo->name,
+                    'name'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                    'link'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                    'icon'  => 'dot',
+                    'child' => $subOptions,
+                ];
             }
         }
 
-        return response()->json($optionsByGroup);
+        // Opciones directas del grupo padre
+        $directOptions = Permission::where('groupMenu_id', $grupo->id)
+            ->whereIn('name', $permis)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy('name'); // 🔑 agrupamos por nombre
+
+        foreach ($directOptions as $name => $options) {
+            $actions = $options->pluck('action')->unique()->implode(',');
+            $first   = $options->first();
+
+            $group_menu['child'][] = [
+                'id'     => $first->id,
+                'title'  => $first->name,
+                'name'   => strtolower(str_replace(' ', '_', $first->name)),
+                'link'   => $first->route,
+                'action' => $actions,
+                'icon'   => 'dot',
+            ];
+        }
+
+        if (count($group_menu['child']) > 0) {
+            $optionsByGroup[] = $group_menu;
+        }
     }
+
+    return response()->json($optionsByGroup);
+}
+
+
+
 
 
 

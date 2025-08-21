@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Contracts\Permission;
 
 class GroupMenu extends Model
 {
@@ -60,6 +61,29 @@ class GroupMenu extends Model
         'groupMenu_id',
         'created_at',
         'updated_at',
-
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at'
+    ];
+
+    const filters = [
+        'name' => 'like',
+        'icon' => 'like',
+        'state' => 'like',
+        'groupMenu_id' => '=',
+        'created_at' => 'betwen',
+    ];
+
+    const sorts = [
+        'id' => 'desc'
+    ];
+
+
+    public function permissions()
+    {
+        return $this->hasMany(Permission::class, 'groupMenu_id');
+    }
+
 }
