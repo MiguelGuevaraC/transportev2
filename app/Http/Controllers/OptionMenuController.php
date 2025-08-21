@@ -84,7 +84,7 @@ class OptionMenuController extends Controller
     public function getAccessAll(Request $request)
     {
         $name = $request->input('name');
-        $groupId = $request->input('group_id');
+        $groupId = $request->input('groupMenu_id');
         $action = $request->input('action');
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -96,6 +96,7 @@ class OptionMenuController extends Controller
         if ($name) {
             $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
         }
+        
         if ($groupId) {
             $query->where('groupMenu_id', $groupId);
         }
@@ -117,6 +118,7 @@ class OptionMenuController extends Controller
                 'link' => $option->route,
                 'action' => $option->action,
                 'group' => $option->groupMenu ? $option->groupMenu->name : null,
+                'groupMenu_id' => $option->groupMenu_id ? $option->groupMenu_id : null,
                 'icon' => $option->icon ?? 'dot',
             ];
         });
