@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\VentaController;
 use App\Http\Controllers\Api\WorkerController;
+use App\Http\Controllers\OptionMenuController;
 use App\Http\Controllers\Collection\CollectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -89,6 +90,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::delete('typeofUser/{id}', [TypeofUserController::class, 'destroy']);
     Route::put('setAccess/{typeUserId}', [TypeofUserController::class, 'setAccess']);
     Route::get('getAccess/{id}', [TypeofUserController::class, 'getAccess']);
+    Route::get('getAccessAll', [OptionMenuController::class, 'getAccessAll']);
+ Route::post('optionmenu', [OptionMenuController::class, 'store']);
 
     // COMISSION_AGENT
     Route::get('comissionAgent', [ComissionAgentController::class, 'index']);

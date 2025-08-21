@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class TypeofUserController extends Controller
@@ -36,9 +37,12 @@ class TypeofUserController extends Controller
     {
         // $list = Role::with(['permissions',"permissions.groupMenu"])->orderBy('id', 'desc')->get();
         $list = Role::whereNotIn('id', [1])
-        ->orderBy('name','asc')->get();
+            ->orderBy('name', 'asc')->get();
         return response()->json($list, 200);
     }
+
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -300,65 +304,65 @@ class TypeofUserController extends Controller
             return response()->json(['message' => 'TypeOf_User not found'], 422);
         }
 
-        if (in_array($id, [1, 2, 3, 4,9])) {
+        if (in_array($id, [1, 2, 3, 4, 9])) {
             return response()->json(['message' => 'This Type User cannot be deleted'], 422);
         }
 
         $object->delete();
     }
 
-/**
- * @OA\Put(
- *     path="/transporte/public/api/setAccess/{typeUserId}",
- *     tags={"TypeofUser"},
- *     summary="Set access to type of User",
- *     description="Set access permissions for a specific type of user.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="typeUserId",
- *         in="path",
- *         required=true,
- *         description="ID of the type of user",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\RequestBody(
- *         required=true,
- *         description="Options menu in array format",
- *         @OA\JsonContent(
- *             required={"optionsMenu"},
- *             @OA\Property(
- *                 property="optionsMenu",
- *                 type="array",
- *                 @OA\Items(type="integer"),
- *                 example={1, 2, 3},
- *                 description="List of permission IDs to assign"
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Permissions assigned successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Permissions assigned successfully.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Validation error."),
- *             @OA\Property(property="errors", type="object", description="Object containing validation errors")
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Put(
+     *     path="/transporte/public/api/setAccess/{typeUserId}",
+     *     tags={"TypeofUser"},
+     *     summary="Set access to type of User",
+     *     description="Set access permissions for a specific type of user.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="typeUserId",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the type of user",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Options menu in array format",
+     *         @OA\JsonContent(
+     *             required={"optionsMenu"},
+     *             @OA\Property(
+     *                 property="optionsMenu",
+     *                 type="array",
+     *                 @OA\Items(type="integer"),
+     *                 example={1, 2, 3},
+     *                 description="List of permission IDs to assign"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Permissions assigned successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Permissions assigned successfully.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error."),
+     *             @OA\Property(property="errors", type="object", description="Object containing validation errors")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
 
     public function setAccess(Request $request)
     {
@@ -438,9 +442,9 @@ class TypeofUserController extends Controller
         }
 
         $permissions = Role::find($id)->permissions()
-        ->with('groupMenu')
-        ->orderBy('name')
-        ->get();
+            ->with('groupMenu')
+            ->orderBy('name')
+            ->get();
         return response()->json([
             "Option_Menu" => $permissions,
         ]);

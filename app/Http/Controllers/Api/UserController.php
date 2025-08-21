@@ -60,19 +60,19 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $branch_office_id = $request->input('branch_office_id');
-        $perPage          = $request->input('per_page', 15); // Número de elementos por página (por defecto 15)
-        $page             = $request->input('page', 1);      // Página actual (por defecto 1)
+        $perPage = $request->input('per_page', 15); // Número de elementos por página (por defecto 15)
+        $page = $request->input('page', 1);      // Página actual (por defecto 1)
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = auth()->user()->worker->branchOffice_id;
-            $branchOffice     = BranchOffice::find($branch_office_id);
+            $branchOffice = BranchOffice::find($branch_office_id);
         }
 
         // Paginación dinámica con `per_page` y `page`
@@ -82,17 +82,17 @@ class UserController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'total'          => $list->total(),
-            'data'           => $list->items(),
-            'current_page'   => $list->currentPage(),
-            'last_page'      => $list->lastPage(),
-            'per_page'       => $list->perPage(),
+            'total' => $list->total(),
+            'data' => $list->items(),
+            'current_page' => $list->currentPage(),
+            'last_page' => $list->lastPage(),
+            'per_page' => $list->perPage(),
             'first_page_url' => $list->url(1),
-            'from'           => $list->firstItem(),
-            'next_page_url'  => $list->nextPageUrl(),
-            'path'           => $list->path(),
-            'prev_page_url'  => $list->previousPageUrl(),
-            'to'             => $list->lastItem(),
+            'from' => $list->firstItem(),
+            'next_page_url' => $list->nextPageUrl(),
+            'path' => $list->path(),
+            'prev_page_url' => $list->previousPageUrl(),
+            'to' => $list->lastItem(),
         ], 200);
     }
 
@@ -154,8 +154,8 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            "username"        => "required",
-            "password"        => "required",
+            "username" => "required",
+            "password" => "required",
             "branchOffice_id" => 'required|exists:branch_offices,id',
         ]);
 
@@ -163,22 +163,22 @@ class UserController extends Controller
         // $user = User::where("username", $request->username)->where("id", 1)->first();
 
         $bitacora = Bitacora::create([
-            'user_id'     => null,         // ID del usuario que realiza la acción (usuario que intenta loguearse)
-            'record_id'   => null,         // El ID del usuario afectado (el mismo que intenta loguearse)
-            'action'      => 'LOGIN',      // Acción realizada
-            'table_name'  => 'users',      // Tabla afectada
-            'data'        => json_encode([ // Guardar los datos como JSON
-                'username'        => $request->username,
+            'user_id' => null,         // ID del usuario que realiza la acción (usuario que intenta loguearse)
+            'record_id' => null,         // El ID del usuario afectado (el mismo que intenta loguearse)
+            'action' => 'LOGIN',      // Acción realizada
+            'table_name' => 'users',      // Tabla afectada
+            'data' => json_encode([ // Guardar los datos como JSON
+                'username' => $request->username,
                 'branchOffice_id' => $request->branchOffice_id,
 
             ]),
             'description' => 'Inicio de sesión',   // Descripción de la acción
-            'ip_address'  => $request->ip(),        // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'ip_address' => $request->ip(),        // Dirección IP del usuario
+            'user_agent' => $request->userAgent(), // Información sobre el navegador/dispositivo
         ]);
 
-        if (! $user) {
-            $bitacora->action      = 'Login Fallido';
+        if (!$user) {
+            $bitacora->action = 'Login Fallido';
             $bitacora->description = 'Usuario No Encontrado';
             $bitacora->save();
             return response()->json([
@@ -188,7 +188,7 @@ class UserController extends Controller
         }
 
         if ($user->worker->branchOffice_id != $request->input('branchOffice_id')) {
-            $bitacora->action      = 'Login Fallido';
+            $bitacora->action = 'Login Fallido';
             $bitacora->description = 'Usuario No Registrador en Esta Sucursal';
             $bitacora->save();
             return response()->json([
@@ -206,18 +206,18 @@ class UserController extends Controller
             $user->makeHidden('password');
             $bitacora->user_id = $user->id;
 
-            $bitacora->record_id   = $user->id;
-            $bitacora->action      = 'Login Exitoso';
+            $bitacora->record_id = $user->id;
+            $bitacora->action = 'Login Exitoso';
             $bitacora->description = 'Se logró Ingresar';
             $bitacora->save();
             // -------------------------------------------------
             return response()->json([
                 'token' => $token,
-                'user'  => User::with(['worker', 'box', 'worker.person', 'worker.area', 'worker.branchOffice', 'typeofUser'])->find($user->id),
-                'menu'  => $this->obtenerMenu(),
+                'user' => User::with(['worker', 'box', 'worker.person', 'worker.area', 'worker.branchOffice', 'typeofUser'])->find($user->id),
+                'menu' => $this->obtenerMenu(),
             ]);
         } else {
-            $bitacora->action      = 'Login Fallido';
+            $bitacora->action = 'Login Fallido';
             $bitacora->description = 'Password no correcta';
             $bitacora->save();
             return response()->json([
@@ -279,7 +279,8 @@ class UserController extends Controller
             return User::with(['box', 'worker', 'worker.person', 'typeofUser'])->find($object->id);
         }
         return response()->json(
-            ['message' => 'User not found'], 404
+            ['message' => 'User not found'],
+            404
         );
 
     }
@@ -471,8 +472,8 @@ class UserController extends Controller
             ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
             ->get();
 
-        $User        = User::find(Auth::id());
-        $typeOfUser  = Role::find($User->typeofUser_id);
+        $User = User::find(Auth::id());
+        $typeOfUser = Role::find($User->typeofUser_id);
         $Permissions = $typeOfUser == null ? [] : $typeOfUser->permissions;
 
         $permis = [];
@@ -484,16 +485,16 @@ class UserController extends Controller
 
         foreach ($Grupos as $grupo) {
             $group_menu = [
-                'id'     => $grupo->id,
-                'title'  => $grupo->name,
-                'name'   => strtolower(str_replace(' ', '_', $grupo->name)),
+                'id' => $grupo->id,
+                'title' => $grupo->name,
+                'name' => strtolower(str_replace(' ', '_', $grupo->name)),
                 'parent' => true,
-                'icon'   => $grupo->icon,
-                'link'   => strtolower(str_replace(' ', '_', $grupo->name)),
-                'child'  => [],
+                'icon' => $grupo->icon,
+                'link' => strtolower(str_replace(' ', '_', $grupo->name)),
+                'child' => [],
             ];
 
-            // Obtener subgrupos del grupo padre y ordenar por fecha de creación
+            // Subgrupos del grupo padre
             $subgrupos = GroupMenu::where('groupMenu_id', $grupo->id)
                 ->orderByRaw("FIELD(id, 1,2,3,4,6,7,8,5)")
                 ->get();
@@ -501,50 +502,52 @@ class UserController extends Controller
             foreach ($subgrupos as $subgrupo) {
                 $subgroupOptions = Permission::where('groupMenu_id', $subgrupo->id)
                     ->whereIn('name', $permis)
-                    ->get();
+                    ->orderBy('created_at', 'asc')
+                    ->get()
+                    ->unique('name'); // 🔑 solo names únicos
 
                 $subOptions = [];
-
                 foreach ($subgroupOptions as $option) {
                     $subOptions[] = [
-                        'id'    => $option->id,
+                        'id' => $option->id,
                         'title' => $option->name,
-                        'name'  => strtolower(str_replace(' ', '_', $option->name)),
-                        'link'  => $option->route,
-                        'icon'  => 'dot',
+                        'name' => strtolower(str_replace(' ', '_', $option->name)),
+                        'link' => $option->route,
+                        'action' => $option->action,
+                        'icon' => 'dot',
                     ];
                 }
 
-                // Solo agregar el subgrupo si tiene opciones
                 if (count($subOptions) > 0) {
                     $group_menu['child'][] = [
-                        'id'    => $subgrupo->id,
+                        'id' => $subgrupo->id,
                         'title' => $subgrupo->name,
-                        'name'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                        'link'  => strtolower(str_replace(' ', '_', $subgrupo->name)),
-                        'icon'  => 'dot',
+                        'name' => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                        'link' => strtolower(str_replace(' ', '_', $subgrupo->name)),
+                        'icon' => 'dot',
                         'child' => $subOptions,
                     ];
                 }
             }
 
-            // Obtener opciones directas del grupo padre y ordenar por fecha de creación
+            // Opciones directas del grupo padre
             $directOptions = Permission::where('groupMenu_id', $grupo->id)
                 ->whereIn('name', $permis)
                 ->orderBy('created_at', 'asc')
-                ->get();
+                ->get()
+                ->unique('name'); // 🔑 solo names únicos
 
             foreach ($directOptions as $option) {
                 $group_menu['child'][] = [
-                    'id'    => $option->id,
+                    'id' => $option->id,
                     'title' => $option->name,
-                    'name'  => strtolower(str_replace(' ', '_', $option->name)),
-                    'link'  => $option->route,
-                    'icon'  => 'dot',
+                    'name' => strtolower(str_replace(' ', '_', $option->name)),
+                    'link' => $option->route,
+                    'action' => $option->action,
+                    'icon' => 'dot',
                 ];
             }
 
-            // Solo agregar el grupo si tiene opciones (hijos)
             if (count($group_menu['child']) > 0) {
                 $optionsByGroup[] = $group_menu;
             }
@@ -552,6 +555,11 @@ class UserController extends Controller
 
         return response()->json($optionsByGroup);
     }
+
+
+
+
+
 
     /**
      * @OA\Get(
@@ -661,26 +669,26 @@ class UserController extends Controller
     {
 
         $respuesta = [];
-        $client    = new Client();
+        $client = new Client();
         try {
             $res = $client->get('http://facturae-garzasoft.com/facturacion/buscaCliente/BuscaCliente2.php?' . 'dni=' . $dni . '&fe=N&token=qusEj_w7aHEpX');
 
             if ($res->getStatusCode() == 200) { // 200 OK
                 $response_data = $res->getBody()->getContents();
-                $respuesta     = json_decode($response_data);
+                $respuesta = json_decode($response_data);
                 return response()->json([
                     $respuesta,
                 ]);
             } else {
                 return response()->json([
                     "status" => 0,
-                    "msg"    => "Server Error",
+                    "msg" => "Server Error",
                 ], 500);
             }
         } catch (\Exception $e) {
             return response()->json([
                 "status" => 0,
-                "msg"    => "Server Error: " . $e->getMessage(),
+                "msg" => "Server Error: " . $e->getMessage(),
             ], 500);
         }
     }
@@ -741,11 +749,11 @@ class UserController extends Controller
         $res = $client->get('https://comprobante-e.com/facturacion/buscaCliente/BuscaClienteRuc.php?fe=N&token=qusEj_w7aHEpX&' . 'ruc=' . $ruc);
         if ($res->getStatusCode() == 200) { // 200 OK
             $response_data = $res->getBody()->getContents();
-            $respuesta     = json_decode($response_data);
+            $respuesta = json_decode($response_data);
         } else {
             return response()->json([
                 "status" => 0,
-                "msg"    => "Server error",
+                "msg" => "Server error",
             ], 500);
         }
         return response()->json([
@@ -802,15 +810,15 @@ class UserController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'username'       => [
+            'username' => [
                 'required',
                 'string',
                 Rule::unique('users')->whereNull('deleted_at'),
             ],
-            'password'       => 'required',
-            'worker_id'      => 'required|numeric|exists:workers,id',
+            'password' => 'required',
+            'worker_id' => 'required|numeric|exists:workers,id',
             'typeof_user_id' => 'required|numeric|exists:typeof_Users,id',
-            'box_id'         => 'nullable|numeric|exists:boxes,id',
+            'box_id' => 'nullable|numeric|exists:boxes,id',
 
         ]);
         if ($validator->fails()) {
@@ -821,11 +829,11 @@ class UserController extends Controller
 
         $data = [
 
-            'username'      => $request->input('username') ?? null,
-            'password'      => $hashedPassword ?? null,
+            'username' => $request->input('username') ?? null,
+            'password' => $hashedPassword ?? null,
 
-            'box_id'        => $request->input('box_id') ?? null,
-            'worker_id'     => $request->input('worker_id') ?? null,
+            'box_id' => $request->input('box_id') ?? null,
+            'worker_id' => $request->input('worker_id') ?? null,
             'typeofUser_id' => $request->input('typeof_user_id') ?? null,
         ];
 
@@ -889,20 +897,20 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $client = User::find($id);
-        if (! $client) {
+        if (!$client) {
             return response()->json(['message' => 'User not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
-            'username'       => [
+            'username' => [
                 'required',
                 Rule::unique('users')->ignore($id)->whereNull('deleted_at'),
             ],
-            'password'       => 'required',
-            'worker_id'      => 'required|numeric|exists:workers,id',
+            'password' => 'required',
+            'worker_id' => 'required|numeric|exists:workers,id',
             'typeof_user_id' => 'required|numeric|exists:typeof_Users,id',
-            'box_id'         => 'nullable|numeric|exists:boxes,id',
+            'box_id' => 'nullable|numeric|exists:boxes,id',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()], 422);
@@ -912,11 +920,11 @@ class UserController extends Controller
 
         $data = [
 
-            'username'      => $request->input('username') ?? null,
-            'password'      => $hashedPassword ?? null,
+            'username' => $request->input('username') ?? null,
+            'password' => $hashedPassword ?? null,
 
-            'box_id'        => $request->input('box_id') ?? null,
-            'worker_id'     => $request->input('worker_id') ?? null,
+            'box_id' => $request->input('box_id') ?? null,
+            'worker_id' => $request->input('worker_id') ?? null,
             'typeofUser_id' => $request->input('typeof_user_id') ?? null,
         ];
 
@@ -980,7 +988,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $client = User::find($id);
-        if (! $client) {
+        if (!$client) {
             return response()->json(['message' => 'User not found'], 422);
         }
 

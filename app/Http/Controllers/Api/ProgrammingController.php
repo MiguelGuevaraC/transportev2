@@ -411,7 +411,7 @@ class ProgrammingController extends Controller
             'user_created_id' => Auth::user()->id,
 
             'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
-            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
+            'data_tercerizar_programming' => json_encode($request->input('data_tercerizar_programming')),
 
 
         ];
