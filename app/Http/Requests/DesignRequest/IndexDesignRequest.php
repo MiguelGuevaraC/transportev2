@@ -12,7 +12,8 @@ class IndexDesignRequest extends IndexRequest
     {
         return [
             'name' => ['nullable', 'string'],
-            'state' => ['nullable', 'boolean'],
+            'state' => ['nullable', 'string'],
+            'brand_id' => ['nullable', 'integer'],
         ];
     }
 

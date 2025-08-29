@@ -18,7 +18,9 @@ class DesignResource extends JsonResource
         return [
             'id' => $this->id ?? null,
             'name' => $this->name ?? null,
-            'state' => $this->state ?? null,
+            'brand_id' => $this->brand_id ?? null,
+            'brand' => $this->brand?->name ?? null,
+            //'state' => $this->state ?? null,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }

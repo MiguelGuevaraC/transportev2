@@ -63,12 +63,12 @@ class PersonController extends Controller
         //     ->where('people.type', '!=', 'Trabajador') // Solo actualiza si el type es diferente
         //     ->update(['people.type' => 'Trabajador']);
 
-        DB::table('people')
-            ->join('workers', 'workers.person_id', '=', 'people.id')
-            ->where('people.type', '!=', 'Trabajador') // Solo actualiza si el tipo es diferente
-            ->whereNull('people.deleted_at')           // Solo personas que no han sido eliminadas
-            ->whereNull('workers.deleted_at')          // Solo trabajadores que no han sido eliminados
-            ->update(['people.type' => 'Trabajador']);
+        // DB::table('people')
+        //     ->join('workers', 'workers.person_id', '=', 'people.id')
+        //     ->where('people.type', '!=', 'Trabajador') // Solo actualiza si el tipo es diferente
+        //     ->whereNull('people.deleted_at')           // Solo personas que no han sido eliminadas
+        //     ->whereNull('workers.deleted_at')          // Solo trabajadores que no han sido eliminados
+        //     ->update(['people.type' => 'Trabajador']);
 
         // Obtener la sucursal del usuario o la proporcionada
         $branch_office_id = $request->input('branch_office_id', auth()->user()->worker->branchOffice_id);

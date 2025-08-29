@@ -13,13 +13,16 @@ use App\Http\Requests\UpdateRequest;
  */
 class UpdateDesignRequest extends UpdateRequest
 {
-    public function authorize() { return true; }
+    public function authorize()
+    {
+        return true;
+    }
 
     public function rules()
     {
         return [
             'name' => ['nullable', 'string'],
-            'state' => ['nullable', 'boolean'],
+            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
         ];
     }
 
@@ -28,8 +31,9 @@ class UpdateDesignRequest extends UpdateRequest
         return [
             'name.required' => 'El campo name es obligatorio.',
             'name.name' => 'El formato del campo name es inválido.',
-            'state.required' => 'El campo state es obligatorio.',
-            'state.state' => 'El formato del campo state es inválido.'
+            'brand_id.required' => 'El campo brand_id es obligatorio.',
+            'brand_id.integer' => 'El campo brand_id debe ser un número entero.',
+            'brand_id.exists' => 'El campo brand_id debe existir en la tabla brands.'
         ];
     }
 }

@@ -369,41 +369,53 @@ class TypeofUserController extends Controller
  
 public function setAccess(SetAccessRequest $request, $typeUserId)
 {
-    $role = Role::findOrFail($typeUserId);
+    try {
+        $role = Role::findOrFail($typeUserId);
 
-    $toAdd = [];
-    $toRemove = [];
+        $toAdd = [];
+        $addedSuccessfully = [];
 
-    foreach ($request->input('optionsMenu') as $option) {
-        $permission = Permission::find($option['id']); // ✅ buscamos por id
-        if (!$permission) {
-            continue;
+        foreach ($request->input('optionsMenu') as $option) {
+            $permission = Permission::find($option['id']); 
+            if (!$permission) {
+                continue; // si no existe, saltamos
+            }
+
+            if ($option['state'] === true) {
+                try {
+                    $role->givePermissionTo($permission);
+                    $toAdd[] = $permission->id; // guardamos solo el ID
+                    $addedSuccessfully[] = [
+                        'id' => $permission->id,
+                        'name' => $permission->name,
+                        'action' => $permission->action,
+                    ];
+                } catch (\Exception $e) {
+                    // 👀 si da error al asignar, no lo agregamos
+                    continue;
+                }
+            } else {
+                try {
+                    $role->revokePermissionTo($permission);
+                } catch (\Exception $e) {
+                    // 👀 si da error al revocar, lo ignoramos
+                    continue;
+                }
+            }
         }
 
-        if ($option['state'] === true) {
-            $toAdd[] = $permission; // guardamos el permiso
-        } else {
-            $toRemove[] = $permission;
-        }
+        return response()->json([
+            "added" => $addedSuccessfully, // ✅ solo los exitosos
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            "error" => true,
+            "message" => $e->getMessage(),
+        ], 500);
     }
-
-    // Asignar permisos
-    if (!empty($toAdd)) {
-        $role->givePermissionTo($toAdd);  // ✅ admite colecciones/arrays de permisos
-    }
-
-    // Revocar permisos
-    if (!empty($toRemove)) {
-        $role->revokePermissionTo($toRemove);
-    }
-
-    // Devuelve los permisos que quedaron asignados al rol
-    $permissions = $role->permissions()->get();
-
-    return response()->json([
-        "Option_Menu" => $permissions,
-    ]);
 }
+
 
 
 

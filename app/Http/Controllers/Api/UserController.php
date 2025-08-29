@@ -464,90 +464,90 @@ class UserController extends Controller
 
     //     return $optionsByGroup;
     // }
-public function obtenerMenu()
-{
-    $Grupos = GroupMenu::whereNull('groupMenu_id')
-        ->where('state', 1)
-        ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
-        ->get();
+    public function obtenerMenu()
+    {
+        $Grupos = GroupMenu::whereNull('groupMenu_id')
+            ->where('state', 1)
+            ->orderByRaw("FIELD(id, 1,2,3,4,6,5)")
+            ->get();
 
-    $user = Auth::user();
+        $user = Auth::user();
 
-    // 🔑 Permisos del rol en minúscula
-    $role = Role::with('permissions')->find($user->typeofUser_id);
-    $permis = $role
-        ? $role->permissions
-            ->map(fn($p) => [
-                'id'           => $p->id,
-                'title'        => $p->name,
-                'name'         => strtolower(str_replace(' ', '_', $p->name)),
-                'link'         => $p->route ?? '#',
-                'action'       => strtolower($p->action),
-                'groupMenu_id' => $p->groupMenu_id,
-            ])
-            ->toArray()
-        : [];
+        // 🔑 Permisos del rol
+        $role = Role::with('permissions')->find($user->typeofUser_id);
+        $permis = $role
+            ? $role->permissions
+                ->map(fn($p) => [
+                    'id' => $p->id,
+                    'title' => $p->name,
+                    'name' => strtolower(str_replace(' ', '_', $p->name)),
+                    'link' => $p->route ?? '#',
+                    'action' => strtolower($p->action),
+                    'groupMenu_id' => $p->groupMenu_id,
+                ])
+                ->toArray()
+            : [];
 
-    $optionsByGroup = [];
+        $optionsByGroup = [];
 
-    foreach ($Grupos as $grupo) {
-        $group_menu = [
-            'id'     => $grupo->id,
-            'title'  => $grupo->name,
-            'name'   => strtolower(str_replace(' ', '_', $grupo->name)),
-            'parent' => true,
-            'icon'   => $grupo->icon,
-            'link'   => strtolower(str_replace(' ', '_', $grupo->name)),
-            'child'  => [],
-        ];
+        foreach ($Grupos as $grupo) {
+            $group_menu = [
+                'id' => $grupo->id,
+                'title' => $grupo->name,
+                'name' => strtolower(str_replace(' ', '_', $grupo->name)),
+                'parent' => true,
+                'icon' => $grupo->icon,
+                'link' => strtolower(str_replace(' ', '_', $grupo->name)),
+                'child' => [],
+            ];
 
-        // 📌 Permisos SOLO de este grupo
-        $filtered = array_filter($permis, function ($perm) use ($grupo) {
-            return isset($perm['groupMenu_id']) && $perm['groupMenu_id'] == $grupo->id;
-        });
+            // 📌 Permisos SOLO de este grupo
+            $filtered = array_filter($permis, fn($perm) => $perm['groupMenu_id'] == $grupo->id);
 
-        // 📌 Agrupamos por "name" pero buscamos TODAS las acciones de ese nombre en TODOS los permisos
-        $grouped = [];
-        foreach ($filtered as $perm) {
-            $keyName = $perm['name'];
+            // 📌 Agrupamos por "name"
+            $grouped = [];
+            foreach ($filtered as $perm) {
+                $keyName = $perm['name'];
 
-            if (!isset($grouped[$keyName])) {
-                $grouped[$keyName] = [
-                    'id'      => $perm['id'],
-                    'title'   => $perm['title'],
-                    'name'    => $keyName,
-                    'link'    => $perm['link'],
-                    'actions' => [],
-                    'icon'    => 'dot',
+                if (!isset($grouped[$keyName])) {
+                    $grouped[$keyName] = [
+                        'id' => $perm['id'],
+                        'title' => $perm['title'],
+                        'name' => $keyName,
+                        'link' => $perm['link'],
+                        'actions' => [],
+                        'actions_detail' => [], // 👈 nuevo campo
+                        'icon' => 'dot',
+                    ];
+                }
+
+                if (!in_array($perm['action'], $grouped[$keyName]['actions'])) {
+                    $grouped[$keyName]['actions'][] = $perm['action'];
+                    $grouped[$keyName]['actions_detail'][] = [
+                        'id' => $perm['id'],
+                        'action' => $perm['action'],
+                    ];
+                }
+            }
+
+            // 📌 Armamos el child final
+            foreach ($grouped as $item) {
+                $group_menu['child'][] = [
+                    'id' => $item['id'],
+                    'title' => $item['title'],
+                    'name' => $item['name'],
+                    'link' => $item['link'],
+                    'action' => implode(',', $item['actions']), // ej: "list,create"
+                    'actions_detail' => $item['actions_detail'], // 👈 array con id + acción
+                    'icon' => $item['icon'],
                 ];
             }
 
-            // 👇 aquí juntamos TODAS las acciones del mismo nombre sin importar el groupMenu_id
-            foreach ($permis as $p2) {
-                if ($p2['name'] === $keyName && !in_array($p2['action'], $grouped[$keyName]['actions'])) {
-                    $grouped[$keyName]['actions'][] = $p2['action'];
-                }
-            }
+            $optionsByGroup[] = $group_menu;
         }
 
-        // 📌 Convertimos las acciones en string
-        foreach ($grouped as $item) {
-            $group_menu['child'][] = [
-                'id'     => $item['id'],
-                'title'  => $item['title'],
-                'name'   => $item['name'],
-                'link'   => $item['link'],
-                'action' => implode(',', $item['actions']), // 👈 ahora sí: "list,create"
-                'icon'   => $item['icon'],
-            ];
-        }
-
-        $optionsByGroup[] = $group_menu;
+        return response()->json($optionsByGroup);
     }
-
-    return response()->json($optionsByGroup);
-}
-
 
 
 

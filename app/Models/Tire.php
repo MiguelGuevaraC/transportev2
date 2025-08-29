@@ -21,6 +21,7 @@ class Tire extends Model
         'position_vehicle',
 
         'type',           // Tipo de neumático
+        'stock',
         'size',           // Medida del neumático
         'dot',            // Fecha de fabricación (DOT)
         'tread_type',     // Tipo de banda
@@ -49,6 +50,7 @@ class Tire extends Model
         'id' => '=',
         'code' => 'like',
         'condition' => '=',
+        'stock' => '=',
         'retread_number' => '=',
         'entry_date' => 'date',
         'supplier_id' => '=',

@@ -48,6 +48,7 @@ public function toArray($request): array
     return [
         'id' => $this->id ?? null,
         'code' => $this->code ?? null,
+        'stock' => $this->stock ?? 0,
         'condition' => $this->condition ?? null,
         'retread_number' => $this->retread_number ?? null,
         'entry_date' => $this->entry_date ?? null,

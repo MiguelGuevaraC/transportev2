@@ -35,6 +35,7 @@ class TireService
     public function createTire(array $data): Tire
     {
         $data['code'] = $this->generateTireCode($data);
+        $data['stock'] = 0;
         $tire = Tire::create($data);
         return $tire;
     }

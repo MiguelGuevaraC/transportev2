@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Design extends Model
+class ConceptTireOperation extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
         'name',
-        'state',
-        'brand_id',
+        'type',
+        'status',
         'created_at'
     ];
 
@@ -26,15 +26,10 @@ class Design extends Model
     const filters = [
         'name' => 'like',
         'state' => '=',
-        'brand_id' => '=',
         'created_at' => 'date'
     ];
 
     const sorts = [
         'id' => 'desc'
     ];
-
-    public function brand(){
-        return $this->belongsTo(Brand::class, 'brand_id');
-    }
 }

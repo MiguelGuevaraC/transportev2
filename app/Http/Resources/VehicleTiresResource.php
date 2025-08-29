@@ -8,66 +8,96 @@ class VehicleTiresResource extends JsonResource
 {
     public function toArray($request): array
     {
-        $ejes   = $this->ejes ?? 0;
-        $wheels = $this->wheels ?? 0;
+        $ejes   = $this->ejes ?? 0;    // 🔹 número real de ejes
+        $wheels = $this->wheels ?? 0;  // 🔹 número real de llantas
 
-        // Llantas asignadas desde BD
+        // Llantas asignadas desde BD indexadas por position_vehicle
         $assignedTires = Tire::where('vehicle_id', $this->id)
             ->get()
             ->keyBy('position_vehicle');
 
-        $positions   = [];
-        $remaining   = $wheels;
-        $posCounter  = 1;
+        $posCounter = 1;
+        $remaining  = $wheels;
 
-        for ($eje = 1; $eje <= $ejes; $eje++) {
-            // cada eje puede tener hasta 4 llantas (2L + 2R)
-            $maxPerEje = min(4, $remaining);
+        $positions = collect();
 
-            // siempre balancear izquierda/derecha
-            $perSide = intdiv($maxPerEje, 2);
-            $extra   = $maxPerEje % 2;  // si sobra 1, se asigna a la izquierda
-
-            $ejePositions = [];
-
-            // Izquierda
-            for ($i = 1; $i <= $perSide + $extra; $i++) {
+        /**
+         * 🔹 Eje 1 → siempre 2 llantas direccionales
+         */
+        if ($ejes > 0 && $remaining >= 2) {
+            $firstEje = collect(range(1, 2))->map(function () use ($assignedTires, &$posCounter, &$remaining) {
                 $tire = $assignedTires->get($posCounter);
-                $ejePositions[] = [
-                    'position' => $posCounter,
-                    'assigned' => (bool) $tire,
-                    'tire'     => $tire ? new TireResource($tire) : null,
+                $data = [
+                    'position'       => $posCounter,
+                    'is_directional' => true,
+                    'assigned'       => (bool) $tire,
+                    'tire'           => $tire ? new TireResource($tire) : null,
                 ];
                 $posCounter++;
                 $remaining--;
-            }
+                return $data;
+            });
 
-            // Derecha
-            for ($i = 1; $i <= $perSide; $i++) {
-                if ($remaining <= 0) break;
-                $tire = $assignedTires->get($posCounter);
-                $ejePositions[] = [
-                    'position' => $posCounter,
-                    'assigned' => (bool) $tire,
-                    'tire'     => $tire ? new TireResource($tire) : null,
-                ];
-                $posCounter++;
-                $remaining--;
-            }
-
-            $positions[] = [
-                'eje'        => $eje,
-                'llantas'    => count($ejePositions),
-                'positions'  => $ejePositions,
-            ];
+            $positions->push([
+                'eje'       => 1,
+                'llantas'   => $firstEje->count(),
+                'positions' => $firstEje->values(),
+            ]);
         }
+
+        /**
+         * 🔹 Resto de ejes → cada uno con hasta 4 llantas balanceadas
+         */
+        $resto = collect(range(2, $ejes))->map(function ($eje) use (&$posCounter, &$remaining, $assignedTires) {
+            $maxPerEje = min(4, $remaining);
+            $perSide   = intdiv($maxPerEje, 2);
+            $extra     = $maxPerEje % 2;
+
+            $izq = collect(range(1, $perSide + $extra))->map(function () use ($assignedTires, &$posCounter, &$remaining) {
+                if ($remaining <= 0) return null;
+                $tire = $assignedTires->get($posCounter);
+                $data = [
+                    'position'       => $posCounter,
+                    'is_directional' => false,
+                    'assigned'       => (bool) $tire,
+                    'tire'           => $tire ? new TireResource($tire) : null,
+                ];
+                $posCounter++;
+                $remaining--;
+                return $data;
+            })->filter();
+
+            $der = collect(range(1, $perSide))->map(function () use ($assignedTires, &$posCounter, &$remaining) {
+                if ($remaining <= 0) return null;
+                $tire = $assignedTires->get($posCounter);
+                $data = [
+                    'position'       => $posCounter,
+                    'is_directional' => false,
+                    'assigned'       => (bool) $tire,
+                    'tire'           => $tire ? new TireResource($tire) : null,
+                ];
+                $posCounter++;
+                $remaining--;
+                return $data;
+            })->filter();
+
+            $ejePositions = $izq->merge($der)->values();
+
+            return [
+                'eje'       => $eje,
+                'llantas'   => $ejePositions->count(),
+                'positions' => $ejePositions,
+            ];
+        });
+
+        $positions = $positions->merge($resto);
 
         return [
             'id'           => $this->id ?? null,
             'currentPlate' => $this->currentPlate ?? null,
-            'ejes'         => $ejes,
-            'totalLlantas' => $wheels,
-            'distribution' => $positions, // 👈 distribución por eje
+            'ejes'         => $ejes,   //
+            'totalLlantas' => $wheels, //
+            'distribution' => $positions->values(),
         ];
     }
 }
