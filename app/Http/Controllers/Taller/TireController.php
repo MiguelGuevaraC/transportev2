@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Taller;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TireRequest\GenerateCodeRequest;
 use App\Http\Requests\TireRequest\IndexTireRequest;
 use App\Http\Requests\TireRequest\StoreTireRequest;
 use App\Http\Requests\TireRequest\UpdateTireRequest;
@@ -67,6 +68,22 @@ class TireController extends Controller
         return new TireResource($tire);
     }
 
+     public function generatecodes(GenerateCodeRequest $request)
+    {
+        $data = $request->validated();
+        $base = $data['base'];
+        $cant = (int) $data['cant'];
+
+        try {
+            $codes = $this->tireService->generatecodes($base, $cant);
+            return response()->json(['codes' => $codes], 200);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Error interno al generar códigos.'], 500);
+        }
+    }
+
 /**
  * @OA\Post(
  *     path="/transporte/public/api/tire",
@@ -95,11 +112,45 @@ class TireController extends Controller
  * )
  */
 
+    // public function store(StoreTireRequest $request)
+    // {
+    //     $data= $request->validated();
+    //     $tire = $this->tireService->createTire($data);
+    //     return new TireResource($tire);
+    // }
+
     public function store(StoreTireRequest $request)
     {
-        $data= $request->validated();
-        $tire = $this->tireService->createTire($data);
-        return new TireResource($tire);
+        $data = $request->validated();
+
+        if (!empty($data['codes']) && is_array($data['codes'])) {
+            $codes = $data['codes'];
+            unset($data['codes']);
+            $result = $this->tireService->createMultipleTires($data, $codes);
+
+            if (!empty($result['failed'])) {
+                return response()->json([
+                    'message' => 'No se crearon neumáticos por conflictos con los códigos.',
+                    'failed'  => array_values($result['failed']),
+                ], 422);
+            }
+
+            return TireResource::collection(collect($result['created']))
+                ->response()
+                ->setStatusCode(201);
+        }
+
+        try {
+            $tire = $this->tireService->createTire($data);
+            return (new TireResource($tire))
+                ->response()
+                ->setStatusCode(201);
+        } catch (\Throwable $t) {
+            return response()->json([
+                'message' => 'Error al crear el neumático.',
+                'error' => $t->getMessage(),
+            ], 500);
+        }
     }
 
 /**
