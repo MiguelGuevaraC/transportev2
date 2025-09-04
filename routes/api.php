@@ -197,7 +197,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     // CARRIER GUIDE
     Route::get('carrierGuide', [CarrierGuideController::class, 'index']);
-    
+
     Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
     Route::get('carrierGuide/{id}', [CarrierGuideController::class, 'show']);
     Route::post('carrierGuide', [CarrierGuideController::class, 'store']);
@@ -214,7 +214,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     Route::post('programming', [ProgrammingController::class, 'store']);
     Route::delete('programming/{id}', [ProgrammingController::class, 'destroy']);
-    Route::put('programming/{id}', [ProgrammingController::class, 'update']);
+    Route::post('programming/{id}', [ProgrammingController::class, 'update']);
     Route::put('finishProgramming/{id}', [ProgrammingController::class, 'finishProgramming']);
     Route::get('getPlatformByVehicleId/{id}', [ProgrammingController::class, 'getPlatformByVehicleId']);
     Route::post('reprogramming/{id}', [ProgrammingController::class, 'reprogramming']);

@@ -320,14 +320,18 @@ class ExcelController extends Controller
 
             if ($carrier->subcontract_id !== null) {
                 $data = json_decode($carrier->datasubcontract, true);
-                $conductor1name = $data['namedriver'] . ' ' . ($data['lastnamedriver'] ?? '');
-                $conductor2name = '';
-                $licencia1 = $data['licenciadriver'] ?? '';
-                $placa1 = $data['placa1'] ?? '';
-                $placa2 = $data['placa2'] ?? '';
-                $mtc1 = $data['mtc1'] ?? '';
-                $mtc2 = $data['mtc2'] ?? '';
+
+                if (is_array($data)) {
+                    $conductor1name = ($data['namedriver'] ?? '') . ' ' . ($data['lastnamedriver'] ?? '');
+                    $conductor2name = '';
+                    $licencia1 = $data['licenciadriver'] ?? '';
+                    $placa1 = $data['placa1'] ?? '';
+                    $placa2 = $data['placa2'] ?? '';
+                    $mtc1 = $data['mtc1'] ?? '';
+                    $mtc2 = $data['mtc2'] ?? '';
+                }
             }
+
 
             // Añadir los datos de la guía a la exportación
             $exportData[] = [
@@ -347,6 +351,19 @@ class ExcelController extends Controller
                 'COND. PAGO' => $reception?->conditionPay ?? '-',
                 'ESTADO ENTREGA' => $carrier?->status ?? '-',
                 'ESTADO FACTURACION' => $carrier->status_facturado ?? '',
+
+                'FECHA DE RECEPCION DE GRT' => !empty($reception?->receptionDate)
+                    ? date('d/m/Y', strtotime($reception->receptionDate))
+                    : 'Sin Fecha',
+
+                'FECHA CARGO' => !empty($carrier?->date_cargo)
+                    ? date('d/m/Y', strtotime($carrier->date_cargo))
+                    : 'Sin Fecha',
+
+                'FECHA EST. FACTURACIÓN' => !empty($carrier?->date_est_facturacion)
+                    ? date('d/m/Y', strtotime($carrier->date_est_facturacion))
+                    : 'Sin Fecha',
+
                 'CONDUCTOR 1' => $conductor1name,
                 'LICENCIA 1' => $licencia1,
                 'CONDUCTOR 2' => $conductor2name,
@@ -376,6 +393,13 @@ class ExcelController extends Controller
             'COND. PAGO' => '',
             'ESTADO ENTREGA' => '',
             'ESTADO FACTURACION' => '',
+
+
+            'FECHA DE RECEPCION DE GRT' => '',
+            'FECHA CARGO' => '',
+            'FECHA EST. FACTURACIÓN' => '',
+
+
             'CONDUCTOR 1' => '',
             'LICENCIA 1' => '',
             'CONDUCTOR 2' => '',

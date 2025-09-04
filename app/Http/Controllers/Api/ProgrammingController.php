@@ -794,7 +794,7 @@ class ProgrammingController extends Controller
             'isload' => $request->input('isload') ?? null,
             'user_edited_id' => Auth::user()->id,
             'is_tercerizar_programming' => $request->input('is_tercerizar_programming','0'),
-            'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
+            'data_tercerizar_programming' => json_encode($dataTercerizar),
 
         ];
 
