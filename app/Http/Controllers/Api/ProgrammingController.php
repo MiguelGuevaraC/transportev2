@@ -79,6 +79,9 @@ class ProgrammingController extends Controller
         $startDate = $request->input('startDate'); // Para filtrar por la fecha de salida (departureDate)
         $endDate = $request->input('endDate');   // Para filtrar por la fecha de salida (departureDate)
 
+        $is_tercerizar_programming = $request->input('is_tercerizar_programming', '');
+
+
         // Verificar la oficina principal
         if (!empty($branch_office_id) && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
@@ -129,6 +132,17 @@ class ProgrammingController extends Controller
         if (!empty($branch_office_id)) {
             $programmingQuery->where('branchOffice_id', $branch_office_id);
         }
+        if ((string) $is_tercerizar_programming === '0' || $is_tercerizar_programming === 0) {
+            $programmingQuery->where(function ($q) {
+                $q->whereNull('is_tercerizar_programming')
+                    ->orWhere('is_tercerizar_programming', 'NULL')
+                    ->orWhere('is_tercerizar_programming', '');
+            });
+        } elseif ((string) $is_tercerizar_programming === '1' || $is_tercerizar_programming === 1) {
+            $programmingQuery->where('is_tercerizar_programming', 1);
+        }
+
+
         // Filtros adicionales
         if (!empty($number)) {
             $programmingQuery->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($number) . '%']);
@@ -208,7 +222,7 @@ class ProgrammingController extends Controller
         $list->getCollection()->each(function ($programming) {
 
             $programming->updateTotalDriversExpenses();
-            
+
             if (!$programming->tract) {
                 return; // o puedes usar "continue;" si estás en un bucle normal
             }
@@ -230,7 +244,7 @@ class ProgrammingController extends Controller
             // Formatear el número de programación con el año, ID del vehículo y el contador
             $programming->numero = 'P' . str_pad($branchOfficeId, 3, '0', STR_PAD_LEFT) . '-' . $year . '-' . str_pad($vehicleId, 2, '0', STR_PAD_LEFT) . '-' . $ultimo6Caracteres = substr($programming->numero, -8);
             ;
-            
+
         });
 
         return response()->json([
@@ -366,6 +380,9 @@ class ProgrammingController extends Controller
             'data_tercerizar_programming.company_names' => 'required_if:is_tercerizar_programming,1|string|max:255',
             'data_tercerizar_programming.is_igv' => 'required_if:is_tercerizar_programming,1|boolean',
             'data_tercerizar_programming.monto' => 'required_if:is_tercerizar_programming,1|numeric|min:0',
+
+            'data_tercerizar_programming.monto_factura' => 'nullable|numeric|min:0',
+            'data_tercerizar_programming.archivo_factura' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'tract_id.exists' => 'El tracto seleccionado está ocupado.',
             'platform_id.exists' => 'La plataforma seleccionada está ocupada.',
@@ -397,6 +414,20 @@ class ProgrammingController extends Controller
         $resultado = DB::select('SELECT COALESCE(MAX(CAST(SUBSTRING(numero, LOCATE("-", numero) + 1) AS SIGNED)), 0) + 1 AS siguienteNum FROM programmings WHERE SUBSTRING(numero, 1, 4) = ?', [$tipo])[0]->siguienteNum;
         $siguienteNum = (int) $resultado;
 
+        // Procesar archivo factura si viene
+        $archivoFacturaUrl = null;
+        if ($request->hasFile('data_tercerizar_programming.archivo_factura')) {
+            $file = $request->file('data_tercerizar_programming.archivo_factura');
+            $filename = 'factura_' . time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+            $file->storeAs('public/facturas_tercerizacion_programacion', $filename);
+            $archivoFacturaUrl = asset("storage/facturas_tercerizacion_programacion/$filename");
+        }
+
+        // Construir JSON con los campos
+        $dataTercerizar = $request->input('data_tercerizar_programming', []);
+        $dataTercerizar['monto_factura'] = $request->input('data_tercerizar_programming.monto_factura');
+        $dataTercerizar['archivo_factura'] = $archivoFacturaUrl;
+
         $data = [
             'numero' => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
             'state' => $request->input('state') ?? 'Generada',
@@ -410,8 +441,8 @@ class ProgrammingController extends Controller
             'isload' => $request->input('isload', 0),
             'user_created_id' => Auth::user()->id,
 
-            'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
-            'data_tercerizar_programming' => json_encode($request->input('data_tercerizar_programming')),
+            'is_tercerizar_programming' => $request->input('is_tercerizar_programming','0'),
+            'data_tercerizar_programming' => json_encode($dataTercerizar),
 
 
         ];
@@ -690,6 +721,10 @@ class ProgrammingController extends Controller
             'data_tercerizar_programming.company_names' => 'nullable|string|max:255',
             'data_tercerizar_programming.is_igv' => 'nullable|boolean',
             'data_tercerizar_programming.monto' => 'nullable|numeric|min:0',
+
+            // Nuevos campos
+            'data_tercerizar_programming.monto_factura' => 'nullable|numeric|min:0',
+            'data_tercerizar_programming.archivo_factura' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             // Mensajes personalizados (opcional)
             'tract_id.exists' => 'El tracto seleccionado no existe.',
@@ -725,6 +760,28 @@ class ProgrammingController extends Controller
         }
 
 
+        // === Procesar archivo de factura (si viene uno nuevo, reemplazar el anterior) ===
+        $archivoFacturaUrl = null;
+        if ($request->hasFile('data_tercerizar_programming.archivo_factura')) {
+            $file = $request->file('data_tercerizar_programming.archivo_factura');
+            $filename = 'factura_' . time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+            $file->storeAs('public/facturas_tercerizacion_programacion', $filename);
+            $archivoFacturaUrl = asset("storage/facturas_tercerizacion_programacion/$filename");
+        }
+
+        // === Reconstruir JSON ===
+        $dataTercerizar = $request->input('data_tercerizar_programming', []);
+        $dataTercerizar['monto_factura'] = $request->input('data_tercerizar_programming.monto_factura');
+
+        // Si llega un archivo nuevo, reemplazar la ruta en el JSON
+        if ($archivoFacturaUrl) {
+            $dataTercerizar['archivo_factura'] = $archivoFacturaUrl;
+        } else {
+            // Si no viene nuevo archivo, conservar el que ya está guardado en BD
+            $currentData = json_decode($object->data_tercerizar_programming, true);
+            $dataTercerizar['archivo_factura'] = $currentData['archivo_factura'] ?? null;
+        }
+
         // Actualizar los datos de la programación
         $data = [
             'departureDate' => $request->input('departureDate') ?? null,
@@ -736,7 +793,7 @@ class ProgrammingController extends Controller
             'branch_office_id' => $request->input('branch_office_id') ?? null,
             'isload' => $request->input('isload') ?? null,
             'user_edited_id' => Auth::user()->id,
-            'is_tercerizar_programming' => $request->input('is_tercerizar_programming'),
+            'is_tercerizar_programming' => $request->input('is_tercerizar_programming','0'),
             'data_tercerizar_programming' => $request->input('data_tercerizar_programming'),
 
         ];

@@ -37,6 +37,7 @@ class StoreTireRequest extends StoreRequest
             ],
 
             // resto de reglas...
+            'condition' => ['required', 'string'],
             'entry_date' => ['required', 'date'],
             'supplier_id' => ['nullable', 'integer', 'exists:people,id'],
             'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
