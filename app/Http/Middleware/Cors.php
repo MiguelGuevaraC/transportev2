@@ -19,7 +19,7 @@ class Cors
 
         // Permitir solicitudes desde cualquier origen
         $headers = [
-            'Access-Control-Allow-Origin' => 'https://transportes-hernandez-mrsoft.vercel.app/',
+            'Access-Control-Allow-Origin' => 'https://transportes-hernandez-mrsoft.vercel.app',
             'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers' => 'Origin,Content-Type, Content-Type, Accept, Authorization,X-Requested-With',
             'Access-Control-Allow-Credentials' => true,
