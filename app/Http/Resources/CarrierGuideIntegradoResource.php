@@ -30,7 +30,12 @@ class CarrierGuideIntegradoResource extends JsonResource
             'LLEGADA' => $this?->destination?->name ?? '',
             'CONDICIÓN DE PAGO' => $this?->reception?->conditionPay ?? '',
             'ESTADO MERCADERIA' => $this->status ?? '',
-            'ESTADO FACTURACION' => $this->status_facturado ?? '',
+            // 'ESTADO FACTURACION' => $this->status_facturado ?? '',
+            'ESTADO FACTURACION' => strtolower($this->type) === 'manual'
+    ? 'Enviado'
+    : ($this->status_facturado ?? ''),
+
+    
             'DOCUMENTOS DE VENTA' => $this->reception && $this->reception->moviment
                 ? $this->reception->moviment->sequentialNumber : (empty($this->reception?->nro_sale) ? 'Sin Venta' : $this->reception->nro_sale),
 

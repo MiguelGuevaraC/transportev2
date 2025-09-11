@@ -21,6 +21,8 @@ return new class extends Migration {
             $table->dateTime('operation_date'); // Fecha de operación
             $table->text('comment')->nullable(); // Comentario adicional
 
+            $table->string('presion_aire')->nullable(); // Presión de aire
+
              $table->foreignId('driver_id')->nullable()->unsigned()->constrained('workers');
             $table->foreignId('user_id')->nullable()->constrained('users'); // Usuario responsable
             $table->foreignId('tire_id')->constrained('tires'); // Neumático relacionado

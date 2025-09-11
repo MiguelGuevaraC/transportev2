@@ -350,7 +350,10 @@ class ExcelController extends Controller
                 'SALDO' => $reception?->debtAmount ?? 0,
                 'COND. PAGO' => $reception?->conditionPay ?? '-',
                 'ESTADO ENTREGA' => $carrier?->status ?? '-',
-                'ESTADO FACTURACION' => $carrier->status_facturado ?? '',
+                'ESTADO FACTURACION' => strtolower($carrier->type) === 'manual'
+    ? 'Enviado'
+    : ($carrier->status_facturado ?? ''),
+
 
                 'FECHA DE RECEPCION DE GRT' => !empty($reception?->receptionDate)
                     ? date('d/m/Y', strtotime($reception->receptionDate))

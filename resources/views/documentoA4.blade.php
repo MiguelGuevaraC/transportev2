@@ -556,22 +556,54 @@
 
 
 
+        <style>
+    .tableDetail {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* clave para respetar los anchos */
+    }
+
+    .tableDetail th, .tableDetail td {
+        border: 1px solid #000;
+        padding: 4px;
+        word-wrap: break-word; /* para cortar texto largo */
+    }
+
+    .tableDetail th.item      { width: 5%;  text-align: center; }
+    .tableDetail th.quantity  { width: 7%;  text-align: center; }
+    .tableDetail th.unitPrice { width: 10%; text-align: center; }
+    .tableDetail th.sailPrice { width: 10%; text-align: center; }
+    .tableDetail th.description { width: 38%; text-align: left; }
+    .tableDetail th.sailPricePU { width: 10%; text-align: center; }
+    .tableDetail th.sailPriceVV { width: 10%; text-align: center; }
+</style>
+
+<table class="tableDetail font-12">
+    <tr>
+        <th class="item">Item</th>
+        <th class="item">Cant</th>
+        <th class="quantity">GRT</th>
+        <th class="unitPrice">Placa</th>
+        <th class="sailPrice">OS</th>
+        <th class="description">Descripción</th>
+        <th class="sailPricePU">P.U.</th>
+        <th class="sailPriceVV">V.Venta</th>
+    </tr>
+    <!-- Aquí tus <tr> con PHP -->
+</table>
+
+
         <table class="tableDetail font-12">
             <tr>
-                <th class="item ">Item</th>
-                <th class="item ">Cant</th>
-                <th class="quantity ">GRT</th>
-                <th class="unitPrice ">Placa</th>
-                <th class="sailPrice">OS</th>
-                <th class="description ">Descripción</th>
-                <!-- <th class="sailPrice">UM</th>
-                <th class="sailPrice">Cant.</th>
-                <th class="sailPrice">V.U.</th> -->
-                <th class="sailPrice ">P.U.</th>
-                <th class="sailPrice ">V.Venta</th>
-
-
-            </tr>
+        <th class="item">Item</th>
+        <th class="item">Cant</th>
+        <th class="quantity">GRT</th>
+        <th class="unitPrice">Placa</th>
+        <th class="sailPrice">OS</th>
+        <th class="description">Descripción</th>
+        <th class="sailPricePU">P.U.</th>
+        <th class="sailPriceVV">V.Venta</th>
+    </tr>
             <?php
               $totalDetalle = $totalPagado;
               $subtotal = $totalPagado;

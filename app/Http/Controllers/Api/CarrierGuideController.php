@@ -195,9 +195,7 @@ class CarrierGuideController extends Controller
             });
         }
 
-        if (! empty($typeGuia)) {
-            $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
-        }
+        
         if (! empty($id_sucursal)) {
             $carrierGuides->where('branchOffice_id', $id_sucursal);
         }
@@ -206,9 +204,20 @@ class CarrierGuideController extends Controller
             $carrierGuides->whereRaw('LOWER(status) = ?', [strtolower($statusGuia)]);
         }
 
-        if (! empty($statusFacturado)) {
-            $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
-        }
+        if (!empty($typeGuia)) {
+    $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
+}
+
+if (!empty($statusFacturado)) {
+    if (strtolower($statusFacturado) === 'pendiente') {
+        // excluir los manual
+        $carrierGuides->whereRaw('LOWER(type) != ?', ['manual']);
+        $carrierGuides->whereRaw('LOWER(status_facturado) = ?', ['pendiente']);
+    } elseif (empty($typeGuia) || strtolower($typeGuia) !== 'manual') {
+        // aplica normal solo si no es manual
+        $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
+    }
+}
 
         if (! empty($observation)) {
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
@@ -242,6 +251,13 @@ class CarrierGuideController extends Controller
         $carrierGuides = $carrierGuides->orderBy(DB::raw('CAST(SUBSTRING(numero, 6) AS UNSIGNED)'), 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
+             $carrierGuides->getCollection()->transform(function ($item) {
+            if (strtolower($item->type) === 'manual') {
+                $item->status_facturado = 'Enviado';
+            }
+            return $item;
+        });
+        
         return response()->json([
             'total'          => $carrierGuides->total(),
             'data'           => $carrierGuides->items(),

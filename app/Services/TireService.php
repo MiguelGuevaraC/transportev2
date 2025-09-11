@@ -1,8 +1,10 @@
 <?php
 namespace App\Services;
 
+use App\Models\DocAlmacen;
 use App\Models\Tire;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TireService
@@ -36,7 +38,7 @@ class TireService
 
     public function createTire(array $data): Tire
     {
-       
+
         $data['stock'] = 0;
         $tire = Tire::create($data);
         return $tire;
@@ -53,40 +55,69 @@ class TireService
 
         // 1) Pre-check en BD: códigos que ya existen
         $existing = Tire::whereIn('code', $codes)
-                    ->whereNull('deleted_at')
-                    ->pluck('code')
-                    ->unique()
-                    ->values()
-                    ->all();
+            ->whereNull('deleted_at')
+            ->pluck('code')
+            ->unique()
+            ->values()
+            ->all();
 
         if (!empty($existing)) {
             return ['created' => [], 'failed' => $existing];
         }
 
-        // 2) Crear todos en transacción. Si algo falla, se revierte.
+        // 2) Crear todos en transacción (neumáticos + doc almacén + detalles)
         try {
-            $created = DB::transaction(function () use ($data, $codes) {
-                $arr = [];
+            $result = DB::transaction(function () use ($data, $codes) {
+                $createdTires = [];
+
+                // Crear neumáticos
                 foreach ($codes as $code) {
-                    // doble check dentro de la transacción para reducir race
                     if (Tire::where('code', $code)->whereNull('deleted_at')->exists()) {
-                        // si ya existe durante la transacción, lanzar para que se maneje arriba
                         throw new \RuntimeException("Conflict on code: {$code}");
                     }
 
-                    $payload = array_merge($data, ['code' => $code, 'stock' => $data['stock'] ?? 0]);
-                    $arr[] = Tire::create($payload);
+                    $payload = array_merge($data, [
+                        'code' => $code,
+                        'stock' => $data['stock'] ?? 0
+                    ]);
+
+                    $createdTires[] = Tire::create($payload);
                 }
-                return $arr;
+
+                // Crear documento de almacén (concepto fijo = 2, ingreso)
+                $docAlmacen = DocAlmacen::create([
+                    'concept_id' => 2,
+                    'type' => 'INGRESO',
+                    'movement_date' => now()->toDateString(),
+                    'note' => 'Compra de neumáticos',
+                    'user_id' => Auth::id(),
+                ]);
+
+                // Crear un detalle por cada neumático
+                foreach ($createdTires as $tire) {
+                    $docAlmacen->details()->create([
+                        'tire_id' => $tire->id,
+                        'quantity' => 1,
+                        'note' => 'Ingreso automático por compra',
+                        'previous_quantity' => 0,
+                        'new_quantity' => 1,
+                        'unit_price' => $tire->precioventa ?? 0,
+                        'total_value' => ($tire->precioventa ?? 0) * 1,
+                    ]);
+
+                    // actualizar stock del neumático
+                    $tire->stock = 1;
+                    $tire->save();
+                }
+
+                return ['created' => $createdTires, 'failed' => []];
             });
 
-            return ['created' => $created, 'failed' => []];
+            return $result;
+
         } catch (QueryException $qe) {
-            // excepción de DB: devolvemos mensaje genérico y marca como fallidos todos (no sabemos exacto)
             return ['created' => [], 'failed' => ['db_error' => $qe->getMessage()]];
         } catch (\RuntimeException $re) {
-            // runtime que lanzamos cuando detectamos conflicto dentro de la transacción
-            // extraemos el código si viene en el mensaje
             $msg = $re->getMessage();
             if (str_starts_with($msg, 'Conflict on code: ')) {
                 $code = substr($msg, strlen('Conflict on code: '));
@@ -94,10 +125,10 @@ class TireService
             }
             return ['created' => [], 'failed' => [$msg]];
         } catch (\Throwable $t) {
-            // fallback: no creamos nada y devolvemos el error simple
             return ['created' => [], 'failed' => ['error' => $t->getMessage()]];
         }
     }
+
 
 
     public function updateTire(Tire $tire, array $data): Tire

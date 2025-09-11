@@ -20,6 +20,7 @@ class TireOperation extends Model
         'driver_id',      // Conductor asignado
         'user_id',        // Usuario responsable
         'tire_id',        // Neumático relacionado
+        'presion_aire',   // Presión de aire
         'created_at',
         'updated_at',
         'deleted_at',
@@ -38,6 +39,7 @@ class TireOperation extends Model
         'vehicle_km' => '=',
         'operation_date' => 'between',
         'driver_id' => '=',
+        'presion_aire' => '=',
         'user_id' => '=',
         'tire_id' => '=',
         'created_at' => 'date',

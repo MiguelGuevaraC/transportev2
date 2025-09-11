@@ -36,6 +36,7 @@ class UpdateTireOperationRequest extends UpdateRequest
             'driver_id' => ['nullable', 'integer', 'exists:workers,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'tire_id' => ['required', 'integer', 'exists:tires,id'],
+            'presion_aire' => ['nullable', 'string'],
         ];
     }
 

@@ -33,6 +33,7 @@ class IndexTireOperationRequest extends IndexRequest
             'created_at'     => 'nullable|string',
             'updated_at'     => 'nullable|string',
             'deleted_at'     => 'nullable|string',
+            'presion_aire'   => 'nullable|string',
         ];
     }
 }
