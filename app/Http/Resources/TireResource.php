@@ -43,44 +43,49 @@ class TireResource extends JsonResource
 
 
 
-public function toArray($request): array
-{
-    return [
-        'id' => $this->id ?? null,
-        'code' => $this->code ?? null,
-        'stock' => $this->stock ?? 0,
-        'condition' => $this->condition ?? null,
-        'retread_number' => $this->retread_number ?? null,
-        'entry_date' => $this->entry_date ?? null,
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id ?? null,
+            'code' => $this->code ?? null,
+            'stock' => $this->stock ?? 0,
+            'condition' => $this->condition ?? null,
+            'retread_number' => $this->retread_number ?? null,
+            'entry_date' => $this->entry_date ?? null,
 
-        'supplier_id' => $this->supplier_id ?? null,
-        'supplier' => $this->supplier ?? new PersonaResource($this->supplier),
-'material_id' => $this->material_id ?? null,
-'material' => $this->material ? new MaterialResource($this->material) : null,
+            'supplier_id' => $this->supplier_id ?? null,
+            'supplier' => $this->supplier ?? new PersonaResource($this->supplier),
+            'material_id' => $this->material_id ?? null,
+            'material' => $this->material ? new MaterialResource($this->material) : null,
 
-'design_id' => $this->design_id ?? null,
-'design' => $this->design ? new DesignResource($this->design) : null,
+            'design_id' => $this->design_id ?? null,
+            'design' => $this->design ? new DesignResource($this->design) : null,
 
-'brand_id' => $this->brand_id ?? null,
-'brand' => $this->brand ? new BrandResource($this->brand) : null,
+            'brand_id' => $this->brand_id ?? null,
+            'brand' => $this->brand ? new BrandResource($this->brand) : null,
 
-        'vehicle_id' => $this->vehicle_id ?? null,
-        'vehicle' => $this->vehicle ? $this->vehicle : null,
+            'tire_measure_id' => $this->tire_measure_id ?? null,
+            'tire_measure_name' => $this->tireMeasure ? new TireMeasureResource($this->tireMeasure) : null,
 
-        'type' => $this->type ?? null,
-        'size' => $this->size ?? null,
-        'dot' => $this->dot ?? null,
-        'tread_type' => $this->tread_type ?? null,
-        'current_tread' => $this->current_tread ?? null,
-        'minimum_tread' => $this->minimum_tread ?? null,
-        'tread' => $this->tread ?? null,
-        'shoulder1' => $this->shoulder1 ?? null,
-        'shoulder2' => $this->shoulder2 ?? null,
-        'shoulder3' => $this->shoulder3 ?? null,
+            'number_fact' => $this->number_fact ?? null,
 
-        'created_at' => $this->created_at?->format('Y-m-d H:i:s') ?? null,
-        'updated_at' => $this->updated_at?->format('Y-m-d H:i:s') ?? null,
-    ];
-}
+            'vehicle_id' => $this->vehicle_id ?? null,
+            'vehicle' => $this->vehicle ? $this->vehicle : null,
+
+            'type' => $this->type ?? null,
+            'size' => $this->size ?? null,
+            'dot' => $this->dot ?? null,
+            'tread_type' => $this->tread_type ?? null,
+            'current_tread' => $this->current_tread ?? null,
+            'minimum_tread' => $this->minimum_tread ?? null,
+            'tread' => $this->tread ?? null,
+            'shoulder1' => $this->shoulder1 ?? null,
+            'shoulder2' => $this->shoulder2 ?? null,
+            'shoulder3' => $this->shoulder3 ?? null,
+
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s') ?? null,
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s') ?? null,
+        ];
+    }
 
 }

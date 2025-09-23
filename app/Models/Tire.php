@@ -34,6 +34,8 @@ class Tire extends Model
         'material_id',
         'design_id',
         'brand_id',
+        'tire_measure_id',
+        'number_fact',
 
         'created_at',
         'updated_at',
@@ -75,6 +77,10 @@ class Tire extends Model
         'design_id' => '=',
         'brand_id' => '=',
         'position_vehicle' => '=',
+
+        'tire_measure_id' => '=',
+        'number_fact' => 'like',
+
     ];
 
 
@@ -106,6 +112,11 @@ class Tire extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    public function tireMeasure()
+    {
+        return $this->belongsTo(TireMeasure::class, 'tire_measure_id');
     }
 
 }

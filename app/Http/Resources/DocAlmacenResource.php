@@ -47,7 +47,7 @@ class DocAlmacenResource extends JsonResource
                     fn($d) =>
                     '<li style="margin-bottom: 4px;">' .
                     '<span style="color: green; font-weight: bold;">(Cant:' . e($d->quantity) . ')</span> ' .
-                    '<span style="font-weight: 500;">' . e($d->tire->code) . '</span>' .
+                    '<span style="font-weight: 500;">' . e($d->tire?->code) . '</span>' .
                     '</li>'
                 )->implode('') .
                 '</ul></div>',

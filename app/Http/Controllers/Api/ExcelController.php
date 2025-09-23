@@ -269,9 +269,15 @@ class ExcelController extends Controller
         }
 
         if (!empty($statusFacturado)) {
-            $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
+            if (strtolower($statusFacturado) === 'pendiente') {
+                // excluir los manual
+                $carrierGuides->whereRaw('LOWER(type) != ?', ['manual']);
+                $carrierGuides->whereRaw('LOWER(status_facturado) = ?', ['pendiente']);
+            } elseif (empty($typeGuia) || strtolower($typeGuia) !== 'manual') {
+                // aplica normal solo si no es manual
+                $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
+            }
         }
-
         if (!empty($observation)) {
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
         }
@@ -351,8 +357,8 @@ class ExcelController extends Controller
                 'COND. PAGO' => $reception?->conditionPay ?? '-',
                 'ESTADO ENTREGA' => $carrier?->status ?? '-',
                 'ESTADO FACTURACION' => strtolower($carrier->type) === 'manual'
-    ? 'Enviado'
-    : ($carrier->status_facturado ?? ''),
+                    ? 'Enviado'
+                    : ($carrier->status_facturado ?? ''),
 
 
                 'FECHA DE RECEPCION DE GRT' => !empty($reception?->receptionDate)

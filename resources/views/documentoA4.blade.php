@@ -588,21 +588,7 @@
         <th class="description">Descripción</th>
         <th class="sailPricePU">P.U.</th>
         <th class="sailPriceVV">V.Venta</th>
-    </tr>
-    <!-- Aquí tus <tr> con PHP -->
-</table>
 
-
-        <table class="tableDetail font-12">
-            <tr>
-        <th class="item">Item</th>
-        <th class="item">Cant</th>
-        <th class="quantity">GRT</th>
-        <th class="unitPrice">Placa</th>
-        <th class="sailPrice">OS</th>
-        <th class="description">Descripción</th>
-        <th class="sailPricePU">P.U.</th>
-        <th class="sailPriceVV">V.Venta</th>
     </tr>
             <?php
               $totalDetalle = $totalPagado;

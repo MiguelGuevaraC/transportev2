@@ -45,6 +45,9 @@ class UpdateTireRequest extends UpdateRequest
             'design_id' => ['nullable', 'integer', 'exists:designs,id'],
             'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
 
+            'tire_measure_id' => ['nullable', 'integer', 'exists:tire_measures,id'],
+            'number_fact' => ['nullable', 'string'],
+
             // 'material' => ['nullable', 'string'],
             // 'brand' => ['nullable', 'string'],
             // 'design' => ['nullable', 'string'],

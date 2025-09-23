@@ -44,9 +44,14 @@ class StoreTireRequest extends StoreRequest
             'material_id' => ['required', 'integer', 'exists:materials,id'],
             'design_id' => ['required', 'integer', 'exists:designs,id'],
             'brand_id' => ['required', 'integer', 'exists:brands,id'],
+            
+            'tire_measure_id' => ['nullable', 'integer', 'exists:tire_measures,id'],
+            'number_fact' => ['nullable', 'string'],
+            
             'type' => ['nullable', 'string'],
             'size' => ['nullable', 'string'],
             'dot' => ['nullable', 'string'],
+            
             'tread_type' => ['nullable', 'string'],
             'current_tread' => ['nullable', 'numeric'],
             'minimum_tread' => ['nullable', 'numeric'],
