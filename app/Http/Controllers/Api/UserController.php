@@ -543,7 +543,10 @@ class UserController extends Controller
                 ];
             }
 
-            $optionsByGroup[] = $group_menu;
+            // Solo agregamos si tiene hijos (permisos)
+            if (!empty($group_menu['child'])) {
+                $optionsByGroup[] = $group_menu;
+            }
         }
 
         return response()->json($optionsByGroup);

@@ -47,7 +47,7 @@ class BoxController extends Controller
     public function indexNotAssigned()
     {
         $assignedBoxIds = User::whereNotNull('box_id')->pluck('box_id');
-        $list           = Box::with(['branchOffice'])
+        $list = Box::with(['branchOffice'])
             ->whereNotIn('id', $assignedBoxIds)->simplePaginate();
 
         return response()->json($list, 200);
@@ -87,7 +87,7 @@ class BoxController extends Controller
 
     public function index(Request $request)
     {
-        $user    = Auth()->user();
+        $user = Auth()->user();
         $user_id = $user->id ?? '';
 
         // Obtener el branch_office_id del request o del usuario autenticado
@@ -95,14 +95,14 @@ class BoxController extends Controller
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (! $branchOffice) {
+            if (!$branchOffice) {
                 return response()->json([
                     "message" => "Branch Office Not Found",
                 ], 404);
             }
         } else {
             $branch_office_id = $user->worker->branchOffice_id ?? null;
-            if (! $branch_office_id) {
+            if (!$branch_office_id) {
                 return response()->json([
                     "message" => "Branch Office Not Found for the user",
                 ], 404);
@@ -169,7 +169,7 @@ class BoxController extends Controller
     {
         $object = Box::with(['branchOffice', 'user'])->find($id);
 
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
 
@@ -189,42 +189,42 @@ class BoxController extends Controller
         return response()->json($object, 200);
     }
 
-/**
- *
+    /**
+     *
 
- *
- * @OA\Get(
- *     path="/transporte/public/api/boxByBranch/{id}",
- *     summary="Get all box by Branch Office",
- *     tags={"Box"},
- *     description="Show all box by Branch Office",
- *     security={{"bearerAuth":{}}},
- *           @OA\Parameter(
- *         name="id",
- *         in="path",
- *         description="ID of the Branch Office",
- *         required=true,
- *         @OA\Schema(
- *             type="integer"
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of box by Branch Office",
- *        @OA\JsonContent(
- *             type="array",
- *             @OA\Items(ref="#/components/schemas/Box")
- *         )
- *     ),
- *        @OA\Response(
- *         response=401,
- *         description="Unauthenticated.",
- *         @OA\JsonContent(
- *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
- *         )
- *     ),
- * )
- */
+     *
+     * @OA\Get(
+     *     path="/transporte/public/api/boxByBranch/{id}",
+     *     summary="Get all box by Branch Office",
+     *     tags={"Box"},
+     *     description="Show all box by Branch Office",
+     *     security={{"bearerAuth":{}}},
+     *           @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the Branch Office",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of box by Branch Office",
+     *        @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Box")
+     *         )
+     *     ),
+     *        @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     * )
+     */
 
     public function getBoxByBrandId($idBranchOffice)
     {
@@ -293,18 +293,21 @@ class BoxController extends Controller
     {
 
         $validator = validator()->make($request->all(), [
-            'name'            => [
+            'name' => [
                 'required',
                 'string',
                 Rule::unique('boxes')->whereNull('deleted_at'),
             ],
             'branchOffice_id' => 'required|exists:branch_offices,id',
-            'serie'           => [
+            'serie' => [
                 'required',
                 'string',
                 'size:2',                                       // Debe tener exactamente 2 caracteres
                 Rule::notIn(['10', '20', '30', '40']),          // Excluye las series específicas
-               // Rule::unique('boxes')->whereNull('deleted_at'), // Asegura unicidad
+                Rule::unique('boxes')
+                    ->where(fn($query) => $query->whereNull('deleted_at')), // solo si no está eliminado
+
+
             ],
         ]);
         if ($validator->fails()) {
@@ -312,8 +315,8 @@ class BoxController extends Controller
         }
 
         $data = [
-            'name'            => $request->input('name'),
-            'serie'           => $request->input('serie') ?? null,
+            'name' => $request->input('name'),
+            'serie' => $request->input('serie') ?? null,
             'branchOffice_id' => $request->input('branchOffice_id'),
         ];
 
@@ -366,7 +369,7 @@ class BoxController extends Controller
     public function show($id)
     {
         $object = Box::with(['branchOffice', 'user'])->find($id);
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
 
@@ -425,13 +428,13 @@ class BoxController extends Controller
     public function update(Request $request, $id)
     {
         $object = Box::find($id);
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
 
         // Validar los datos de entrada
         $validator = validator()->make($request->all(), [
-            'name'  => [
+            'name' => [
                 'required',
                 'string',
                 Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
@@ -441,7 +444,9 @@ class BoxController extends Controller
                 'string',
                 'size:2',                              // Debe tener exactamente 2 caracteres
                 Rule::notIn(['10', '20', '30', '40']), // Excluye las series específicas
-             //   Rule::unique('boxes')->ignore($id)->whereNull('deleted_at'),
+                Rule::unique('boxes')
+                    ->ignore($id) // ignora el registro actual (route id)
+                    ->where(fn($query) => $query->whereNull('deleted_at')),
             ],
         ]);
 
@@ -450,7 +455,7 @@ class BoxController extends Controller
         }
 
         $routeData = [
-            'name'  => $request->input('name'),
+            'name' => $request->input('name'),
             'serie' => $request->input('serie') ?? null,
             'branchOffice_id' => $request->input('branchOffice_id') ?? $object->branchOffice_id,
 
@@ -503,7 +508,7 @@ class BoxController extends Controller
     public function destroy($id)
     {
         $object = Box::find($id);
-        if (! $object) {
+        if (!$object) {
             return response()->json(['message' => 'Box not found'], 422);
         }
         $object->state = 0;
