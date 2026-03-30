@@ -68,6 +68,8 @@ class CargaDocumentService
                         'branchOffice_id' => $data['branchOffice_id'],
                         'almacen_id'      => $detail['almacen_id'],
                         'seccion_id'      => $detail['seccion_id'],
+                        'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
+                        'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de anexo opcional
                     ],
                     [
                         'stock' => 0,
@@ -92,26 +94,74 @@ class CargaDocumentService
         return DB::transaction(function () use ($cargaDocument, $data) {
             // Revertir el stock anterior
             $branch_old = $cargaDocument->branchOffice_id;
-            // Obtener el stock actual del producto
-            $product      = Product::findOrFail($data['product_id']);
-            $currentStock = $product->stock;
-
             // Actualizar los datos del documento, incluyendo el stock actual
             $cargaDocument->update(
                 array_intersect_key($data, array_flip($cargaDocument->getFillable())) + [
                     'stock_balance_before' => 0, // Asegura que no sea null
                 ]
             );
+            $movementType = $cargaDocument->movement_type ?? 'ENTRADA'; // Por defecto ENTRADA
+            // Revertir stock de los detalles
+            foreach ($cargaDocument->details as $detail) {
+                $productStock = ProductStockByBranch::where('product_id', $detail->product_id)
+                    ->where('branchOffice_id', $detail->branchOffice_id)
+                    ->where('almacen_id', $detail->almacen_id)
+                    ->where('seccion_id', $detail->seccion_id)
+                    ->first();
 
-            // Aplicar el nuevo stock
-            if ($branch_old != $cargaDocument->branchOffice_id) {
-                $afterStock = $this->updateProductStock($data['product_id'], $branch_old, $data['quantity'], $data['movement_type']);
+                if ($productStock) {
+                    if (strtoupper($movementType) === 'SALIDA') {
+                        $productStock->increment('stock', $detail->quantity);
+                    } else {
+                        $productStock->decrement('stock', $detail->quantity);
+                        
+                    }
+                    
+                }
+
+                // Eliminar el detalle
+                $detail->delete();
             }
-            $afterStock = $this->updateProductStock($data['product_id'], $cargaDocument->branchOffice_id, $data['quantity'], $data['movement_type']);
 
-            $cargaDocument->update([
-                'stock_balance_after' => $afterStock,
-            ]);
+            // Procesar cada detalle y guardarlo
+            foreach ($data['details'] as $detail) {
+                DocumentCargaDetail::create([
+                    'quantity'          => $detail['quantity'],
+                    'product_id'        => $detail['product_id'],
+                    'almacen_id'        => $detail['almacen_id'],
+                    'seccion_id'        => $detail['seccion_id'],
+                    'document_carga_id' => $cargaDocument->id,
+                    'branchOffice_id'   => $data['branchOffice_id'],
+                    'comment'           => isset($detail['comment']) ? $detail['comment'] : null,                 // Comentario opcional
+                    'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
+                    'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
+                    'created_at'        => now(),
+                ]);
+
+                // Actualizar el stock a nivel de sucursal, almacen y seccion
+                $productStock = ProductStockByBranch::firstOrCreate(
+                    [
+                        'product_id'      => $detail['product_id'],
+                        'branchOffice_id' => $data['branchOffice_id'],
+                        'almacen_id'      => $detail['almacen_id'],
+                        'seccion_id'      => $detail['seccion_id'],
+                        'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
+                        'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
+                    ],
+                    [
+                        'stock' => 0,
+                    ]
+                );
+
+                // Incrementar el stock
+                // Incrementar o disminuir el stock según el tipo de movimiento
+                if (strtoupper($movementType) === 'SALIDA') {
+                    $productStock->decrement('stock', $detail['quantity']);
+                } else {
+                    $productStock->increment('stock', $detail['quantity']);
+                }
+            }
+            
             return $cargaDocument;
         });
     }
@@ -124,7 +174,7 @@ class CargaDocumentService
             if (! $cargaDocument) {
                 throw new ModelNotFoundException("El documento de carga no existe.");
             }
-
+            $movementType = $cargaDocument->movement_type ?? 'ENTRADA'; // Por defecto ENTRADA
             // Revertir stock de los detalles
             foreach ($cargaDocument->details as $detail) {
                 $productStock = ProductStockByBranch::where('product_id', $detail->product_id)
@@ -133,8 +183,11 @@ class CargaDocumentService
                     ->where('seccion_id', $detail->seccion_id)
                     ->first();
 
-                if ($productStock) {
+                if (strtoupper($movementType) === 'SALIDA') {
+                    $productStock->increment('stock', $detail->quantity);
+                } else {
                     $productStock->decrement('stock', $detail->quantity);
+                    
                 }
 
                 // Eliminar el detalle

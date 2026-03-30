@@ -342,12 +342,12 @@ class Reception extends Model
 
     public function pointSender()
     {
-        return $this->belongsTo(Address::class, 'pointSender_id');
+        return $this->belongsTo(Address::class, 'pointSender_id')->withTrashed();
     }
 
     public function pointDestination()
     {
-        return $this->belongsTo(Address::class, 'pointDestination_id');
+        return $this->belongsTo(Address::class, 'pointDestination_id')->withTrashed();
     }
 
     public function branchOffice()

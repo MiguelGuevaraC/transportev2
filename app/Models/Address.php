@@ -35,10 +35,20 @@ class Address extends Model
      *         type="string",
      *         description="State of the address"
      *     ),
-     *               @OA\Property(
+     *     @OA\Property(
      *         property="client_id",
      *         type="integer",
      *         description="ID of the adress client"
+     *     ),
+     *     @OA\Property(
+     *         property="place_id",
+     *         type="integer",
+     *         description="ID of the place"
+     *     ),
+     *      @OA\Property(
+     *         property="contact_info_id",
+     *         type="integer",
+     *         description="ID of the contact"
      *     ),
      *     @OA\Property(
      *         property="created_at",
@@ -64,6 +74,11 @@ class Address extends Model
      *          ref="#/components/schemas/Person",
      *         description="Person who send"
      *     ),
+     *    @OA\Property(
+     *         property="place",
+     *          ref="#/components/schemas/Place",
+     *         description="Place where send"
+     *     ),
      * )
      */
 
@@ -73,7 +88,8 @@ class Address extends Model
         'reference',
         'state',
         'client_id',
-
+	    'place_id',
+        'contact_info_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -82,6 +98,16 @@ class Address extends Model
     public function client()
     {
         return $this->belongsTo(Person::class, 'client_id');
+    }
+
+    public function place()
+    {
+        return $this->belongsTo(Place::class, 'place_id');
+    }
+
+    public function contact_info()
+    {
+        return $this->belongsTo(ContactInfo::class, 'contact_info_id');
     }
 
     public function receptionsAsSender()

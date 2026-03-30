@@ -105,7 +105,7 @@ class CarrierGuideController extends Controller
         $carrierGuides = CarrierGuide::with('tract', 'platform', 'motive', 'origin', 'destination', 'sender', 'recipient', 'branchOffice',
             'payResponsible', 'driver', 'copilot', 'districtStart.province.department', 'user',
             'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception', 'reception.moviment',
-            'reception.moviment.installments','reception.moviment.installments.payInstallments', 'reception.details', 'programming');
+            'reception.moviment.installments','reception.moviment.installments.payInstallments', 'reception.details', 'programming','reception.cargos');
 
         // Aplicación de los filtros con comparaciones en minúsculas
         if (! empty($numero)) {
@@ -205,19 +205,19 @@ class CarrierGuideController extends Controller
         }
 
         if (!empty($typeGuia)) {
-    $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
-}
+            $carrierGuides->whereRaw('LOWER(type) = ?', [strtolower($typeGuia)]);
+        }
 
-if (!empty($statusFacturado)) {
-    if (strtolower($statusFacturado) === 'pendiente') {
-        // excluir los manual
-        $carrierGuides->whereRaw('LOWER(type) != ?', ['manual']);
-        $carrierGuides->whereRaw('LOWER(status_facturado) = ?', ['pendiente']);
-    } elseif (empty($typeGuia) || strtolower($typeGuia) !== 'manual') {
-        // aplica normal solo si no es manual
-        $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
-    }
-}
+        if (!empty($statusFacturado)) {
+            if (strtolower($statusFacturado) === 'pendiente') {
+                // excluir los manual
+                $carrierGuides->whereRaw('LOWER(type) != ?', ['manual']);
+                $carrierGuides->whereRaw('LOWER(status_facturado) = ?', ['pendiente']);
+            } elseif (empty($typeGuia) || strtolower($typeGuia) !== 'manual') {
+                // aplica normal solo si no es manual
+                $carrierGuides->whereRaw('LOWER(status_facturado) = ?', [strtolower($statusFacturado)]);
+            }
+        }
 
         if (! empty($observation)) {
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);

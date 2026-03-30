@@ -99,7 +99,7 @@ class CreditNoteController extends Controller
                 $query->where('branchOffice_id', $branch_office_id);
             })
             ->when(!empty($number) && $number !== "null", function ($query) use ($number) {
-                $query->where('number', $number);
+                $query->where('number','like','%'.$number.'%');
             })
             ->when(!empty($person_id) && $person_id !== "null", function ($query) use ($person_id) {
                 return $query->whereHas('moviment.person', function ($query) use ($person_id) {

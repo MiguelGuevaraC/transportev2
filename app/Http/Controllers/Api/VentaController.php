@@ -254,7 +254,8 @@ class VentaController extends Controller
 
     public function store(Request $request)
     {
-
+       // return response()->json(['error' => 'Error procesando peticion, por favor intente mas tarde'], 422);//generado
+       // exit();
         $validator = validator()->make($request->all(), [
 
             'paymentDate' => 'required|date',
@@ -1036,6 +1037,8 @@ class VentaController extends Controller
 
     public function storeWithReceptions(Request $request)
     {
+        //return response()->json(['error' => 'Error procesando peticion, por favor intente mas tarde'], 422);//generado
+        //exit();
         $validator = validator()->make($request->all(), [
             'paymentDate' => 'required|date',
             'yape' => 'nullable|numeric',

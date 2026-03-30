@@ -33,7 +33,7 @@ class AddressController extends Controller
 
     public function index()
     {
-        $list = Address::with('client')->where('state', '1')->orderBy('id', 'desc')->get();
+        $list = Address::with('client','place','contact_info')->where('state', '1')->orderBy('id', 'desc')->get();
         return response()->json($list, 200);
     }
 
@@ -74,6 +74,58 @@ class AddressController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/transporte/public/api/addressForPersonPlace/{idPersona}",
+     *     summary="Get Address for Person",
+     *     tags={"Address"},
+     *     description="Show all Address",
+     *     security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *         name="idPersona",
+     *         in="path",
+     *         description="ID of the person",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
+    * @OA\RequestBody(
+     *     required=true,
+     *     description="Search data",
+     *     @OA\JsonContent(
+     *         @OA\Property(property="place_id", type="string", example="Direccion 1", description="Place of search"),
+     *     )
+     * ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of Address"
+     *     ),
+     *        @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     * )
+     */
+
+    public function addressForPersonPlace($idPersona,Request $request)
+    {
+        $place_id = $request->input('place_id');
+        $list = Address::where('client_id', $idPersona)
+                    ->where(function($sql) use($place_id){
+                        if(!is_null($place_id) && $place_id!=""){
+                            $sql->where('place_id','=',$place_id);
+                        }
+                    })
+                    ->where('state', '1')->orderBy('id', 'desc')->get();
+        return response()->json($list, 200);
+    }
+
+    
+
+    /**
      * @OA\Post(
      *     path="/transporte/public/api/address",
      *     summary="Store a new address",
@@ -87,6 +139,8 @@ class AddressController extends Controller
      *         @OA\Property(property="name", type="string", example="Direccion 1", description="Direction of User"),
      *@OA\Property(property="reference", type="string", example="Reference 1", description="Reference of User"),
      *@OA\Property(property="client_id", type="integer", example=1, description="Id person of User"),
+     *@OA\Property(property="place_id", type="integer", example=1, description="Id place of User"),
+     *@OA\Property(property="contact_info_id", type="integer", example=1, description="Id contact of User"),
      *     )
      * ),
 
@@ -120,6 +174,7 @@ class AddressController extends Controller
         $validator = validator()->make($request->all(), [
             'name' => 'required',
             'client_id' => 'required|exists:people,id',
+            //'place_id' => 'required|exists:places,id',
         ]);
 
         if ($validator->fails()) {
@@ -130,11 +185,13 @@ class AddressController extends Controller
             'name' => $request->input('name'),
             'reference' => $request->input('reference'),
             'client_id' => $request->input('client_id'),
+            'place_id' => $request->input('place_id'),
+            'contact_info_id' => $request->input('contact_info_id'),
         ];
 
         $object = Address::create($data);
 
-        $object = Address::with(["client"])->find($object->id);
+        $object = Address::with(["client","place","contact_info"])->find($object->id);
         return response()->json($object, 200);
 
     }
@@ -183,7 +240,7 @@ class AddressController extends Controller
 
     public function show($id)
     {
-        $address = Address::with(["client"])->find($id);
+        $address = Address::with(["client","place","contact_info"])->find($id);
         if (!$address) {
             return response()->json(['message' => 'Address not found'], 422);
         }
@@ -212,6 +269,8 @@ class AddressController extends Controller
      *         @OA\Property(property="name", type="string", example="Direccion 1", description="Direction of User"),
      *@OA\Property(property="reference", type="string", example="Reference 1", description="Reference of User"),
      *@OA\Property(property="client_id", type="integer", example=1, description="Id person of User"),
+     *@OA\Property(property="place_id", type="integer", example=1, description="Id place of User"),
+     *@OA\Property(property="contact_info_id", type="integer", example=1, description="Id contact of User"),
      *     )
      * ),
      *     @OA\Response(
@@ -264,11 +323,13 @@ class AddressController extends Controller
             'name' => $request->input('name'),
             'reference' => $request->input('reference'),
             'client_id' => $request->input('client_id'),
+            'place_id' => $request->input('place_id'),
+            'contact_info_id' => $request->input('contact_info_id'),
 
         ], $filterNullValues);
 
         $object->update($Data);
-        $object = Address::with(["client"])->find($object->id);
+        $object = Address::with(["client","place"])->find($object->id);
 
         return response()->json($object, 200);
     }
@@ -320,12 +381,12 @@ class AddressController extends Controller
              return response()->json(['message' => 'Dirección No Encontrada'], 422);
          }
 
-         // Validar si la dirección está asociada como punto de envío o destino
-         $hasReceptions = $address->receptionsAsSender()->exists() || $address->receptionsAsDestination()->exists();
+         // Validar si la dirección está asociada como punto de envío o destino, comentado a petición de Jeyson
+         /*$hasReceptions = $address->receptionsAsSender()->exists() || $address->receptionsAsDestination()->exists();
 
          if ($hasReceptions) {
              return response()->json(['message' => 'Dirección está asociada con recepciones'], 422);
-         }
+         }*/
 
          // Cambiar el estado de la dirección a 0 (deshabilitada)
          $address->state = 0;

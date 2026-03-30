@@ -75,6 +75,7 @@ class CollectionController extends Controller
         $isCargos        = $request->input('isCargos');
         $statusReception = $request->input('statusReception');
         $numberGuia      = $request->input('numberGuia');
+        $documentGuia      = $request->input('documentGuia');
         $numberVenta     = $request->input('numberVenta');
 
         // $branch_office_id = $request->input('branchOffice_id');
@@ -165,6 +166,10 @@ class CollectionController extends Controller
             $receptionsQuery->where('carrier_guides.numero', 'LIKE', '%' . $numberGuia . '%');
         }
 
+        if (! empty($documentGuia)) {
+            $receptionsQuery->where('carrier_guides.document', 'LIKE', '%' . $documentGuia . '%');
+        }
+
         // Filtro por número de venta dentro de la relación moviment
         if (! empty($numberVenta)) {
             $receptionsQuery->where(function ($query) use ($numberVenta) {
@@ -227,16 +232,16 @@ class CollectionController extends Controller
             // Si sólo se ingresó una parte de la ruta (ej. "Chiclayo")
             if (count($routeParts) === 1) {
                 $receptionsQuery->whereHas('origin', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($routeParts[0]) . '%']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
                 })->orWhereHas('destination', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($routeParts[0]) . '%']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
                 });
             } elseif (count($routeParts) === 2) {
                 // Si se ingresó el formato "Origen-Destino" (ej. "Amazonas-Chiclayo")
                 $receptionsQuery->whereHas('origin', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($routeParts[0]) . '%']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
                 })->whereHas('destination', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($routeParts[1]) . '%']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[1]) . '']);
                 });
             }
         }
@@ -357,7 +362,7 @@ class CollectionController extends Controller
                     $query->where(function ($query) {
                         $query->whereDoesntHave('tractProgrammings')
                             ->whereDoesntHave('platformProgrammings');
-                    });
+                    })->orWhereIn('id',[7,110]);
                 }
                 // if ($sinProgramaciones === "0" || $sinProgramaciones === "false") {
                 //     // Filtrar vehículos con programaciones.

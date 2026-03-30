@@ -120,7 +120,11 @@ class StoreCargaDocumentRequest extends StoreRequest
                     $stock = ProductStockByBranch::where('product_id', $detail['product_id'])
                         ->where('branchOffice_id', $this->branchOffice_id)
                         ->where('almacen_id', $detail['almacen_id'])
-                        ->where('seccion_id', $detail['seccion_id'])
+                        ->where(function($sql) use($detail){
+                            if(!is_null($detail['seccion_id']) && $detail['seccion_id']!=""){
+                                $sql->where('seccion_id', $detail['seccion_id']);
+                            }
+                        })
                         ->value('stock');
 
                     if ($stock === null || $stock < $detail['quantity']) {

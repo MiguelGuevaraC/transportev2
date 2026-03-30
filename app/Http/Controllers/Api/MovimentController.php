@@ -1309,9 +1309,9 @@ class MovimentController extends Controller
         if ($request->filled('box_id')) {
             $query->where('box_id', $request->input('box_id'));
         }
-        if ($branchOfficeId) {
-            $query->where('branchOffice_id', $branchOfficeId);
-        }
+        //if ($branchOfficeId) {
+        //    $query->where('branchOffice_id', $branchOfficeId);
+        //}
 
         // Obtener movimientos paginados
         $page = $request->input('page', 1);

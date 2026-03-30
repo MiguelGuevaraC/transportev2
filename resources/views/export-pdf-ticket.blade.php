@@ -408,6 +408,9 @@
         <?php
         if ($linkRevisarFact) {
             echo '<section class="detalleCaja">
+
+                                                                                    <label for="gracias" style="font-size:10px;margin-top: -10px">La EMPRESA no es responsable de daños y perjuicios en  artículos y/o carga generados por mal embalaje, bajo responsabilidad del CLIENTE.</label>
+                                                                                    <br>
                                                                                     <label for="gracias" style="font-size:12px">¡ Gracias por su compra !</label>
                                                                                     <br>
                                                                                     <label for=""><b>Representación impresa del Comprobante Electrónico, consulta en <a style="text-decoration: none;color:black" href="http://facturae-garzasoft.com" target="_blank">http://facturae-garzasoft.com</a> </b></label>

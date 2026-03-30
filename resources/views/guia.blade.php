@@ -922,6 +922,9 @@
             style="width: 100%; border-collapse: collapse; background-color: white; 
         margin-top:150px;text-align: right;">
             <tr>
+                <th colspan="3"><label for="gracias" style="font-size:10px;">La EMPRESA no es responsable de daños y perjuicios en  artículos y/o carga generados por mal embalaje, bajo responsabilidad del CLIENTE.</label></th>
+            </tr>
+            <tr>
                 <th style="width: 30%; text-align: center; font-weight: normal;">
                     {{ getArchivosDocument($object->id, 'guia') }}
                 </th>
@@ -938,6 +941,9 @@
                     margin: 10px auto; border-radius: 10px;">
                     </div> <!-- Cuadrado para firma -->
                     <div><b>Recibí Conforme</b></div>
+                    <div><b>Nombres:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></div>
+                    <div><b>DNI:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></div>
+                    <div><b>Fecha:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></div>
                 </th>
             </tr>
         </table>

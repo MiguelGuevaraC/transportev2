@@ -16,6 +16,8 @@ class ProductStockByBranch extends Model
         'branchOffice_id',
         'seccion_id',
         'almacen_id',
+        'date_expiration',
+        'num_lot',
         'created_at',
         'updated_at',
         'deleted_at',

@@ -510,7 +510,7 @@ class DetailReceptionController extends Controller
             'districtStart.province.department', 'districtEnd.province.department',
             'copilot.person', 'subcontract', 'driver.person',
         ])
-
+            ->whereNotIn('carrier_guides.status_facturado',['Anulada'])
             ->orderByRaw('CASE WHEN programming_id = ? THEN 0 ELSE 1 END', [$programming_id])
             ->orderBy('id', 'desc');
 

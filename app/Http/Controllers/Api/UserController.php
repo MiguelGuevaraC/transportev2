@@ -110,7 +110,7 @@ class UserController extends Controller
      *             required={"username", "password", "branchOffice_id"},
      *             @OA\Property(property="username", type="string", example="administrador"),
      *             @OA\Property(property="password", type="string", format="password", example="password"),
-     *             @OA\Property(property="branchOffice_id", type="integer", example=1, description="ID of the branch office")
+     *             @OA\Property(property="branchOffice_id", type="integer", example=1, description="ID of the branch office, ya no es necesario")
      *         )
      *     ),
      *     @OA\Response(
@@ -156,7 +156,7 @@ class UserController extends Controller
         $request->validate([
             "username" => "required",
             "password" => "required",
-            "branchOffice_id" => 'required|exists:branch_offices,id',
+            //"branchOffice_id" => 'required|exists:branch_offices,id',
         ]);
 
         $user = User::where("username", $request->username)->where("state", 1)->first();
@@ -169,7 +169,7 @@ class UserController extends Controller
             'table_name' => 'users',      // Tabla afectada
             'data' => json_encode([ // Guardar los datos como JSON
                 'username' => $request->username,
-                'branchOffice_id' => $request->branchOffice_id,
+                //'branchOffice_id' => $request->branchOffice_id,
 
             ]),
             'description' => 'Inicio de sesión',   // Descripción de la acción
@@ -187,14 +187,14 @@ class UserController extends Controller
             ], 422);
         }
 
-        if ($user->worker->branchOffice_id != $request->input('branchOffice_id')) {
+        /*if ($user->worker->branchOffice_id != $request->input('branchOffice_id')) {
             $bitacora->action = 'Login Fallido';
             $bitacora->description = 'Usuario No Registrador en Esta Sucursal';
             $bitacora->save();
             return response()->json([
                 "error" => "Usuario No Registrador en Esta Sucursal",
             ], 422);
-        }
+        }*/
 
         if (Hash::check($request->password, $user->password)) {
             // Autenticar al usuario

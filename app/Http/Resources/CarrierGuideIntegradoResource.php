@@ -23,8 +23,8 @@ class CarrierGuideIntegradoResource extends JsonResource
             'FECHA' => isset($this->transferStartDate) ? date('d/m/Y', strtotime($this->transferStartDate)) : '',
             'CARGA' => collect($this?->reception?->details)->pluck('description')->implode(', ') ?? '',
 
-            'RAZÓN SOCIAL REMITENTE' => $this->personNames($this->sender) ?? '',
-            'RAZÓN SOCIAL DESTINATARIO' => $this->personNames($this->recipient) ?? '',
+            'RAZÓN SOCIAL REMITENTE' => $this?->sender ? $this->personNames($this->sender) : '',
+            'RAZÓN SOCIAL DESTINATARIO' => $this?->recipient? $this->personNames($this->recipient) : '',
             'DOCUMENTO ANEXO' => $this->document ?? '',
             'PARTIDA' => $this?->origin?->name ?? '',
             'LLEGADA' => $this?->destination?->name ?? '',
@@ -83,7 +83,7 @@ class CarrierGuideIntegradoResource extends JsonResource
             'FECHA EST. FACTURACIÓN' => isset($this->date_est_facturacion) ? date('d/m/Y', strtotime($this->date_est_facturacion)) : 'Sin Fecha',
 
             'OBSERVACIONES' => $this->observation ?? '',
-            'CONDUCTOR' => $this->personNames($this->driver->person) ?? '',
+            'CONDUCTOR' => $this?->driver?->person ? $this->personNames($this?->driver?->person) : '',
             'M' => $this?->user?->username ?? '',
         ];
     }
