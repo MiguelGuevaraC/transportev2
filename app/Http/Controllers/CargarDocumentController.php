@@ -222,7 +222,8 @@ class CargarDocumentController extends Controller
         }
 
         $updatedcarga = $this->cargaDocumentService->updateCargaDocument($carga, $validatedData);
-        return new CargaResource($updatedcarga);
+        $carga = $this->cargaDocumentService->getCargaDocumentById($id);
+        return new CargaResource($carga);
     }
 
 /**

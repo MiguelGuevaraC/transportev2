@@ -40,6 +40,7 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'details.*.seccion_id' => 'required|exists:seccions,id,deleted_at,NULL',
             'details.*.comment'    => 'nullable|string|max:500',
             'details.*.num_anexo'    => 'nullable|string|max:500',
+            'details.*.num_lot'    => 'nullable|string|max:500',
             'details.*.date_expiration'    => 'nullable|date',
         ];
     }
@@ -94,6 +95,10 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'details.*.num_anexo.nullable'       => 'El número de anexo es opcional.',
             'details.*.num_anexo.string'         => 'El número de anexo debe ser una cadena de texto.',
             'details.*.num_anexo.max'            => 'El número de anexo no puede tener más de 500 caracteres.',
+
+            'details.*.num_lot.nullable'       => 'El número de lote es opcional.',
+            'details.*.num_lot.string'         => 'El número de lote debe ser una cadena de texto.',
+            'details.*.num_lot.max'            => 'El número de lote no puede tener más de 500 caracteres.',
 
             'details.*.date_expiration.nullable' => 'La fecha de expiración es opcional.',
             'details.*.date_expiration.date'     => 'La fecha de expiración debe ser una fecha válida.',

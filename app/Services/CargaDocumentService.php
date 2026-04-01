@@ -58,6 +58,7 @@ class CargaDocumentService
                     'comment'           => isset($detail['comment']) ? $detail['comment'] : null,                 // Comentario opcional
                     'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
                     'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
+                    'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
                     'created_at'        => now(),
                 ]);
 
@@ -107,6 +108,7 @@ class CargaDocumentService
                     ->where('branchOffice_id', $detail->branchOffice_id)
                     ->where('almacen_id', $detail->almacen_id)
                     ->where('seccion_id', $detail->seccion_id)
+                    ->where('num_lot','like', $detail->num_lot)
                     ->first();
 
                 if ($productStock) {
@@ -135,6 +137,7 @@ class CargaDocumentService
                     'comment'           => isset($detail['comment']) ? $detail['comment'] : null,                 // Comentario opcional
                     'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
                     'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
+                    'num_lot'           => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
                     'created_at'        => now(),
                 ]);
 
@@ -181,6 +184,7 @@ class CargaDocumentService
                     ->where('branchOffice_id', $detail->branchOffice_id)
                     ->where('almacen_id', $detail->almacen_id)
                     ->where('seccion_id', $detail->seccion_id)
+                    ->where('num_lot','like', $detail->num_lot)
                     ->first();
 
                 if (strtoupper($movementType) === 'SALIDA') {

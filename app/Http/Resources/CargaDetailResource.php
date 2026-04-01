@@ -49,6 +49,7 @@ class CargaDetailResource extends JsonResource
             'branchOffice'      => $this->branchOffice ?? null,
             'comment'           => $this->comment ?? null,
             'num_anexo'         => $this->num_anexo ?? null,
+            'num_lot'         => $this->num_lot ?? null,
             'date_expiration'   => $this->date_expiration ?? null,
             'created_at'        => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];

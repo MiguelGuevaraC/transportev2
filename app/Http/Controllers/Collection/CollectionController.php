@@ -362,7 +362,7 @@ class CollectionController extends Controller
                     $query->where(function ($query) {
                         $query->whereDoesntHave('tractProgrammings')
                             ->whereDoesntHave('platformProgrammings');
-                    })->orWhereIn('id',[7,110]);
+                    })->orWhereIn('id',[7,110,6]);
                 }
                 // if ($sinProgramaciones === "0" || $sinProgramaciones === "false") {
                 //     // Filtrar vehículos con programaciones.

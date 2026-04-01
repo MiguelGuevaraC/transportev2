@@ -17,6 +17,7 @@ class DocumentCargaDetail extends Model
         'branchOffice_id',
         'comment',
         'num_anexo',
+        'num_lot',
         'date_expiration',
         'created_at',
     ];
