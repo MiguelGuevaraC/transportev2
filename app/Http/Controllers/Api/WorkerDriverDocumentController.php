@@ -31,7 +31,7 @@ class WorkerDriverDocumentController extends Controller
         $v = Validator::make($request->all(), [
             'worker_id'         => 'required|integer|exists:workers,id',
             'description'       => 'required|string|max:255',
-            'type_document_id'  => 'nullable|integer|exists:type_documents,id',
+            'type_document_id'  => 'required|integer|exists:type_documents,id',
             'number'            => 'nullable|string',
             'dueDate'           => 'nullable|date',
             'pathFile'          => 'required|file|max:10240',

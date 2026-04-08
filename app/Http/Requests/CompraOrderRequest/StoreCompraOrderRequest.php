@@ -46,10 +46,10 @@ class StoreCompraOrderRequest extends StoreRequest
             'proveedor_id'         => 'required|integer|exists:people,id',
             'purchase_quotation_id'=> 'nullable|integer|exists:purchase_quotations,id',
             'comment'              => 'nullable|string',
-            'details'              => 'required|array|min:1',
-            'details.*.repuesto_id'=> 'required|integer|exists:repuestos,id',
-            'details.*.quantity'   => 'required|numeric|min:1',
-            'details.*.unit_price' => 'required|numeric|min:0',
+            'details'              => 'nullable|array|min:1',
+            'details.*.repuesto_id'=> 'required_with:details|integer|exists:repuestos,id',
+            'details.*.quantity'   => 'required_with:details|numeric|min:1',
+            'details.*.unit_price' => 'required_with:details|numeric|min:0',
             'details.*.comment'    => 'nullable|string',
         ];
     }
@@ -100,5 +100,20 @@ class StoreCompraOrderRequest extends StoreRequest
             'details.*.unit_price'   => 'precio unitario',
             'details.*.comment'      => 'comentario del detalle',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $hasQuotation = ! empty($this->input('purchase_quotation_id'));
+            $details       = $this->input('details');
+
+            if (! $hasQuotation && (! is_array($details) || count($details) === 0)) {
+                $validator->errors()->add(
+                    'details',
+                    'Debe incluir al menos un detalle o indicar una cotización ganadora.'
+                );
+            }
+        });
     }
 }

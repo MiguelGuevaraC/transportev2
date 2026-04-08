@@ -33,7 +33,7 @@ class WorkerStatusHistoryController extends Controller
         }
         $v = Validator::make($request->all(), [
             'action'          => 'required|string|in:disable,enable',
-            'reason'          => 'nullable|string|max:2000',
+            'reason'          => 'required_if:action,disable|nullable|string|max:2000',
             'effective_date'  => 'required|date',
         ]);
         if ($v->fails()) {

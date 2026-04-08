@@ -19,6 +19,10 @@ use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
+    public function store(Request $request)
+    {
+        return $this->createOrUpdate($request);
+    }
 
     /**
      *
@@ -301,7 +305,7 @@ class VehicleController extends Controller
             'mode' => 'nullable|string',
             // 'responsable_id' => 'nullable|exists:woid',
             'typeCarroceria_id' => 'nullable|exists:type_carrocerias,id',
-            'photos.*.file' => 'nullable',
+            'photos.*.file' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:5120',
             'currentPlate' => [
                 'required',
                 'string',
