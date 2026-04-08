@@ -37,6 +37,8 @@ class UpdateCompraMovimentRequest extends UpdateRequest
 
             'proveedor_id'             => 'nullable|integer|exists:people,id',
             'compra_order_id'          => 'nullable|integer|exists:compra_orders,id',
+            'is_partial'               => 'nullable|boolean',
+            'partial_receipt_group_id' => 'nullable|integer|exists:compra_partial_receipt_groups,id',
             'payment_method'           => 'nullable|string',
             'comment'                  => 'nullable|string',
             'status'                   => 'nullable|string',
@@ -49,6 +51,7 @@ class UpdateCompraMovimentRequest extends UpdateRequest
 
             'details.*.almacen_id'     => 'sometimes|nullable|integer|exists:almacens,id',
             'details.*.seccion_id'     => 'sometimes|nullable|integer|exists:seccions,id',
+            'details.*.compra_order_detail_id' => 'nullable|integer|exists:compra_order_details,id',
 
             'payables'                 => 'nullable|array',
             'payables.*.id'            => 'nullable|integer|exists:payables,id',

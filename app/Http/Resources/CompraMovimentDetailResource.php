@@ -27,6 +27,7 @@ class CompraMovimentDetailResource extends JsonResource
     {
         return [
             'id'            => $this->id ?? null,
+            'compra_order_detail_id' => $this->compra_order_detail_id ?? null,
             'repuesto_id'   => $this->repuesto_id ?? null,
             'repuesto_name' => $this->repuesto?->name ?? null,
 

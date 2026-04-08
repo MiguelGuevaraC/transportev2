@@ -31,6 +31,7 @@ class UpdateCompraOrderRequest extends UpdateRequest
             'branchOffice_id'       => 'nullable|integer|exists:branch_offices,id',
          
             'proveedor_id'          => 'nullable|integer|exists:people,id',
+            'purchase_quotation_id' => 'nullable|integer|exists:purchase_quotations,id',
             'comment'               => 'nullable|string',
             'details'               => 'nullable|array|min:1',
 

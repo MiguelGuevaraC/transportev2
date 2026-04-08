@@ -15,6 +15,7 @@ class CompraOrderDetail extends Model
         'compra_order_id',
         'repuesto_id',
         'quantity',
+        'quantity_received',
         'unit_price',
         'subtotal',
         'comment',

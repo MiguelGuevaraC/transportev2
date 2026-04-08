@@ -476,4 +476,6 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     require __DIR__ . '/Api/DocAlmacenDetailApi.php'; //DETALLES DOC ALMACEN
     require __DIR__ . '/Api/TireMeasureApi.php'; //DETALLES TIRE MEASURE
 
+    require __DIR__ . '/Api/PropuestaFuncionalidadApi.php';
+
 });

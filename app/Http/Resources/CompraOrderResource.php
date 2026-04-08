@@ -31,6 +31,7 @@ class CompraOrderResource extends JsonResource
             'branchOffice_id'   => $this->branchOffice_id ?? null,
             'branchOffice_name' => $this?->branchOffice?->name ?? null,
             'proveedor_id'      => $this->proveedor_id ?? null,
+            'purchase_quotation_id' => $this->purchase_quotation_id ?? null,
             'proveedor_name'    => trim("{$this->proveedor?->names} {$this->proveedor?->fatherSurname} {$this->proveedor?->motherSurname} {$this->proveedor?->businessName}"),
             'total'             => $this->details?->sum('subtotal') ?? null,
             'details'           => CompraOrderDetailResource::collection($this->details ?? collect()),

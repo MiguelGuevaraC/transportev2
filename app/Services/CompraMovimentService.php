@@ -2,9 +2,11 @@
 namespace App\Services;
 
 use App\Models\CompraMoviment;
+use App\Models\CompraOrderDetail;
 use App\Models\Payable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CompraMovimentService
 {
@@ -22,42 +24,66 @@ class CompraMovimentService
 
     public function createCompraMoviment(array $data): CompraMoviment
     {
-        // Crear la compra inicialmente sin el número
-        $compraMoviment = CompraMoviment::create($data);
+        return DB::transaction(function () use ($data) {
+            $isPartial       = ! empty($data['is_partial']);
+            $compraOrderId   = $data['compra_order_id'] ?? null;
 
-        // Generar el número de movimiento basado en branchOffice_id (formato CM + ID sucursal 2 dígitos)
-        $tipo = 'CM' . str_pad($data['branchOffice_id'], 2, '0', STR_PAD_LEFT);
+            // Crear la compra inicialmente sin el número
+            $compraMoviment = CompraMoviment::create($data);
 
-        $siguienteNum = DB::selectOne('
+            // Generar el número de movimiento basado en branchOffice_id (formato CM + ID sucursal 2 dígitos)
+            $tipo = 'CM' . str_pad($data['branchOffice_id'], 2, '0', STR_PAD_LEFT);
+
+            $siguienteNum = DB::selectOne('
         SELECT COALESCE(MAX(CAST(SUBSTRING(number, LOCATE("-", number) + 1) AS SIGNED)), 0) + 1 AS siguienteNum
         FROM compra_moviments
         WHERE SUBSTRING(number, 1, 4) = ?
     ', [$tipo])->siguienteNum;
 
-        $compraMoviment->number = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
-        $compraMoviment->save();
+            $compraMoviment->number = $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT);
+            $compraMoviment->save();
 
-        // Insertar detalles si existen
-        if (! empty($data['details']) && is_array($data['details'])) {
-            $allowedAttributes = (new \App\Models\CompraMovimentDetail())->getFillable();
+            // Insertar detalles si existen
+            if (! empty($data['details']) && is_array($data['details'])) {
+                $allowedAttributes = (new \App\Models\CompraMovimentDetail())->getFillable();
 
-            foreach ($data['details'] as $detail) {
-                $detail['subtotal'] = $detail['quantity'] * $detail['unit_price'];
-                $cleanDetail        = array_intersect_key($detail, array_flip($allowedAttributes));
-                $compraMoviment->details()->create($cleanDetail);
-            }
-        }
-        if (! empty($data['payables']) && is_array($data['payables'])) {
-            foreach ($data['payables'] as $payable) {
-                if (! isset($payable['monto']) || $payable['monto'] <= 0) {
-                    continue;
+                foreach ($data['details'] as $detail) {
+                    $detail['subtotal'] = $detail['quantity'] * $detail['unit_price'];
+                    $cleanDetail        = array_intersect_key($detail, array_flip($allowedAttributes));
+                    $compraMoviment->details()->create($cleanDetail);
+
+                    if ($isPartial && $compraOrderId && ! empty($detail['compra_order_detail_id'])) {
+                        $od = CompraOrderDetail::where('id', $detail['compra_order_detail_id'])
+                            ->where('compra_order_id', $compraOrderId)
+                            ->first();
+                        if (! $od) {
+                            throw ValidationException::withMessages([
+                                'details' => 'El detalle de orden de compra no coincide con la orden indicada.',
+                            ]);
+                        }
+                        $newReceived = (float) $od->quantity_received + (float) $detail['quantity'];
+                        if ($newReceived > (float) $od->quantity) {
+                            throw ValidationException::withMessages([
+                                'details' => 'La cantidad del ingreso parcial supera lo pendiente en la línea de la orden OC.',
+                            ]);
+                        }
+                        $od->quantity_received = $newReceived;
+                        $od->save();
+                    }
                 }
-
-                $this->generate_credit_payment_custom($compraMoviment, $payable['monto'], $payable['days'] ?? 0);
             }
-        }
+            if (! empty($data['payables']) && is_array($data['payables'])) {
+                foreach ($data['payables'] as $payable) {
+                    if (! isset($payable['monto']) || $payable['monto'] <= 0) {
+                        continue;
+                    }
 
-        return $compraMoviment;
+                    $this->generate_credit_payment_custom($compraMoviment, $payable['monto'], $payable['days'] ?? 0);
+                }
+            }
+
+            return $compraMoviment;
+        });
     }
     public function updateCompraMoviment(CompraMoviment $compraMoviment, array $data): CompraMoviment
 {

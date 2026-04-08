@@ -17,6 +17,7 @@ class CompraOrder extends Model
         'branchOffice_id',
         'person_id',
         'proveedor_id',
+        'purchase_quotation_id',
         'comment',
         'status',
         'created_at',
@@ -32,9 +33,10 @@ class CompraOrder extends Model
         'date_movement'   => 'between',
         'branchOffice_id' => '=',
         'person_id'       => '=',
-        'proveedor_id'    => '=',
-        'comment'         => 'like',
-        'status'          => 'like',
+        'proveedor_id'           => '=',
+        'purchase_quotation_id'  => '=',
+        'comment'                => 'like',
+        'status'                 => 'like',
     ];
 
     const sorts = [
@@ -55,5 +57,10 @@ class CompraOrder extends Model
      public function details()
     {
         return $this->hasMany(CompraOrderDetail::class);
+    }
+
+    public function purchaseQuotation()
+    {
+        return $this->belongsTo(PurchaseQuotation::class, 'purchase_quotation_id');
     }
 }

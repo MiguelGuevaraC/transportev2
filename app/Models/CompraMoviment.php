@@ -25,6 +25,8 @@ class CompraMoviment extends Model
         'person_id',
         'proveedor_id',
         'compra_order_id',
+        'is_partial',
+        'partial_receipt_group_id',
         'payment_method',
         'comment',
         'status',
@@ -35,6 +37,10 @@ class CompraMoviment extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    protected $casts = [
+        'is_partial' => 'boolean',
+    ];
     const filters = [
 
         'number'          => 'like',
@@ -44,6 +50,8 @@ class CompraMoviment extends Model
         'person_id'       => '=',
         'proveedor_id'    => '=',
         'compra_order_id' => '=',
+        'is_partial'      => '=',
+        'partial_receipt_group_id' => '=',
         'payment_method'  => 'like',
         'comment'         => 'like',
         'status'          => 'like',
@@ -76,5 +84,10 @@ class CompraMoviment extends Model
     public function payables()
     {
         return $this->hasMany(Payable::class);
+    }
+
+    public function partialReceiptGroup()
+    {
+        return $this->belongsTo(CompraPartialReceiptGroup::class, 'partial_receipt_group_id');
     }
 }

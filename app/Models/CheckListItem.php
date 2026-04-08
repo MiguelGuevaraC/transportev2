@@ -15,6 +15,7 @@ class CheckListItem extends Model
         'id',
         'name',
         'address',
+        'repuesto_id',
         'status',
         'created_at',
     ];
@@ -36,6 +37,12 @@ class CheckListItem extends Model
     public function checkLists()
     {
         return $this->belongsToMany(CheckList::class, 'check_list_details', 'check_list_item_id', 'check_list_id')
+                    ->withPivot('id', 'observation', 'is_selected')
                     ->withTimestamps();
+    }
+
+    public function repuesto()
+    {
+        return $this->belongsTo(Repuesto::class, 'repuesto_id');
     }
 }

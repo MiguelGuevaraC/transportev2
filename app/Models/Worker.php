@@ -221,4 +221,9 @@ class Worker extends Model
         return $this->hasMany(CarrierGuide::class, 'copilot_id');
     }
 
+    public function statusHistories()
+    {
+        return $this->hasMany(WorkerStatusHistory::class, 'worker_id')->orderByDesc('effective_date')->orderByDesc('id');
+    }
+
 }

@@ -44,6 +44,7 @@ class StoreCompraOrderRequest extends StoreRequest
             'branchOffice_id'      => 'required|integer|exists:branch_offices,id',
            
             'proveedor_id'         => 'required|integer|exists:people,id',
+            'purchase_quotation_id'=> 'nullable|integer|exists:purchase_quotations,id',
             'comment'              => 'nullable|string',
             'details'              => 'required|array|min:1',
             'details.*.repuesto_id'=> 'required|integer|exists:repuestos,id',

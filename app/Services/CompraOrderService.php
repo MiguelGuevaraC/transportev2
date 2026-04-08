@@ -2,7 +2,9 @@
 namespace App\Services;
 
 use App\Models\CompraOrder;
+use App\Models\PurchaseQuotation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CompraOrderService
 {
@@ -20,6 +22,26 @@ class CompraOrderService
 
 public function createCompraOrder(array $data): CompraOrder
 {
+    if (! empty($data['purchase_quotation_id'])) {
+        $pq = PurchaseQuotation::with('lines')->find($data['purchase_quotation_id']);
+        if (! $pq || ! $pq->is_winner) {
+            throw ValidationException::withMessages([
+                'purchase_quotation_id' => 'La cotización debe existir y estar marcada como ganadora.',
+            ]);
+        }
+        $data['proveedor_id'] = $pq->proveedor_id;
+        if (empty($data['details']) && $pq->lines->isNotEmpty()) {
+            $data['details'] = $pq->lines->map(function ($l) {
+                return [
+                    'repuesto_id' => $l->repuesto_id,
+                    'quantity'    => $l->quantity,
+                    'unit_price'  => $l->unit_price,
+                    'comment'     => null,
+                ];
+            })->all();
+        }
+    }
+
     // Crear la orden de compra principal sin los detalles
     $ordercompra = CompraOrder::create($data);
 

@@ -14,6 +14,7 @@ class CompraMovimentDetail extends Model
     protected $fillable = [
         'id',
         'compra_moviment_id',
+        'compra_order_detail_id',
         'repuesto_id',
         'quantity',
         'unit_price',
@@ -56,5 +57,10 @@ class CompraMovimentDetail extends Model
     public function seccion()
     {
         return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    public function compraOrderDetail()
+    {
+        return $this->belongsTo(CompraOrderDetail::class, 'compra_order_detail_id');
     }
 }

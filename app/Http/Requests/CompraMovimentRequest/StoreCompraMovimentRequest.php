@@ -50,6 +50,8 @@ class StoreCompraMovimentRequest extends StoreRequest
 
             'proveedor_id'          => 'required|integer|exists:people,id',
             'compra_order_id'       => 'nullable|integer|exists:compra_orders,id',
+            'is_partial'            => 'nullable|boolean',
+            'partial_receipt_group_id' => 'nullable|integer|exists:compra_partial_receipt_groups,id',
             'payment_method'        => 'required|string',
             'serie_doc'             => 'nullable|string|max:4',
             'correlative_doc'       => 'nullable|string|max:8',
@@ -64,6 +66,7 @@ class StoreCompraMovimentRequest extends StoreRequest
             'details.*.quantity'    => 'required|integer|min:1',
             'details.*.unit_price'  => 'required|numeric|min:0',
             'details.*.comment'     => 'nullable|string',
+            'details.*.compra_order_detail_id' => 'nullable|integer|exists:compra_order_details,id',
             'details.*.almacen_id'  => 'required|integer|exists:almacens,id',
             'details.*.seccion_id'  => 'required|integer|exists:seccions,id',
 

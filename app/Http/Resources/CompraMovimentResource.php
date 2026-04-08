@@ -54,6 +54,8 @@ class CompraMovimentResource extends JsonResource
             
             'compra_order_id'   => $this->compra_order_id ?? null,
             'compra_order_code' => $this->compra_order->number ?? null,
+            'is_partial'        => $this->is_partial ?? false,
+            'partial_receipt_group_id' => $this->partial_receipt_group_id ?? null,
             'payment_method'    => $this->payment_method ?? null,
             'comment'           => $this->comment ?? null,
             'status'            => $this->status ?? null,

@@ -359,6 +359,16 @@ class VehicleController extends Controller
             }
             // Procesar las fotos
             if ($request->has('photos')) {
+                $photoCount = 0;
+                foreach ($request->photos as $photoData) {
+                    if (isset($photoData['file']) && $photoData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                        $photoCount++;
+                    }
+                }
+                if ($photoCount > 4) {
+                    return response()->json(['error' => 'Solo se permiten hasta 4 fotos por vehículo.'], 422);
+                }
+
                 $existingPhotos = Photos::where('vehicle_id', $vehicle->id)->get();
                 foreach ($existingPhotos as $photo) {
                     $filePath = str_replace('/storage', 'public', $photo->description);
@@ -638,6 +648,10 @@ class VehicleController extends Controller
 
         // Procesar las fotos
         if ($request->has('photos')) {
+            $files = $request->file('photos');
+            if ($files && count($files) > 4) {
+                return response()->json(['error' => 'Solo se permiten hasta 4 fotos por vehículo.'], 422);
+            }
             foreach ($request->file('photos') as $photoFile) {
                 $fileType = $request->input('photos')[array_search($photoFile, $request->file('photos'))]['type'];
 

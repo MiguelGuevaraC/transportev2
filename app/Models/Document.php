@@ -78,6 +78,8 @@ class Document extends Model
         'status',
         'state',
         'vehicle_id',
+        'worker_id',
+        'type_document_id',
         'created_at',
         'updated_at',
 
@@ -85,5 +87,15 @@ class Document extends Model
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class,'vehicle_id');
+    }
+
+    public function worker()
+    {
+        return $this->belongsTo(Worker::class, 'worker_id');
+    }
+
+    public function typeDocument()
+    {
+        return $this->belongsTo(Type_document::class, 'type_document_id');
     }
 }
