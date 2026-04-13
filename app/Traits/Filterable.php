@@ -112,9 +112,30 @@ trait Filterable
         $query = $this->applyFilters($query, $request, $filters);
         $query = $this->applySorting($query, $request, $sorts);
 
-        $all     = $request->query('all', false) === 'true';
-        $results = $all ? $query->take(1000)->get() : $query->paginate($request->query('per_page', Constants::DEFAULT_PER_PAGE));
+        $all = $request->query('all', false) === 'true';
+        if ($all) {
+            $results = $query->take(1000)->get();
 
-        return $all ? response()->json($resource::collection($results)) : $resource::collection($results);
+            return response()->json($resource::collection($results));
+        }
+
+        $perPage = $request->query('per_page');
+        if ($perPage === null || $perPage === '') {
+            $perPage = $request->query('row');
+        }
+        if ($perPage === null || $perPage === '') {
+            $perPage = Constants::DEFAULT_PER_PAGE;
+        }
+        $perPage = (int) $perPage;
+        if ($perPage < 1) {
+            $perPage = Constants::DEFAULT_PER_PAGE;
+        }
+        if ($perPage > 200) {
+            $perPage = 200;
+        }
+
+        $results = $query->paginate($perPage);
+
+        return $resource::collection($results);
     }
 }
