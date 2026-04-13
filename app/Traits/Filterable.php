@@ -23,7 +23,8 @@ trait Filterable
                 }
             }
 
-            if ($value !== null) {
+            // Cadenas vacías en query (?branch_office_id=) no deben filtrar (antes daban 0 filas).
+            if ($value !== null && $value !== '') {
                 if (strpos($filter, '.') !== false) {
                     [$relation, $relationFilter] = explode('.', $filter);
                     $query->whereHas($relation, function ($q) use ($relationFilter, $operator, $value) {
@@ -92,7 +93,7 @@ trait Filterable
         $sortField = $request->query('sort');
         $sortOrder = $request->query('direction', 'desc');
   
-        if ($sortField !== null && in_array($sortField, $sorts)) {
+        if ($sortField !== null && array_key_exists($sortField, $sorts)) {
             $query->orderBy($sortField, $sortOrder);
         } else {
             $query->orderBy('id', $sortOrder);
