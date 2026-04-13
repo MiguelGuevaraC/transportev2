@@ -22,6 +22,13 @@ class WorkerResource extends JsonResource
             'pathPhoto'         => $this->pathPhoto ?? null,
 
             'status'            => $this->status ?? null,
+            'contract_type'     => $this->contract_type ?? null,
+            'contract_end_date' => $this->contract_end_date ? $this->contract_end_date->format('Y-m-d') : null,
+            'salary_mode'       => $this->salary_mode ?? null,
+            'is_paid_intern'    => $this->is_paid_intern,
+            'path_licencia_photo' => $this->path_licencia_photo ?? null,
+            'path_dni_photo'    => $this->path_dni_photo ?? null,
+            'biometric_credential_id' => $this->biometric_credential_id ?? null,
             'startDate'         => $this->startDate ?? null,
             'endDate'           => $this->endDate ?? null,
             'state'             => $this->state ?? null,

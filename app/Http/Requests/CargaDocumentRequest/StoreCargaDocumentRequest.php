@@ -2,7 +2,7 @@
 namespace App\Http\Requests\CargaDocumentRequest;
 
 use App\Http\Requests\StoreRequest;
-use App\Models\ProductStockByBranch;
+use App\Services\CargaDocumentService;
 use Illuminate\Validation\Validator;
 
 /**
@@ -48,6 +48,9 @@ class StoreCargaDocumentRequest extends StoreRequest
             'distribuidor_id'           => 'required|exists:people,id,deleted_at,NULL',
             'movement_type'             => 'required|string|in:ENTRADA,SALIDA',
             'comment'                   => 'nullable|string|max:500',
+            'billing_month'             => 'nullable|string|regex:/^\d{4}-\d{2}$/',
+            'carrier_guide_id'          => 'nullable|integer',
+            'guide_pdf'                 => 'nullable|file|mimes:pdf|max:20480',
 
             'details'                   => 'required|array|min:1',
             'details.*.id'              => 'nullable|integer',
@@ -58,6 +61,8 @@ class StoreCargaDocumentRequest extends StoreRequest
             'details.*.comment'         => 'nullable|string|max:500',
             'details.*.num_anexo'       => 'nullable|string|max:500',
             'details.*.date_expiration' => 'nullable|date',
+            'details.*.num_lot'         => 'nullable|string|max:120',
+            'details.*.position_code'   => 'nullable|string|max:64',
         ];
     }
 
@@ -116,19 +121,13 @@ class StoreCargaDocumentRequest extends StoreRequest
     {
         $validator->after(function ($validator) {
             if ($this->movement_type === 'SALIDA') {
+                $service = app(CargaDocumentService::class);
                 foreach ($this->details as $index => $detail) {
-                    $stock = ProductStockByBranch::where('product_id', $detail['product_id'])
-                        ->where('branchOffice_id', $this->branchOffice_id)
-                        ->where('almacen_id', $detail['almacen_id'])
-                        ->where(function($sql) use($detail){
-                            if(!is_null($detail['seccion_id']) && $detail['seccion_id']!=""){
-                                $sql->where('seccion_id', $detail['seccion_id']);
-                            }
-                        })
-                        ->value('stock');
+                    $row   = $service->findStockRowForDetail($detail, (int) $this->branchOffice_id);
+                    $stock = $row ? (float) $row->stock : null;
 
                     if ($stock === null || $stock < $detail['quantity']) {
-                        $validator->errors()->add("details.$index.quantity", "Stock insuficiente para el producto en la sucursal, almacén y sección seleccionados. Disponible: " . ($stock ?? 0));
+                        $validator->errors()->add("details.$index.quantity", 'Stock insuficiente para el producto en la sucursal, almacén, sección, lote y posición seleccionados. Disponible: ' . ($stock ?? 0));
                     }
                 }
             }

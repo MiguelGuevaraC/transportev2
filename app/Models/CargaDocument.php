@@ -28,6 +28,9 @@ class CargaDocument extends Model
         'stock_balance_before',
         'stock_balance_after',
         'comment',
+        'billing_month',
+        'guide_pdf_path',
+        'carrier_guide_id',
         'product_id',
 
         'person_id',
@@ -53,6 +56,7 @@ class CargaDocument extends Model
         'movement_date'   => 'date',
         'weight'          => 'like',
         'lote_doc'        => '=',
+        'billing_month'   => '=',
         'date_expiration' => 'date',
 
         'unit_price'      => 'like',

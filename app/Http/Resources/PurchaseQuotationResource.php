@@ -10,7 +10,9 @@ class PurchaseQuotationResource extends JsonResource
     {
         return [
             'id'                      => $this->id,
+            'correlativo'             => 'COT-' . str_pad((string) $this->id, 6, '0', STR_PAD_LEFT),
             'product_requirement_id'  => $this->product_requirement_id,
+            'product_requirement_correlativo' => 'REQ-' . str_pad((string) $this->product_requirement_id, 6, '0', STR_PAD_LEFT),
             'proveedor_id'            => $this->proveedor_id,
             'proveedor_name'          => trim("{$this->proveedor?->names} {$this->proveedor?->businessName}"),
             'is_winner'               => (bool) $this->is_winner,

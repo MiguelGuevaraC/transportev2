@@ -2,8 +2,8 @@
 namespace App\Http\Requests\CargaDocumentRequest;
 
 use App\Http\Requests\UpdateRequest;
-use App\Models\User;
-use Illuminate\Validation\Rule;
+use App\Services\CargaDocumentService;
+use Illuminate\Validation\Validator;
 
 class UpdateCargaDocumentRequest extends UpdateRequest
 {
@@ -31,6 +31,9 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'distribuidor_id'           => 'required|exists:people,id,deleted_at,NULL',
             'movement_type' => 'required|string|in:ENTRADA,SALIDA',
             'comment'       => 'nullable|string|max:500',
+            'billing_month' => 'nullable|string|regex:/^\d{4}-\d{2}$/',
+            'carrier_guide_id' => 'nullable|integer',
+            'guide_pdf' => 'nullable|file|mimes:pdf|max:20480',
 
             'details'              => 'required|array|min:1',
             'details.*.id'         => 'nullable|integer',
@@ -42,6 +45,7 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'details.*.num_anexo'    => 'nullable|string|max:500',
             'details.*.num_lot'    => 'nullable|string|max:500',
             'details.*.date_expiration'    => 'nullable|date',
+            'details.*.position_code'      => 'nullable|string|max:64',
         ];
     }
 
@@ -103,6 +107,23 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'details.*.date_expiration.nullable' => 'La fecha de expiración es opcional.',
             'details.*.date_expiration.date'     => 'La fecha de expiración debe ser una fecha válida.',
         ];
+    }
+
+    public function withValidator(Validator $validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->movement_type === 'SALIDA') {
+                $service = app(CargaDocumentService::class);
+                foreach ($this->details as $index => $detail) {
+                    $row   = $service->findStockRowForDetail($detail, (int) $this->branchOffice_id);
+                    $stock = $row ? (float) $row->stock : null;
+
+                    if ($stock === null || $stock < $detail['quantity']) {
+                        $validator->errors()->add("details.$index.quantity", 'Stock insuficiente para el producto en la sucursal, almacén, sección, lote y posición seleccionados. Disponible: ' . ($stock ?? 0));
+                    }
+                }
+            }
+        });
     }
 
 }

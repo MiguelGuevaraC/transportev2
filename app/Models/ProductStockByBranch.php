@@ -18,6 +18,7 @@ class ProductStockByBranch extends Model
         'almacen_id',
         'date_expiration',
         'num_lot',
+        'position_code',
         'created_at',
         'updated_at',
         'deleted_at',

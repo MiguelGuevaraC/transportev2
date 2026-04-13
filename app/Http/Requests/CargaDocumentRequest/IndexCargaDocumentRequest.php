@@ -52,6 +52,7 @@ class IndexCargaDocumentRequest extends IndexRequest
             'weight'          => 'nullable|string',
             'lote_doc'        => 'nullable|string',
             'date_expiration' => 'nullable|string',
+            'billing_month'   => 'nullable|string|regex:/^\d{4}-\d{2}$/',
 
         ];
     }

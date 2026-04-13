@@ -14,8 +14,10 @@ use App\Models\CargaDocument;
 use App\Models\DocumentCargaDetail;
 use App\Models\Product;
 use App\Services\CargaDocumentService;
+use App\Services\KardexReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CargarDocumentController extends Controller
@@ -78,6 +80,12 @@ class CargarDocumentController extends Controller
                     $request->input('from'),
                     $request->input('to'),
                 ]);
+            });
+        }
+
+        if ($request->filled('billing_month')) {
+            $query->whereHas('document_carga', function ($q) use ($request) {
+                $q->where('billing_month', $request->input('billing_month'));
             });
         }
 
@@ -158,7 +166,10 @@ class CargarDocumentController extends Controller
         $data                    = $request->validated();
         $data['user_created_id'] = auth()->id(); // o Auth::id()
         $carga                   = $this->cargaDocumentService->createCargaDocument($data);
-        return new CargaResource($carga);
+        $carga                   = $this->cargaDocumentService->getCargaDocumentById($carga->id);
+        $this->persistGuidePdf($request, $carga);
+
+        return new CargaResource($this->cargaDocumentService->getCargaDocumentById($carga->id));
     }
 
 /**
@@ -222,8 +233,10 @@ class CargarDocumentController extends Controller
         }
 
         $updatedcarga = $this->cargaDocumentService->updateCargaDocument($carga, $validatedData);
-        $carga = $this->cargaDocumentService->getCargaDocumentById($id);
-        return new CargaResource($carga);
+        $carga          = $this->cargaDocumentService->getCargaDocumentById($id);
+        $this->persistGuidePdf($request, $carga);
+
+        return new CargaResource($this->cargaDocumentService->getCargaDocumentById($id));
     }
 
 /**
@@ -296,6 +309,58 @@ class CargarDocumentController extends Controller
 
         // Retornar la exportación
         return Excel::download(new KardexExport($idproducto, $from, $to, $branch_id), $fileName);
+    }
+
+    public function exportKardexJson(KardexRequest $request)
+    {
+        $idproducto = isset($request->product_id) && $request->product_id !== 'null'
+            ? (is_array($request->product_id) ? $request->product_id : [$request->product_id])
+            : null;
+
+        $from      = $request->from ?? null;
+        $to        = $request->to ?? null;
+        $branch_id = $request->branchOffice_id ?? null;
+
+        $service = new KardexReportService($idproducto, $from, $to, $branch_id ? (int) $branch_id : null);
+
+        return response()->json($service->toJsonStructure());
+    }
+
+    public function uploadDamagedPhoto(Request $request, $detailId)
+    {
+        $request->validate([
+            'photo' => 'required|image|max:10240',
+        ]);
+
+        $detail = DocumentCargaDetail::find($detailId);
+        if (! $detail) {
+            return response()->json(['error' => 'Detalle de carga no encontrado'], 404);
+        }
+
+        if ($detail->damaged_photo_path) {
+            Storage::delete(str_replace('/storage/', 'public/', $detail->damaged_photo_path));
+        }
+
+        $stored                   = $request->file('photo')->store('public/carga_damaged');
+        $detail->damaged_photo_path = Storage::url($stored);
+        $detail->save();
+
+        return new CargaDetailResource($detail);
+    }
+
+    protected function persistGuidePdf(Request $request, ?CargaDocument $doc): void
+    {
+        if (! $doc || ! $request->hasFile('guide_pdf')) {
+            return;
+        }
+
+        if ($doc->guide_pdf_path) {
+            Storage::delete(str_replace('/storage/', 'public/', $doc->guide_pdf_path));
+        }
+
+        $stored                = $request->file('guide_pdf')->store('public/carga_guides');
+        $doc->guide_pdf_path = Storage::url($stored);
+        $doc->save();
     }
 
     /**

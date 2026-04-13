@@ -115,7 +115,7 @@ class WorkerController extends Controller
          $state      = $request->input('state') ?? '';
         $namesCadena = $request->input('namesCadena') ?? '';
         $namesCadena = str_replace('%20', '', $namesCadena); // Elimina %20
-        $namesCadena = strtolower($namesCadena);             // Convierte todo a minúsculas
+        $namesCadena = strtolower($namesCadena);             // Convierte todo a min?sculas
 
         $isConductor = $request->input('isConductor') ?? '';
 
@@ -133,7 +133,7 @@ class WorkerController extends Controller
                     $query->where('occupation', '!=', 'Conductor');
                 }
 
-                // Siempre filtra por la ocupación, si se ha especificado
+                // Siempre filtra por la ocupaci?n, si se ha especificado
                 if (! empty($occupation)) {
                     // Cambiar a where para aplicar ambos filtros como un AND
                     $query->where('occupation', $occupation);
@@ -166,7 +166,7 @@ class WorkerController extends Controller
             )
             ->paginate($workers_per_page, ['*'], 'workers_page', $workers_page);
 
-        // Calcular el total de páginas
+        // Calcular el total de p?ginas
         // $totalPages = ceil($list->total() / $workers_per_page);
 
         return response()->json([
@@ -205,7 +205,7 @@ class WorkerController extends Controller
      *     security={{"bearerAuth": {}}},
      *     @OA\Parameter(name="filters", in="query", description="Filtros aplicables", @OA\Schema(ref="#/components/schemas/BankAccountFilters")),
      *     @OA\Response(response=200, description="Lista de BankAccounts", @OA\JsonContent(ref="#/components/schemas/BankAccount")),
-     *     @OA\Response(response=422, description="Validación fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
+     *     @OA\Response(response=422, description="Validaci?n fallida", @OA\JsonContent(type="object", @OA\Property(property="error", type="string")))
      * )
      */
 
@@ -291,13 +291,13 @@ class WorkerController extends Controller
 
         ], [
             'person_id.required'       => 'El campo persona es obligatorio.',
-            'person_id.unique'         => 'Esta persona ya está asignada a otro trabajador.',
-            'area_id.required'         => 'El campo área es obligatorio.',
-            'area_id.exists'           => 'El área seleccionada no es válida.',
+            'person_id.unique'         => 'Esta persona ya est? asignada a otro trabajador.',
+            'area_id.required'         => 'El campo ?rea es obligatorio.',
+            'area_id.exists'           => 'El ?rea seleccionada no es v?lida.',
             'branchOffice_id.required' => 'El campo sucursal es obligatorio.',
-            'branchOffice_id.exists'   => 'La sucursal seleccionada no es válida.',
+            'branchOffice_id.exists'   => 'La sucursal seleccionada no es v?lida.',
             'district_id.required'     => 'El campo distrito es obligatorio.',
-            'district_id.exists'       => 'El distrito seleccionado no es válido.',
+            'district_id.exists'       => 'El distrito seleccionado no es v?lido.',
         ]);
 
         if ($validator->fails()) {
@@ -343,14 +343,14 @@ class WorkerController extends Controller
         $object = Worker::with('person', 'area', 'district.province.department', 'branchOffice')->find($object->id);
 
         Bitacora::create([
-            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acci?n
             'record_id'   => $object->id, // El ID del usuario afectado
-            'action'      => 'POST',      // Acción realizada
+            'action'      => 'POST',      // Acci?n realizada
             'table_name'  => 'workers',   // Tabla afectada
             'data'        => json_encode($object),
-            'description' => 'Crea Trabajador',     // Descripción de la acción
-            'ip_address'  => $request->ip(),        // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'description' => 'Crea Trabajador',     // Descripci?n de la acci?n
+            'ip_address'  => $request->ip(),        // Direcci?n IP del usuario
+            'user_agent'  => $request->userAgent(), // Informaci?n sobre el navegador/dispositivo
         ]);
 
         return response()->json($object, 200);
@@ -558,7 +558,7 @@ class WorkerController extends Controller
     public function createOrUpdate(Request $request, $id = null)
     {
         $worker = $id != 'null' ? Worker::find($id) : new Worker();
-        // Validación de los datos
+        // Validaci?n de los datos
         $validator = validator()->make($request->all(), [
             'person_id'       => [
                 'required',
@@ -570,16 +570,24 @@ class WorkerController extends Controller
             'area_id'         => 'required|exists:areas,id',
             'branchOffice_id' => 'required|exists:branch_offices,id',
             'district_id'     => 'required|exists:districts,id',
+
+            'contract_type'           => 'nullable|in:determinado,indefinido',
+            'contract_end_date'       => 'nullable|date|required_if:contract_type,determinado',
+            'salary_mode'             => 'nullable|in:planilla,caja',
+            'is_paid_intern'          => 'nullable|boolean',
+            'biometric_credential_id' => 'nullable|string|max:191',
+            'licencia_photo'          => 'nullable|image|max:10240',
+            'dni_photo'               => 'nullable|image|max:10240',
         ], [
             'person_id.required'       => 'El campo persona es obligatorio.',
             'person_id.string'         => 'El campo persona debe ser una cadena de texto.',
-            'person_id.unique'         => 'Esta persona ya está asignada a otro trabajador.',
-            'area_id.required'         => 'El campo área es obligatorio.',
-            'area_id.exists'           => 'El área seleccionada no es válida.',
+            'person_id.unique'         => 'Esta persona ya est? asignada a otro trabajador.',
+            'area_id.required'         => 'El campo ?rea es obligatorio.',
+            'area_id.exists'           => 'El ?rea seleccionada no es v?lida.',
             'branchOffice_id.required' => 'El campo sucursal es obligatorio.',
-            'branchOffice_id.exists'   => 'La sucursal seleccionada no es válida.',
+            'branchOffice_id.exists'   => 'La sucursal seleccionada no es v?lida.',
             'district_id.required'     => 'El campo distrito es obligatorio.',
-            'district_id.exists'       => 'El distrito seleccionado no es válido.',
+            'district_id.exists'       => 'El distrito seleccionado no es v?lido.',
         ]);
 
         if ($validator->fails()) {
@@ -606,6 +614,14 @@ class WorkerController extends Controller
         $worker->licencia_date    = $request->input('licencia_date');
         $worker->startDate        = $request->input('startDate');
 
+        $worker->contract_type           = $request->input('contract_type');
+        $worker->contract_end_date       = $request->input('contract_end_date');
+        $worker->salary_mode             = $request->input('salary_mode');
+        $worker->biometric_credential_id = $request->input('biometric_credential_id');
+        if ($request->has('is_paid_intern')) {
+            $worker->is_paid_intern = filter_var($request->input('is_paid_intern'), FILTER_VALIDATE_BOOLEAN);
+        }
+
         // Guardar los datos
         $worker->save();
 
@@ -622,18 +638,36 @@ class WorkerController extends Controller
             $worker->save();
         }
 
-        // Retornar la información del trabajador con las relaciones cargadas
+        if ($request->hasFile('licencia_photo')) {
+            if ($worker->path_licencia_photo) {
+                Storage::delete(str_replace('/storage/', 'public/', $worker->path_licencia_photo));
+            }
+            $path                      = $request->file('licencia_photo')->store('public/workers/licencia');
+            $worker->path_licencia_photo = Storage::url($path);
+            $worker->save();
+        }
+
+        if ($request->hasFile('dni_photo')) {
+            if ($worker->path_dni_photo) {
+                Storage::delete(str_replace('/storage/', 'public/', $worker->path_dni_photo));
+            }
+            $path                   = $request->file('dni_photo')->store('public/workers/dni');
+            $worker->path_dni_photo = Storage::url($path);
+            $worker->save();
+        }
+
+        // Retornar la informaci?n del trabajador con las relaciones cargadas
         $worker = Worker::with('person', 'area', 'district.province.department', 'branchOffice')->find($worker->id);
 
         Bitacora::create([
-            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acci?n
             'record_id'   => $worker->id, // El ID del usuario afectado
-            'action'      => 'POST',      // Acción realizada
+            'action'      => 'POST',      // Acci?n realizada
             'table_name'  => 'workers',   // Tabla afectada
             'data'        => json_encode($worker),
-            'description' => 'Actualiza o crea Trabajador', // Descripción de la acción
-            'ip_address'  => $request->ip(),                // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(),         // Información sobre el navegador/dispositivo
+            'description' => 'Actualiza o crea Trabajador', // Descripci?n de la acci?n
+            'ip_address'  => $request->ip(),                // Direcci?n IP del usuario
+            'user_agent'  => $request->userAgent(),         // Informaci?n sobre el navegador/dispositivo
         ]);
 
         return response()->json($worker, 200);
@@ -746,10 +780,10 @@ class WorkerController extends Controller
             return response()->json(['error' => 'Worker not found'], 404);
         }
 
-                                                     // Definir el número de elementos por página
+                                                     // Definir el n?mero de elementos por p?gina
         $perPage = request()->input('per_page', 10); // Puedes ajustar el valor predeterminado
 
-        // Obtener el historial de programaciones del trabajador con paginación y ordenado de forma descendente
+        // Obtener el historial de programaciones del trabajador con paginaci?n y ordenado de forma descendente
         $history = DetailWorker::where('worker_id', $workerId)
             ->join('programmings', 'programmings.id', '=', 'detail_workers.programming_id') // Unir con la tabla 'programmings'
             ->with(
@@ -777,11 +811,11 @@ class WorkerController extends Controller
         // Preparar la respuesta con los datos paginados
         return response()->json([
             'total'          => $history->total(),
-            'data'           => $programmingCollection, // Aquí están las programaciones pluckeadas y ordenadas
+            'data'           => $programmingCollection, // Aqu? est?n las programaciones pluckeadas y ordenadas
             'current_page'   => $history->currentPage(),
             'last_page'      => $history->lastPage(),
             'per_page'       => $history->perPage(),
-            'pagination'     => $perPage, // Nuevo campo para el tamaño de la paginación
+            'pagination'     => $perPage, // Nuevo campo para el tama?o de la paginaci?n
             'first_page_url' => $history->url(1),
             'from'           => $history->firstItem(),
             'next_page_url'  => $history->nextPageUrl(),
@@ -841,7 +875,7 @@ class WorkerController extends Controller
         }
 
         if ($worker->detailWorkers()->exists()) {
-            return response()->json(['message' => 'Este trabajador pertenece a una programación'], 422);
+            return response()->json(['message' => 'Este trabajador pertenece a una programaci?n'], 422);
         }
 
         if ($worker->carrierGuidesPilotos()->exists()) {
@@ -856,14 +890,14 @@ class WorkerController extends Controller
             ->find($id);
 
         Bitacora::create([
-            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acci?n
             'record_id'   => $object->id, // El ID del usuario afectado
-            'action'      => 'DELETE',    // Acción realizada
+            'action'      => 'DELETE',    // Acci?n realizada
             'table_name'  => 'workers',   // Tabla afectada
             'data'        => json_encode($object),
-            'description' => 'Elimina Trabajador',  // Descripción de la acción
-            'ip_address'  => $request->ip(),        // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(), // Información sobre el navegador/dispositivo
+            'description' => 'Elimina Trabajador',  // Descripci?n de la acci?n
+            'ip_address'  => $request->ip(),        // Direcci?n IP del usuario
+            'user_agent'  => $request->userAgent(), // Informaci?n sobre el navegador/dispositivo
         ]);
 
         $worker->delete();
@@ -879,14 +913,14 @@ class WorkerController extends Controller
         $this->workerService->changeStatus($worker->id);
 
         Bitacora::create([
-            'user_id'     => Auth::id(),  // ID del usuario que realiza la acción
+            'user_id'     => Auth::id(),  // ID del usuario que realiza la acci?n
             'record_id'   => $worker->id, // El ID del usuario afectado
-            'action'      => 'PUT',       // Acción realizada
+            'action'      => 'PUT',       // Acci?n realizada
             'table_name'  => 'workers',   // Tabla afectada
             'data'        => json_encode($worker),
-            'description' => 'Actualiza estado de Trabajador', // Descripción de la acción
-            'ip_address'  => $request->ip(),                   // Dirección IP del usuario
-            'user_agent'  => $request->userAgent(),            // Información sobre el navegador/dispositivo
+            'description' => 'Actualiza estado de Trabajador', // Descripci?n de la acci?n
+            'ip_address'  => $request->ip(),                   // Direcci?n IP del usuario
+            'user_agent'  => $request->userAgent(),            // Informaci?n sobre el navegador/dispositivo
         ]);
 
         return response()->json(new WorkerResource($worker), 200);

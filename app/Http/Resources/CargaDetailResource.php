@@ -50,6 +50,8 @@ class CargaDetailResource extends JsonResource
             'comment'           => $this->comment ?? null,
             'num_anexo'         => $this->num_anexo ?? null,
             'num_lot'         => $this->num_lot ?? null,
+            'position_code'   => $this->position_code ?? null,
+            'damaged_photo_path' => $this->damaged_photo_path ?? null,
             'date_expiration'   => $this->date_expiration ?? null,
             'created_at'        => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
         ];

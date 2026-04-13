@@ -10,6 +10,7 @@ class ProductRequirementResource extends JsonResource
     {
         return [
             'id'                => $this->id,
+            'correlativo'       => 'REQ-' . str_pad((string) $this->id, 6, '0', STR_PAD_LEFT),
             'check_list_id'     => $this->check_list_id,
             'branch_office_id'  => $this->branch_office_id,
             'status'            => $this->status,

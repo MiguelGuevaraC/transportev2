@@ -1,9 +1,7 @@
 <?php
 namespace App\Exports;
 
-use App\Models\CargaDocument;
-use App\Models\DetailReception;
-use App\Models\Product;
+use App\Services\KardexReportService;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -33,123 +31,14 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     public function collection()
     {
-        if ($this->product_id[0] === null) { 
-            $products = CargaDocument::whereHas('product', function ($query) {
-                $query->whereNull('deleted_at');
-            })
-            ->latest()
-            ->pluck('product_id')
-            ->unique()
-            ->take(50)
-            ->filter()    // Filtra valores nulos
-            ->toArray(); // Convierte a array
-        } else {
-            $products = is_array($this->product_id)
-                ? array_filter($this->product_id) // Filtra valores nulos
-                : ($this->product_id !== "null" && $this->product_id !== null
-                    ? [$this->product_id]
-                    : CargaDocument::whereHas('product', function ($query) {
-                        $query->whereNull('deleted_at');
-                    })
-                        ->latest()
-                        ->pluck('product_id')
-                        ->unique()
-                        ->take(50)
-                        ->filter()    // Filtra valores nulos
-                        ->toArray());
-        }
-        
-      
-        // Si sigue siendo null, lo convertimos en un array vacío
-        $products = empty($products) ? [] : $products;
+        $svc = new KardexReportService(
+            $this->product_id,
+            $this->from,
+            $this->to,
+            $this->branch_id ? (int) $this->branch_id : null
+        );
 
-        $finalCollection = new Collection();
-
-        foreach ($products as $product_id) {
-            $queryCarga = CargaDocument::whereNull('deleted_at')
-                ->where('product_id', $product_id)
-                ->where('branchOffice_id', $this->branch_id); // Filtrar por sucursal
-
-            $queryRecep = DetailReception::whereNull('deleted_at')
-                ->where('product_id', $product_id)
-                ->whereHas('reception', fn($q) => $q->where('branchOffice_id', $this->branch_id)); // Filtrar por sucursal
-
-            if ($this->from) {
-                $toDate = $this->to ?? now();
-                $queryCarga->whereBetween('movement_date', [$this->from, $toDate]);
-                $queryRecep->whereHas('reception.firstCarrierGuide', fn($q) =>
-                    $q->whereBetween('transferStartDate', [$this->from, $toDate])
-                );
-            }
-
-            $saldoInicial = $this->getStockBefore($product_id, $this->branch_id);
-
-            $finalCollection->push(
-                ['is_header' => true, 'movement_date' => Product::find($product_id)->description ?? 'SIN NOMBRE', 'type' => '', 'concept' => '', 'document' => '', 'num_anexo' => '', 'person' => '', 'distribuidor' => ''
-                    , 'quantity' => '', 'saldo' => '', 'comment' => ''],
-                ['is_header'   => true, 'movement_date'  => 'Fecha Movimiento', 'type' => 'Tipo Movimiento',
-                    'concept'      => 'Concepto', 'document' => 'Documento',
-                    'num_anexo'    => 'Número Anexo',
-                    'person'       => 'Persona',
-                    'distribuidor' => 'Distribuidor',
-
-                    'quantity'     => 'Cantidad',
-                    'saldo'        => 'Saldo',
-
-                    'comment'      => 'Comentario'],
-                ['movement_date' => $this->from ?? now(), 'type' => 'SALDO INICIAL',
-                    'concept'        => 'Stock acumulado hasta ' . ($this->from ?? 'Hoy'),
-                    'document'       => '', 'num_anexo'              => '-',
-                    'person'         => '-',
-                    'distribuidor'   => '-',
-                    'quantity'       => 0, 'saldo'                   => $saldoInicial, 'comment' => '-']
-            );
-
-            $cargaDocuments = $queryCarga->orderByDesc('movement_date')->take(200)->get()->map(fn($doc) => [
-                'movement_date' => $doc->movement_date,
-                'type'          => $doc->movement_type,
-                'concept'       => 'DOCUMENTO DE CARGA',
-                'document'      => $doc->code_doc,
-                'num_anexo'     => $doc->num_anexo,
-                'quantity'      => $doc->quantity,
-                'person'        => $doc?->person?->names . " " . $doc?->person?->businessName,
-                'distribuidor'  => $doc?->distribuidor?->names . " " . $doc?->distribuidor?->businessName,
-                'saldo'         => null,
-                'comment'       => $doc->comment ?? "-",
-            ]);
-
-            $detailReceptions = $queryRecep->take(200)->get()->map(fn($detail) => [
-                'movement_date' => $detail->reception->firstCarrierGuide->transferStartDate ?? now(),
-                'type'          => 'SALIDA',
-                'concept'       => 'GUIA TRANSPORTE',
-                'document'      => $detail->reception->firstCarrierGuide->numero ?? 'Sin Número',
-                'num_anexo'     => $detail->reception->firstCarrierGuide->document ?? 'Sin Número',
-                'person'        => $detail?->reception?->sender->names . " " . $detail?->reception?->sender->businessName,
-                'distribuidor'  => '',
-
-                'quantity'      => $detail->cant,
-                'saldo'         => null,
-                'comment'       => '-',
-            ]);
-
-            $saldo   = $saldoInicial;
-            $records = collect([ ...$cargaDocuments, ...$detailReceptions])
-                ->sortBy('movement_date') // Orden cronológico
-                ->map(function ($row) use (&$saldo) {
-                    $row['saldo'] = ($row['type'] === 'ENTRADA')
-                    ? $saldo += $row['quantity']
-                    : $saldo -= $row['quantity'];
-                    return $row;
-                });
-
-            $finalCollection = $finalCollection->merge($records)->push([
-                'movement_date' => '', 'type'         => '', 'concept' => '', 'document' => '', 'num_anexo' => '',
-                'person'        => '', 'distribuidor' => '',
-                'quantity'      => '', 'saldo'        => '', 'comment' => '',
-            ]);
-        }
-
-        return $finalCollection;
+        return $svc->toFlatCollection();
     }
 
     public function headings(): array
@@ -192,35 +81,6 @@ class KardexExport implements FromCollection, WithHeadings, WithMapping, WithTit
             (string) $row['saldo'],
             (string) $row['comment'],
         ];
-    }
-
-    private function getStockBefore($productId, $branchOfficeId)
-    {
-        $toDate = $this->from;
-
-        // Obtener stock antes de la fecha filtrado por sucursal
-        $stockCalculado = CargaDocument::where('product_id', $productId)
-            ->where('branchOffice_id', $branchOfficeId)
-            ->whereNull('deleted_at')
-            ->where('movement_date', '<', $toDate)
-            ->selectRaw("
-                COALESCE(SUM(CASE WHEN movement_type = 'ENTRADA' THEN quantity ELSE 0 END), 0) -
-                COALESCE(SUM(CASE WHEN movement_type = 'SALIDA' THEN quantity ELSE 0 END), 0)
-            AS stock_calculado")
-            ->value('stock_calculado') ?? 0;
-
-        // Obtener la cantidad total de recepciones en el rango de fechas
-        $totalDetailQuantity = DetailReception::where('product_id', $productId)
-            ->whereHas('reception', function ($query) use ($toDate, $branchOfficeId) {
-                $query->where('branchOffice_id', $branchOfficeId)
-                    ->whereHas('firstCarrierGuide', fn($q) =>
-                        $q->where('transferStartDate', '<', $toDate)
-                    );
-            })
-            ->whereNull('deleted_at')->sum('cant') ?? 0;
-
-        // Calcular el stock final
-        return $stockCalculado - $totalDetailQuantity;
     }
 
     public function title(): string

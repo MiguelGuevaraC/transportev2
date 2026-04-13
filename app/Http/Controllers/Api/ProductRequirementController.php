@@ -117,11 +117,10 @@ class ProductRequirementController extends Controller
             $request->input('observation')
         );
         if ($m->lines->isEmpty()) {
-            $m->delete();
-
-            return response()->json([
-                'message' => 'No se generaron líneas: ítems desmarcados sin repuesto asociado en el maestro de ítems de checklist.',
-            ], 422);
+            return (new \App\Http\Resources\ProductRequirementResource($m))
+                ->additional([
+                    'warning' => 'No se generaron líneas automáticas porque los ítems desmarcados no tienen repuesto asociado en el maestro. Puede completar las líneas manualmente.',
+                ]);
         }
 
         return new \App\Http\Resources\ProductRequirementResource($m);

@@ -19,9 +19,68 @@ class CargaDocumentService
         $this->productService = $productService;
     }
 
+    protected function applyStockPivotMatch($query, $detail, int $branchOfficeId, bool $fromArray = true)
+    {
+        $productId  = $fromArray ? ($detail['product_id'] ?? null) : $detail->product_id;
+        $almacenId  = $fromArray ? ($detail['almacen_id'] ?? null) : $detail->almacen_id;
+        $seccionId  = $fromArray ? ($detail['seccion_id'] ?? null) : $detail->seccion_id;
+        $numLot     = $fromArray ? ($detail['num_lot'] ?? null) : $detail->num_lot;
+        $posCode    = $fromArray ? ($detail['position_code'] ?? null) : $detail->position_code;
+        $dateExp    = $fromArray ? ($detail['date_expiration'] ?? null) : $detail->date_expiration;
+
+        $query->where('product_id', $productId)
+            ->where('branchOffice_id', $branchOfficeId)
+            ->where('almacen_id', $almacenId);
+
+        if ($seccionId !== null && $seccionId !== '') {
+            $query->where('seccion_id', $seccionId);
+        } else {
+            $query->whereNull('seccion_id');
+        }
+
+        if ($numLot !== null && $numLot !== '') {
+            $query->where('num_lot', $numLot);
+        } else {
+            $query->whereNull('num_lot');
+        }
+
+        if ($posCode !== null && $posCode !== '') {
+            $query->where('position_code', $posCode);
+        } else {
+            $query->whereNull('position_code');
+        }
+
+        if ($dateExp !== null && $dateExp !== '') {
+            $query->whereDate('date_expiration', $dateExp);
+        } else {
+            $query->whereNull('date_expiration');
+        }
+    }
+
+    protected function stockPivotAttributes(array $detail, int $branchOfficeId): array
+    {
+        return [
+            'product_id'      => $detail['product_id'],
+            'branchOffice_id' => $branchOfficeId,
+            'almacen_id'      => $detail['almacen_id'],
+            'seccion_id'      => $detail['seccion_id'] ?? null,
+            'date_expiration' => $detail['date_expiration'] ?? null,
+            'num_lot'         => $detail['num_lot'] ?? null,
+            'position_code'   => $detail['position_code'] ?? null,
+        ];
+    }
+
     public function getCargaDocumentById(int $id): ?CargaDocument
     {
         return CargaDocument::find($id);
+    }
+
+    public function findStockRowForDetail(array $detail, int $branchOfficeId): ?ProductStockByBranch
+    {
+        $query = ProductStockByBranch::query();
+        $this->applyStockPivotMatch($query, $detail, $branchOfficeId, true);
+
+        return $query->first();
     }
 
     public function createCargaDocument(array $data): CargaDocument
@@ -59,19 +118,14 @@ class CargaDocumentService
                     'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
                     'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
                     'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
+                    'position_code'   => isset($detail['position_code']) ? $detail['position_code'] : null,
+                    'damaged_photo_path' => isset($detail['damaged_photo_path']) ? $detail['damaged_photo_path'] : null,
                     'created_at'        => now(),
                 ]);
 
                 // Actualizar el stock a nivel de sucursal, almacen y seccion
                 $productStock = ProductStockByBranch::firstOrCreate(
-                    [
-                        'product_id'      => $detail['product_id'],
-                        'branchOffice_id' => $data['branchOffice_id'],
-                        'almacen_id'      => $detail['almacen_id'],
-                        'seccion_id'      => $detail['seccion_id'],
-                        'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
-                        'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de anexo opcional
-                    ],
+                    $this->stockPivotAttributes($detail, (int) $data['branchOffice_id']),
                     [
                         'stock' => 0,
                     ]
@@ -104,12 +158,9 @@ class CargaDocumentService
             $movementType = $cargaDocument->movement_type ?? 'ENTRADA'; // Por defecto ENTRADA
             // Revertir stock de los detalles
             foreach ($cargaDocument->details as $detail) {
-                $productStock = ProductStockByBranch::where('product_id', $detail->product_id)
-                    ->where('branchOffice_id', $detail->branchOffice_id)
-                    ->where('almacen_id', $detail->almacen_id)
-                    ->where('seccion_id', $detail->seccion_id)
-                    ->where('num_lot','like', $detail->num_lot)
-                    ->first();
+                $productStock = ProductStockByBranch::query();
+                $this->applyStockPivotMatch($productStock, $detail, (int) $detail->branchOffice_id, false);
+                $productStock = $productStock->first();
 
                 if ($productStock) {
                     if (strtoupper($movementType) === 'SALIDA') {
@@ -138,19 +189,14 @@ class CargaDocumentService
                     'num_anexo'         => isset($detail['num_anexo']) ? $detail['num_anexo'] : null,             // Número de anexo opcional
                     'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
                     'num_lot'           => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
+                    'position_code'   => isset($detail['position_code']) ? $detail['position_code'] : null,
+                    'damaged_photo_path' => isset($detail['damaged_photo_path']) ? $detail['damaged_photo_path'] : null,
                     'created_at'        => now(),
                 ]);
 
                 // Actualizar el stock a nivel de sucursal, almacen y seccion
                 $productStock = ProductStockByBranch::firstOrCreate(
-                    [
-                        'product_id'      => $detail['product_id'],
-                        'branchOffice_id' => $data['branchOffice_id'],
-                        'almacen_id'      => $detail['almacen_id'],
-                        'seccion_id'      => $detail['seccion_id'],
-                        'date_expiration'   => isset($detail['date_expiration']) ? $detail['date_expiration'] : null, // Fecha de vencimiento opcional
-                        'num_lot'         => isset($detail['num_lot']) ? $detail['num_lot'] : null,             // Número de lot opcional
-                    ],
+                    $this->stockPivotAttributes($detail, (int) $data['branchOffice_id']),
                     [
                         'stock' => 0,
                     ]
@@ -180,18 +226,16 @@ class CargaDocumentService
             $movementType = $cargaDocument->movement_type ?? 'ENTRADA'; // Por defecto ENTRADA
             // Revertir stock de los detalles
             foreach ($cargaDocument->details as $detail) {
-                $productStock = ProductStockByBranch::where('product_id', $detail->product_id)
-                    ->where('branchOffice_id', $detail->branchOffice_id)
-                    ->where('almacen_id', $detail->almacen_id)
-                    ->where('seccion_id', $detail->seccion_id)
-                    ->where('num_lot','like', $detail->num_lot)
-                    ->first();
+                $productStock = ProductStockByBranch::query();
+                $this->applyStockPivotMatch($productStock, $detail, (int) $detail->branchOffice_id, false);
+                $productStock = $productStock->first();
 
-                if (strtoupper($movementType) === 'SALIDA') {
-                    $productStock->increment('stock', $detail->quantity);
-                } else {
-                    $productStock->decrement('stock', $detail->quantity);
-                    
+                if ($productStock) {
+                    if (strtoupper($movementType) === 'SALIDA') {
+                        $productStock->increment('stock', $detail->quantity);
+                    } else {
+                        $productStock->decrement('stock', $detail->quantity);
+                    }
                 }
 
                 // Eliminar el detalle

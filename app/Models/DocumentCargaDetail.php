@@ -18,6 +18,8 @@ class DocumentCargaDetail extends Model
         'comment',
         'num_anexo',
         'num_lot',
+        'position_code',
+        'damaged_photo_path',
         'date_expiration',
         'created_at',
     ];
@@ -34,6 +36,8 @@ class DocumentCargaDetail extends Model
         'document_carga_id' => '=',
         'branchOffice_id'   => '=',
         'comment'           => 'like',
+        'position_code'     => '=',
+        'num_lot'           => '=',
     ];
 
     const fields_export = [

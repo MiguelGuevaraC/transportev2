@@ -140,6 +140,13 @@ class Worker extends Model
         'pathPhoto',
 
         'status',
+        'contract_type',
+        'contract_end_date',
+        'salary_mode',
+        'is_paid_intern',
+        'path_licencia_photo',
+        'path_dni_photo',
+        'biometric_credential_id',
         'startDate',
         'endDate',
         'state',
@@ -149,6 +156,11 @@ class Worker extends Model
         'area_id',
         'branchOffice_id',
 
+    ];
+
+    protected $casts = [
+        'contract_end_date' => 'date',
+        'is_paid_intern'    => 'boolean',
     ];
 
     const fields_export = [
@@ -226,4 +238,15 @@ class Worker extends Model
         return $this->hasMany(WorkerStatusHistory::class, 'worker_id')->orderByDesc('effective_date')->orderByDesc('id');
     }
 
+    public function attendanceEvents()
+    {
+        return $this->hasMany(WorkerAttendanceEvent::class, 'worker_id')->orderByDesc('attendance_date');
+    }
+
+    public function absences()
+    {
+        return $this->hasMany(WorkerAbsence::class, 'worker_id')->orderByDesc('absence_date');
+    }
+
 }
+

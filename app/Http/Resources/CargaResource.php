@@ -46,9 +46,13 @@ class CargaResource extends JsonResource
             // 'num_anexo'         => $this->num_anexo ?? null,
 
             'movement_type'     => $this->movement_type ?? null,
+            'code_doc'          => $this->code_doc ?? null,
             // 'stock_balance_before' => $this->stock_balance_before ?? null,
             // 'stock_balance_after'  => $this->stock_balance_after ?? null,
             'comment'           => $this->comment ?? null,
+            'billing_month'     => $this->billing_month ?? null,
+            'guide_pdf_path'    => $this->guide_pdf_path ?? null,
+            'carrier_guide_id'  => $this->carrier_guide_id ?? null,
 
            'details' => CargaDetailResource::collection($this->details ?? []),
 

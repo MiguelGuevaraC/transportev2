@@ -3,6 +3,7 @@
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BetController;
+use App\Http\Controllers\Api\WarehouseCargaHelperController;
 use App\Http\Controllers\CargarDocumentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContestantController;
@@ -11,6 +12,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('export/kardex', [CargarDocumentController::class, 'exportKardex']);
+    Route::get('export/kardex-json', [CargarDocumentController::class, 'exportKardexJson']);
+
+    Route::get('carga/almacenes-options', [WarehouseCargaHelperController::class, 'almacenesConSecciones']);
+    Route::get('carga/suggested-lotes', [WarehouseCargaHelperController::class, 'lotesSugeridos']);
+    Route::get('carga/posicion-cantidad', [WarehouseCargaHelperController::class, 'cantidadPorPosicion']);
+    Route::get('carga/posiciones-estado', [WarehouseCargaHelperController::class, 'estadoPosiciones']);
+
+    Route::post('cargadocument-detail/{id}/damaged-photo', [CargarDocumentController::class, 'uploadDamagedPhoto']);
 
     Route::get('history-cargadocument', [CargarDocumentController::class, 'index_history']);
     Route::get('history-cargadocument-excel', [CargarDocumentController::class, 'index_export_excel']);
