@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\WorkerResource;
 use App\Models\Worker;
 use App\Models\WorkerStatusHistory;
 use Illuminate\Http\Request;
@@ -52,9 +53,6 @@ class WorkerStatusHistoryController extends Controller
         $worker->state = $action === 'enable';
         $worker->save();
 
-        return response()->json([
-            'message' => 'Historial registrado y estado del trabajador actualizado.',
-            'worker'  => $worker->fresh(['person', 'area', 'branchOffice']),
-        ]);
+        return new WorkerResource($worker->fresh(['person', 'area', 'branchOffice']));
     }
 }
