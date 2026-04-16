@@ -2999,7 +2999,7 @@ class VentaController extends Controller
                 'person' => function ($query) {
                     $query->withTrashed(); // Incluir personas eliminadas
                 },
-                'creditNote',
+                'creditNotes',
                 'user.worker.person',
                 'installments',
                 'installments.payInstallments',
@@ -3014,8 +3014,9 @@ class VentaController extends Controller
             // $mov->updateSaldo(); // Ejecutar updateSaldo() en cada registro
             $ventaTotal = $item->total; // Total de la venta
 
-            if ($item->creditNote || $item->status == "Anulada") {
-                $notaCreditoTotal = $item->creditNote ? $item->creditNote->total : 0; // Total de la nota de crédito
+            $sumNc = $item->creditNotes ? $item->creditNotes->sum('total') : 0;
+            if ($sumNc > 0 || $item->status == "Anulada") {
+                $notaCreditoTotal = $sumNc;
 
                 // Calculamos el nuevo total, asegurándonos de que no sea negativo
                 $item->total = max($ventaTotal - $notaCreditoTotal, 0);
@@ -3025,7 +3026,8 @@ class VentaController extends Controller
                 $item->saldo = max($item->saldo, 0);
 
                 if ($ventaTotal == $notaCreditoTotal) {
-                    $item->status = 'Anulada por Nota: ' . $item->creditNote->number; // Total igual al monto de la nota de crédito
+                    $ultimaNc = $item->creditNotes->sortByDesc('id')->first();
+                    $item->status = 'Anulada por Nota: ' . ($ultimaNc ? $ultimaNc->number : ''); // Total igual al monto de las notas de crédito
                 } else {
                     if ($item->saldo == 0) {
                         $item->status = 'Pagado';
@@ -3033,7 +3035,7 @@ class VentaController extends Controller
                         $item->status = 'Pendiente';
                     }
                 }
-                if ($item->creditNote) {
+                if ($item->creditNotes && $item->creditNotes->isNotEmpty()) {
                     // if ($item->creditNote->reason !="13") {
 //     $item->status = 'Anulada por Nota: ' . $item->creditNote->number;
 // }
@@ -3076,7 +3078,7 @@ class VentaController extends Controller
             ->when(!empty($end), fn($query) => $query->where('paymentDate', '<=', $end))
             ->when(!empty($sequentialNumber), fn($query) => $query->where('sequentialNumber', 'LIKE', "%$sequentialNumber%"))
             ->where('movType', 'Venta')
-            ->with('creditNote')
+            ->with('creditNotes')
             ->get()
             ->sum('total');
 
@@ -3237,13 +3239,15 @@ class VentaController extends Controller
             })
             ->where('movType', 'Venta')
             ->where('status_facturado', 'Enviado')
+            ->where('status', '!=', 'Anulada')
             ->where(function ($query) use ($idNotaCredito, $nota) {
-                // Incluir movimientos que no tienen nota de crédito o que están asociados a la nota de crédito actual
-                $query->doesntHave('creditNote'); // Movimientos sin nota de crédito
-    
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('creditNotes')
+                        ->orWhereRaw('(SELECT COALESCE(SUM(total), 0) FROM credit_notes WHERE moviment_id = moviments.id AND deleted_at IS NULL) < moviments.total');
+                });
                 if ($nota) {
-                    $query->orWhereHas('creditNote', function ($subQuery) use ($idNotaCredito) {
-                        $subQuery->where('id', $idNotaCredito); // Movimientos asociados a la nota de crédito actual
+                    $query->orWhereHas('creditNotes', function ($subQuery) use ($idNotaCredito) {
+                        $subQuery->where('id', $idNotaCredito);
                     });
                 }
             })

@@ -249,10 +249,19 @@ class CreditNoteController extends Controller
                     "message" => "Box Not Found",
                 ], 404);
             }
+        } else {
+            $box = Box::find(Auth::user()->box_id);
+        }
+        if (!$box || $box->serie == null) {
+            return response()->json(['error' => 'Caja No tiene Serie'], 422);
         }
 
         $branchOffice = BranchOffice::find($request->input('branchOffice_id'));
         $moviment = Moviment::find($request->input('moviment_id'));
+
+        if ($moviment->status === 'Anulada') {
+            return response()->json(['error' => 'La venta está anulada; no se pueden emitir más notas de crédito.'], 422);
+        }
 
         // if ($moviment->installments && $moviment->installments->first()->payInstallments->isNotEmpty()) {
         //     return response()->json(['error' => 'Se encontró Amortizaciones en esta venta'], 422);
@@ -260,8 +269,11 @@ class CreditNoteController extends Controller
         if ($request->input('total') < 0) {
             return response()->json(['error' => 'El Monto No debe ser Negativo'], 422);
         }
-        if ($request->input('total') > $moviment->total) {
-            return response()->json(['error' => 'El Monto Supera el Monto de la Venta'], 422);
+        $sumExistenteNc = (float) CreditNote::where('moviment_id', $moviment->id)->sum('total');
+        $nuevoMontoNc = (float) ($request->input('total') ?? 0);
+        $totalVenta = (float) $moviment->total;
+        if ($sumExistenteNc + $nuevoMontoNc > $totalVenta + 0.0001) {
+            return response()->json(['error' => 'La suma de notas de crédito no puede superar el monto de la venta.'], 422);
         }
 
         // Determinar el tipo basado en el sequentialNumber del movimiento
@@ -277,6 +289,7 @@ class CreditNoteController extends Controller
         $tipo = $tipo . $branchOfficeIdFormatted;
 
         //
+        $installmentPay = null;
         if ($moviment->installments->first()) {
             $montoNota = $request->input('total');
             $montoVenta = $moviment->total;
@@ -362,7 +375,7 @@ class CreditNoteController extends Controller
 
         // Crear la nota de crédito
         $object = CreditNote::create($data);
-        if ($request->input('reason') == '1') {
+        if ($request->input('reason') == '1' && ($sumExistenteNc + $nuevoMontoNc >= $totalVenta - 0.0001)) {
             $moviment->status = "Anulada";
         }
         $moviment->save();
@@ -378,8 +391,9 @@ class CreditNoteController extends Controller
         $object->productList = $descriptionString;
         $object->save();
 
+        $totalNcAcumulado = $sumExistenteNc + (float) $object->total;
         if ($moviment->typePayment == 'Contado') {
-            if ($object->total == $moviment->total) {
+            if ($totalNcAcumulado >= $totalVenta - 0.0001) {
                 $movCaja = Moviment::where('mov_id', $moviment->id)->first();
                 if ($movCaja) {
                     $movCaja->status = "Anulada por Nota";
@@ -388,14 +402,16 @@ class CreditNoteController extends Controller
                 }
             }
         } else {
-            $installmentPay->comment = 'NC-' . $object->number;
-            $installmentPay->save();
+            if ($installmentPay) {
+                $installmentPay->comment = 'NC-' . $object->number;
+                $installmentPay->save();
+            }
         }
 
         $receptions = $moviment->receptions;
 
         // if ($object->total == $moviment->total && $request->input('reason')=="1") {
-        if ($object->total == $moviment->total) {
+        if ($totalNcAcumulado >= $totalVenta - 0.0001) {
             foreach ($receptions as $reception) {
                 $rececption = Reception::find($reception->id);
                 $rececption->moviment_id = null;
@@ -505,8 +521,11 @@ class CreditNoteController extends Controller
         if ($request->input('total') < 0) {
             return response()->json(['error' => 'El Monto No debe ser Negativo'], 422);
         }
-        if ($request->input('total') > $moviment->total) {
-            return response()->json(['error' => 'El Monto Supera el Monto de la Venta'], 422);
+        $sumOtrosNc = (float) CreditNote::where('moviment_id', $moviment->id)->where('id', '!=', $object->id)->sum('total');
+        $nuevoTotalNc = (float) ($request->input('total') ?? 0);
+        $totalVentaUpd = (float) $moviment->total;
+        if ($sumOtrosNc + $nuevoTotalNc > $totalVentaUpd + 0.0001) {
+            return response()->json(['error' => 'La suma de notas de crédito no puede superar el monto de la venta.'], 422);
         }
         if ($moviment->id != $idVenta) {
             return response()->json(['error' => 'Id Venta no puede ser diferente'], 422);
@@ -521,7 +540,8 @@ class CreditNoteController extends Controller
         }
 
         // Formatear el tipo con el ID de la sucursal
-        $branchOfficeIdFormatted = str_pad($box_id, 2, '0', STR_PAD_LEFT);
+        $boxSerie = $box_id && is_numeric($box_id) ? Box::find($box_id)?->serie : Auth::user()->box->serie;
+        $branchOfficeIdFormatted = str_pad((string) $boxSerie, 2, '0', STR_PAD_LEFT);
         $tipo = $tipo . $branchOfficeIdFormatted;
 
         // Actualizar la nota de crédito con los nuevos datos
@@ -540,9 +560,9 @@ class CreditNoteController extends Controller
 
         $object->save();
 
-        // Cambiar el estado del movimiento a "Anulada"
+        // Cambiar el estado del movimiento a "Anulada" solo si la anulación cubre el total de la venta
 
-        if ($request->input('reason') == '1') {
+        if ($request->input('reason') == '1' && ($sumOtrosNc + $nuevoTotalNc >= $totalVentaUpd - 0.0001)) {
             $moviment->status = "Anulada";
         }
         $moviment->save();

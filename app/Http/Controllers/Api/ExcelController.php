@@ -1024,8 +1024,8 @@ class ExcelController extends Controller
         foreach ($notascredito as $nc) {
             // $nc=CreditNote::with(['moviment'])->find($nc->id);
             $moviment = Moviment::find($nc->moviment_id);
-            if ($moviment && $moviment->creditNote) { // Ventas con nota de crédito
-                $fechaEmisionNC = $moviment->creditNote->created_at ? Carbon::parse($moviment->creditNote->created_at) : false;
+            if ($moviment) { // Ventas con nota de crédito (cada fila es una NC)
+                $fechaEmisionNC = $nc->created_at ? Carbon::parse($nc->created_at) : false;
 
                 if ($fechaEmisionNC && $fechaEmisionNC->between($start, $end)) {
                     $installment = Installment::withTrashed() // Incluye registros eliminados
@@ -1036,16 +1036,16 @@ class ExcelController extends Controller
                     $newRequest = new Request();
 
                     // Agregar el campo 'nombre' al nuevo request
-                    $newRequest->merge(['nombre' => $moviment->creditNote->number]);
+                    $newRequest->merge(['nombre' => $nc->number]);
 
-                    if ($moviment->creditNote->getstatus_fact == null) {
+                    if ($nc->getstatus_fact == null) {
                         $condicionNC = $this->getStatusFacturacion($newRequest);
                         $condicionNC = $condicionNC == '' ? 'NO ENCONTRADO EN EL FACTURADOR' : $condicionNC;
-                        $creditupdatestatus = CreditNote::find($moviment->creditNote->id);
+                        $creditupdatestatus = CreditNote::find($nc->id);
                         $creditupdatestatus->getstatus_fact = $condicionNC;
                         $creditupdatestatus->save();
                     } else {
-                        $condicionNC = $moviment->creditNote->getstatus_fact;
+                        $condicionNC = $nc->getstatus_fact;
                     }
 
                     $dateinstallmentNC = "--/--/--";
@@ -1071,7 +1071,7 @@ class ExcelController extends Controller
                             : trim(($personaCliente->names ?? '') . ' ' . ($personaCliente->fatherSurname ?? '') . ' ' . ($personaCliente->motherSurname ?? ''));
                     }
 
-                    $notacredito = $moviment->creditNote;
+                    $notacredito = $nc;
                     // Cálculos
                     $totalDetalle = $notacredito->total ?? 0;
                     $afecto = $totalDetalle ? $totalDetalle / 1.18 : 0;

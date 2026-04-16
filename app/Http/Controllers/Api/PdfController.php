@@ -1593,7 +1593,7 @@ class PdfController extends Controller
 
         // Obtener datos que NO tienen nota de crédito
         $ventasSinNotaCredito = Moviment::where('branchOffice_id', $branch_office_id)
-            ->doesntHave('creditNote') // Filtra las que no tienen nota de crédito
+            ->doesntHave('creditNotes') // Filtra las que no tienen nota de crédito
             ->when($typeDocument != '', function ($query) use ($typeDocument) {
                 return $query->where('typeDocument', $typeDocument);
             })
@@ -1625,7 +1625,7 @@ class PdfController extends Controller
 
         // Obtener datos que SÍ tienen nota de crédito
         $ventasConNotaCredito = Moviment::where('branchOffice_id', $branch_office_id)
-            ->has('creditNote') // Filtra las que tienen nota de crédito
+            ->has('creditNotes') // Filtra las que tienen nota de crédito
             ->when($typeDocument != '', function ($query) use ($typeDocument) {
                 return $query->where('typeDocument', $typeDocument);
             })

@@ -403,11 +403,7 @@ class Reception extends Model
     {
         return $this->belongsTo(Moviment::class)
             ->where(function ($query) {
-                // Si tiene Credit Note y el total es diferente, priorizarlo
-                $query->whereHas('creditNote', function ($subquery) {
-                    $subquery->whereColumn('credit_notes.total', '!=', 'moviments.total');
-                })
-                // Si no tiene Credit Note, aplicar los filtros de status
+                $query->whereRaw('(SELECT COALESCE(SUM(total), 0) FROM credit_notes WHERE moviment_id = moviments.id AND deleted_at IS NULL) != moviments.total')
                     ->orWhere(function ($subQuery) {
                         $subQuery->whereNotIn('status', ['Anulada por Nota', 'Anulada'])
                             ->where('status_facturado', '!=', 'Anulado');

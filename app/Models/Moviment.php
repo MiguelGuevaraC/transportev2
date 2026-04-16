@@ -320,10 +320,18 @@ class Moviment extends Model
             ->orderBy('date', 'asc'); // Prioriza las fechas de vencimiento más próximas
     }
 
+    public function creditNotes()
+    {
+        return $this->hasMany(CreditNote::class);
+    }
+
     public function creditNote()
     {
-        return $this->hasOne(CreditNote::class)->where('status_facturado', '!=', 'Anulada');
-        // return $this->hasOne(CreditNote::class);
+        return $this->hasOne(CreditNote::class)->ofMany([
+            'id' => 'max',
+        ], function ($query) {
+            $query->where('status_facturado', '!=', 'Anulada');
+        });
     }
 
     public function updateSaldo()
