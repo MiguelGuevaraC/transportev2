@@ -16,6 +16,7 @@ use Illuminate\Validation\Validator;
  *     @OA\Property(property="person_id", type="integer", description="ID of the person associated with the movement"),
  *     @OA\Property(property="distribuidor_id", type="integer", description="ID of the distributor associated with the movement"),
  *     @OA\Property(property="movement_type", type="string", description="Type of movement (ENTRADA or SALIDA)"),
+ *     @OA\Property(property="carrier_guide_number", type="string", nullable=true, description="Número de guía externa (no es ID de guía registrada en el sistema)"),
  *     @OA\Property(property="comment", type="string", nullable=true, description="Optional comment about the movement"),
  *     @OA\Property(
  *         property="details",
@@ -39,6 +40,13 @@ class StoreCargaDocumentRequest extends StoreRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('carrier_guide_id') && ! $this->has('carrier_guide_number')) {
+            $this->merge(['carrier_guide_number' => $this->input('carrier_guide_id')]);
+        }
+    }
+
     public function rules()
     {
         return [
@@ -49,7 +57,7 @@ class StoreCargaDocumentRequest extends StoreRequest
             'movement_type'             => 'required|string|in:ENTRADA,SALIDA',
             'comment'                   => 'nullable|string|max:500',
             'billing_month'             => 'nullable|string|regex:/^\d{4}-\d{2}$/',
-            'carrier_guide_id'          => 'nullable|integer',
+            'carrier_guide_number'      => 'nullable|string|max:191',
             'guide_pdf'                 => 'nullable|file|mimes:pdf|max:20480',
 
             'details'                   => 'required|array|min:1',

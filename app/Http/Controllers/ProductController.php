@@ -53,13 +53,50 @@ class ProductController extends Controller
             }
         });
         // Obtener los productos filtrados
-        $products = $this->getFilteredResults(
-            Product::class,
-            $request,
-            Product::filters,
-            Product::sorts,
-            ProductResource::class
-        );
+        if (strtoupper((string) $request->query('movement_type', '')) === 'SALIDA') {
+            $branchFilter = $request->query('branch_office_id');
+            if (($branchFilter === null || $branchFilter === '') && Auth::user()->worker) {
+                $branchFilter = Auth::user()->worker->branchOffice_id;
+            }
+            $query = Product::query()->whereHas('branchOffices', function ($q) use ($request, $branchFilter) {
+                $q->where('product_stock_by_branches.stock', '>', 0);
+                if ($branchFilter !== null && $branchFilter !== '') {
+                    $q->where('product_stock_by_branches.branchOffice_id', $branchFilter);
+                }
+                if ($request->filled('almacen_id')) {
+                    $q->where('product_stock_by_branches.almacen_id', $request->input('almacen_id'));
+                }
+                if ($request->filled('seccion_id')) {
+                    $q->where('product_stock_by_branches.seccion_id', $request->input('seccion_id'));
+                }
+            })->with(['branchOffices' => function ($q) use ($request, $branchFilter) {
+                $q->where('product_stock_by_branches.stock', '>', 0);
+                if ($branchFilter !== null && $branchFilter !== '') {
+                    $q->where('product_stock_by_branches.branchOffice_id', $branchFilter);
+                }
+                if ($request->filled('almacen_id')) {
+                    $q->where('product_stock_by_branches.almacen_id', $request->input('almacen_id'));
+                }
+                if ($request->filled('seccion_id')) {
+                    $q->where('product_stock_by_branches.seccion_id', $request->input('seccion_id'));
+                }
+            }]);
+            $products = $this->getFilteredResults(
+                $query,
+                $request,
+                Product::filters,
+                Product::sorts,
+                ProductResource::class
+            );
+        } else {
+            $products = $this->getFilteredResults(
+                Product::class,
+                $request,
+                Product::filters,
+                Product::sorts,
+                ProductResource::class
+            );
+        }
         $items = $products instanceof \Illuminate\Pagination\AbstractPaginator  ? $products->items() : $products;
         collect($items)->each(function ($product) use ($branchOffice_id) {
             if (isset($product->id)) {

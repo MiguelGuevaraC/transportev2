@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BranchOffice;
 use App\Models\ContactInfo;
 use App\Models\Person;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -223,7 +224,97 @@ class PersonController extends Controller
             $persons->prepend($personInclude); // Agregar la persona al inicio del conjunto de resultados
         }
 
+        $this->hydrateLatestLotInProducts($persons);
+
         return response()->json($persons, 200);
+    }
+
+    private function hydrateLatestLotInProducts($persons): void
+    {
+        $productIds = [];
+        $branchIds = [];
+        foreach ($persons as $person) {
+            foreach ($person->products ?? [] as $product) {
+                $productIds[] = $product->id;
+                foreach ($product->branchOffices ?? [] as $branchOffice) {
+                    $branchIds[] = $branchOffice->id;
+                }
+            }
+        }
+
+        $productIds = array_values(array_unique(array_filter($productIds)));
+        $branchIds = array_values(array_unique(array_filter($branchIds)));
+        if (empty($productIds) || empty($branchIds)) {
+            return;
+        }
+
+        $rows = DB::table('document_carga_details as dcd')
+            ->join('carga_documents as cd', 'cd.id', '=', 'dcd.document_carga_id')
+            ->whereNull('cd.deleted_at')
+            ->whereNull('dcd.deleted_at')
+            ->whereIn('dcd.product_id', $productIds)
+            ->whereIn('dcd.branchOffice_id', $branchIds)
+            ->whereNotNull('dcd.num_lot')
+            ->where('dcd.num_lot', '!=', '')
+            ->orderByDesc('dcd.created_at')
+            ->orderByDesc('dcd.id')
+            ->select(
+                'dcd.product_id',
+                'dcd.branchOffice_id',
+                'dcd.almacen_id',
+                'dcd.seccion_id',
+                'dcd.num_lot',
+                'dcd.document_carga_id',
+                'cd.movement_date',
+                'dcd.created_at as detail_created_at'
+            )
+            ->get();
+
+        $exactMap = [];
+        $fallbackMap = [];
+        foreach ($rows as $row) {
+            $almacenKey = (string) ($row->almacen_id ?? 'null');
+            $seccionKey = (string) ($row->seccion_id ?? 'null');
+            $exactKey = $row->product_id . '|' . $row->branchOffice_id . '|' . $almacenKey . '|' . $seccionKey;
+            $meta = [
+                'num_lot' => $row->num_lot,
+                'last_lot_document_id' => (int) $row->document_carga_id,
+                'last_lot_date' => $row->movement_date
+                    ? Carbon::parse($row->movement_date)->toIso8601String()
+                    : Carbon::parse($row->detail_created_at)->toIso8601String(),
+            ];
+            if (!isset($exactMap[$exactKey])) {
+                $exactMap[$exactKey] = $meta;
+            }
+
+            $fallbackKey = $row->product_id . '|' . $row->branchOffice_id;
+            if (!isset($fallbackMap[$fallbackKey])) {
+                $fallbackMap[$fallbackKey] = $meta;
+            }
+        }
+
+        foreach ($persons as $person) {
+            foreach ($person->products ?? [] as $product) {
+                foreach ($product->branchOffices ?? [] as $branchOffice) {
+                    $pivot = $branchOffice->pivot ?? null;
+                    if (!$pivot) {
+                        continue;
+                    }
+
+                    $almacenKey = (string) ($pivot->almacen_id ?? 'null');
+                    $seccionKey = (string) ($pivot->seccion_id ?? 'null');
+                    $exactKey = $product->id . '|' . $branchOffice->id . '|' . $almacenKey . '|' . $seccionKey;
+                    $fallbackKey = $product->id . '|' . $branchOffice->id;
+
+                    $meta = $exactMap[$exactKey] ?? ($fallbackMap[$fallbackKey] ?? null);
+                    if ($meta !== null && ($meta['num_lot'] ?? '') !== '') {
+                        $pivot->num_lot = $meta['num_lot'];
+                        $pivot->last_lot_document_id = $meta['last_lot_document_id'];
+                        $pivot->last_lot_date = $meta['last_lot_date'];
+                    }
+                }
+            }
+        }
     }
 
 /**

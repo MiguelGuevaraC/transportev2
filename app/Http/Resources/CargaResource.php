@@ -52,7 +52,7 @@ class CargaResource extends JsonResource
             'comment'           => $this->comment ?? null,
             'billing_month'     => $this->billing_month ?? null,
             'guide_pdf_path'    => $this->guide_pdf_path ?? null,
-            'carrier_guide_id'  => $this->carrier_guide_id ?? null,
+            'carrier_guide_number' => $this->carrier_guide_number ?? null,
 
            'details' => CargaDetailResource::collection($this->details ?? []),
 

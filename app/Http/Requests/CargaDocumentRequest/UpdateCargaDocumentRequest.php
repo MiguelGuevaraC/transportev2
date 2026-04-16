@@ -17,6 +17,13 @@ class UpdateCargaDocumentRequest extends UpdateRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('carrier_guide_id') && ! $this->has('carrier_guide_number')) {
+            $this->merge(['carrier_guide_number' => $this->input('carrier_guide_id')]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,7 +39,7 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'movement_type' => 'required|string|in:ENTRADA,SALIDA',
             'comment'       => 'nullable|string|max:500',
             'billing_month' => 'nullable|string|regex:/^\d{4}-\d{2}$/',
-            'carrier_guide_id' => 'nullable|integer',
+            'carrier_guide_number' => 'nullable|string|max:191',
             'guide_pdf' => 'nullable|file|mimes:pdf|max:20480',
 
             'details'              => 'required|array|min:1',

@@ -30,7 +30,7 @@ class CargaDocument extends Model
         'comment',
         'billing_month',
         'guide_pdf_path',
-        'carrier_guide_id',
+        'carrier_guide_number',
         'product_id',
 
         'person_id',

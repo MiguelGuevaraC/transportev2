@@ -30,6 +30,14 @@ class ProductResource extends JsonResource
 
     public function toArray($request): array
     {
+        $isSalida = strtoupper((string) $request->query('movement_type', '')) === 'SALIDA';
+        $branchOffices = $this->branchOffices;
+        if ($isSalida) {
+            $branchOffices = $branchOffices->filter(function ($branch) {
+                return (float) ($branch->pivot->stock ?? 0) > 0;
+            });
+        }
+
         return [
             'id'              => $this->id ?? null,
             'description'     => $this->description ?? null,
@@ -43,7 +51,7 @@ class ProductResource extends JsonResource
             'unity'           => $this->unity ? new UnityResource($this->unity) : null,
             'person_id'       => $this->person_id ?? null,
             'person'          => $this->person ?? null,
-            'stock_by_branch' => $this->branchOffices->map(function ($branch) {
+            'stock_by_branch' => $branchOffices->map(function ($branch) {
                 return [
                     'branch_office_id' => $branch->id,
                     'branch_name'      => $branch->name,

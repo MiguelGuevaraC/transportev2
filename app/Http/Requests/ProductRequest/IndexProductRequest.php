@@ -30,6 +30,10 @@ class IndexProductRequest extends IndexRequest
             'category'    => 'nullable|string',
             'unity_id'    => 'nullable|string',
             'weight'      => 'nullable|string',
+            'movement_type' => 'nullable|string|in:ENTRADA,SALIDA',
+            'branch_office_id' => 'nullable|integer',
+            'almacen_id' => 'nullable|integer',
+            'seccion_id' => 'nullable|integer',
         ];
     }
 
