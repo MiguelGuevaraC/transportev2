@@ -10,9 +10,9 @@ use Illuminate\Validation\Validator;
  *     schema="CargaDocumentRequest",
  *     title="CargaDocumentRequest",
  *     description="Request model for loading a document with product details",
- *     required={"movement_date", "branchOffice_id", "person_id", "distribuidor_id", "movement_type", "details"},
+ *     required={"movement_date", "person_id", "distribuidor_id", "movement_type", "details"},
  *     @OA\Property(property="movement_date", type="string", format="date", description="Date of the movement"),
- *     @OA\Property(property="branchOffice_id", type="integer", description="Branch office ID"),
+ *     @OA\Property(property="branchOffice_id", type="integer", nullable=true, description="Opcional; se ignora y se asigna desde la sucursal del usuario (worker.branchOffice_id)"),
  *     @OA\Property(property="person_id", type="integer", description="ID of the person associated with the movement"),
  *     @OA\Property(property="distribuidor_id", type="integer", description="ID of the distributor associated with the movement"),
  *     @OA\Property(property="movement_type", type="string", description="Type of movement (ENTRADA or SALIDA)"),
@@ -45,6 +45,9 @@ class StoreCargaDocumentRequest extends StoreRequest
         if ($this->has('carrier_guide_id') && ! $this->has('carrier_guide_number')) {
             $this->merge(['carrier_guide_number' => $this->input('carrier_guide_id')]);
         }
+
+        $branchId = auth()->user()?->worker?->branchOffice_id;
+        $this->merge(['branchOffice_id' => $branchId]);
     }
 
     public function rules()
@@ -80,8 +83,8 @@ class StoreCargaDocumentRequest extends StoreRequest
             'movement_date.required'             => 'La fecha del movimiento es obligatoria.',
             'movement_date.date'                 => 'La fecha del movimiento debe ser una fecha válida.',
 
-            'branchOffice_id.required'           => 'La Sucursal es obligatoria.',
-            'branchOffice_id.exists'             => 'La Sucursal seleccionada no es válida o ha sido eliminada.',
+            'branchOffice_id.required'           => 'El usuario no tiene sucursal asignada; no puede registrar el documento.',
+            'branchOffice_id.exists'             => 'La sucursal del usuario no es válida o ha sido eliminada.',
 
             'person_id.required'                 => 'La persona es obligatoria.',
             'person_id.exists'                   => 'La persona seleccionada no es válida o ha sido eliminada.',
@@ -128,8 +131,20 @@ class StoreCargaDocumentRequest extends StoreRequest
     public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
+            $service = app(CargaDocumentService::class);
+
+            if ($this->movement_type === 'ENTRADA' && is_array($this->details)) {
+                $payload = [
+                    'movement_type'   => $this->movement_type,
+                    'branchOffice_id' => $this->branchOffice_id,
+                    'details'         => $this->details,
+                ];
+                foreach ($service->entradaPositionConflictErrors($payload, null) as $index => $message) {
+                    $validator->errors()->add("details.$index.position_code", $message);
+                }
+            }
+
             if ($this->movement_type === 'SALIDA') {
-                $service = app(CargaDocumentService::class);
                 foreach ($this->details as $index => $detail) {
                     $row   = $service->findStockRowForDetail($detail, (int) $this->branchOffice_id);
                     $stock = $row ? (float) $row->stock : null;

@@ -5,7 +5,9 @@ use App\Models\CargaDocument;
 use App\Models\DocumentCargaDetail;
 use App\Models\Product;
 use App\Models\ProductStockByBranch;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CargaDocumentService
@@ -81,6 +83,184 @@ class CargaDocumentService
         $this->applyStockPivotMatch($query, $detail, $branchOfficeId, true);
 
         return $query->first();
+    }
+
+    /**
+     * Clave física de ubicación: sucursal + almacén + sección + código de posición.
+     */
+    protected function storageSlotKey(int $branchId, int $almacenId, $seccionId, string $positionCode): string
+    {
+        $sec = ($seccionId === null || $seccionId === '') ? 'null' : (string) (int) $seccionId;
+
+        return $branchId . '|' . $almacenId . '|' . $sec . '|' . $positionCode;
+    }
+
+    protected function seccionIdsMatch($a, $b): bool
+    {
+        $emptyA = $a === null || $a === '';
+        $emptyB = $b === null || $b === '';
+        if ($emptyA && $emptyB) {
+            return true;
+        }
+        if ($emptyA || $emptyB) {
+            return false;
+        }
+
+        return (int) $a === (int) $b;
+    }
+
+    protected function lotsMatch($a, $b): bool
+    {
+        $sa = ($a === null || $a === '') ? '' : trim((string) $a);
+        $sb = ($b === null || $b === '') ? '' : trim((string) $b);
+
+        return $sa === $sb;
+    }
+
+    protected function expirationsMatch($a, $b): bool
+    {
+        if ($a === null && $b === null) {
+            return true;
+        }
+        if ($a === null || $b === null) {
+            return false;
+        }
+
+        return Carbon::parse($a)->toDateString() === Carbon::parse($b)->toDateString();
+    }
+
+    /**
+     * Coincidencia detalle histórico ↔ fila de stock (mismo pivote de inventario).
+     */
+    protected function detailMatchesStockRow(DocumentCargaDetail $det, ProductStockByBranch $row): bool
+    {
+        if ((int) $det->product_id !== (int) $row->product_id) {
+            return false;
+        }
+        if ((int) $det->branchOffice_id !== (int) $row->branchOffice_id) {
+            return false;
+        }
+        if ((int) $det->almacen_id !== (int) $row->almacen_id) {
+            return false;
+        }
+        if (! $this->seccionIdsMatch($det->seccion_id, $row->seccion_id)) {
+            return false;
+        }
+        if (! $this->lotsMatch($det->num_lot, $row->num_lot)) {
+            return false;
+        }
+        if (! $this->expirationsMatch($det->date_expiration, $row->date_expiration)) {
+            return false;
+        }
+
+        $dp = trim((string) ($det->position_code ?? ''));
+        $rp = trim((string) ($row->position_code ?? ''));
+
+        return $dp !== '' && $dp === $rp;
+    }
+
+    protected function sumOldDetailQtyMatchingStockRow(Collection $oldDetails, ProductStockByBranch $row): float
+    {
+        $sum = 0.0;
+        foreach ($oldDetails as $det) {
+            if ($this->detailMatchesStockRow($det, $row)) {
+                $sum += (float) $det->quantity;
+            }
+        }
+
+        return $sum;
+    }
+
+    /**
+     * ENTRADA: no permitir dos productos distintos en la misma posición (misma sucursal, almacén y sección).
+     *
+     * @return array<int, string> índice del detalle => mensaje
+     */
+    public function entradaPositionConflictErrors(array $data, ?int $excludeCargaDocumentId = null): array
+    {
+        $errors = [];
+        if (($data['movement_type'] ?? '') !== 'ENTRADA') {
+            return $errors;
+        }
+
+        $details   = $data['details'] ?? [];
+        $branchId  = (int) ($data['branchOffice_id'] ?? 0);
+        $oldDetails = collect();
+        if ($excludeCargaDocumentId !== null && $excludeCargaDocumentId > 0) {
+            $oldDetails = DocumentCargaDetail::where('document_carga_id', $excludeCargaDocumentId)->get();
+        }
+
+        // 1) Mismo request: varios productos distintos en la misma posición física
+        $keyToIndices = [];
+        foreach ($details as $i => $d) {
+            $pos = trim((string) ($d['position_code'] ?? ''));
+            if ($pos === '') {
+                continue;
+            }
+            $key = $this->storageSlotKey(
+                $branchId,
+                (int) ($d['almacen_id'] ?? 0),
+                $d['seccion_id'] ?? null,
+                $pos
+            );
+            if (! isset($keyToIndices[$key])) {
+                $keyToIndices[$key] = [];
+            }
+            $keyToIndices[$key][] = (int) $i;
+        }
+        foreach ($keyToIndices as $indices) {
+            $pids = [];
+            foreach ($indices as $i) {
+                $pids[(int) ($details[$i]['product_id'] ?? 0)] = true;
+            }
+            if (count($pids) > 1) {
+                $msg = 'No puede ingresar dos productos distintos en la misma posición dentro de este almacén.';
+                foreach ($indices as $i) {
+                    $errors[$i] = $msg;
+                }
+            }
+        }
+
+        // 2) Stock existente: otro producto con cantidad > 0 en la misma posición
+        foreach ($details as $i => $d) {
+            if (isset($errors[$i])) {
+                continue;
+            }
+            $pos = trim((string) ($d['position_code'] ?? ''));
+            if ($pos === '') {
+                continue;
+            }
+            $productId = (int) ($d['product_id'] ?? 0);
+            $almacenId = (int) ($d['almacen_id'] ?? 0);
+            $seccionId = $d['seccion_id'] ?? null;
+
+            $q = ProductStockByBranch::query()
+                ->where('branchOffice_id', $branchId)
+                ->where('almacen_id', $almacenId)
+                ->where('product_id', '!=', $productId)
+                ->where('stock', '>', 0)
+                ->where('position_code', $pos);
+
+            if ($seccionId !== null && $seccionId !== '') {
+                $q->where('seccion_id', (int) $seccionId);
+            } else {
+                $q->whereNull('seccion_id');
+            }
+
+            foreach ($q->get() as $row) {
+                $remaining = (float) $row->stock;
+                if ($oldDetails->isNotEmpty()) {
+                    $remaining -= $this->sumOldDetailQtyMatchingStockRow($oldDetails, $row);
+                }
+                if ($remaining > 0.00001) {
+                    $errors[$i] = 'La posición «' . $pos . '» en este almacén ya tiene otro producto con stock. Elija otra posición o vacíe la ubicación antes.';
+
+                    break;
+                }
+            }
+        }
+
+        return $errors;
     }
 
     public function createCargaDocument(array $data): CargaDocument

@@ -11,6 +11,16 @@ use Illuminate\Http\Request;
 class WarehouseCargaHelperController extends Controller
 {
     /**
+     * Sucursal del documento: siempre la del trabajador del usuario autenticado.
+     */
+    protected function branchOfficeIdFromAuth(): ?int
+    {
+        $id = auth()->user()?->worker?->branchOffice_id;
+
+        return $id !== null ? (int) $id : null;
+    }
+
+    /**
      * Solo almacenes con secciones (sin listar sucursales) para selects de documento de carga.
      */
     public function almacenesConSecciones(Request $request)
@@ -30,17 +40,21 @@ class WarehouseCargaHelperController extends Controller
     {
         $request->validate([
             'product_id'      => 'required|integer|exists:products,id,deleted_at,NULL',
-            'branchOffice_id' => 'required|integer|exists:branch_offices,id,deleted_at,NULL',
             'almacen_id'      => 'nullable|integer|exists:almacens,id,deleted_at,NULL',
             'seccion_id'      => 'nullable|integer|exists:seccions,id,deleted_at,NULL',
             'limit'           => 'nullable|integer|min:1|max:50',
         ]);
 
+        $branchOfficeId = $this->branchOfficeIdFromAuth();
+        if ($branchOfficeId === null) {
+            return response()->json(['message' => 'El usuario no tiene sucursal asignada.'], 422);
+        }
+
         $limit = (int) $request->input('limit', 20);
 
         $q = DocumentCargaDetail::query()
             ->where('product_id', $request->input('product_id'))
-            ->where('branchOffice_id', $request->input('branchOffice_id'))
+            ->where('branchOffice_id', $branchOfficeId)
             ->whereNotNull('num_lot')
             ->where('num_lot', '!=', '');
 
@@ -68,15 +82,19 @@ class WarehouseCargaHelperController extends Controller
     public function cantidadPorPosicion(Request $request)
     {
         $request->validate([
-            'branchOffice_id' => 'required|integer|exists:branch_offices,id,deleted_at,NULL',
             'almacen_id'      => 'required|integer|exists:almacens,id,deleted_at,NULL',
             'position_code'   => 'required|string|max:64',
             'seccion_id'      => 'nullable|integer|exists:seccions,id,deleted_at,NULL',
         ]);
 
+        $branchOfficeId = $this->branchOfficeIdFromAuth();
+        if ($branchOfficeId === null) {
+            return response()->json(['message' => 'El usuario no tiene sucursal asignada.'], 422);
+        }
+
         $q = ProductStockByBranch::query()
             ->with('product:id,description')
-            ->where('branchOffice_id', $request->input('branchOffice_id'))
+            ->where('branchOffice_id', $branchOfficeId)
             ->where('almacen_id', $request->input('almacen_id'))
             ->where('position_code', $request->input('position_code'));
 
@@ -109,13 +127,17 @@ class WarehouseCargaHelperController extends Controller
     public function estadoPosiciones(Request $request)
     {
         $request->validate([
-            'branchOffice_id' => 'required|integer|exists:branch_offices,id,deleted_at,NULL',
             'almacen_id'      => 'required|integer|exists:almacens,id,deleted_at,NULL',
             'seccion_id'      => 'nullable|integer|exists:seccions,id,deleted_at,NULL',
         ]);
 
+        $branchOfficeId = $this->branchOfficeIdFromAuth();
+        if ($branchOfficeId === null) {
+            return response()->json(['message' => 'El usuario no tiene sucursal asignada.'], 422);
+        }
+
         $base = ProductStockByBranch::query()
-            ->where('branchOffice_id', $request->input('branchOffice_id'))
+            ->where('branchOffice_id', $branchOfficeId)
             ->where('almacen_id', $request->input('almacen_id'))
             ->whereNotNull('position_code')
             ->where('position_code', '!=', '');

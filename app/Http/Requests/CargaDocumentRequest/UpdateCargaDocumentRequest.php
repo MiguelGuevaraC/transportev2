@@ -22,6 +22,9 @@ class UpdateCargaDocumentRequest extends UpdateRequest
         if ($this->has('carrier_guide_id') && ! $this->has('carrier_guide_number')) {
             $this->merge(['carrier_guide_number' => $this->input('carrier_guide_id')]);
         }
+
+        $branchId = auth()->user()?->worker?->branchOffice_id;
+        $this->merge(['branchOffice_id' => $branchId]);
     }
 
     /**
@@ -67,8 +70,8 @@ class UpdateCargaDocumentRequest extends UpdateRequest
             'movement_date.required' => 'La fecha del movimiento es obligatoria.',
             'movement_date.date'     => 'La fecha del movimiento debe ser una fecha válida.',
 
-           'branchOffice_id.required'           => 'La Sucursal es obligatoria.',
-            'branchOffice_id.exists'             => 'La Sucursal seleccionada no es válida o ha sido eliminada.',
+           'branchOffice_id.required'           => 'El usuario no tiene sucursal asignada; no puede actualizar el documento.',
+            'branchOffice_id.exists'             => 'La sucursal del usuario no es válida o ha sido eliminada.',
 
             'person_id.required'                 => 'La persona es obligatoria.',
             'person_id.exists'                   => 'La persona seleccionada no es válida o ha sido eliminada.',
@@ -119,8 +122,21 @@ class UpdateCargaDocumentRequest extends UpdateRequest
     public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
+            $service = app(CargaDocumentService::class);
+
+            if ($this->movement_type === 'ENTRADA' && is_array($this->details)) {
+                $payload = [
+                    'movement_type'   => $this->movement_type,
+                    'branchOffice_id' => $this->branchOffice_id,
+                    'details'         => $this->details,
+                ];
+                $docId = (int) $this->route('id');
+                foreach ($service->entradaPositionConflictErrors($payload, $docId > 0 ? $docId : null) as $index => $message) {
+                    $validator->errors()->add("details.$index.position_code", $message);
+                }
+            }
+
             if ($this->movement_type === 'SALIDA') {
-                $service = app(CargaDocumentService::class);
                 foreach ($this->details as $index => $detail) {
                     $row   = $service->findStockRowForDetail($detail, (int) $this->branchOffice_id);
                     $stock = $row ? (float) $row->stock : null;
