@@ -3121,7 +3121,7 @@ class VentaController extends Controller
      *     path="/transporte/public/api/saleWithoutCreditNote",
      *     tags={"Sale"},
      *     summary="Get Sales Moviments without Credit Notes",
-     *     description="Retrieve a list of sales movements that do not have an associated credit note. You can filter the results by branch office, document type, and sequential number.",
+     *     description="Ventas que aún admiten NC por anulación: se excluyen solo si la suma de NC con motivo 1 o 2 alcanza el total. Otras NC (descuento, etc.) no bloquean el listado.",
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(
@@ -3241,10 +3241,10 @@ class VentaController extends Controller
             ->where('status_facturado', 'Enviado')
             ->where('status', '!=', 'Anulada')
             ->where(function ($query) use ($idNotaCredito, $nota) {
-                $query->where(function ($q) {
-                    $q->whereDoesntHave('creditNotes')
-                        ->orWhereRaw('(SELECT COALESCE(SUM(total), 0) FROM credit_notes WHERE moviment_id = moviments.id AND deleted_at IS NULL) < moviments.total');
-                });
+                // Solo las NC por anulación (1, 2) consumen el cupo de anulación; descuentos u otros motivos no ocultan la venta.
+                $query->whereRaw(
+                    '(SELECT COALESCE(SUM(total), 0) FROM credit_notes WHERE moviment_id = moviments.id AND deleted_at IS NULL AND reason IN (\'1\', \'2\')) < moviments.total'
+                );
                 if ($nota) {
                     $query->orWhereHas('creditNotes', function ($subQuery) use ($idNotaCredito) {
                         $subQuery->where('id', $idNotaCredito);
