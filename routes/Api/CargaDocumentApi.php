@@ -18,6 +18,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('carga/suggested-lotes', [WarehouseCargaHelperController::class, 'lotesSugeridos']);
     Route::get('carga/posicion-cantidad', [WarehouseCargaHelperController::class, 'cantidadPorPosicion']);
     Route::get('carga/posiciones-estado', [WarehouseCargaHelperController::class, 'estadoPosiciones']);
+    Route::get('carga/sticker-posicion', [WarehouseCargaHelperController::class, 'stickerPosicion']);
 
     Route::post('cargadocument-detail/{id}/damaged-photo', [CargarDocumentController::class, 'uploadDamagedPhoto']);
 

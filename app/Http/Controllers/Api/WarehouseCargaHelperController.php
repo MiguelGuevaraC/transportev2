@@ -6,6 +6,7 @@ use App\Http\Resources\AlmacenResource;
 use App\Models\Almacen;
 use App\Models\DocumentCargaDetail;
 use App\Models\ProductStockByBranch;
+use App\Services\WarehousePositionStickerService;
 use Illuminate\Http\Request;
 
 class WarehouseCargaHelperController extends Controller
@@ -167,6 +168,49 @@ class WarehouseCargaHelperController extends Controller
         return response()->json([
             'occupied'        => $occupied,
             'empty_tracked'   => $emptyTracked,
+        ]);
+    }
+
+    /**
+     * Etiqueta adhesiva (imagen SVG) con producto, posición y QR. Query as=json devuelve base64 para axios.
+     */
+    public function stickerPosicion(Request $request, WarehousePositionStickerService $stickerService)
+    {
+        $request->validate([
+            'product_id'    => 'required|integer|exists:products,id,deleted_at,NULL',
+            'position_code' => 'required|string|max:64',
+            'almacen_id'    => 'required|integer|exists:almacens,id,deleted_at,NULL',
+            'seccion_id'    => 'nullable|integer|exists:seccions,id,deleted_at,NULL',
+            'as'            => 'nullable|in:json',
+        ]);
+
+        $branchOfficeId = $this->branchOfficeIdFromAuth();
+        if ($branchOfficeId === null) {
+            return response()->json(['message' => 'El usuario no tiene sucursal asignada.'], 422);
+        }
+
+        $seccionId = $request->filled('seccion_id') ? (int) $request->input('seccion_id') : null;
+
+        $svg = $stickerService->buildSvgSticker(
+            (int) $request->input('product_id'),
+            trim((string) $request->input('position_code')),
+            (int) $request->input('almacen_id'),
+            $seccionId,
+            $branchOfficeId
+        );
+
+        if ($request->query('as') === 'json') {
+            return response()->json([
+                'mime'         => 'image/svg+xml',
+                'image_base64' => base64_encode($svg),
+                'filename'     => 'sticker-posicion.svg',
+            ]);
+        }
+
+        return response($svg, 200, [
+            'Content-Type'        => 'image/svg+xml; charset=utf-8',
+            'Content-Disposition' => 'inline; filename="sticker-posicion.svg"',
+            'Cache-Control'       => 'no-store, no-cache, must-revalidate',
         ]);
     }
 }
