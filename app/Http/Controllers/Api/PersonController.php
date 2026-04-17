@@ -225,8 +225,48 @@ class PersonController extends Controller
         }
 
         $this->hydrateLatestLotInProducts($persons);
+        $this->normalizeClientsFilterStocks($persons);
 
         return response()->json($persons, 200);
+    }
+
+    private function normalizeClientsFilterStocks($persons): void
+    {
+        foreach ($persons as $person) {
+            foreach ($person->products ?? [] as $product) {
+                $branches = $product->branchOffices ?? collect();
+                if ($branches->isEmpty()) {
+                    continue;
+                }
+
+                $grouped = $branches->groupBy(function ($branch) {
+                    $pivot = $branch->pivot ?? null;
+                    if (!$pivot) {
+                        return 'no-pivot';
+                    }
+
+                    return $branch->id . '|' . ($pivot->almacen_id ?? 'null') . '|' . ($pivot->seccion_id ?? 'null') . '|' . trim((string) ($pivot->num_lot ?? ''));
+                });
+
+                $normalized = collect();
+                foreach ($grouped as $group) {
+                    $hasPositive = $group->contains(function ($branch) {
+                        return (float) ($branch->pivot->stock ?? 0) > 0.00001;
+                    });
+
+                    foreach ($group as $branch) {
+                        $stock = (float) ($branch->pivot->stock ?? 0);
+                        if ($hasPositive && $stock <= 0.00001) {
+                            continue;
+                        }
+
+                        $normalized->push($branch);
+                    }
+                }
+
+                $product->setRelation('branchOffices', $normalized->values());
+            }
+        }
     }
 
     private function hydrateLatestLotInProducts($persons): void
