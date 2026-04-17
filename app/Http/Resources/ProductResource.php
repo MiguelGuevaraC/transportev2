@@ -30,20 +30,17 @@ class ProductResource extends JsonResource
  */
 
     /**
-     * Quita filas fantasma: stock 0 sin posición cuando ya hay otra fila del mismo
-     * sucursal/almacén/sección/lote/fecha con stock positivo (evita duplicados 0 vs 608 en el listado).
+     * Quita filas fantasma: si en el mismo sucursal/almacén/sección/lote hay stock positivo,
+     * no listar filas con stock 0 (sin agrupar por fecha: evita duplicar 0 vs 608 cuando una fila
+     * trae vencimiento y otra no).
      */
     protected function filterRedundantZeroStockPivotRows($branchOffices)
     {
         $list    = collect($branchOffices->all());
         $grouped = $list->groupBy(function ($branch) {
             $p = $branch->pivot;
-            $d = '';
-            if ($p->date_expiration !== null && $p->date_expiration !== '') {
-                $d = Carbon::parse($p->date_expiration)->toDateString();
-            }
 
-            return $branch->id . '|' . $p->almacen_id . '|' . ($p->seccion_id ?? 'null') . '|' . trim((string) ($p->num_lot ?? '')) . '|' . $d;
+            return $branch->id . '|' . $p->almacen_id . '|' . ($p->seccion_id ?? 'null') . '|' . trim((string) ($p->num_lot ?? ''));
         });
         $result = collect();
         foreach ($grouped as $group) {
@@ -52,8 +49,7 @@ class ProductResource extends JsonResource
             });
             foreach ($group as $branch) {
                 $stock = (float) ($branch->pivot->stock ?? 0);
-                $pos   = trim((string) ($branch->pivot->position_code ?? ''));
-                if ($hasPositive && $stock <= 0.00001 && $pos === '') {
+                if ($hasPositive && $stock <= 0.00001) {
                     continue;
                 }
                 $result->push($branch);

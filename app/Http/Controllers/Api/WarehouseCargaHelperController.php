@@ -77,7 +77,7 @@ class WarehouseCargaHelperController extends Controller
     }
 
     /**
-     * Cantidad total y desglose por producto en una posición (sticker A/A1).
+     * Cantidad total y desglose por producto en una posición (código de ubicación; sirve para armar la etiqueta adhesiva que pegan en bodega).
      */
     public function cantidadPorPosicion(Request $request)
     {
