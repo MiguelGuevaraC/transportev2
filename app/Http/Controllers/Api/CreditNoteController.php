@@ -401,11 +401,10 @@ class CreditNoteController extends Controller
                     $movCaja->delete();
                 }
             }
-        } else {
-            if ($installmentPay) {
-                $installmentPay->comment = 'NC-' . $object->number;
-                $installmentPay->save();
-            }
+        }
+        if ($installmentPay) {
+            $installmentPay->comment = 'NC-' . $object->number;
+            $installmentPay->save();
         }
 
         $receptions = $moviment->receptions;
@@ -544,6 +543,8 @@ class CreditNoteController extends Controller
         $branchOfficeIdFormatted = str_pad((string) $boxSerie, 2, '0', STR_PAD_LEFT);
         $tipo = $tipo . $branchOfficeIdFormatted;
 
+        $totalNcAntesEdicion = (float) $object->total;
+
         // Actualizar la nota de crédito con los nuevos datos
         // $object->number = $object->number ?? $tipo . '-' . str_pad($object->id, 8, '0', STR_PAD_LEFT);
         $object->totalReferido = $moviment->total ?? 0;
@@ -587,11 +588,27 @@ class CreditNoteController extends Controller
             $installment = $moviment->installments->first();
 
             if ($installment) { // Verificar que exista una cuota
-                // Obtener la primera amortización de tipo "Nota Credito"
-                $hasCreditNote = $installment->payInstallments->where('type', '=', 'Nota Credito')->first();
+                // Amortización de esta NC concreta (varias NC = varias filas; no pisar la primera).
+                $ncComment = 'NC-' . $object->number;
+                $hasCreditNote = $installment->payInstallments()
+                    ->where('type', 'Nota Credito')
+                    ->where('comment', $ncComment)
+                    ->first();
+
+                if (! $hasCreditNote) {
+                    $soloNc = $installment->payInstallments()->where('type', 'Nota Credito')->orderBy('id')->get();
+                    if ($soloNc->count() === 1) {
+                        $hasCreditNote = $soloNc->first();
+                    } else {
+                        $hasCreditNote = $installment->payInstallments()
+                            ->where('type', 'Nota Credito')
+                            ->whereRaw('ABS(total - ?) < 0.0001', [$totalNcAntesEdicion])
+                            ->orderByDesc('id')
+                            ->first();
+                    }
+                }
 
                 if ($hasCreditNote) {
-                    // Actualiza el registro existente en lugar de crear uno nuevo
                     $hasCreditNote->update([
                         'paymentDate' => Carbon::now()->toDateString(),
                         'total' => $request->input('total') ?? 0,
@@ -600,14 +617,34 @@ class CreditNoteController extends Controller
                         'cash' => $request->input('total') ?? 0,
                         'card' => 0,
                         'plin' => 0,
-                        // 'nroOperacion' => '',
-                        // 'comment' => '',
                         'type' => 'Nota Credito',
-                        // 'bank_id' => null,
                     ]);
+                    $hasCreditNote->comment = $ncComment;
+                    $hasCreditNote->save();
                 } else {
-                    // Opcional: manejar el caso en que no hay "Nota Credito"
-                    // Puedes decidir qué hacer aquí, como registrar un mensaje o crear una nueva amortización
+                    $tipoc = 'CC01';
+                    $resultado = DB::select(
+                        'SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(number, "-", -1) AS UNSIGNED)), 0) + 1 AS siguienteNum
+                         FROM pay_installments
+                         WHERE SUBSTRING_INDEX(number, "-", 1) = ?',
+                        [$tipoc]
+                    );
+                    $siguienteNum = isset($resultado[0]->siguienteNum) ? (int) $resultado[0]->siguienteNum : 1;
+                    PayInstallment::create([
+                        'number' => $tipoc . '-' . str_pad((string) $siguienteNum, 8, '0', STR_PAD_LEFT),
+                        'paymentDate' => Carbon::now()->toDateString(),
+                        'total' => $request->input('total') ?? 0,
+                        'yape' => 0,
+                        'deposit' => 0,
+                        'cash' => $request->input('total') ?? 0,
+                        'card' => 0,
+                        'plin' => 0,
+                        'nroOperacion' => '',
+                        'comment' => $ncComment,
+                        'type' => 'Nota Credito',
+                        'installment_id' => $installment->id,
+                        'bank_id' => null,
+                    ]);
                 }
 
                 // Actualizar el total de la deuda en el installment
