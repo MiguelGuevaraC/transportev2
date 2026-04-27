@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CarrierGuideController;
 use App\Http\Controllers\Api\ComissionAgentController;
 use App\Http\Controllers\Api\ContactInfoController;
 use App\Http\Controllers\Api\CreditNoteController;
+use App\Http\Controllers\Api\DebitNoteController;
 use App\Http\Controllers\Api\DetailGrtController;
 use App\Http\Controllers\Api\DetailReceptionController;
 use App\Http\Controllers\Api\DetailWorkerController;
@@ -340,6 +341,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('declararVentasHoy', [VentaController::class, 'declararVentasHoy']);
     Route::get('declararNCHoy', [CreditNoteController::class, 'declararNCHoy']);
     Route::get('declararNotaCredito/{id}', [CreditNoteController::class, 'declararNotaCredito']);
+    Route::get('declararNDHoy', [DebitNoteController::class, 'declararNDHoy']);
+    Route::get('declararNotaDebito/{id}', [DebitNoteController::class, 'declararNotaDebito']);
     Route::get('declararGuia/{id}', [CarrierGuideController::class, 'declararGuia']);
     Route::get('declararGuiaBack', [CarrierGuideController::class, 'declararGuiaBack']);
 
@@ -365,6 +368,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post('creditNote', [CreditNoteController::class, 'store']);
     Route::delete('creditNote/{id}', [CreditNoteController::class, 'destroy']);
     Route::put('creditNote/{id}', [CreditNoteController::class, 'update']);
+
+    // DEBIT NOTE
+    Route::get('debitNote', [DebitNoteController::class, 'index']);
+    Route::get('debitNote/{id}', [DebitNoteController::class, 'show']);
+    Route::post('debitNote', [DebitNoteController::class, 'store']);
+    Route::delete('debitNote/{id}', [DebitNoteController::class, 'destroy']);
+    Route::put('debitNote/{id}', [DebitNoteController::class, 'update']);
 
     // EXPENSES CONCEPT
     Route::get('expensesConcept', [ExpensesConceptController::class, 'index']);

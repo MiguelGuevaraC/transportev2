@@ -334,6 +334,20 @@ class Moviment extends Model
         });
     }
 
+    public function debitNotes()
+    {
+        return $this->hasMany(DebitNote::class);
+    }
+
+    public function debitNote()
+    {
+        return $this->hasOne(DebitNote::class)->ofMany([
+            'id' => 'max',
+        ], function ($query) {
+            $query->where('status_facturado', '!=', 'Anulada');
+        });
+    }
+
     public function updateSaldo()
     {
         // Sumar el totalDebt de todas las installments relacionadas
