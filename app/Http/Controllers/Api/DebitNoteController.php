@@ -114,7 +114,7 @@ class DebitNoteController extends Controller
     public function store(Request $request)
     {
         $validator = validator()->make($request->all(), [
-            'total' => 'required|numeric|min:0.01',
+            'total' => 'required|numeric',
             'comment' => 'nullable|string',
             'reason' => 'nullable|string',
             'reason_code' => [
@@ -161,6 +161,11 @@ class DebitNoteController extends Controller
             return response()->json(['error' => 'La venta está anulada; no se pueden emitir notas de débito.'], 422);
         }
 
+        $monto = $this->resolverMontoIncrementoNotaDebito($request, $moviment);
+        if ($monto < 0.01) {
+            return response()->json(['error' => 'El monto de la nota de débito (incremento) debe ser al menos 0.01. Revise total, newTotal y totalAjuste.'], 422);
+        }
+
         $tipo = $this->buildDebitNotePrefix($moviment, $box);
 
         $resultado2 = DB::select(
@@ -172,7 +177,6 @@ class DebitNoteController extends Controller
 
         $siguienteNum2 = (int) $resultado2[0]->siguienteNum;
 
-        $monto = (float) $request->input('total');
         $this->applyDeltaToFirstInstallment($moviment, $monto);
 
         $data = [
@@ -247,7 +251,7 @@ class DebitNoteController extends Controller
     public function update(Request $request, $id)
     {
         $validator = validator()->make($request->all(), [
-            'total' => 'required|numeric|min:0.01',
+            'total' => 'required|numeric',
             'comment' => 'nullable|string',
             'reason' => 'nullable|string',
             'reason_code' => [
@@ -286,14 +290,18 @@ class DebitNoteController extends Controller
             return response()->json(['error' => 'La venta está anulada.'], 422);
         }
 
+        $montoResuelto = $this->resolverMontoIncrementoNotaDebito($request, $moviment);
+        if ($montoResuelto < 0.01) {
+            return response()->json(['error' => 'El monto de la nota de débito (incremento) debe ser al menos 0.01. Revise total, newTotal y totalAjuste.'], 422);
+        }
+
         $totalAntes = (float) $object->total;
-        $totalNuevo = (float) $request->input('total');
-        $delta = $totalNuevo - $totalAntes;
+        $delta = $montoResuelto - $totalAntes;
         $this->applyDeltaToFirstInstallment($moviment, $delta);
 
         $object->totalReferido = $moviment->total ?? 0;
         $object->percentaje = $request->input('percentaje') ?? 0;
-        $object->total = $totalNuevo;
+        $object->total = $montoResuelto;
         $object->reason_code = $request->input('reason_code');
         $object->reason = $request->input('reason');
         $object->comment = $request->input('comment') ?? '-';
@@ -431,6 +439,34 @@ class DebitNoteController extends Controller
             ]);
         }
         Log::error("FINALIZADO ENVIO MASIVO $fecha, ND ENVIADAS: $contador");
+    }
+
+    /**
+     * Monto que se suma a la cuota (incremento de la ND).
+     * 1) Si viene newTotal: max(0, newTotal - total de la venta).
+     * 2) Si total > totalAjuste (ambos numéricos): total - totalAjuste (front: total = nuevo monto deseado, totalAjuste = base).
+     * 3) Si no: total del request = incremento directo.
+     */
+    private function resolverMontoIncrementoNotaDebito(Request $request, Moviment $moviment): float
+    {
+        if ($request->filled('newTotal') && is_numeric($request->input('newTotal'))) {
+            $nuevo = (float) $request->input('newTotal');
+            $baseVenta = (float) $moviment->total;
+
+            return max(0.0, $nuevo - $baseVenta);
+        }
+
+        $rawTotal = $request->input('total');
+        $ajuste = $request->input('totalAjuste');
+        if ($ajuste !== null && $ajuste !== '' && is_numeric($ajuste) && $rawTotal !== null && $rawTotal !== '' && is_numeric($rawTotal)) {
+            $t = (float) $rawTotal;
+            $a = (float) $ajuste;
+            if ($t > $a) {
+                return max(0.0, $t - $a);
+            }
+        }
+
+        return (float) $rawTotal;
     }
 
     private function invocarFacturadorNotaDebito(int $idventa): void
