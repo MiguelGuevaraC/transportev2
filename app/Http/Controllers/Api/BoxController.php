@@ -46,7 +46,7 @@ class BoxController extends Controller
 
     public function indexNotAssigned(Request $request)
     {
-        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $perPage = min(max((int) $request->input('per_page', 500), 1), 500);
         $page = max((int) $request->input('page', 1), 1);
 
         $assignedBoxIds = User::whereNotNull('box_id')->pluck('box_id');
@@ -92,33 +92,22 @@ class BoxController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
-
-        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $perPage = min(max((int) $request->input('per_page', 500), 1), 500);
         $page = max((int) $request->input('page', 1), 1);
 
-        $branch_office_id = $request->input('branch_office_id');
+        $list = Box::with(['branchOffice', 'user'])
+            ->where('state', 1)
+            ->orderBy('id', 'desc');
 
-        if ($branch_office_id && is_numeric($branch_office_id)) {
-            $branchOffice = BranchOffice::find($branch_office_id);
+        if ($request->filled('branch_office_id') && is_numeric($request->input('branch_office_id'))) {
+            $branchOffice = BranchOffice::find($request->input('branch_office_id'));
             if (! $branchOffice) {
                 return response()->json([
                     'message' => 'Branch Office Not Found',
                 ], 404);
             }
-        } else {
-            $branch_office_id = $user->worker->branchOffice_id ?? null;
-            if (! $branch_office_id) {
-                return response()->json([
-                    'message' => 'Branch Office Not Found for the user',
-                ], 404);
-            }
+            $list->where('branchOffice_id', $request->input('branch_office_id'));
         }
-
-        $list = Box::with(['branchOffice', 'user'])
-            ->where('state', 1)
-            ->where('branchOffice_id', $branch_office_id)
-            ->orderBy('id', 'desc');
 
         $paginatedList = $list->paginate($perPage, ['*'], 'page', $page);
 
@@ -131,7 +120,7 @@ class BoxController extends Controller
      */
     public function indexAll(Request $request)
     {
-        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $perPage = min(max((int) $request->input('per_page', 500), 1), 500);
         $page = max((int) $request->input('page', 1), 1);
 
         $list = Box::with(['branchOffice', 'user'])
