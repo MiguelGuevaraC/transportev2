@@ -44,11 +44,16 @@ class BoxController extends Controller
      * )
      */
 
-    public function indexNotAssigned()
+    public function indexNotAssigned(Request $request)
     {
+        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $page = max((int) $request->input('page', 1), 1);
+
         $assignedBoxIds = User::whereNotNull('box_id')->pluck('box_id');
         $list = Box::with(['branchOffice'])
-            ->whereNotIn('id', $assignedBoxIds)->simplePaginate();
+            ->whereNotIn('id', $assignedBoxIds)
+            ->orderBy('id', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json($list, 200);
     }
@@ -87,40 +92,63 @@ class BoxController extends Controller
 
     public function index(Request $request)
     {
-        $user = Auth()->user();
-        $user_id = $user->id ?? '';
+        $user = auth()->user();
 
-        // Obtener el branch_office_id del request o del usuario autenticado
+        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $page = max((int) $request->input('page', 1), 1);
+
         $branch_office_id = $request->input('branch_office_id');
 
         if ($branch_office_id && is_numeric($branch_office_id)) {
             $branchOffice = BranchOffice::find($branch_office_id);
-            if (!$branchOffice) {
+            if (! $branchOffice) {
                 return response()->json([
-                    "message" => "Branch Office Not Found",
+                    'message' => 'Branch Office Not Found',
                 ], 404);
             }
         } else {
             $branch_office_id = $user->worker->branchOffice_id ?? null;
-            if (!$branch_office_id) {
+            if (! $branch_office_id) {
                 return response()->json([
-                    "message" => "Branch Office Not Found for the user",
+                    'message' => 'Branch Office Not Found for the user',
                 ], 404);
             }
         }
 
-        // Construir la consulta base
+        $list = Box::with(['branchOffice', 'user'])
+            ->where('state', 1)
+            ->where('branchOffice_id', $branch_office_id)
+            ->orderBy('id', 'desc');
+
+        $paginatedList = $list->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($paginatedList, 200);
+    }
+
+    /**
+     * Listado de cajas (todas las sucursales o filtradas). Misma paginación que index.
+     * Usado por boxAll cuando el front no debe heredar solo la sucursal del usuario.
+     */
+    public function indexAll(Request $request)
+    {
+        $perPage = min(max((int) $request->input('per_page', 15), 1), 500);
+        $page = max((int) $request->input('page', 1), 1);
+
         $list = Box::with(['branchOffice', 'user'])
             ->where('state', 1)
             ->orderBy('id', 'desc');
 
-        // Si el usuario no es admin, filtrar por su branchOffice_id
-        //  if ($user_id != 1) {
-        //      $list->where('branchOffice_id', $branch_office_id);
-        //  }
+        if ($request->filled('branch_office_id') && is_numeric($request->input('branch_office_id'))) {
+            $branchOffice = BranchOffice::find($request->input('branch_office_id'));
+            if (! $branchOffice) {
+                return response()->json([
+                    'message' => 'Branch Office Not Found',
+                ], 404);
+            }
+            $list->where('branchOffice_id', $request->input('branch_office_id'));
+        }
 
-        // Paginar los resultados
-        $paginatedList = $list->simplePaginate();
+        $paginatedList = $list->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json($paginatedList, 200);
     }
