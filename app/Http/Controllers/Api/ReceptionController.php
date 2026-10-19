@@ -136,7 +136,8 @@ class ReceptionController extends Controller
             'pointDestination',
             'pointSender',
             'details',
-            'firstCarrierGuide'
+            'firstCarrierGuide',
+            'moviment.installments'
         )
             ->where(function ($query) use ($subRoutes) {
                 foreach ($subRoutes as $subRoute) {
@@ -151,6 +152,13 @@ class ReceptionController extends Controller
                 }
             })
             ->where('branchOffice_id', $branch_office_id)
+            // receptionDate es DATE; la comparación directa permite usar su índice.
+            ->when($request->filled('dateStart'), function ($query) use ($request) {
+                $query->where('receptionDate', '>=', $request->input('dateStart'));
+            })
+            ->when($request->filled('dateEnd'), function ($query) use ($request) {
+                $query->where('receptionDate', '<=', $request->input('dateEnd'));
+            })
             ->orderBy('id', 'desc')
             ->paginate();
 
@@ -983,7 +991,8 @@ class ReceptionController extends Controller
                     //         'carrier_guides.programming_id'
                     //     );
                     // },
-                    'moviment:id,reception_id,sequentialNumber',
+                    'moviment:id,reception_id,sequentialNumber,status,saldo',
+                    'moviment.installments:id,moviment_id,date,totalDebt,status',
                 ]);
 
         // 3. Aplicar filtros
@@ -1043,11 +1052,11 @@ class ReceptionController extends Controller
 
         // Filtros por fechas
         if (!empty($filters['dateStart'])) {
-            $query->whereDate('receptions.receptionDate', '>=', $filters['dateStart']);
+            $query->where('receptions.receptionDate', '>=', $filters['dateStart']);
         }
 
         if (!empty($filters['dateEnd'])) {
-            $query->whereDate('receptions.receptionDate', '<=', $filters['dateEnd']);
+            $query->where('receptions.receptionDate', '<=', $filters['dateEnd']);
         }
 
         // Filtro por guía
@@ -1218,6 +1227,8 @@ class ReceptionController extends Controller
                 ? $detailsMap[$reception->id]->pluck('description')->implode(', ')
                 : '-';
 
+            $invoiceStatus = $this->getInvoiceStatus($reception->moviment);
+
             $reception->firstCarrierGuide = CarrierGuide::with([
                 'districtStart.province.department',
                 'districtEnd.province.department',
@@ -1251,6 +1262,7 @@ class ReceptionController extends Controller
                 'GUIA' => (string) ($reception->firstCarrierGuide->numero ?? 'Sin Guia'),
                 'DOC. VENTA' => (string) ($reception->nro_sale ??
                     ($reception->moviment->sequentialNumber ?? 'Sin Venta')),
+                'SITUACIÓN FACTURA' => $invoiceStatus,
                 'ESTADO RECEPCIÓN' => $status,
                 'USUARIO' => (string) ($reception->user->username ?? 'No asignado'),
             ];
@@ -1277,6 +1289,7 @@ class ReceptionController extends Controller
             'PESO' => (string) $totals['peso'],
             'GUIA' => '',
             'DOC. VENTA' => '',
+            'SITUACIÓN FACTURA' => '',
             'ESTADO RECEPCIÓN' => '',
             'USUARIO' => '',
         ];
@@ -1285,6 +1298,30 @@ class ReceptionController extends Controller
             'data' => $exportData,
             'totals' => $totals,
         ];
+    }
+
+    /**
+     * Determina la situación actual de la factura relacionada.
+     */
+    protected function getInvoiceStatus($moviment): string
+    {
+        if (!$moviment) {
+            return 'Sin Factura';
+        }
+
+        if ($moviment->status === 'Pagado'
+            || ($moviment->saldo !== null && (float) $moviment->saldo <= 0)) {
+            return 'Pagado';
+        }
+
+        $today = Carbon::today();
+        $hasOverdueInstallment = $moviment->installments->contains(function ($installment) use ($today) {
+            return (float) ($installment->totalDebt ?? 0) > 0
+                && $installment->date
+                && Carbon::parse($installment->date)->lt($today);
+        });
+
+        return $hasOverdueInstallment ? 'Vencido' : 'Pendiente';
     }
 
 }

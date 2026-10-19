@@ -40,6 +40,7 @@ class ReceptionsExport implements FromCollection, WithStyles
             'PESO',
             'GUIA',
             'DOC. VENTA',
+            'SITUACIÓN FACTURA',
             'ESTADO RECEPCIÓN',
             'USUARIO',
         ]);
@@ -58,22 +59,22 @@ class ReceptionsExport implements FromCollection, WithStyles
         $lastRow = $sheet->getHighestRow();
     
         // Establecer ajuste automático para todas las columnas, excepto H y K
-        foreach (range('A', 'O') as $column) {
+        foreach (range('A', 'P') as $column) {
             if (!in_array($column, ['H', 'K'])) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
         }
     
         // Negrita y centrado para los encabezados
-        $sheet->getStyle('A1:O1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:P1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:P1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
     
         // Color de fondo para los encabezados
-        $sheet->getStyle('A1:O1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A1:O1')->getFill()->getStartColor()->setARGB('FFCCCCCC'); // Gris claro
+        $sheet->getStyle('A1:P1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('A1:P1')->getFill()->getStartColor()->setARGB('FFCCCCCC'); // Gris claro
     
         // Estilo de bordes para la tabla
-        $sheet->getStyle('A1:O' . $lastRow)->applyFromArray([
+        $sheet->getStyle('A1:P' . $lastRow)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -83,10 +84,10 @@ class ReceptionsExport implements FromCollection, WithStyles
         ]);
     
         // Ajuste del texto a la izquierda para los datos (excepto encabezados)
-        $sheet->getStyle('A2:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A2:P' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     
         // Centrar el contenido de la columna de enlaces "DOCUMENTO"
-        $sheet->getStyle('O2:O' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('P2:P' . $lastRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
     }
     
 }
