@@ -963,7 +963,14 @@ class ReceptionController extends Controller
             }
         }
 
-        // 2. Construir query base con solo las relaciones necesarias
+        // 2. Construir query base con solo las relaciones necesarias.
+        // Se selecciona una sola guía activa por recepción para evitar filas
+        // duplicadas y consultas adicionales durante el procesamiento.
+        $activeGuide = CarrierGuide::query()
+            ->selectRaw('reception_id, MAX(id) as id')
+            ->where('status_facturado', '!=', 'Anulada')
+            ->groupBy('reception_id');
+
         $query = Reception::select(
             'receptions.*',
             DB::raw('(
@@ -972,10 +979,12 @@ class ReceptionController extends Controller
                 WHERE detail_receptions.reception_id = receptions.id
             ) as carga'),
             'carrier_guides.numero as guide_number',
-            'carrier_guides.id as guide_id' // Aquí el error podría estar en la coma antes del cierre
-        )->leftJoin('carrier_guides', function ($join) {
-            $join->on('receptions.id', '=', 'carrier_guides.reception_id')
-                ->where('carrier_guides.status_facturado', '!=', 'Anulada'); // Filtra solo guías activas
+            'carrier_guides.id as guide_id',
+            'carrier_guides.programming_id as guide_programming_id'
+        )->leftJoinSub($activeGuide, 'active_guides', function ($join) {
+            $join->on('receptions.id', '=', 'active_guides.reception_id');
+        })->leftJoin('carrier_guides', function ($join) {
+            $join->on('active_guides.id', '=', 'carrier_guides.id');
         })->with([
                     'user:id,username',
                     'origin:id,name',
@@ -998,14 +1007,11 @@ class ReceptionController extends Controller
         // 3. Aplicar filtros
         $this->applyReceptionFilters($query, $filters);
 
-        // 4. Obtener datos (limitado a 2000 para rendimiento)
-        $receptions = $query->orderBy('id', 'desc')->take(3000)->get();
+        // 4. Obtener datos (limitado para proteger la respuesta síncrona)
+        $receptions = $query->orderBy('receptions.id', 'desc')->take(3000)->get();
 
-        // 5. Precarga de detalles para evitar N+1
-        $detailsMap = $this->getReceptionDetails($receptions->pluck('id')->toArray());
-
-        // 6. Procesar y formatear datos
-        $result = $this->processReceptionData($receptions, $detailsMap);
+        // 5. Procesar y formatear datos. La carga ya viene agregada desde SQL.
+        $result = $this->processReceptionData($receptions);
 
         // 7. Exportar a Excel usando la fachada correctamente
         return $this->excel->download(
@@ -1188,25 +1194,9 @@ class ReceptionController extends Controller
     }
 
     /**
-     * Obtiene los detalles de recepción para un conjunto de IDs
-     */
-    protected function getReceptionDetails(array $receptionIds)
-    {
-        if (empty($receptionIds)) {
-            return collect();
-        }
-
-        return DB::table('detail_receptions')
-            ->whereIn('reception_id', $receptionIds)
-            ->select('reception_id', 'description')
-            ->get()
-            ->groupBy('reception_id');
-    }
-
-    /**
      * Procesa las recepciones y prepara los datos para exportación
      */
-    protected function processReceptionData($receptions, $detailsMap)
+    protected function processReceptionData($receptions)
     {
         $exportData = [];
         $totals = ['flete' => 0, 'deuda' => 0, 'peso' => 0];
@@ -1214,34 +1204,18 @@ class ReceptionController extends Controller
         foreach ($receptions as $reception) {
             // Determinar estado
             $status = 'No asignado';
-            if (!$reception->firstCarrierGuide) {
+            if (!$reception->guide_id) {
                 $status = 'Sin Guia';
-            } elseif ($reception->firstCarrierGuide && empty($reception->firstCarrierGuide->programming_id)) {
+            } elseif (empty($reception->guide_programming_id)) {
                 $status = 'Sin Programar';
             } else {
                 $status = 'Programado';
             }
 
             // Obtener descripción de carga
-            $carga = isset($detailsMap[$reception->id])
-                ? $detailsMap[$reception->id]->pluck('description')->implode(', ')
-                : '-';
+            $carga = $reception->carga ?: '-';
 
             $invoiceStatus = $this->getInvoiceStatus($reception->moviment);
-
-            $reception->firstCarrierGuide = CarrierGuide::with([
-                'districtStart.province.department',
-                'districtEnd.province.department',
-                'motive',
-                'sender',
-                'recipient',
-                'payResponsible',
-                'programming',
-                'programming.tract',
-                'programming.platform',
-                'programming.origin',
-                'programming.destination',
-            ])->find($reception->guide_id); // Obtener la guía específica
 
             // Preparar datos para exportación
             $exportData[] = [
@@ -1259,7 +1233,7 @@ class ReceptionController extends Controller
                 'DEUDA' => (string) ($reception->debtAmount ?? 0),
                 'CARGA' => (string) $carga,
                 'PESO' => (string) ($reception->netWeight ?? 0),
-                'GUIA' => (string) ($reception->firstCarrierGuide->numero ?? 'Sin Guia'),
+                'GUIA' => (string) ($reception->guide_number ?? 'Sin Guia'),
                 'DOC. VENTA' => (string) ($reception->nro_sale ??
                     ($reception->moviment->sequentialNumber ?? 'Sin Venta')),
                 'SITUACIÓN FACTURA' => $invoiceStatus,
