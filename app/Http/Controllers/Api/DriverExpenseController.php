@@ -7,6 +7,7 @@ use App\Http\Resources\DriverExpenseResource;
 use App\Models\BankAccount;
 use App\Models\BankMovement;
 use App\Models\Box;
+use App\Models\CajaYadiraMovement;
 use App\Models\DriverExpense;
 use App\Models\Moviment;
 use App\Models\Payable;
@@ -243,6 +244,14 @@ class DriverExpenseController extends Controller
 
     public function store(Request $request)
     {
+        if (! $request->has('type_payment') && $request->has('typePayment')) {
+            $request->merge(['type_payment' => $request->input('typePayment')]);
+        }
+        $normalizedPayment = str_replace(' ', '_', strtoupper((string) $request->input('type_payment')));
+        $isCajaYadira = $normalizedPayment === 'CAJA_YADIRA';
+        if ($isCajaYadira) {
+            $request->merge(['type_payment' => 'CAJA_YADIRA']);
+        }
 
         $rules = [
             'programming_id'         => 'required|exists:programmings,id',
@@ -253,11 +262,12 @@ class DriverExpenseController extends Controller
             'bank_id'                => 'nullable|exists:banks,id',
             'proveedor_id'           => 'nullable|exists:people,id',
             'selectTypePay'          => 'nullable|in:CONTADO,CREDITO,CANJE',
-            'type_payment'           => 'required|in:YAPE,DEPOSITO,EFECTIVO,COBRANZA_GUIAS',
+            'type_payment'           => 'required|in:YAPE,DEPOSITO,EFECTIVO,COBRANZA_GUIAS,CAJA_YADIRA',
             'nro_dias'               => 'nullable|required_if:type_payment,CREDITO',
 
             'type_document_id'       => 'nullable|exists:type_documents,id,deleted_at,NULL',
             'operationNumber'        => 'nullable|required_with:type_document_id',
+            'image'                  => 'nullable|file|image|max:10240',
 
             'bank_account_id'        => ['nullable', Rule::exists('bank_accounts', 'id')->whereNull('deleted_at')],
         ];
@@ -266,7 +276,7 @@ class DriverExpenseController extends Controller
             '*.required'           => 'El campo ":attribute" es obligatorio.',
             '*.exists'             => 'El valor seleccionado para ":attribute" no es válido.',
             'selectTypePay.in'     => 'El tipo de pago debe ser CONTADO, CREDITO o CANJE.',
-            'type_payment.in'      => 'El método de pago debe ser YAPE, DEPOSITO, EFECTIVO o COBRANZA_GUIAS.',
+            'type_payment.in'      => 'El método de pago debe ser YAPE, DEPOSITO, EFECTIVO, COBRANZA_GUIAS o CAJA_YADIRA.',
             'nro_dias.required_if' => 'Debe especificar "número de días" si el tipo de pago es CREDITO.',
         ];
 
@@ -319,12 +329,12 @@ class DriverExpenseController extends Controller
         // if ($user->typeofUser_id != 4) { //DEBE SER CAJERO
         //     return response()->json(['error' => 'El usuario debe ser del tipo Cajero'], 422);
         // }
-        if (! $user->box) {
+        if (! $isCajaYadira && ! $user->box) {
             return response()->json(['error' => 'El usuario no tiene una caja'], 422);
         }
 
-        $box = Box::find($user->box->id);
-        if ($box->status != 'Activa') {
+        $box = $user->box ? Box::find($user->box->id) : null;
+        if (! $isCajaYadira && $box->status != 'Activa') {
             return response()->json(['error' => 'Caja No está Aperturada'], 422);
         }
 
@@ -363,7 +373,7 @@ class DriverExpenseController extends Controller
             $this->driverExpense->generate_credit_payments($objectExpense->id, $dias);
         } else if ($objectExpense->selectTypePay == "CONTADO") {
             $bank_account = BankAccount::find($request->input(key: 'bank_account_id'));
-            if ($bank_account != null) {
+            if ($bank_account != null && ! $isCajaYadira) {
                 $data_movement_bank = [
                     'driver_expense_id'      => $objectExpense->id,
                     'bank_id'                => $request->input('bank_id'),
@@ -402,6 +412,25 @@ class DriverExpenseController extends Controller
             $objectExpense->save();
             Log::info('Imagen guardada en la base de datos con ruta: ' . $rutaImagen);
         }
+
+        // Caja Yadira utiliza su propio libro de ingresos/egresos y no mezcla
+        // sus movimientos con la caja operativa del usuario.
+        if ($isCajaYadira) {
+            $expenseConcept = $objectExpense->expensesConcept;
+            CajaYadiraMovement::create([
+                'movement_date' => $request->input('date_expense') ?: now()->toDateString(),
+                'movement_time' => now()->format('H:i'),
+                'type' => $expenseConcept?->typeConcept === 'Ingreso' ? 'Ingreso' : 'Egreso',
+                'operation_number' => $request->input('operationNumber'),
+                'amount' => $totalAcum,
+                'person_id' => $personWorker->id,
+                'concept' => $expenseConcept?->name ?? 'Movimiento de Caja Yadira',
+                'observation' => $request->input('comment'),
+                'voucher_path' => $objectExpense->routeFact !== 'ruta.jpg' ? $objectExpense->routeFact : null,
+                'driver_expense_id' => $objectExpense->id,
+                'user_id' => auth()->id(),
+            ]);
+        }
         $tipo = 'M' . str_pad($programming->branchOffice_id, 3, '0', STR_PAD_LEFT);
 
         $tipo = str_pad($tipo, 4, '0', STR_PAD_RIGHT);
@@ -411,7 +440,7 @@ class DriverExpenseController extends Controller
 
         if ($request->input('expensesConcept_id') == 1) { //GENERA MOVIMEITNO EGRESO DE CAJA
 
-            if ($request->input('isMovimentCaja') == 1) {
+            if ($request->input('isMovimentCaja') == 1 && ! $isCajaYadira) {
                 $data = [
 
                     'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),
@@ -449,7 +478,7 @@ class DriverExpenseController extends Controller
             $programming->updateTotalDriversExpenses();
 
         } else {
-            if ($request->input('isMovimentCaja') == 1) {
+            if ($request->input('isMovimentCaja') == 1 && ! $isCajaYadira) {
                 $data = [
 
                     'sequentialNumber'  => $tipo . '-' . str_pad($siguienteNum, 8, '0', STR_PAD_LEFT),

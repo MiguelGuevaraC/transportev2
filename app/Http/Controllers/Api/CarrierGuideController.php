@@ -6,6 +6,7 @@ use App\Http\Requests\CarrierGuideRequest\SubcontractDataRequest;
 use App\Models\Bitacora;
 use App\Models\BranchOffice;
 use App\Models\CarrierGuide;
+use App\Models\CarrierGuideRelation;
 use App\Models\District;
 use App\Models\Motive;
 use App\Models\Person;
@@ -89,6 +90,7 @@ class CarrierGuideController extends Controller
         $document        = $request->input('document');
         $startDate       = $request->input('startDate');
         $endDate         = $request->input('endDate');
+        $dateType        = $request->input('dateType', $request->input('dateFilter', 'guide'));
         $route           = $request->input('route');
         $typeGuia        = $request->input('typeGuia');
         $statusGuia      = $request->input('statusGuia');
@@ -223,13 +225,7 @@ class CarrierGuideController extends Controller
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
         }
 
-        if (! empty($startDate) && ! empty($endDate)) {
-            $carrierGuides->whereBetween(DB::raw('DATE(transferStartDate)'), [$startDate, $endDate]);
-        } elseif (! empty($startDate)) {
-            $carrierGuides->whereDate('transferStartDate', '>=', $startDate);
-        } elseif (! empty($endDate)) {
-            $carrierGuides->whereDate('transferStartDate', '<=', $endDate);
-        }
+        $carrierGuides->filterByEmissionDate($dateType, $startDate, $endDate);
 
         // Si el parámetro "all" es true, no paginar
         if ($request->boolean('all')) {
@@ -333,6 +329,7 @@ class CarrierGuideController extends Controller
 
     public function store(Request $request)
     {
+        $this->normalizeParentGuideInput($request);
 
         $validator = validator()->make($request->all(), [
             'ubigeoStart'       => 'nullable',
@@ -362,6 +359,7 @@ class CarrierGuideController extends Controller
 
             'districtStart_id'  => 'required|exists:districts,id',
             'districtEnd_id'    => 'required|exists:districts,id',
+            'parent_carrier_guide_id' => 'nullable|integer|exists:carrier_guides,id',
         ]);
 
         if ($validator->fails()) {
@@ -376,6 +374,11 @@ class CarrierGuideController extends Controller
                 'user_agent'  => $request->userAgent(),                                    // Información sobre el navegador/dispositivo
             ]);
             return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $parentValidation = $this->validateParentGuide($request->input('parent_carrier_guide_id'));
+        if ($parentValidation !== true) {
+            return $parentValidation;
         }
 
         $remitenteguia = Person::find($request->input('sender_id'));
@@ -438,6 +441,11 @@ class CarrierGuideController extends Controller
         $document = $request->input('document') ?? null;
         if ($document != null) {
             $document = $this->algoritmoanexos($document);
+
+            $referenceValidation = $this->validateUniqueSenderGuideReference($document);
+            if ($referenceValidation !== true) {
+                return $referenceValidation;
+            }
 
             // Verifica que el 'sender_id' esté presente en la solicitud antes de buscar la persona.
             $senderId = $request->input('sender_id');
@@ -504,6 +512,10 @@ class CarrierGuideController extends Controller
         ];
 
         $object = CarrierGuide::create($data);
+
+        if ($request->filled('parent_carrier_guide_id')) {
+            $this->syncParentGuideRelation($object->id, (int) $request->input('parent_carrier_guide_id'));
+        }
 
         $object->ubigeoStart = District::find($request->input('districtStart_id'))->ubigeo_code;
         $object->ubigeoEnd   = District::find($request->input('districtEnd_id'))->ubigeo_code;
@@ -699,6 +711,8 @@ class CarrierGuideController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->normalizeParentGuideInput($request);
+
         $object = CarrierGuide::find($id);
         if (! $object) {
             return response()->json(['message' => 'CarrierGuide not found'], 422);
@@ -731,6 +745,7 @@ class CarrierGuideController extends Controller
 
             'districtStart_id'  => 'required|exists:districts,id',
             'districtEnd_id'    => 'required|exists:districts,id',
+            'parent_carrier_guide_id' => 'sometimes|nullable|integer|exists:carrier_guides,id',
 
         ]);
 
@@ -747,6 +762,16 @@ class CarrierGuideController extends Controller
             ]);
 
             return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        if ($request->has('parent_carrier_guide_id')) {
+            $parentValidation = $this->validateParentGuide(
+                $request->input('parent_carrier_guide_id'),
+                (int) $id
+            );
+            if ($parentValidation !== true) {
+                return $parentValidation;
+            }
         }
 
         $motive       = Motive::find($request->input('motive_id'));
@@ -768,6 +793,12 @@ class CarrierGuideController extends Controller
         $document = $request->input('document') ?? null;
         if ($document != null) {
             $document = $this->algoritmoanexos($document);
+
+            $referenceValidation = $this->validateUniqueSenderGuideReference($document, $object->id);
+            if ($referenceValidation !== true) {
+                return $referenceValidation;
+            }
+
             // Verifica que el 'sender_id' esté presente en la solicitud antes de buscar la persona.
             $senderId = $request->input('sender_id');
             if ($senderId) {
@@ -837,6 +868,15 @@ class CarrierGuideController extends Controller
         ];
 
         $object->update($Data);
+
+        if ($request->has('parent_carrier_guide_id')) {
+            $this->syncParentGuideRelation(
+                (int) $object->id,
+                $request->filled('parent_carrier_guide_id')
+                    ? (int) $request->input('parent_carrier_guide_id')
+                    : null
+            );
+        }
 
         $object->ubigeoStart = District::find($request->input('districtStart_id'))->ubigeo_code;
         $object->ubigeoEnd   = District::find($request->input('districtEnd_id'))->ubigeo_code;
@@ -1241,12 +1281,156 @@ class CarrierGuideController extends Controller
         return $document;
     }
 
+    /**
+     * Acepta el nombre técnico y los nombres funcionales usados por el frontend.
+     */
+    protected function normalizeParentGuideInput(Request $request): void
+    {
+        if (! $request->has('parent_carrier_guide_id')) {
+            foreach (['guia_matriz_id', 'matriz_id'] as $alias) {
+                if ($request->has($alias)) {
+                    $request->merge([
+                        'parent_carrier_guide_id' => $request->input($alias),
+                    ]);
+                    break;
+                }
+            }
+        }
+    }
+
+    protected function validateParentGuide($parentId, ?int $childId = null)
+    {
+        if ($parentId === null || $parentId === '') {
+            return true;
+        }
+
+        $parent = CarrierGuide::find((int) $parentId);
+        if (! $parent) {
+            return response()->json(['error' => 'La guía matriz no existe.'], 422);
+        }
+
+        if ($childId !== null && (int) $parentId === $childId) {
+            return response()->json(['error' => 'Una guía no puede depender de sí misma.'], 422);
+        }
+
+        if (strtolower((string) $parent->status_facturado) === 'anulada') {
+            return response()->json(['error' => 'No se puede vincular una guía matriz anulada.'], 422);
+        }
+
+        if ($childId !== null && $this->wouldCreateGuideCycle((int) $parentId, $childId)) {
+            return response()->json(['error' => 'El vínculo generaría una relación circular entre guías.'], 422);
+        }
+
+        return true;
+    }
+
+    protected function syncParentGuideRelation(int $childId, ?int $parentId): void
+    {
+        CarrierGuideRelation::where('child_carrier_guide_id', $childId)->delete();
+
+        if ($parentId !== null) {
+            CarrierGuideRelation::firstOrCreate([
+                'parent_carrier_guide_id' => $parentId,
+                'child_carrier_guide_id' => $childId,
+            ], [
+                'relation_type' => 'derivada',
+            ]);
+        }
+    }
+
+    protected function wouldCreateGuideCycle(int $parentId, int $childId): bool
+    {
+        $pending = [$childId];
+        $visited = [];
+
+        while ($pending) {
+            $current = array_pop($pending);
+            if (isset($visited[$current])) {
+                continue;
+            }
+
+            $visited[$current] = true;
+            if ($current === $parentId) {
+                return true;
+            }
+
+            $children = CarrierGuideRelation::where('parent_carrier_guide_id', $current)
+                ->pluck('child_carrier_guide_id');
+
+            foreach ($children as $next) {
+                $pending[] = (int) $next;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Garantiza que una referencia de guía remitente no se asigne a más de
+     * una guía transportista activa. El campo document puede contener varias
+     * referencias separadas por comas.
+     */
+    protected function validateUniqueSenderGuideReference(?string $document, ?int $ignoreId = null)
+    {
+        $references = collect(explode(',', (string) $document))
+            ->map(fn ($reference) => trim($reference))
+            ->filter()
+            ->map(fn ($reference) => [
+                'value' => $reference,
+                'normalized' => strtolower(str_replace(' ', '', $reference)),
+            ])
+            ->unique('normalized')
+            ->values();
+
+        if ($references->isEmpty()) {
+            return true;
+        }
+
+        $duplicate = CarrierGuide::query()
+            ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+            ->whereRaw("LOWER(COALESCE(status_facturado, '')) NOT IN ('anulada', 'anulado')")
+            ->where(function ($query) use ($references) {
+                foreach ($references as $reference) {
+                    $query->orWhereRaw(
+                        "FIND_IN_SET(?, LOWER(REPLACE(document, ' ', ''))) > 0",
+                        [$reference['normalized']]
+                    );
+                }
+            })
+            ->select(['id', 'numero', 'document'])
+            ->first();
+
+        if (!$duplicate) {
+            return true;
+        }
+
+        $duplicatedReference = $references->first(function ($reference) use ($duplicate) {
+            $storedReferences = collect(explode(',', (string) $duplicate->document))
+                ->map(fn ($value) => strtolower(str_replace(' ', '', trim($value))))
+                ->filter();
+
+            return $storedReferences->contains($reference['normalized']);
+        });
+
+        return response()->json([
+            'message' => 'La guía remitente ya está asociada a otra guía transportista.',
+            'reference' => $duplicatedReference['value'] ?? null,
+            'carrier_guide' => $duplicate->numero,
+        ], 422);
+    }
+
     public function changeStatusFacturacion(Request $request, $id)
     {
         $object = CarrierGuide::find($id);
 
+        // Aceptar ambos nombres para facilitar la integración con el frontend.
+        $request->merge([
+            'motivoAnulacion' => $request->input('motivoAnulacion', $request->input('motivo_anulacion')),
+        ]);
+
         $validator = validator()->make($request->all(), [
             'statusFacturado' => 'required|in:Anulada,Pendiente,Enviado',
+            'motivoAnulacion' => 'required_if:statusFacturado,Anulada|nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
@@ -1258,6 +1442,11 @@ class CarrierGuideController extends Controller
         }
 
         $object->status_facturado = $request->input('statusFacturado') ?? $object->status_facturado;
+
+        // El motivo es obligatorio al anular y se conserva como historial de la guía.
+        if ($object->status_facturado === 'Anulada') {
+            $object->motivo_anulacion = trim((string) $request->input('motivoAnulacion'));
+        }
 
         $object->save();
 

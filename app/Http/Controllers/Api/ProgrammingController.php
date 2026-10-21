@@ -491,10 +491,15 @@ class ProgrammingController extends Controller
                 foreach ($detailsReceptions as $detail) {
 
                     $detailReception = CarrierGuide::find($detail['idDetail']);
-                    $detailReception->status = 'En Transito';
-                    $detailReception->save();
                     if ($detailReception) {
-                        $detailReception->update(['programming_id' => $object->id]);
+                        // Una guía entregada no debe retroceder a "En Transito"
+                        // al asociarla a un viaje o manifiesto.
+                        if ($detailReception->status !== 'Entregado') {
+                            $detailReception->status = 'En Transito';
+                        }
+                        $detailReception->programming_id = $object->id;
+                        $detailReception->save();
+
                         CarrierByProgramming::create([
                             'programming_id' => $object->id,
                             'carrier_guide_id' => $detailReception->id,
@@ -888,8 +893,12 @@ class ProgrammingController extends Controller
                         $detailReception = CarrierGuide::find($detailData['idDetail']);
 
                         if ($detailReception) {
-                            $detailReception->update(['status' => 'En Transito']);
-                            $detailReception->update(['programming_id' => $object->id]);
+                            // Preservar el estado final de las guías ya entregadas.
+                            if ($detailReception->status !== 'Entregado') {
+                                $detailReception->status = 'En Transito';
+                            }
+                            $detailReception->programming_id = $object->id;
+                            $detailReception->save();
 
                             $carrierByProgramming = CarrierByProgramming::where([
                                 'programming_id' => $object->id,

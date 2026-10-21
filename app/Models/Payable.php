@@ -37,6 +37,7 @@ class Payable extends Model
 
         'driver_expense_id',
         'compra_moviment_id',
+        'fuel_purchase_id',
         'user_created_id',
         'created_at',
     ];
@@ -73,6 +74,11 @@ class Payable extends Model
     public function compra_moviment()
     {
         return $this->belongsTo(CompraMoviment::class, 'compra_moviment_id');
+    }
+
+    public function fuel_purchase()
+    {
+        return $this->belongsTo(FuelPurchase::class, 'fuel_purchase_id');
     }
 
     public function payPayables()

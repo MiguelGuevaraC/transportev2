@@ -136,6 +136,7 @@ class ExcelController extends Controller
         $document = $request->input('document');
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
+        $dateType = $request->input('dateType', $request->input('dateFilter', 'guide'));
         $route = $request->input('route');
         $typeGuia = $request->input('typeGuia');
         $statusGuia = $request->input('statusGuia');
@@ -282,13 +283,7 @@ class ExcelController extends Controller
             $carrierGuides->whereRaw('LOWER(observation) LIKE ?', ['%' . strtolower($observation) . '%']);
         }
 
-        if (!empty($startDate) && !empty($endDate)) {
-            $carrierGuides->whereBetween(DB::raw('DATE(transferStartDate)'), [$startDate, $endDate]);
-        } elseif (!empty($startDate)) {
-            $carrierGuides->whereDate('transferStartDate', '>=', $startDate);
-        } elseif (!empty($endDate)) {
-            $carrierGuides->whereDate('transferStartDate', '<=', $endDate);
-        }
+        $carrierGuides->filterByEmissionDate($dateType, $startDate, $endDate);
 
         // Ordenar y paginar
         $carrierGuides = $carrierGuides->orderBy('id', 'desc')

@@ -1,12 +1,49 @@
 <?php
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CarrierGuide extends Model
 {
     use SoftDeletes;
+
+    /**
+     * Filtra por la fecha de emisión de la guía o de la factura relacionada.
+     *
+     * dateType: guide|invoice (también acepta guia|factura).
+     */
+    public function scopeFilterByEmissionDate(
+        Builder $query,
+        ?string $dateType,
+        ?string $startDate,
+        ?string $endDate
+    ): Builder {
+        if (!$startDate && !$endDate) {
+            return $query;
+        }
+
+        $start = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
+        $end = $endDate ? Carbon::parse($endDate)->addDay()->startOfDay() : null;
+        $dateType = strtolower((string) $dateType);
+
+        if (in_array($dateType, ['invoice', 'factura', 'fecha_factura'], true)) {
+            return $query->whereExists(function ($subQuery) use ($start, $end) {
+                $subQuery->selectRaw('1')
+                    ->from('moviments')
+                    ->whereColumn('moviments.reception_id', 'carrier_guides.reception_id')
+                    ->whereNull('moviments.deleted_at')
+                    ->when($start, fn ($q) => $q->where('moviments.paymentDate', '>=', $start))
+                    ->when($end, fn ($q) => $q->where('moviments.paymentDate', '<', $end));
+            });
+        }
+
+        return $query
+            ->when($start, fn ($q) => $q->where('carrier_guides.created_at', '>=', $start))
+            ->when($end, fn ($q) => $q->where('carrier_guides.created_at', '<', $end));
+    }
 
 /**
  * @OA\Schema(
@@ -16,6 +53,8 @@ class CarrierGuide extends Model
  *     required={"id","status","document","subContract","transferStartDate","tract_id","platform_id","origin_id","destination_id","sender_id","recipient_id","payResponsible_id","driver_id"},
  *     @OA\Property(property="id", type="integer", description="Carrier guide ID"),
  *     @OA\Property(property="status", type="string", description="Status"),
+ *     @OA\Property(property="parent_carrier_guide_id", type="integer", nullable=true, description="Guía matriz opcional"),
+ *     @OA\Property(property="motivo_anulacion", type="string", nullable=true, description="Motivo de anulación de la guía"),
  *     @OA\Property(property="numero", type="string"),
  *     @OA\Property(property="subContract", type="string"),
  *     @OA\Property(property="motivo", type="string"),
@@ -66,6 +105,7 @@ class CarrierGuide extends Model
         'serie',
         'motivo',
         'status_facturado',
+        'motivo_anulacion',
         'codemotivo',
         'placa',
 
@@ -189,6 +229,37 @@ class CarrierGuide extends Model
     {
         return $this->belongsToMany(Programming::class, 'carrier_by_programmings', 'carrier_guide_id', 'programming_id');
     }
+
+    public function outgoingGuideRelations()
+    {
+        return $this->hasMany(CarrierGuideRelation::class, 'parent_carrier_guide_id');
+    }
+
+    public function incomingGuideRelations()
+    {
+        return $this->hasMany(CarrierGuideRelation::class, 'child_carrier_guide_id');
+    }
+
+    public function relatedGuides()
+    {
+        return $this->belongsToMany(
+            self::class,
+            'carrier_guide_relations',
+            'parent_carrier_guide_id',
+            'child_carrier_guide_id'
+        )->withPivot('relation_type')->withTimestamps();
+    }
+
+    public function parentGuides()
+    {
+        return $this->belongsToMany(
+            self::class,
+            'carrier_guide_relations',
+            'child_carrier_guide_id',
+            'parent_carrier_guide_id'
+        )->withPivot('relation_type')->withTimestamps();
+    }
+
      public function user()
     {
         return $this->belongsTo(User::class, 'user_created_id');

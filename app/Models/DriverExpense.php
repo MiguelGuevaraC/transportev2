@@ -146,6 +146,11 @@ class DriverExpense extends Model
         return $this->hasOne(BankMovement::class, 'driver_expense_id')->latestOfMany();
     }
 
+    public function cajaYadiraMovement()
+    {
+        return $this->hasOne(CajaYadiraMovement::class, 'driver_expense_id');
+    }
+
     public function payable()
     {
         return $this->hasOne(Payable::class);

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cargos;
 use App\Models\Reception;
+use App\Models\SystemSetting;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -68,6 +71,11 @@ class CargoController extends Controller
     }
     public function destroy($id)
     {
+        $authorization = $this->validateCargoDeletionAccess(request());
+        if ($authorization !== true) {
+            return $authorization;
+        }
+
         // Buscar el cargo por su ID
         $cargo = Cargos::find($id);
 
@@ -87,6 +95,78 @@ class CargoController extends Controller
 
         // Retornar respuesta exitosa
         return response()->json(['message' => 'Cargo eliminado con éxito'], 200);
+    }
+
+    /**
+     * Actualiza la clave de eliminación de cargos.
+     * Solo el usuario autorizado puede cambiarla.
+     */
+    public function updateDeletionPassword(Request $request)
+    {
+        $authorization = $this->validateAuthorizedUser();
+        if ($authorization !== true) {
+            return $authorization;
+        }
+
+        $data = $request->validate([
+            'current_password' => 'required|digits:4',
+            'password' => 'required|digits:4|confirmed',
+        ]);
+
+        $setting = SystemSetting::firstOrCreate(
+            ['key' => 'cargo_delete_password'],
+            ['value' => Hash::make('4828')]
+        );
+
+        if (!Hash::check($data['current_password'], $setting->value)) {
+            return response()->json([
+                'message' => 'La clave actual no es válida.',
+            ], 422);
+        }
+
+        $setting->update(['value' => Hash::make($data['password'])]);
+
+        return response()->json([
+            'message' => 'Clave de eliminación actualizada correctamente.',
+        ]);
+    }
+
+    protected function validateCargoDeletionAccess(Request $request)
+    {
+        $authorization = $this->validateAuthorizedUser();
+        if ($authorization !== true) {
+            return $authorization;
+        }
+
+        $request->validate([
+            'password' => 'required|digits:4',
+        ]);
+
+        $setting = SystemSetting::where('key', 'cargo_delete_password')->first();
+        if (!$setting || !Hash::check($request->input('password'), $setting->value)) {
+            return response()->json([
+                'message' => 'La clave de eliminación no es válida.',
+            ], 422);
+        }
+
+        return true;
+    }
+
+    protected function validateAuthorizedUser()
+    {
+        $user = Auth::user();
+        $authorizedUsername = strtolower((string) env(
+            'CARGO_DELETE_AUTHORIZED_USER',
+            'cynthiaventuradelgado'
+        ));
+
+        if (!$user || strtolower((string) $user->username) !== $authorizedUsername) {
+            return response()->json([
+                'message' => 'No tienes autorización para eliminar cargos.',
+            ], 403);
+        }
+
+        return true;
     }
     public function indexByReception(Request $request, $reception_id)
     {

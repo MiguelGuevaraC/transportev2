@@ -475,6 +475,7 @@ class DetailReceptionController extends Controller
         $numero = $request->input('numero');
         $origenOrDestino = $request->input('origenOrDestino');
         $nombreClientePaga = $request->input('nombrePersona');
+        $glosa = $request->input('glosa', $request->input('observacion', $request->input('observation')));
         $branch_office_id = $request->input('branch_office_id');
         // Buscar la ruta principal
         $route = Route::where('placeStart_id', $startPlace)
@@ -587,6 +588,24 @@ class DetailReceptionController extends Controller
                         $this->applyNameFilter($q, $nombreClientePagaUpper);
                     });
                 });
+            });
+        }
+
+        // Busca el texto en cualquier posición de la glosa/detalle,
+        // observación de la guía o comentario de la recepción.
+        if ($glosa !== null && trim($glosa) !== '') {
+            $glosa = strtolower(trim($glosa));
+            $query->where(function ($query) use ($glosa) {
+                $query->whereRaw('LOWER(carrier_guides.observation) LIKE ?', ["%{$glosa}%"])
+                    ->orWhereHas('reception', function ($receptionQuery) use ($glosa) {
+                        $receptionQuery->whereRaw('LOWER(receptions.comment) LIKE ?', ["%{$glosa}%"]);
+                    })
+                    ->orWhereHas('reception.details', function ($detailQuery) use ($glosa) {
+                        $detailQuery->where(function ($q) use ($glosa) {
+                            $q->whereRaw('LOWER(description) LIKE ?', ["%{$glosa}%"])
+                                ->orWhereRaw('LOWER(comment) LIKE ?', ["%{$glosa}%"]);
+                        });
+                    });
             });
         }
 

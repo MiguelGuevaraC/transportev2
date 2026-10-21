@@ -1035,6 +1035,7 @@ class ReceptionController extends Controller
             'nombreDestinatario' => $request->input('nombreDestinatario') ? strtoupper($request->input('nombreDestinatario')) : null,
             'numberVenta' => $request->input('numberVenta'),
             'numberGuia' => $request->input('numberGuia'),
+            'glosa' => $request->input('glosa', $request->input('observacion', $request->input('observation'))),
             'origenOrDestino' => $request->input('origenOrDestino') ? strtoupper($request->input('origenOrDestino')) : null,
             'isCargos' => $request->input('isCargos'),
             'statusReception' => $request->input('statusReception'),
@@ -1073,6 +1074,22 @@ class ReceptionController extends Controller
         // }
         if (!empty($filters['numberGuia'])) {
             $query->where('carrier_guides.numero', 'LIKE', '%' . $filters['numberGuia'] . '%');
+        }
+
+        // Busca el texto en cualquier posición de la glosa/detalle,
+        // observación de la guía o comentario de la recepción.
+        if (!empty($filters['glosa'])) {
+            $glosa = strtolower(trim($filters['glosa']));
+            $query->where(function ($q) use ($glosa) {
+                $q->whereRaw('LOWER(carrier_guides.observation) LIKE ?', ["%{$glosa}%"])
+                    ->orWhereRaw('LOWER(receptions.comment) LIKE ?', ["%{$glosa}%"])
+                    ->orWhereHas('details', function ($detailQuery) use ($glosa) {
+                        $detailQuery->where(function ($detailQ) use ($glosa) {
+                            $detailQ->whereRaw('LOWER(description) LIKE ?', ["%{$glosa}%"])
+                                ->orWhereRaw('LOWER(comment) LIKE ?', ["%{$glosa}%"]);
+                        });
+                    });
+            });
         }
 
         // Filtros por nombres (remitente, destinatario, cliente que paga)

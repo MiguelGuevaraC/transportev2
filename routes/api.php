@@ -6,11 +6,14 @@ use App\Http\Controllers\Api\areaController;
 use App\Http\Controllers\Api\BoxController;
 use App\Http\Controllers\Api\BranchOfficeController;
 use App\Http\Controllers\Api\CargoController;
+use App\Http\Controllers\Api\CajaYadiraController;
 use App\Http\Controllers\Api\CarrierGuideController;
+use App\Http\Controllers\Api\CarrierGuideRelationController;
 use App\Http\Controllers\Api\ComissionAgentController;
 use App\Http\Controllers\Api\ContactInfoController;
 use App\Http\Controllers\Api\CreditNoteController;
 use App\Http\Controllers\Api\DebitNoteController;
+use App\Http\Controllers\Api\FuelController;
 use App\Http\Controllers\Api\DetailGrtController;
 use App\Http\Controllers\Api\DetailReceptionController;
 use App\Http\Controllers\Api\DetailWorkerController;
@@ -203,6 +206,9 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('carrierGuide_export_excel', [CarrierGuideController::class, 'export_excel']);
     Route::get('carrierGuide/{id}', [CarrierGuideController::class, 'show']);
     Route::post('carrierGuide', [CarrierGuideController::class, 'store']);
+    Route::get('carrierGuide/{carrierGuideId}/relations', [CarrierGuideRelationController::class, 'index']);
+    Route::post('carrierGuide/{carrierGuideId}/relations', [CarrierGuideRelationController::class, 'store']);
+    Route::delete('carrierGuide/{carrierGuideId}/relations/{relatedGuideId}', [CarrierGuideRelationController::class, 'destroy']);
     Route::delete('carrierGuide/{id}', [CarrierGuideController::class, 'destroy']);
     Route::put('carrierGuide/{id}', [CarrierGuideController::class, 'update']);
     Route::put('carrierGuide/{id}/status', [CarrierGuideController::class, 'updateStatus']);
@@ -272,6 +278,31 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::put('box/{id}', [BoxController::class, 'update']);
 
     // MOVIMENT
+    // CONTROL DE ABASTECIMIENTO DE COMBUSTIBLE
+    Route::get('fuel/stations', [FuelController::class, 'stations']);
+    Route::post('fuel/stations', [FuelController::class, 'storeStation']);
+    Route::put('fuel/stations/{id}', [FuelController::class, 'updateStation']);
+    Route::delete('fuel/stations/{id}', [FuelController::class, 'deleteStation']);
+    Route::get('fuel/assignments', [FuelController::class, 'assignments']);
+    Route::post('fuel/assignments', [FuelController::class, 'storeAssignment']);
+    Route::put('fuel/assignments/{id}', [FuelController::class, 'updateAssignment']);
+    Route::delete('fuel/assignments/{id}', [FuelController::class, 'deleteAssignment']);
+    Route::get('fuel/purchases', [FuelController::class, 'purchases']);
+    Route::post('fuel/purchases', [FuelController::class, 'storePurchase']);
+    Route::get('fuel/purchases/export-excel', [FuelController::class, 'exportPurchases']);
+    Route::get('fuel/purchases/payables', [FuelController::class, 'payables']);
+    Route::get('fuel/purchases/{id}', [FuelController::class, 'showPurchase']);
+    Route::delete('fuel/purchases/{id}', [FuelController::class, 'deletePurchase']);
+    Route::post('fuel/purchases/{id}/pay', [FuelController::class, 'payCredit']);
+
+    Route::get('cajaYadira/payment-method', [CajaYadiraController::class, 'paymentMethod']);
+    Route::get('cajaYadira', [CajaYadiraController::class, 'index']);
+    Route::post('cajaYadira/movement', [CajaYadiraController::class, 'store']);
+    Route::get('cajaYadira/export-excel', [CajaYadiraController::class, 'exportExcel']);
+    Route::get('cajaYadira/export-pdf', [CajaYadiraController::class, 'exportPdf']);
+    Route::get('cajaYadira/{id}', [CajaYadiraController::class, 'show']);
+    Route::delete('cajaYadira/{id}', [CajaYadiraController::class, 'destroy']);
+
     Route::get('moviment', [MovimentController::class, 'index']);
     Route::get('moviment/last/{idBox}', [MovimentController::class, 'showLastMovPayment']);
     Route::get('moviment/{id}', [MovimentController::class, 'show']);
@@ -431,6 +462,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('cargosByReception/{id}', [CargoController::class, 'indexByReception']);
     Route::post('cargo', [CargoController::class, 'store']);
     Route::delete('cargo/{id}', [CargoController::class, 'destroy']);
+    Route::put('cargo-delete-password', [CargoController::class, 'updateDeletionPassword']);
 
     Route::get('notification', [NotificationController::class, 'index']);
     Route::get('report-workers', [WorkerController::class, 'index_export_excel']);
