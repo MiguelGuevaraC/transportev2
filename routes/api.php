@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CargoController;
 use App\Http\Controllers\Api\CajaYadiraController;
 use App\Http\Controllers\Api\CarrierGuideController;
 use App\Http\Controllers\Api\CarrierGuideRelationController;
+use App\Http\Controllers\Api\ConsolidatedGuidesReportController;
 use App\Http\Controllers\Api\ComissionAgentController;
 use App\Http\Controllers\Api\ContactInfoController;
 use App\Http\Controllers\Api\CreditNoteController;
@@ -341,6 +342,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('reportCajaExcel', [MovimentController::class, 'reporteIngresosExcel'])->name('reportCajaExcel');
 
     Route::get('reporteCuentasPorCobrarExcel', [PdfController::class, 'reporteCuentasPorCobrarExcel'])->name('reportCajaExcel');
+    Route::get('reporteGuiasConsolidadoExcel', [ConsolidatedGuidesReportController::class, 'export'])->name('reporteGuiasConsolidadoExcel');
     Route::get('salesExcel', [ExcelController::class, 'reporteVentasExcel'])->name('reportVentasExcel');
     Route::get('reporteRecepcionesExcel', [ReceptionController::class, 'reporteRecepcionesExcel'])->name('reporteRecepcionesExcel');
 

@@ -67,6 +67,41 @@ El Excel incluye `SITUACIÓN FACTURA`:
 
 No limitar el calendario a 15 días. Deshabilitar el botón durante la descarga. `dataCollection` conserva paginación independiente para evitar cargar todas las recepciones en una sola llamada; el frontend debe usar `receptions.current_page`, `receptions.last_page`, `receptions.total` y `receptions.data`.
 
+### Excel consolidado de las tres fuentes
+
+Para descargar toda la información relacionada en un único archivo, usar este endpoint nuevo:
+
+```http
+GET {API}/api/reporteGuiasConsolidadoExcel
+```
+
+La respuesta es un solo `.xlsx` con tres hojas:
+
+1. `Recepción de guías`.
+2. `Guías de transporte`.
+3. `Cuentas por cobrar`.
+
+El endpoint acepta los filtros de los tres módulos. Para una descarga por rango de fechas se recomienda enviar:
+
+```text
+branch_office_id=1
+dateStart=2026-01-01
+dateEnd=2026-10-21
+startDate=2026-01-01
+endDate=2026-10-21
+dateType=guide
+```
+
+También acepta `numberGuia`, `documentGuia`, `numberVenta`, `codeReception`, `glosa`, `origenOrDestino`, `nombreClientePaga`, `nombreRemitente`, `nombreDestinatario`, `statusReception`, `statusGuia`, `statusFacturado`, `typeGuia`, `vehicles`, `drivers`, `status`, `person_id` y `sequentialNumber`.
+
+Ejemplo:
+
+```text
+/api/reporteGuiasConsolidadoExcel?branch_office_id=1&dateStart=2026-01-01&dateEnd=2026-10-21&startDate=2026-01-01&endDate=2026-10-21&dateType=guide&numberGuia=&documentGuia=&numberVenta=&glosa=
+```
+
+El frontend debe reemplazar las tres descargas anteriores por una sola llamada a este endpoint y tratar la respuesta como `blob`.
+
 ## 2. Guías: fecha de emisión seleccionable
 
 Mostrar un selector:
