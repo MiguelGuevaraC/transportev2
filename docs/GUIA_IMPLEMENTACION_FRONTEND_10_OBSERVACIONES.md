@@ -10,12 +10,53 @@ Todas las rutas requieren autenticación Sanctum. Usar `Authorization: Bearer <t
 
 El rango corresponde a `receptions.receptionDate` y es inclusivo.
 
+El frontend debe utilizar el endpoint optimizado de carga de datos:
+
 ```http
-GET {API}/api/reception
+GET {API}/api/dataCollection
+```
+
+Para el Excel se mantiene:
+
+```http
 GET {API}/api/reporteRecepcionesExcel
 ```
 
-Enviar `dateStart`, `dateEnd`, `branch_office_id`, `codeReception`, `numberGuia`, `numberVenta`, `glosa`, `origenOrDestino`, `statusReception`, `isCargos`, `page` y `per_page` según corresponda. El Excel debe recibir exactamente los mismos filtros del listado y responde un `.xlsx`.
+Enviar a `dataCollection` los filtros de recepciones y sus paginaciones independientes:
+
+```text
+branch_office_id
+receptions_page
+receptions_per_page
+places_page
+places_per_page
+workers_page
+workers_per_page
+vehicles_page
+vehicles_per_page
+codeReception
+dateStart
+dateEnd
+origenOrDestino
+nombreClientePaga
+nombreRemitente
+nombreDestinatario
+statusReception
+isCargos
+numberVenta
+numberGuia
+documentGuia
+glosa
+sinProgramaciones
+```
+
+Ejemplo recomendado:
+
+```text
+/api/dataCollection?branch_office_id=1&receptions_page=1&receptions_per_page=10&places_per_page=100&workers_per_page=100&vehicles_per_page=100&dateStart=2026-01-01&dateEnd=2026-10-21&glosa=&codeReception=&numberGuia=&documentGuia=&numberVenta=&origenOrDestino=&nombreClientePaga=&nombreRemitente=&nombreDestinatario=&statusReception=&isCargos=&sinProgramaciones=false
+```
+
+Para `reporteRecepcionesExcel`, enviar los mismos filtros de recepción (`branch_office_id`, `dateStart`, `dateEnd`, `codeReception`, `numberGuia`, `numberVenta`, `glosa`, `origenOrDestino`, `statusReception`, nombres e `isCargos`). La respuesta es un `.xlsx`.
 
 El Excel incluye `SITUACIÓN FACTURA`:
 
@@ -24,7 +65,7 @@ El Excel incluye `SITUACIÓN FACTURA`:
 - `Pendiente`: saldo pendiente sin cuota vencida.
 - `Sin Factura`: no existe factura relacionada.
 
-No limitar el calendario a 15 días. Deshabilitar el botón durante la descarga.
+No limitar el calendario a 15 días. Deshabilitar el botón durante la descarga. `dataCollection` conserva paginación independiente para evitar cargar todas las recepciones en una sola llamada; el frontend debe usar `receptions.current_page`, `receptions.last_page`, `receptions.total` y `receptions.data`.
 
 ## 2. Guías: fecha de emisión seleccionable
 

@@ -77,6 +77,7 @@ class CollectionController extends Controller
         $numberGuia      = $request->input('numberGuia');
         $documentGuia      = $request->input('documentGuia');
         $numberVenta     = $request->input('numberVenta');
+        $glosa           = $request->input('glosa', $request->input('observacion', $request->input('observation')));
 
         // $branch_office_id = $request->input('branchOffice_id');
         // Validate receptions_per_page
@@ -91,28 +92,6 @@ class CollectionController extends Controller
 
         //     ->where('branchOffice_id', $branch_office_id)
         //     ->orderBy('id', 'desc')->paginate($receptions_per_page, ['*'], 'receptions_page', $receptions_page);
-
-        $receptionsQuery = Reception::with([
-            'user', 'origin', 'sender', 'destination',
-            'recipient', 'pickupResponsible', 'payResponsible',
-            'seller', 'pointDestination', 'pointSender', 'branchOffice',
-            'details', 'firstCarrierGuide', 'moviment', 'cargos',
-        ])
-            ->where('branchOffice_id', $branch_office_id);
-
-        // Filtro por código de recepción
-        if (! empty($codeReception)) {
-            $receptionsQuery->where('codeReception', 'LIKE', '%' . $codeReception . '%');
-        }
-
-        // Filtro por fecha inicio (>=) y fecha fin (<=)
-        if (! empty($dateStart)) {
-            $receptionsQuery->whereDate('receptionDate', '>=', $dateStart);
-        }
-
-        if (! empty($dateEnd)) {
-            $receptionsQuery->whereDate('receptionDate', '<=', $dateEnd);
-        }
 
         $receptionsQuery = Reception::select(
             'receptions.*',
@@ -147,11 +126,11 @@ class CollectionController extends Controller
 
         // Filtro por fecha inicio (>=) y fecha fin (<=)
         if (! empty($dateStart)) {
-            $receptionsQuery->whereDate('receptions.receptionDate', '>=', $dateStart);
+            $receptionsQuery->where('receptions.receptionDate', '>=', $dateStart);
         }
 
         if (! empty($dateEnd)) {
-            $receptionsQuery->whereDate('receptions.receptionDate', '<=', $dateEnd);
+            $receptionsQuery->where('receptions.receptionDate', '<=', $dateEnd);
         }
 
         // Filtro por número de guía
@@ -168,6 +147,20 @@ class CollectionController extends Controller
 
         if (! empty($documentGuia)) {
             $receptionsQuery->where('carrier_guides.document', 'LIKE', '%' . $documentGuia . '%');
+        }
+
+        // Busca el texto en cualquier posición de la glosa/observación,
+        // observación de la guía o descripción de la carga.
+        if (! empty($glosa)) {
+            $receptionsQuery->where(function ($query) use ($glosa) {
+                $term = '%' . mb_strtolower($glosa) . '%';
+
+                $query->whereRaw('LOWER(receptions.comment) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(carrier_guides.observation) LIKE ?', [$term])
+                    ->orWhereHas('details', function ($detailsQuery) use ($term) {
+                        $detailsQuery->whereRaw('LOWER(description) LIKE ?', [$term]);
+                    });
+            });
         }
 
         // Filtro por número de venta dentro de la relación moviment
@@ -276,19 +269,24 @@ class CollectionController extends Controller
         // Obtener y procesar las recepciones con paginación
         $receptions = $receptionsQuery->orderBy('id', 'desc')->paginate($receptions_per_page, ['*'], 'receptions_page', $receptions_page);
 
+        // Cargar las guías relacionadas en una sola consulta para evitar N+1.
+        $guideIds = collect($receptions->items())
+            ->pluck('guide_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $guidesById = CarrierGuide::with([
+            'districtStart.province.department',
+            'districtEnd.province.department',
+            'motive', 'sender', 'recipient', 'payResponsible',
+            'programming', 'programming.tract', 'programming.platform',
+            'programming.origin', 'programming.destination',
+        ])->whereIn('id', $guideIds)->get()->keyBy('id');
+
         // Transformación de la colección para definir el 'status'
-        $receptions->getCollection()->transform(function ($reception) {
-            // Cargar la guía específica usando el guide_id
-            $reception->first_carrier_guide = CarrierGuide::with([
-                'districtStart.province.department',
-                'districtEnd.province.department',
-                'motive', 'sender', 'recipient', 'payResponsible',
-                'programming',
-                'programming.tract',
-                'programming.platform',
-                'programming.origin',
-                'programming.destination',
-            ])->find($reception->guide_id); // Obtener la guía específica
+        $receptions->getCollection()->transform(function ($reception) use ($guidesById) {
+            $reception->first_carrier_guide = $guidesById[$reception->guide_id] ?? null;
 
             // Evitar error si no existe la guía
             if (! $reception->first_carrier_guide) {
@@ -315,7 +313,7 @@ class CollectionController extends Controller
         // ->paginate($places_per_page, ['*'], 'places_page', $places_page);
 
         $places = Place::orderBy('name', 'asc')
-            ->paginate(500);
+            ->paginate($places_per_page, ['*'], 'places_page', $places_page);
 
         // Workers pagination
         $workers_page     = $request->input('workers_page', 1);
