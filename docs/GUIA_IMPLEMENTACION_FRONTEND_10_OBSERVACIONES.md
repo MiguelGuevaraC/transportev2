@@ -127,7 +127,13 @@ DELETE {API}/api/cargo/{id}
 PUT    {API}/api/cargo-delete-password
 ```
 
-El frontend debe ocultar el botón para usuarios no autorizados, pero el backend vuelve a validar el permiso. Antes de eliminar, mostrar confirmación y solo actualizar la lista si la respuesta es exitosa. Se elimina el registro y el archivo físico.
+El frontend debe ocultar el botón para usuarios no autorizados, pero el backend vuelve a validar el permiso. Pueden eliminar cargos:
+
+- El usuario autorizado configurado en `CARGO_DELETE_AUTHORIZED_USER`.
+- Usuarios con rol Administrador Backend (`typeofUser_id=1`).
+- Usuarios con rol Administrador Transporte (`typeofUser_id=2`).
+
+Todos deben ingresar la clave de eliminación. Antes de eliminar, mostrar confirmación y solo actualizar la lista si la respuesta es exitosa. Se elimina el registro y el archivo físico.
 
 Para cambiar la clave:
 

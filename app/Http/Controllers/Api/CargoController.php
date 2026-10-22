@@ -160,7 +160,10 @@ class CargoController extends Controller
             'cynthiaventuradelgado'
         ));
 
-        if (!$user || strtolower((string) $user->username) !== $authorizedUsername) {
+        $isAdministrator = $user && in_array((int) $user->typeofUser_id, [1, 2], true);
+        $isAuthorizedUser = $user && strtolower((string) $user->username) === $authorizedUsername;
+
+        if (! $user || (! $isAdministrator && ! $isAuthorizedUser)) {
             return response()->json([
                 'message' => 'No tienes autorización para eliminar cargos.',
             ], 403);
