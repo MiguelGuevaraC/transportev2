@@ -12,6 +12,7 @@ use App\Models\Subcontract;
 use App\Models\Vehicle;
 use App\Models\Worker;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class CollectionController extends Controller
@@ -224,17 +225,20 @@ class CollectionController extends Controller
 
             // Si sólo se ingresó una parte de la ruta (ej. "Chiclayo")
             if (count($routeParts) === 1) {
-                $receptionsQuery->whereHas('origin', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
-                })->orWhereHas('destination', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
+                $term = '%' . strtolower(trim($routeParts[0])) . '%';
+                $receptionsQuery->where(function ($query) use ($term) {
+                    $query->whereHas('origin', function ($placeQuery) use ($term) {
+                        $placeQuery->whereRaw('LOWER(name) LIKE ?', [$term]);
+                    })->orWhereHas('destination', function ($placeQuery) use ($term) {
+                        $placeQuery->whereRaw('LOWER(name) LIKE ?', [$term]);
+                    });
                 });
             } elseif (count($routeParts) === 2) {
                 // Si se ingresó el formato "Origen-Destino" (ej. "Amazonas-Chiclayo")
                 $receptionsQuery->whereHas('origin', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[0]) . '']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower(trim($routeParts[0])) . '%']);
                 })->whereHas('destination', function ($query) use ($routeParts) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ['' . strtolower($routeParts[1]) . '']);
+                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower(trim($routeParts[1])) . '%']);
                 });
             }
         }
@@ -300,20 +304,20 @@ class CollectionController extends Controller
 
             return $reception;
         });
-        // Places pagination
-        $places_page     = $request->input('places_page', 1);
-        $places_per_page = $request->input('places_per_page', 500); // Default 10
-
-        // Validate places_per_page
-        if (! is_numeric($places_per_page) || $places_per_page <= 0) {
-            $places_per_page = 10; // Default value if NaN or non-positive
-        }
-
-        // $places = Place::orderBy('id', 'desc')
-        // ->paginate($places_per_page, ['*'], 'places_page', $places_page);
-
-        $places = Place::orderBy('name', 'asc')
-            ->paginate($places_per_page, ['*'], 'places_page', $places_page);
+        // El selector de origen/destino necesita buscar en todo el catálogo.
+        // No paginar lugares: con 100/500 registros se ocultaban destinos
+        // existentes como Pacasmayo, Trujillo o Piura.
+        $places = Place::select(['id', 'ubigeo', 'name', 'address', 'state', 'district_id'])
+            ->orderBy('name', 'asc')
+            ->get();
+        $placesLimit = max($places->count(), 1);
+        $places = new LengthAwarePaginator(
+            $places,
+            $places->count(),
+            $placesLimit,
+            1,
+            ['path' => $request->url()]
+        );
 
         // Workers pagination
         $workers_page     = $request->input('workers_page', 1);
@@ -457,7 +461,7 @@ class CollectionController extends Controller
                 'current_page'   => $places->currentPage(),
                 'last_page'      => $places->lastPage(),
                 'per_page'       => $places->perPage(),
-                'pagination'     => $places_per_page, // New field for pagination size
+                'pagination'     => $placesLimit,
                 'first_page_url' => $places->url(1),
                 'from'           => $places->firstItem(),
                 'next_page_url'  => $places->nextPageUrl(),

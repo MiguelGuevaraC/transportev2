@@ -410,7 +410,12 @@ class ReceptionController extends Controller
 
         if ($object) {
             //ASIGNAR DETALLES
-            $details = $request->input('details');
+            // El detalle es opcional. Evitar foreach sobre null para que una
+            // recepción sin detalle no falle después de haberse creado.
+            $details = $request->input('details', []);
+            if (! is_array($details)) {
+                $details = [];
+            }
             $idDetalles = [];
 
             foreach ($details as $detail) {
