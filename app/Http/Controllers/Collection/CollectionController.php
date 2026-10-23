@@ -11,6 +11,7 @@ use App\Models\Reception;
 use App\Models\Subcontract;
 use App\Models\Vehicle;
 use App\Models\Worker;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -131,7 +132,10 @@ class CollectionController extends Controller
         }
 
         if (! empty($dateEnd)) {
-            $receptionsQuery->where('receptions.receptionDate', '<=', $dateEnd);
+            // receptionDate incluye hora; incluir todo el día final sin
+            // aplicar funciones sobre la columna y conservar los índices.
+            $endExclusive = Carbon::parse($dateEnd)->addDay()->startOfDay();
+            $receptionsQuery->where('receptions.receptionDate', '<', $endExclusive);
         }
 
         // Filtro por número de guía

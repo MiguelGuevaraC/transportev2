@@ -157,7 +157,8 @@ class ReceptionController extends Controller
                 $query->where('receptionDate', '>=', $request->input('dateStart'));
             })
             ->when($request->filled('dateEnd'), function ($query) use ($request) {
-                $query->where('receptionDate', '<=', $request->input('dateEnd'));
+                $endExclusive = Carbon::parse($request->input('dateEnd'))->addDay()->startOfDay();
+                $query->where('receptionDate', '<', $endExclusive);
             })
             ->orderBy('id', 'desc')
             ->paginate();
@@ -1068,7 +1069,8 @@ class ReceptionController extends Controller
         }
 
         if (!empty($filters['dateEnd'])) {
-            $query->where('receptions.receptionDate', '<=', $filters['dateEnd']);
+            $endExclusive = Carbon::parse($filters['dateEnd'])->addDay()->startOfDay();
+            $query->where('receptions.receptionDate', '<', $endExclusive);
         }
 
         // Filtro por guía

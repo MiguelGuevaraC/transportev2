@@ -155,7 +155,7 @@ class ConsolidatedGuidesReportController extends Controller
     private function applyDateRange($query, string $column, ?string $start, ?string $end): void
     {
         $query->when($start, fn ($q) => $q->where($column, '>=', $start));
-        $query->when($end, fn ($q) => $q->where($column, '<=', $end));
+        $query->when($end, fn ($q) => $q->where($column, '<', Carbon::parse($end)->addDay()->startOfDay()));
     }
 
     private function personName($person): string
