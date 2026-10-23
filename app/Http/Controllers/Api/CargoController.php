@@ -15,16 +15,30 @@ class CargoController extends Controller
 {
     public function store(Request $request)
     {
+        $uploadedCargos = $request->file('cargos', []);
+        foreach ((array) $uploadedCargos as $index => $uploadedCargo) {
+            $file = is_array($uploadedCargo) ? ($uploadedCargo['file'] ?? null) : null;
+            if ($file && $file->getError() !== UPLOAD_ERR_OK) {
+                return response()->json([
+                    'error' => "No se pudo subir cargos.{$index}.file. Verifique el tamaño del archivo y vuelva a intentarlo.",
+                    'upload_error' => $file->getError(),
+                ], 422);
+            }
+        }
+
         // Validar los datos recibidos
         $validator = validator()->make($request->all(), [
             'reception_id' => 'required|integer|exists:receptions,id',
             'cargos' => 'required|array', // Validar que "cargos" es un array
             'cargos.*.description' => 'nullable|string', // Cada cargo puede tener una descripción
-            'cargos.*.file' => 'required|file|mimes:pdf,jpg,png,doc,docx', // Validar cada archivo
+            'cargos.*.file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:20480', // Hasta 20 MB por archivo
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
+            return response()->json([
+                'error' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         // Buscar la recepción
@@ -37,12 +51,16 @@ class CargoController extends Controller
         $createdCargos = [];
 
         // Iterar sobre los cargos y procesar archivos
-        foreach ($request->cargos as $cargo) {
+        $cargoInputs = $request->input('cargos', []);
+        foreach ($cargoInputs as $index => $cargo) {
             // Verificar que el archivo esté presente y sea válido
-            if (isset($cargo['file']) && $cargo['file'] instanceof \Illuminate\Http\UploadedFile) {
-                $photoFile = $cargo['file'];
+            $photoFile = $uploadedCargos[$index]['file'] ?? null;
+            if ($photoFile instanceof \Illuminate\Http\UploadedFile && $photoFile->isValid()) {
+                // Archivo válido.
             } else {
-                continue; // Saltar a la siguiente iteración si no hay archivo válido
+                return response()->json([
+                    'error' => "El archivo cargos.{$index}.file es obligatorio y debe ser válido.",
+                ], 422);
             }
 
             // Descripción predeterminada si no se proporciona

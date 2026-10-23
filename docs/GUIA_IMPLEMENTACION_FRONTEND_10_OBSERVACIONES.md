@@ -135,6 +135,8 @@ El frontend debe ocultar el botón para usuarios no autorizados, pero el backend
 
 Todos deben ingresar la clave de eliminación. Antes de eliminar, mostrar confirmación y solo actualizar la lista si la respuesta es exitosa. Se elimina el registro y el archivo físico.
 
+Para registrar cargos, enviar `multipart/form-data` con archivos anidados como `cargos[0][file]`, `cargos[1][file]`, etc. Se aceptan `pdf`, `jpg`, `jpeg`, `png`, `doc` y `docx`, con un máximo de 20 MB por archivo.
+
 Para cambiar la clave:
 
 ```json
