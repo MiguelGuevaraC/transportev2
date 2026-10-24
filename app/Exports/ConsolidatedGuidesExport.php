@@ -6,11 +6,15 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class ConsolidatedGuidesExport implements WithMultipleSheets
 {
-    public function __construct(
-        private readonly array $receptions,
-        private readonly array $guides,
-        private readonly array $receivables,
-    ) {
+    private $receptions;
+    private $guides;
+    private $receivables;
+
+    public function __construct(array $receptions, array $guides, array $receivables)
+    {
+        $this->receptions = $receptions;
+        $this->guides = $guides;
+        $this->receivables = $receivables;
     }
 
     public function sheets(): array
@@ -18,7 +22,7 @@ class ConsolidatedGuidesExport implements WithMultipleSheets
         return [
             new ConsolidatedSheetExport(
                 'Recepción de guías',
-                ['Código recepción', 'Fecha recepción', 'Guía', 'Doc. venta', 'Remitente', 'Destinatario', 'Origen', 'Destino', 'Cliente paga', 'Flete', 'Deuda', 'Carga', 'Peso', 'Situación factura', 'Estado recepción'],
+                ['Código recepción', 'Fecha recepción', 'Guía', 'Doc. venta', 'Remitente', 'Destinatario', 'Origen', 'Destino', 'Cliente paga', 'Flete', 'Deuda', 'Carga', 'Peso', 'Situación factura', 'Estado recepción', 'Pagos'],
                 collect($this->receptions),
             ),
             new ConsolidatedSheetExport(

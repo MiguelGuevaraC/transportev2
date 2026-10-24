@@ -94,6 +94,8 @@ dateType=guide
 
 También acepta `numberGuia`, `documentGuia`, `numberVenta`, `codeReception`, `glosa`, `origenOrDestino`, `nombreClientePaga`, `nombreRemitente`, `nombreDestinatario`, `statusReception`, `statusGuia`, `statusFacturado`, `typeGuia`, `vehicles`, `drivers`, `status`, `person_id` y `sequentialNumber`.
 
+`branch_office_id` es opcional. Para consultar todas las sucursales, el frontend debe mostrar la opción `TODAS` y omitir el parámetro o enviarlo vacío. No debe bloquear la descarga obligando a seleccionar una sucursal.
+
 Ejemplo:
 
 ```text
@@ -101,6 +103,8 @@ Ejemplo:
 ```
 
 El frontend debe reemplazar las tres descargas anteriores por una sola llamada a este endpoint y tratar la respuesta como `blob`.
+
+La hoja `Recepción de guías` también incluye la columna `Pagos`, con el número de operación, tipo, banco, monto y fecha de cada pago; si no existen pagos muestra `No tiene Pagos Realizados`.
 
 ## 2. Guías: fecha de emisión seleccionable
 

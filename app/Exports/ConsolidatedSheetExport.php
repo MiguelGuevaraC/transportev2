@@ -12,11 +12,15 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ConsolidatedSheetExport implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize
 {
-    public function __construct(
-        private readonly string $sheetTitle,
-        private readonly array $headings,
-        private readonly Collection $rows,
-    ) {
+    private $sheetTitle;
+    private $headings;
+    private $rows;
+
+    public function __construct(string $sheetTitle, array $headings, Collection $rows)
+    {
+        $this->sheetTitle = $sheetTitle;
+        $this->headings = $headings;
+        $this->rows = $rows;
     }
 
     public function collection(): Collection

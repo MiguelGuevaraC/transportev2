@@ -32,7 +32,7 @@ class ConsolidatedGuidesReportController extends Controller
     {
         $query = Reception::with([
             'origin', 'destination', 'sender', 'recipient', 'payResponsible',
-            'details', 'moviment.installments', 'firstCarrierGuide',
+            'details', 'moviment.installments.payInstallments.bank', 'firstCarrierGuide',
         ])->when($filters['branch_office_id'] ?? null, fn ($q, $value) => $q->where('branchOffice_id', $value));
 
         $this->applyDateRange($query, 'receptionDate', $filters['dateStart'] ?? null, $filters['dateEnd'] ?? null);
@@ -70,6 +70,7 @@ class ConsolidatedGuidesReportController extends Controller
                 $reception->netWeight,
                 $this->invoiceStatus($movement),
                 $guide ? ($guide->programming ? 'Programado' : 'Sin Programar') : 'Sin Guía',
+                $this->paymentsSummary($movement),
             ];
         })->values()->all();
     }
@@ -169,5 +170,30 @@ class ConsolidatedGuidesReportController extends Controller
         if (! $movement) return 'Sin Factura';
         if ($movement->status === 'Pagado' || (float) ($movement->saldo ?? 0) <= 0) return 'Pagado';
         return $movement->installments->contains(fn ($item) => (float) ($item->totalDebt ?? 0) > 0 && $item->date && Carbon::parse($item->date)->isPast()) ? 'Vencido' : 'Pendiente';
+    }
+
+    private function paymentsSummary($movement): string
+    {
+        if (! $movement || ! $movement->relationLoaded('installments')) {
+            return 'No tiene Pagos Realizados';
+        }
+
+        $payments = $movement->installments
+            ->flatMap(fn ($installment) => $installment->relationLoaded('payInstallments') ? $installment->payInstallments : [])
+            ->values();
+
+        if ($payments->isEmpty()) {
+            return 'No tiene Pagos Realizados';
+        }
+
+        return $payments->map(function ($payment) {
+            $operation = $payment->type === 'Nota Credito'
+                ? 'N° Operación: ' . ($payment->comment ?? '') . ' | '
+                : (($payment->nroOperacion ?? '0') !== '0' ? 'N° Operación: ' . $payment->nroOperacion . ' | ' : '');
+            $bank = $payment->bank?->name ? 'Banco: ' . $payment->bank->name . ' | ' : '';
+
+            return $operation . 'Tipo: ' . ($payment->type ?? '') . ' | ' . $bank
+                . 'Monto: S/ ' . ($payment->total ?? 0) . ' | Fecha de Pago: ' . ($payment->paymentDate ?? '');
+        })->implode("\n");
     }
 }
