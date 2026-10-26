@@ -28,7 +28,7 @@ class CajaYadiraController extends Controller
             ->orderByDesc('movement_date')
             ->orderByDesc('id');
 
-        $this->applyFilters($query, $request);
+        $this->applyCajaYadiraFilters($query, $request);
 
         $movements = $query->paginate((int) $request->input('per_page', 15));
 
@@ -130,10 +130,10 @@ class CajaYadiraController extends Controller
             ->orderBy('movement_date')
             ->orderBy('id');
 
-        return $this->applyFilters($query, $request);
+        return $this->applyCajaYadiraFilters($query, $request);
     }
 
-    protected function applyFilters($query, Request $request)
+    protected function applyCajaYadiraFilters($query, Request $request)
     {
         return $query
             ->when($request->filled('date_start'), fn ($q) => $q->whereDate('movement_date', '>=', $request->input('date_start')))
