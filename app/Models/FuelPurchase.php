@@ -33,4 +33,24 @@ class FuelPurchase extends Model
     public function worker() { return $this->belongsTo(Worker::class); }
     public function assignment() { return $this->belongsTo(FuelVehicleDriverAssignment::class, 'assignment_id'); }
     public function payable() { return $this->hasOne(Payable::class, 'fuel_purchase_id'); }
+
+    /**
+     * Situación calculada para reportes: Pagado, En deuda o Vencido.
+     * No modifica el estado almacenado y considera también el saldo real de la cuenta por pagar.
+     */
+    public function reportStatus(): string
+    {
+        if ($this->payment_condition === 'Contado'
+            || $this->status === 'Pagado'
+            || ($this->payable && $this->payable->status === 'Pagado')
+            || ($this->payable && (float) $this->payable->totalDebt <= 0)) {
+            return 'Pagado';
+        }
+
+        if ($this->due_date && $this->due_date->isPast()) {
+            return 'Vencido';
+        }
+
+        return 'En deuda';
+    }
 }

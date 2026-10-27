@@ -442,11 +442,28 @@ GET  {API}/api/fuel/purchases
 GET  {API}/api/fuel/purchases/payables
 POST {API}/api/fuel/purchases/{id}/pay
 GET  {API}/api/fuel/purchases/export-excel
+GET  {API}/api/fuel/purchases/export-pdf
 GET  {API}/api/fuel/purchases/{id}
 DELETE {API}/api/fuel/purchases/{id}
 ```
 
-El listado acepta `vehicle_id`, `worker_id`, `fuel_station_id`, `date_start`, `date_end`, `page` y `per_page`. El Excel acepta los mismos filtros.
+El listado y ambas exportaciones aceptan los filtros `vehicle_id`, `plate`, `worker_id`, `fuel_station_id`, `fuel_station`, `date_start`, `date_end`, `status`, `page` y `per_page`.
+
+Para el reporte solicitado:
+
+- `date_start` y `date_end`: rango de fecha del abastecimiento, inclusivo.
+- `plate`: búsqueda parcial por placa; también se puede enviar `vehicle_id`.
+- `fuel_station`: búsqueda parcial por nombre del grifo; también se puede enviar `fuel_station_id`.
+- `status`: `Pagado`, `En deuda`/`Deuda`, o `Vencido`.
+
+Ejemplos:
+
+```http
+GET {API}/api/fuel/purchases/export-excel?date_start=2026-01-01&date_end=2026-03-31&plate=ABC123&fuel_station_id=2&status=deuda
+GET {API}/api/fuel/purchases/export-pdf?date_start=2026-01-01&date_end=2026-03-31&plate=ABC123&fuel_station_id=2&status=pagado
+```
+
+La columna `Situación` se calcula así: `Pagado` cuando el abastecimiento está cancelado, `Vencido` cuando existe saldo y pasó la fecha de vencimiento, y `En deuda` cuando existe saldo pendiente aún no vencido.
 
 Las cuentas por pagar aceptan `status=Pendiente` o `status=Vencido`. Una deuda pendiente cuya fecha ya venció se presenta como `Vencido`.
 

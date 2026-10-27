@@ -9,6 +9,7 @@ use App\Models\FuelStation;
 use App\Models\FuelVehicleDriverAssignment;
 use App\Models\Payable;
 use App\Models\PayPayable;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -292,14 +293,49 @@ class FuelController extends Controller
         return Excel::download(new FuelPurchasesExport($this->purchaseQuery($request)->get()), 'reporte_compras_combustible_' . now()->format('Ymd_His') . '.xlsx');
     }
 
+    public function exportPurchasesPdf(Request $request)
+    {
+        $purchases = $this->purchaseQuery($request)->get();
+        $totals = [
+            'amount' => $purchases->sum(fn ($purchase) => (float) $purchase->total),
+            'paid' => $purchases->filter(fn ($purchase) => $purchase->reportStatus() === 'Pagado')->sum(fn ($purchase) => (float) $purchase->total),
+            'debt' => $purchases->filter(fn ($purchase) => in_array($purchase->reportStatus(), ['En deuda', 'Vencido'], true))->sum(fn ($purchase) => (float) ($purchase->payable?->totalDebt ?? $purchase->total)),
+        ];
+
+        return Pdf::loadView('fuel-purchases-report', [
+            'purchases' => $purchases,
+            'totals' => $totals,
+            'filters' => $request->only(['date_start', 'date_end', 'plate', 'vehicle_id', 'fuel_station', 'fuel_station_id', 'status']),
+        ])->setPaper('a4', 'landscape')
+            ->download('reporte_compras_combustible_' . now()->format('Ymd_His') . '.pdf');
+    }
+
     protected function purchaseQuery(Request $request)
     {
         return FuelPurchase::with(['station', 'vehicle', 'worker.person', 'payable'])
             ->when($request->filled('vehicle_id'), fn ($q) => $q->where('vehicle_id', $request->vehicle_id))
+            ->when($request->filled('plate'), fn ($q) => $q->whereHas('vehicle', fn ($vehicle) => $vehicle->where('currentPlate', 'like', '%' . $request->plate . '%')))
             ->when($request->filled('worker_id'), fn ($q) => $q->where('worker_id', $request->worker_id))
             ->when($request->filled('fuel_station_id'), fn ($q) => $q->where('fuel_station_id', $request->fuel_station_id))
+            ->when($request->filled('fuel_station'), fn ($q) => $q->whereHas('station', fn ($station) => $station->where('name', 'like', '%' . $request->fuel_station . '%')))
             ->when($request->filled('date_start'), fn ($q) => $q->whereDate('fuel_date', '>=', $request->date_start))
             ->when($request->filled('date_end'), fn ($q) => $q->whereDate('fuel_date', '<=', $request->date_end))
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $status = strtolower(trim((string) $request->status));
+
+                if ($status === 'pagado') {
+                    $q->where(function ($query) {
+                        $query->where('fuel_purchases.payment_condition', 'Contado')
+                            ->orWhere('fuel_purchases.status', 'Pagado')
+                            ->orWhereHas('payable', fn ($payable) => $payable->where('status', 'Pagado')->orWhere('totalDebt', '<=', 0));
+                    });
+                } elseif (in_array($status, ['deuda', 'en deuda', 'pendiente'], true)) {
+                    $q->whereHas('payable', fn ($payable) => $payable->where('totalDebt', '>', 0));
+                } elseif ($status === 'vencido') {
+                    $q->whereHas('payable', fn ($payable) => $payable->where('totalDebt', '>', 0))
+                        ->whereDate('fuel_purchases.due_date', '<', today());
+                }
+            })
             ->orderByDesc('fuel_date')->orderByDesc('id');
     }
 

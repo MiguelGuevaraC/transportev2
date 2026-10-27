@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class FuelPurchasesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles
 {
-    public function __construct(private readonly Collection $purchases) {}
+    public function __construct(private Collection $purchases) {}
 
     public function collection(): Collection
     {
@@ -34,7 +34,7 @@ class FuelPurchasesExport implements FromCollection, ShouldAutoSize, WithHeading
                 'Factura' => $purchase->invoice_number,
                 'Operación pago' => $purchase->payment_operation_number,
                 'Vencimiento' => optional($purchase->due_date)->format('d/m/Y'),
-                'Estado' => $purchase->status,
+                'Situación' => $purchase->reportStatus(),
                 'Observación' => $purchase->observation,
             ];
         });
@@ -42,7 +42,7 @@ class FuelPurchasesExport implements FromCollection, ShouldAutoSize, WithHeading
 
     public function headings(): array
     {
-        return ['Fecha', 'Grifo', 'Vehículo', 'Chofer', 'Odómetro', 'Combustible', 'Cantidad', 'Precio unitario', 'Total', 'Condición', 'Forma de pago', 'Factura', 'Operación pago', 'Vencimiento', 'Estado', 'Observación'];
+        return ['Fecha', 'Grifo', 'Vehículo', 'Chofer', 'Odómetro', 'Combustible', 'Cantidad', 'Precio unitario', 'Total', 'Condición', 'Forma de pago', 'Factura', 'Operación pago', 'Vencimiento', 'Situación', 'Observación'];
     }
 
     public function styles(Worksheet $sheet): array
