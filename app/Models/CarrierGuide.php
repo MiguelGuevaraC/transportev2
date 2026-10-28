@@ -25,8 +25,8 @@ class CarrierGuide extends Model
             return $query;
         }
 
-        $start = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
-        $end = $endDate ? Carbon::parse($endDate)->addDay()->startOfDay() : null;
+        $start = self::parseReportDate($startDate, false);
+        $end = self::parseReportDate($endDate, true);
         $dateType = strtolower((string) $dateType);
 
         if (in_array($dateType, ['invoice', 'factura', 'fecha_factura'], true)) {
@@ -43,6 +43,26 @@ class CarrierGuide extends Model
         return $query
             ->when($start, fn ($q) => $q->where('carrier_guides.created_at', '>=', $start))
             ->when($end, fn ($q) => $q->where('carrier_guides.created_at', '<', $end));
+    }
+
+    private static function parseReportDate(?string $value, bool $endOfRange): ?Carbon
+    {
+        if (! $value) {
+            return null;
+        }
+
+        foreach (['Y-m-d', 'd/m/Y', 'd-m-Y'] as $format) {
+            try {
+                $date = Carbon::createFromFormat($format, trim($value));
+                if ($date !== false) {
+                    return $endOfRange ? $date->addDay()->startOfDay() : $date->startOfDay();
+                }
+            } catch (\Throwable $exception) {
+                // Probar el siguiente formato admitido.
+            }
+        }
+
+        return null;
     }
 
 /**

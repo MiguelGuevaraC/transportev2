@@ -60,8 +60,12 @@ class GuidesExport implements FromCollection, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        $sheetTitle = "{$this->fechaInicio}_AL_{$this->fechaFin}";
-        $sheet->setTitle($sheetTitle);
+        // Excel no permite /, \\, ?, *, [, ] ni nombres mayores de 31 caracteres.
+        // El frontend puede enviar fechas como dd/mm/aaaa o yyyy-mm-dd.
+        $sheetTitle = trim((string) $this->fechaInicio . '_AL_' . (string) $this->fechaFin);
+        $sheetTitle = preg_replace('/[\\\\\/:?*\[\]]/', '-', $sheetTitle);
+        $sheetTitle = mb_substr($sheetTitle ?: 'GUIAS', 0, 31);
+        $sheet->setTitle($sheetTitle ?: 'GUIAS');
 
         // Última fila de datos
         $lastRow = $sheet->getHighestRow();

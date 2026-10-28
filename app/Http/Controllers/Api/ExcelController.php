@@ -134,8 +134,10 @@ class ExcelController extends Controller
         $id_sucursal = $request->input('branch_office_id');
 
         $document = $request->input('document');
-        $startDate = $request->input('startDate');
-        $endDate = $request->input('endDate');
+        // Aceptar ambos nombres para que el botón de exportación use los
+        // mismos filtros que el listado nuevo.
+        $startDate = $request->input('startDate', $request->input('dateStart'));
+        $endDate = $request->input('endDate', $request->input('dateEnd'));
         $dateType = $request->input('dateType', $request->input('dateFilter', 'guide'));
         $route = $request->input('route');
         $typeGuia = $request->input('typeGuia');

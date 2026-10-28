@@ -33,9 +33,22 @@ class BranchOfficeController extends Controller
      *     ),
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $list = BranchOffice::orderBy('id', 'desc')->get();
+        $query = BranchOffice::query()->orderBy('id', 'desc');
+
+        // Uso exclusivo de reportes/listados de guías. Mantenerlo opcional
+        // evita cambiar el catálogo general usado por los demás módulos.
+        if ($request->boolean('only_with_guides')) {
+            $query->whereExists(function ($subQuery) {
+                $subQuery->selectRaw('1')
+                    ->from('carrier_guides')
+                    ->whereColumn('carrier_guides.branchOffice_id', 'branch_offices.id')
+                    ->whereNull('carrier_guides.deleted_at');
+            });
+        }
+
+        $list = $query->get();
         return response()->json($list, 200);
     }
 

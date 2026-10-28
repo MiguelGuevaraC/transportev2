@@ -96,6 +96,14 @@ También acepta `numberGuia`, `documentGuia`, `numberVenta`, `codeReception`, `g
 
 `branch_office_id` es opcional. Para consultar todas las sucursales, el frontend debe mostrar la opción `TODAS` y omitir el parámetro o enviarlo vacío. No debe bloquear la descarga obligando a seleccionar una sucursal.
 
+Para llenar el selector de sucursal únicamente con oficinas que tienen guías registradas, usar:
+
+```http
+GET {API}/api/branchOffice?only_with_guides=true
+```
+
+El endpoint general `/api/branchOffice` mantiene su comportamiento actual y continúa devolviendo todas las sucursales.
+
 Ejemplo:
 
 ```text
