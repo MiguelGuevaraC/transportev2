@@ -42,7 +42,7 @@ class CarrierGuideIntegradoResource extends JsonResource
             'FECHA DOC' => $moviment ? date('d/m/Y', strtotime($moviment?->paymentDate)) : '',
             'MONTO TOTAL' => $moviment ? $moviment->total : '0',
             'MODO DE PAGO' => $moviment ? $this->getFormaPagoAttribute($moviment) : '',
-            'NRO DE OPERACIÓN' => $moviment->operationNumber ?? ($moviment->nroTransferencia ?? ''),
+            'NRO DE OPERACIÓN' => $moviment?->operationNumber ?? ($moviment?->nroTransferencia ?? ''),
             'AMORTIZACIONES_RESUMEN' => (function () use ($moviment) {
                 $installments = $moviment?->installments ?? [];
 

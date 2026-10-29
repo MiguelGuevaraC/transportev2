@@ -17,7 +17,10 @@ class GuidesIntegradoExport implements WithMultipleSheets
     public function sheets(): array
     {
         return $this->data
-            ->groupBy(fn($item) => explode('-', $item->numero)[0] ?? 'SIN_SERIE')
+            ->groupBy(function ($item) {
+                $numero = trim((string) ($item->numero ?? ''));
+                return $numero !== '' ? (explode('-', $numero)[0] ?: 'SIN_SERIE') : 'SIN_SERIE';
+            })
             ->map(fn($items, $serie) => new GuideSheetExport($items->values(), $serie))
             ->values()
             ->all();

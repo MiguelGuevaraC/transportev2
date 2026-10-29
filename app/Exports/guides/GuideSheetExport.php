@@ -42,7 +42,10 @@ class GuideSheetExport implements FromCollection, WithTitle, WithStyles
 
     public function title(): string
     {
-        return $this->serie;
+        $title = preg_replace('/[\\\\\/:?*\[\]]/', '-', trim((string) $this->serie));
+        $title = mb_substr($title ?: 'SIN_SERIE', 0, 31);
+
+        return $title ?: 'SIN_SERIE';
     }
 
     public function styles(Worksheet $sheet): array
