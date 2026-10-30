@@ -103,11 +103,29 @@ class CarrierGuideController extends Controller
         $nombreRemitente    = $request->input('nombreRemitente');
         $nombreDestinatario = $request->input('nombreDestinatario');
 
-        // Iniciar consulta base
-        $carrierGuides = CarrierGuide::with('tract', 'platform', 'motive', 'origin', 'destination', 'sender', 'recipient', 'branchOffice',
-            'payResponsible', 'driver', 'copilot', 'districtStart.province.department', 'user',
-            'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception', 'reception.moviment',
-            'reception.moviment.installments','reception.moviment.installments.payInstallments', 'reception.details', 'programming','reception.cargos');
+        // La exportación no necesita todas las relaciones del listado de pantalla.
+        // Cargar cargos, programación, distritos y oficinas completas para 1,000
+        // guías agotaba la memoria del servidor antes de generar el Excel.
+        if ($request->boolean('for_export')) {
+            $carrierGuides = CarrierGuide::with([
+                'origin:id,name',
+                'destination:id,name',
+                'sender:id,names,fatherSurname,motherSurname,businessName,typeofDocument,documentNumber',
+                'recipient:id,names,fatherSurname,motherSurname,businessName,typeofDocument,documentNumber',
+                'driver.person',
+                'user:id,username',
+                'reception:id,nro_sale,conditionPay,moviment_id,receptionDate',
+                'reception.details:id,reception_id,description',
+                'reception.moviment',
+                'reception.moviment.installments',
+                'reception.moviment.installments.payInstallments',
+            ]);
+        } else {
+            $carrierGuides = CarrierGuide::with('tract', 'platform', 'motive', 'origin', 'destination', 'sender', 'recipient', 'branchOffice',
+                'payResponsible', 'driver', 'copilot', 'districtStart.province.department', 'user',
+                'districtEnd.province.department', 'copilot.person', 'subcontract', 'driver.person', 'reception', 'reception.moviment',
+                'reception.moviment.installments','reception.moviment.installments.payInstallments', 'reception.details', 'programming','reception.cargos');
+        }
 
         // Aplicación de los filtros con comparaciones en minúsculas
         if (! empty($numero)) {
@@ -1539,7 +1557,7 @@ class CarrierGuideController extends Controller
 
     public function export_excel(Request $request)
     {
-        $request->merge(['all' => true]);
+        $request->merge(['all' => true, 'for_export' => true]);
         $response = $this->index($request);
         $data     = $response->getData()->data ?? [];
         $total    = $response->getData()->total ?? 0;
