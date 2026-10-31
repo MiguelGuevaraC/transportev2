@@ -152,29 +152,30 @@ class ExcelController extends Controller
         $nombreDestinatario = $request->input('nombreDestinatario');
 
         // Iniciar consulta base
-        $carrierGuides = CarrierGuide::with(
-            'tract',
-            'platform',
-            'motive',
-            'origin',
-            'destination',
-            'sender',
-            'recipient',
-            'branchOffice',
-            'payResponsible',
-            'driver',
-            'copilot',
-            'districtStart.province.department',
-            'districtEnd.province.department',
-            'copilot.person',
-            'subcontract',
+        $carrierGuides = CarrierGuide::with([
+            'tract:id,currentPlate,numberMtc',
+            'platform:id,currentPlate,numberMtc',
+            'origin:id,name',
+            'destination:id,name',
+            'sender:id,names,fatherSurname,motherSurname,businessName,typeofDocument,documentNumber',
+            'recipient:id,names,fatherSurname,motherSurname,businessName,typeofDocument,documentNumber',
             'driver.person',
-            'reception'
-        );
+            'copilot.person',
+            'reception:id,receptionDate,conditionPay,creditAmount,paymentAmount,debtAmount,netWeight,comment',
+            'reception.details:id,reception_id,description',
+        ]);
 
         // Aplicación de los filtros con comparaciones en minúsculas
         if (!empty($numero)) {
             $carrierGuides->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($numero) . '%']);
+        }
+
+        if (!empty($request->input('serie', $request->input('series')))) {
+            $serie = strtoupper(trim($request->input('serie', $request->input('series'))));
+            $carrierGuides->whereRaw(
+                'UPPER(TRIM(SUBSTRING_INDEX(numero, \'-\', 1))) = ?',
+                [$serie]
+            );
         }
 
         if (!empty($document)) {

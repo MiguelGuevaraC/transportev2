@@ -59,6 +59,31 @@ class CarrierGuideController extends Controller
         $query->where(DB::raw("UPPER(CONCAT_WS(' ', names, fatherSurname, motherSurname, businessName))"), 'LIKE', '%' . $searchTermUpper . '%')
             ->orWhere(DB::raw('UPPER(documentNumber)'), 'LIKE', '%' . $searchTermUpper . '%');
     }
+
+    /**
+     * Series disponibles para el filtro de guías.
+     */
+    public function series(Request $request)
+    {
+        $query = CarrierGuide::query()
+            ->whereNotNull('numero')
+            ->where('numero', '!=', '')
+            ->when($request->filled('branch_office_id'), fn ($q) => $q->where('branchOffice_id', $request->branch_office_id))
+            ->selectRaw("UPPER(TRIM(SUBSTRING_INDEX(numero, '-', 1))) AS serie")
+            ->groupBy('serie')
+            ->orderBy('serie');
+
+        $series = $query->get()->map(fn ($item) => [
+            'serie' => $item->serie,
+            'name' => $item->serie,
+        ])->values();
+
+        return response()->json([
+            'data' => $series,
+            'total' => $series->count(),
+        ]);
+    }
+
     public function index(Request $request)
     {
         // Obtener el branch_office_id desde la solicitud o usar el del usuario autenticado
@@ -85,6 +110,7 @@ class CarrierGuideController extends Controller
 
         // FILTROS
         $numero      = $request->input('numero');
+        $serie       = $request->input('serie', $request->input('series'));
         $id_sucursal = $request->input('branch_office_id');
 
         $document        = $request->input('document');
@@ -130,6 +156,13 @@ class CarrierGuideController extends Controller
         // Aplicación de los filtros con comparaciones en minúsculas
         if (! empty($numero)) {
             $carrierGuides->whereRaw('LOWER(numero) LIKE ?', ['%' . strtolower($numero) . '%']);
+        }
+
+        if (! empty($serie)) {
+            $carrierGuides->whereRaw(
+                'UPPER(TRIM(SUBSTRING_INDEX(numero, \'-\', 1))) = ?',
+                [strtoupper(trim($serie))]
+            );
         }
 
         if (! empty($document)) {
@@ -248,6 +281,9 @@ class CarrierGuideController extends Controller
         // Si el parámetro "all" es true, no paginar
         if ($request->boolean('all')) {
             $results = $carrierGuides->take(Constants::LIMIT_ALL)->get();
+            if (! $request->boolean('for_export')) {
+                $results->each(fn ($item) => $item->amortizaciones_resumen = $this->amortizacionesResumen($item));
+            }
 
             return response()->json([
                 'total'        => $results->count(),
@@ -269,6 +305,7 @@ class CarrierGuideController extends Controller
             if (strtolower($item->type) === 'manual') {
                 $item->status_facturado = 'Enviado';
             }
+            $item->amortizaciones_resumen = $this->amortizacionesResumen($item);
             return $item;
         });
         
@@ -1406,6 +1443,9 @@ class CarrierGuideController extends Controller
 
         $duplicate = CarrierGuide::query()
             ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+            // Una guía huérfana o cuya recepción fue eliminada no debe
+            // bloquear el registro de un anexo válido.
+            ->whereHas('reception', fn ($query) => $query->whereNull('receptions.deleted_at'))
             ->whereRaw("LOWER(COALESCE(status_facturado, '')) NOT IN ('anulada', 'anulado')")
             ->where(function ($query) use ($references) {
                 foreach ($references as $reference) {
@@ -1435,6 +1475,48 @@ class CarrierGuideController extends Controller
             'reference' => $duplicatedReference['value'] ?? null,
             'carrier_guide' => $duplicate->numero,
         ], 422);
+    }
+
+    protected function amortizacionesResumen($carrierGuide): string
+    {
+        $movement = $carrierGuide->reception?->moviment;
+        $installments = $movement && $movement->relationLoaded('installments')
+            ? $movement->installments
+            : collect();
+
+        if ($installments->isEmpty()) {
+            return 'No tienes deudas ni amortizaciones registradas.';
+        }
+
+        $summary = "Resumen de tus deudas y amortizaciones:\n";
+
+        foreach ($installments as $installment) {
+            $date = $installment->date ? date('d/m/Y', strtotime($installment->date)) : '-';
+            $total = number_format((float) ($installment->total ?? 0), 2);
+            $debt = number_format((float) ($installment->totalDebt ?? 0), 2);
+            $paid = number_format((float) ($installment->total ?? 0) - (float) ($installment->totalDebt ?? 0), 2);
+
+            $summary .= "- Deuda con fecha {$date}, estado: " . ($installment->status ?? 'Desconocido') . ".\n";
+            $summary .= "  Monto total: S/ {$total}, pagado: S/ {$paid}, pendiente: S/ {$debt}.\n";
+
+            $payments = $installment->relationLoaded('payInstallments')
+                ? $installment->payInstallments
+                : collect();
+
+            if ($payments->isNotEmpty()) {
+                $summary .= "  Amortizaciones:\n";
+                foreach ($payments as $payment) {
+                    $paymentDate = $payment->paymentDate ? date('d/m/Y', strtotime($payment->paymentDate)) : '-';
+                    $operation = $payment->type === 'Nota Credito'
+                        ? ($payment->comment ?? '')
+                        : ($payment->nroOperacion ?? 'N/A');
+                    $summary .= "    • Pago el {$paymentDate} por S/ " . number_format((float) ($payment->total ?? 0), 2)
+                        . " vía " . ($payment->type ?? 'Pago') . " (Operación: {$operation}).\n";
+                }
+            }
+        }
+
+        return trim($summary);
     }
 
     public function changeStatusFacturacion(Request $request, $id)
@@ -1557,6 +1639,13 @@ class CarrierGuideController extends Controller
 
     public function export_excel(Request $request)
     {
+        // El reporte con rango de fechas debe conservar el formato detallado
+        // de la pestaña "GUÍAS" del control operativo.
+        if ($request->filled('startDate') || $request->filled('endDate')
+            || $request->filled('dateStart') || $request->filled('dateEnd')) {
+            return app(ExcelController::class)->guidesExcel($request);
+        }
+
         $request->merge(['all' => true, 'for_export' => true]);
         $response = $this->index($request);
         $data     = $response->getData()->data ?? [];
