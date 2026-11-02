@@ -294,6 +294,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::get('fuel/purchases/export-excel', [FuelController::class, 'exportPurchases']);
     Route::get('fuel/purchases/export-pdf', [FuelController::class, 'exportPurchasesPdf']);
     Route::get('fuel/purchases/payables', [FuelController::class, 'payables']);
+    Route::post('fuel/purchases/{id}/images', [FuelController::class, 'updatePurchaseImages']);
     Route::get('fuel/purchases/{id}', [FuelController::class, 'showPurchase']);
     Route::delete('fuel/purchases/{id}', [FuelController::class, 'deletePurchase']);
     Route::post('fuel/purchases/{id}/pay', [FuelController::class, 'payCredit']);
