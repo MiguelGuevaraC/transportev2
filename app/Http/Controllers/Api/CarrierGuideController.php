@@ -69,9 +69,9 @@ class CarrierGuideController extends Controller
             ->whereNotNull('numero')
             ->where('numero', '!=', '')
             ->when($request->filled('branch_office_id'), fn ($q) => $q->where('branchOffice_id', $request->branch_office_id))
-            ->selectRaw("UPPER(TRIM(SUBSTRING_INDEX(numero, '-', 1))) AS serie")
-            ->groupBy('serie')
-            ->orderBy('serie');
+            ->whereRaw("TRIM(SUBSTRING_INDEX(numero, '-', 1)) != ''")
+            ->selectRaw("DISTINCT UPPER(TRIM(SUBSTRING_INDEX(numero, '-', 1))) AS serie")
+            ->orderByRaw("UPPER(TRIM(SUBSTRING_INDEX(numero, '-', 1))) ASC");
 
         $series = $query->get()->map(fn ($item) => [
             'serie' => $item->serie,
