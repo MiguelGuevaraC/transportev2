@@ -79,3 +79,44 @@ GET {API}/api/carrierGuide/series
 GET {API}/api/carrierGuide?serie=V001
 GET {API}/api/carrierGuide_export_excel?serie=V001
 ```
+
+## 4. Actualizar fotos del abastecimiento de combustible
+
+Para subir fotos posteriormente, usar:
+
+```http
+POST {API}/api/fuel/purchases/{id}/images
+Content-Type: multipart/form-data
+```
+
+El frontend puede enviar una, dos o las tres imágenes. Los nombres permitidos son:
+
+```text
+odometer_image       # Foto del kilometraje/contómetro
+pump_start_image     # Surtidor antes de abastecer
+pump_end_image       # Surtidor después de abastecer
+```
+
+Cada archivo debe ser una imagen de máximo 10 MB. No se deben enviar los demás datos del abastecimiento; la API solo actualiza las fotos enviadas.
+
+Ejemplo:
+
+```bash
+curl -X POST "{API}/api/fuel/purchases/25/images" \
+  -H "Authorization: Bearer {TOKEN}" \
+  -F "pump_end_image=@surtidor-final.jpg"
+```
+
+Respuesta exitosa:
+
+```json
+{
+  "message": "Fotos del abastecimiento actualizadas correctamente.",
+  "data": {
+    "id": 25,
+    "odometer_image": "/storage/fuel-control/odometro.jpg",
+    "pump_start_image": "/storage/fuel-control/surtidor-inicio.jpg",
+    "pump_end_image": "/storage/fuel-control/surtidor-final.jpg"
+  }
+}
+```

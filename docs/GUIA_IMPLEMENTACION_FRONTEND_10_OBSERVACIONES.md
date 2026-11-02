@@ -451,6 +451,7 @@ GET  {API}/api/fuel/purchases/payables
 POST {API}/api/fuel/purchases/{id}/pay
 GET  {API}/api/fuel/purchases/export-excel
 GET  {API}/api/fuel/purchases/export-pdf
+POST {API}/api/fuel/purchases/{id}/images
 GET  {API}/api/fuel/purchases/{id}
 DELETE {API}/api/fuel/purchases/{id}
 ```
@@ -490,6 +491,8 @@ Pago de crédito:
 Si el saldo llega a cero pasa a `Pagado`; si queda saldo, permanece `Pendiente`. No eliminar un abastecimiento con pagos registrados.
 
 El Excel histórico incluye fecha, grifo, vehículo, chofer, kilometraje, combustible, cantidad, precio unitario, total, condición de pago, factura, operación, vencimiento, estado y observación.
+
+Para completar o reemplazar posteriormente las fotos de un abastecimiento, enviar `multipart/form-data` a `POST /api/fuel/purchases/{id}/images`. Se pueden enviar uno o varios de estos campos: `odometer_image`, `pump_start_image` y `pump_end_image`; cada archivo debe ser una imagen de máximo 10 MB.
 
 ---
 

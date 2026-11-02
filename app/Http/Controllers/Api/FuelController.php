@@ -217,6 +217,46 @@ class FuelController extends Controller
         return $purchase ? response()->json($purchase) : response()->json(['message' => 'Abastecimiento no encontrado'], 404);
     }
 
+    public function updatePurchaseImages(Request $request, $id)
+    {
+        $purchase = FuelPurchase::find($id);
+        if (! $purchase) {
+            return response()->json(['message' => 'Abastecimiento no encontrado'], 404);
+        }
+
+        $data = $this->validateData($request, [
+            'odometer_image' => 'nullable|file|image|max:10240',
+            'pump_start_image' => 'nullable|file|image|max:10240',
+            'pump_end_image' => 'nullable|file|image|max:10240',
+        ]);
+
+        $imageFields = ['odometer_image', 'pump_start_image', 'pump_end_image'];
+        $updates = [];
+        $uploaded = false;
+
+        foreach ($imageFields as $field) {
+            if ($request->hasFile($field)) {
+                $updates[$field] = Storage::url(
+                    $request->file($field)->store('public/fuel-control')
+                );
+                $uploaded = true;
+            }
+        }
+
+        if (! $uploaded) {
+            return response()->json([
+                'error' => 'Debe enviar al menos una imagen para actualizar.',
+            ], 422);
+        }
+
+        $purchase->update($updates);
+
+        return response()->json([
+            'message' => 'Fotos del abastecimiento actualizadas correctamente.',
+            'data' => $purchase->fresh()->load('station', 'vehicle', 'worker.person'),
+        ]);
+    }
+
     public function deletePurchase($id)
     {
         $purchase = FuelPurchase::find($id);
